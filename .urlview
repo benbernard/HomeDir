@@ -1,0 +1,2 @@
+REGEXP (((https?|ftp|gopher)://|(mailto|file|news):)[^' <>"]+|(www).[-a-z0-9.]+)[^' .,;<>":\n]
+COMMAND google-chrome --user-data-dir=/home/benbernard/.config/google-chrome-youtube %s 1>/dev/null 2>/dev/null

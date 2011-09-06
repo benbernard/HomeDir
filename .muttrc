@@ -1,0 +1,50 @@
+# Import ApolloMuttNg awesomeness
+source /home/benbernard/.eihooks/dotfiles/muttngrc
+source ~/.muttrc.site
+
+set delete # don't ask me about deleting messages
+
+# General settings
+set quit=ask-no     #Prompt to confirm quit
+set markers=no      # do not display + at the beginnging of wrapped lines
+set smart_wrap=no   # do not wrap at word boundries
+set wait_key=no     # do not prompt for a key after running an external app
+set pipe_decode=yes # Have mutt decode messages before sending them through the pipe
+set reply_to=no 
+
+set sig_on_top=yes # put signature on top of replied-to messages
+#set signoff_string="-Ben\n" # set a signoff string
+set sig_dashes=no
+set signature="/bin/true |"
+#set sig_dashes=no # Do not put '-- \n' in the sig, I'll supply it
+#set signature='/apollo/env/envImprovement/bin/ninjaSignature |' # Special signature
+
+# Set urlView bindings
+# It parses out html messages and launches a web browser for them
+# The sed magic joins urls so that outlook URLs wrapped to 80 chars will be recognized
+macro pager B '| join-urls.pl | /usr/bin/urlview<enter>' 'Follow links with urlview'
+macro index B '| join-urls.pl | /usr/bin/urlview<enter>' 'Follow links with urlview'
+
+# Set shift-tab to be previous new message
+bind index <backtab> previous-new
+macro index <backtab> previous-new
+
+# Wish this worked, trying to get a macro to move threads around
+# macro index } <tag-thread>;<tag-prefix><save-message>=single-payments-ui/<enter>
+
+bind index ? search-reverse #Set backward search key
+
+# auto-view html mail + pgp encoded msgs (according to ~/.mailcap)
+set implicit_autoview
+auto_view text/html application/x-pgp-message
+#set mailcap_path="~/.mailcap"
+set mailcap_sanitize=yes
+
+# fix up index, do not use %4l as its useless
+set index_format="%Z %[%m/%d %H:%M] %-15.15F %s" #Set index format
+#set index_format="%4C %Z %[%m/%d %H:%M] %-15.15F %s" #Set index format
+
+# Change the text color from yellow
+color sidebar_new blue white # color of folders with new mail
+
+#set max_display_recips=10

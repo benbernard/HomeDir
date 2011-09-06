@@ -1,0 +1,140 @@
+# If we are starting inside a screen, be sure that STY gets unset so that every 'screen' invocation doesn't re-attach
+unsetenv STY
+
+# Bind ctrl-n and ctrl-p to move between monitors
+bind C-n nextscreen
+bind C-p prevscreen
+
+# Make window with focus have color border
+set border 2
+set fwcolor green
+set bwcolor black
+
+source ~/.ratpoisonrc.site
+
+# bind ctrl-t to go back last focus
+bind C-t focuslast
+
+# bind o to go to other
+bind o other
+
+# use to use alias for testing
+alias reload source /home/benbernard/.ratpoisonrc
+bind C-r reload
+
+# bind T to other
+bind T other
+
+# bind ctrl-shift-l to lock screen
+alias sc-lock exec gnome-screensaver-command -l
+bind C-L sc-lock
+
+# handy menu for selecting a window
+alias ratmenwin exec perl /home/benbernard/bin/warpToNS --name "Window" --nomouse
+bind w ratmenwin
+bind C-w ratmenwin
+
+# change n to be ninja search
+alias ninjaSearch exec perl /home/benbernard/bin/warpToNS --name "Ninja Search" --nomouse
+bind n ninjaSearch
+
+# display copy buffers
+alias buffers exec perl /home/benbernard/bin/warpToNS --name "Buffers" --nomouse
+bind b buffers
+
+# flip shells
+alias flip_win exec perl /home/benbernard/bin/flip_windows.pl --a 'main shell' --b 'home shell'
+bind M-0 flip_win
+
+# context menu
+alias rat_display_window exec perl /home/benbernard/bin/rat_display_windows.pl
+bind W rat_display_window
+bind C-W rat_display_window
+
+# Add a title bind
+bind quotedbl title
+
+# add focus movement keys
+bind h focusleft
+bind j focusdown
+bind k focusup
+bind l focusright
+
+#and movement exchange keys
+bind C-h exchangeleft
+bind C-j exchangedown
+bind C-k exchangeup
+bind C-l exchangeright
+
+# lock screen scaver
+alias screenlock exec xscreensaver-command -lock
+bind L screenlock
+
+# start windows and vnc
+alias remote exec /usr/bin/rdesktop -d ANT -r sound -a 24 -u benbernard-g 1270x1000+0+0 -K term-sea.ant.amazon.com
+alias vnc exec /usr/local/bin/vncviewer :2
+bind v vnc
+
+# change K to be nicely close rather than kill the X connection, since we've bount k and C-k
+# C-K still hard kills the connection
+bind K delete
+
+# Change meta-tab to be previous instead of last
+bind M-Tab focusprev
+
+# set up eraseBiffs binding
+alias eraseBiffs exec /home/benbernard/bin/eraseBiffs
+bind e eraseBiffs
+
+# remove resize binding
+bind r echo Use :resize
+
+# Frame set bindings
+alias switchFrameset1 exec perl /home/benbernard/bin/switchFrameset --set 1
+alias switchFrameset2 exec perl /home/benbernard/bin/switchFrameset --set 2
+alias switchFrameset3 exec perl /home/benbernard/bin/switchFrameset --set 3
+alias switchFrameset4 exec perl /home/benbernard/bin/switchFrameset --set 4
+alias switchFrameset5 exec perl /home/benbernard/bin/switchFrameset --set 5
+alias switchFrameset6 exec perl /home/benbernard/bin/switchFrameset --set 6
+alias switchFrameset7 exec perl /home/benbernard/bin/switchFrameset --set 7
+alias switchFrameset8 exec perl /home/benbernard/bin/switchFrameset --set 8
+alias switchFrameset9 exec perl /home/benbernard/bin/switchFrameset --set 9
+alias switchFrameset0 exec perl /home/benbernard/bin/switchFrameset --set 0
+alias switchFramesetLast exec perl /home/benbernard/bin/switchFrameset --set last
+
+bind M-1 switchFrameset1
+bind M-2 switchFrameset2
+bind M-3 switchFrameset3
+bind M-4 switchFrameset4
+bind M-5 switchFrameset5
+bind M-6 switchFrameset6
+bind M-7 switchFrameset7
+bind M-8 switchFrameset8
+bind M-9 switchFrameset9
+#bind M-0 switchFrameset0
+bind M-minus switchFramesetLast
+
+# Restore buffers
+alias restoreBuffer1 exec perl /home/benbernard/bin/restore_buffer.pl --buffer 1
+alias restoreBuffer2 exec perl /home/benbernard/bin/restore_buffer.pl --buffer 2
+alias restoreBuffer3 exec perl /home/benbernard/bin/restore_buffer.pl --buffer 3
+alias restoreBuffer4 exec perl /home/benbernard/bin/restore_buffer.pl --buffer 4
+alias restoreBuffer5 exec perl /home/benbernard/bin/restore_buffer.pl --buffer 5
+alias restoreBuffer6 exec perl /home/benbernard/bin/restore_buffer.pl --buffer 6
+alias restoreBuffer7 exec perl /home/benbernard/bin/restore_buffer.pl --buffer 7
+alias restoreBuffer8 exec perl /home/benbernard/bin/restore_buffer.pl --buffer 8
+alias restoreBuffer9 exec perl /home/benbernard/bin/restore_buffer.pl --buffer 9
+alias restoreBuffer0 exec perl /home/benbernard/bin/restore_buffer.pl --buffer 0
+alias restoreBufferLast exec perl /home/benbernard/bin/restore_buffer.pl --buffer 1
+
+bind C-1 restoreBuffer1
+bind C-2 restoreBuffer2
+bind C-3 restoreBuffer3
+bind C-4 restoreBuffer4
+bind C-5 restoreBuffer5
+bind C-6 restoreBuffer6
+bind C-7 restoreBuffer7
+bind C-8 restoreBuffer8
+bind C-9 restoreBuffer9
+bind C-0 restoreBuffer0
+bind C-minus restoreBufferLast

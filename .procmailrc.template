@@ -1,0 +1,29 @@
+PATH=/bin:/usr/bin
+MAILDIR=$HOME/mail      
+DEFAULT=$MAILDIR/mbox/
+LOGFILE=$MAILDIR/procmaillog   #recommended
+
+# Testing
+#VERBOSE=ON
+
+#Keep a backup of everything
+:0 c
+backup/
+
+# Work around procmail bug: any output on stderr will cause the "F" in "From"
+# to be dropped.  This will re-add it.
+:0
+* ^^rom[ ]
+{
+  #LOG="*** Dropped F off From_ header! Fixing up. "
+  
+  :0 fhw
+  | sed -e '1s/^/F/'
+}
+
+:0 H
+* ^(To|CC|List-ID):.*list@foobar.com
+list/
+
+#:0 fhw
+#| $HOME/bin/add-mail-headers 
