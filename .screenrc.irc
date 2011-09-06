@@ -1,0 +1,8 @@
+# vim: set ft=screen:
+source $HOME/.screenrc
+
+screen
+sleep 2
+stuff "irssi\015"
+sleep 2
+stuff "/4\015/printlog\015"

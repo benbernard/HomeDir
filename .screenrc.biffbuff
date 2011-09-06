@@ -1,0 +1,9 @@
+# vim: set ft=screen:
+source $HOME/.screenrc
+
+hardstatus off
+hardstatus ignore
+
+screen
+sleep 1
+stuff "biffBuff"

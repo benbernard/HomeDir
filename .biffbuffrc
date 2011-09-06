@@ -1,0 +1,8 @@
+$VAR1 = {
+  commands => {
+    calendar => {
+      program          => "/home/benbernard/bin/calBiff.pl --noexpire --window 15",
+      interval_seconds => 60,
+    },
+  },
+};

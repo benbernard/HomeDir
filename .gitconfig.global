@@ -1,0 +1,46 @@
+# vim: set filetype=gitconfig :
+
+[diff]
+  color = auto
+  rename = copy
+  external = ~/bin/git-diff.sh
+
+[pager]
+    color = true
+
+[status]
+    color = true
+
+[color]
+    ui = true
+    interactive = always
+
+[color "diff"]
+  whitespace = red reverse
+
+[core]
+    whitespace=fix,-indent-with-non-tab,trailing-space,cr-at-eol
+	pager = less -XRMSI
+
+[alias]
+    st = status
+    ci = commit
+    br = branch
+    co = checkout
+    df = diff
+    lg = log -p
+    lgfiles = log --name-only
+    lol = log --graph --decorate --pretty=oneline --abbrev-commit
+    lola = log --graph --decorate --pretty=oneline --abbrev-commit --all
+    ls = ls-files
+
+[difftool]
+    prompt = no
+
+[merge]
+    tool = kidff3
+
+[gc]
+  auto = 0
+  reflogExpire = never
+  reflogExpireUnreachable = never

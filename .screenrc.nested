@@ -1,0 +1,10 @@
+# vim: set ft=screen:
+source $HOME/.screenrc
+
+# Change screen command key to Control-B, instead of control-a
+escape "^Ll"
+
+#flip bindings
+bind ^X escape "^Xx"
+
+shell zsh

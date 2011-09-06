@@ -1,0 +1,148 @@
+# -*- conf-space -*-
+###################### Setup Basic Mail Settings #################### 
+#
+# Set mailbox type to maildir
+set mbox_type="maildir"
+set spoolfile=~/mail/mbox/
+
+# Set folder for mailboxes
+set folder=~/mail
+
+# Set mail check times
+set mail_check=5
+set timeout=10
+
+# set to use your printer (DDuplex means double sided) 
+# set print_command="enscript -DDuplex:true -P denali@10.21.132.29"
+
+# General settings
+set copy                          # Keep copies of outgoing mail...
+set postponed=+postponed          # Where postponed messages live.
+set include=yes                   # Default to including previous message in reply
+set quit=yes                      # Prompt to confirm quit
+set hostname="google.com"         # Complete addresses with @amazon.com instead of @`hostname`
+set forward_format="Fwd: %s"      # Set forward header to be reasonable
+set trash=+deleted                # Set trash folder
+set header_cache=~/mail/hcache    # Setup header cache
+set postponed="=postponed"        # postponed mail goes to the Exchange Drafts folder
+set record="=sent-mail"           # sent mail goes to the Exchange Sent Items folder
+set editor="vim -c 'set ft=mail'" # Start vim with filetype to mail
+set delete                        # just delete the messages I've marked, don't prompt
+set move=no                       # don't move message from the spool
+set nomark_old                    # don't mark any messages as old
+
+###################### Display Settings #############################
+
+set pager_context=4      # Don't scroll off the pager by 4 lines
+set pager_index_lines=10 # Set the pager size
+set sort=threads         # sort by threads
+set sort_aux=date-sent   # auxiliary sort by the date sent
+set index_format="%4C %Z %{%b %d} %-15.15F (%4l) %s" #Set index format
+
+###################### Setup New Key Bindings #######################
+
+bind index G last-entry     # Set command aliases
+bind pager \\ previous-line # \ goes up in pager
+
+# Bind M to mark all messages read
+macro   index   M "<tag-pattern>~N\r<tag-prefix><clear-flag>N<untag-pattern>.*\r" "Mark all messages in this mailbox as read"
+
+# maybe we should add this someday
+# It parses out html messages and launches a web browser for them
+# macro pager B <pipe-entry>'/home/bernard/bin/invokeUrlView'<enter> 'Follow links with urlview'
+# macro index B <pipe-entry>'/home/bernard/bin/invokeUrlView'<enter> 'Follow links with urlview'
+
+bind pager \cd noop
+bind index \cd noop
+
+###################### Sidebar Settings #############################
+
+# Sidebar settings
+# Sidebar patch from: http://thomer.com/mutt/
+set sidebar_width=24             # set width in pixels
+set sidebar_visible=yes          # by default, make it visible
+
+color sidebar_new yellow default # color of folders with new mail
+
+# ctrl-n, ctrl-p to select next, prev folder
+# ctrl-o to open selected folder
+bind index <Up> sidebar-prev
+bind index <Down> sidebar-next
+bind index <Right> sidebar-open
+bind pager <Up> sidebar-prev
+bind pager <Down> sidebar-next
+bind pager <Right> sidebar-open
+
+# Original setting from sidebar website
+bind index \CP sidebar-prev
+bind index \CN sidebar-next
+bind index \CO sidebar-open
+bind pager \CP sidebar-prev
+bind pager \CN sidebar-next
+bind pager \CO sidebar-open
+
+# I don't need these (yet), scrolls folder list up and down
+# sidebar-scroll-up
+# sidebar-scroll-down
+
+# b toggles sidebar visibility
+macro index b ':toggle sidebar_visible'
+macro pager b ':toggle sidebar_visible'
+
+
+###################### Header Settings ##############################
+
+set edit_headers # Have the headers in the editor
+set autoedit     # with edit_headers, skips the send menu
+set header       # Include headers in reply messages
+
+# Don't display any headers, then unignore the ones we ant to see
+ignore *
+unignore date from: to cc subject organization
+
+###################### Color defaults ###############################
+
+# valid colors : white, black,  green,  magenta,
+#                blue,  cyan,   yellow, red,
+# Each color comes in plain (red) and bright (brightred)
+# color thisthing foreground background [arguments]
+
+#these are the default debian colors and they rock
+color normal	white black
+color attachment brightyellow black
+color hdrdefault cyan black
+color indicator black cyan
+color markers	brightred black
+color quoted	green black
+color signature cyan black
+color status	brightgreen blue
+color tilde	blue black
+color tree	red black
+
+## First color the whole index
+color index     white black [\-\.+_a-zA-Z0-9]+@[\-\.a-zA-Z0-9]+
+
+## whitelist your homies
+color index yellow black "~f jeff@"
+color index yellow black "~f env-improvement-ninjas@"
+
+# Mail from any of my alternate addresses
+color index     green black ~P
+
+# Header colors, when reading mail
+color hdrdefault cyan black
+color header   brightgreen black ^To:
+color header   brightred black ^Cc:
+color header   brightcyan black ^From:
+color header   brightmagenta black ^Date:
+color header   brightcyan black ^Reply-To:
+color header   brightyellow black ^Subject:
+
+# Body colors
+color body     yellow black [\-\.+_a-zA-Z0-9]+@[\-\.a-zA-Z0-9]+
+color body     green black (https|http|ftp)://[\-\.\,/%~_:?\#&+a-zA-Z0-9=]+
+color quoted    green black
+color attachment yellow black
+color signature cyan black
+color markers   red black
+color tilde     blue black

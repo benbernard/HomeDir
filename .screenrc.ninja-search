@@ -1,0 +1,5 @@
+# vim: set ft=screen:
+source $HOME/.screenrc
+
+hardstatus off
+hardstatus ignore

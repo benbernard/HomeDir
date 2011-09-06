@@ -1,0 +1,2 @@
+hardcopy -h /tmp/screen-log-tempfile
+screen -t urls env EDITOR=urlview process-scrollback-edit --filter process-scrollback-for-urlview /tmp/screen-log-tempfile

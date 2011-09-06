@@ -1,0 +1,2 @@
+hardcopy -h /tmp/screen-log-tempfile
+screen -t hist process-scrollback-edit /tmp/screen-log-tempfile

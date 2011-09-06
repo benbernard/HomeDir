@@ -1,0 +1,23 @@
+vbell off
+vbell_msg "Ring"
+
+# detach on hangup
+autodetach on
+
+# don't display copyright page
+startup_message off
+
+# scroll back
+defscrollback 1000
+
+# setup the caption
+hardstatus alwayslastline "%{-b gk}%-w%{+b kg}%50>%n %t%{-b gk}%+w %=%C%<"
+
+# right/left bindings
+bindkey "^[[c" next
+bindkey "^[[d" prev
+bindkey "^[[b" focus
+
+# Set the altscreen so that when you quit vi, it will go back to
+# what it was before
+altscreen on

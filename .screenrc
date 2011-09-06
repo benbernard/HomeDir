@@ -1,0 +1,65 @@
+vbell off
+vbell_msg "Ring"
+
+# detach on hangup
+autodetach on
+
+# don't display copyright page
+startup_message off
+
+# scroll back
+defscrollback 10000
+
+# Set the altscreen so that when you quit vi, it will go back to
+# what it was before
+altscreen on 
+
+# allow scroll back
+termcapinfo xterm ti@:te@
+
+#Always display status line, even if there is
+#only 1 window
+#caption always
+
+#Nethack style error messages!
+nethack on
+
+# setup the caption
+hardstatus alwayslastline "%{-b gk}%-w%{+b kg}%50>%n %t%{-b gk}%+w %=%C%<"
+
+# Change screen command key to Control-X, instead of control-a
+escape "^Xx"
+
+# right/left bindings
+bindkey "^[[c" next
+bindkey "^[[d" prev
+bindkey "^[[b" focus
+
+# Set the shell to execute
+shell /bin/zsh
+
+# Set the title to change with the command running
+shelltitle "% |zsh"
+
+#scrollback binds
+ # Bind ^a H to edit the scrollback in an editor
+ bind H source $HOME/.eihooks/dotfiles/screen.scrollback-edit
+ 
+ # Bind ^a H view urls from scrollback in urlview
+ bind ^B source $HOME/.eihooks/dotfiles/screen.scrollback-urlview
+ bind b source $HOME/.eihooks/dotfiles/screen.scrollback-urlview
+
+# set the second mark, write to the screen-exchange
+# file, and use xsel to synchronize the paste buffer
+# with the X selection.
+#bindkey -m > eval "stuff ' '" writebuf "exec sh -c 'env > /var/tmp/foo.env'"
+#bindkey -m > eval "stuff ' '" writebuf "exec /bin/zsh -c 'env -i DISPLAY=:0.0 XAUTHORITY=/home/bernard/.Xauthority /usr/X11R6/bin/xclip -i < /tmp/screen-exchange >/var/tmp/output 2>&1'"
+#bindkey -m > eval "stuff ' '" writebuf "exec /home/bernard/bin/copybuff"
+#bindkey -m > eval "stuff ' '" writebuf "exec sh -c '/usr/X11R6/bin/xclip -l 1 -i < /tmp/screen-exchange'"
+
+#flip bindings
+bind ^L escape "^Ll"
+
+#turn on logging
+# log on
+#logfile ~/.screen/output/screenlog
