@@ -20,7 +20,6 @@ set copy                          # Keep copies of outgoing mail...
 set postponed=+postponed          # Where postponed messages live.
 set include=yes                   # Default to including previous message in reply
 set quit=yes                      # Prompt to confirm quit
-set hostname="google.com"         # Complete addresses with @amazon.com instead of @`hostname`
 set forward_format="Fwd: %s"      # Set forward header to be reasonable
 set trash=+deleted                # Set trash folder
 set header_cache=~/mail/hcache    # Setup header cache

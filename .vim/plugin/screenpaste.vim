@@ -83,10 +83,10 @@ if !hasmapto("<Plug>ScreenBufferInsert", "n")
   nmap <unique> <Leader>i <Plug>ScreenBufferInsert
 endif
 if !hasmapto("<Plug>ScreenBufferPaste", "i")
-" BEGIN AMAZON MODIFICATION
+" BEGIN MODIFICATION
 "  REMOVING imap statement, since insert mode maps are annoying
 "  imap <unique> <Leader>p <Plug>ScreenBufferPaste
-" END AMAZON MODIFICATION
+" END MODIFICATION
 endif
 " }}}
 
