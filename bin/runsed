@@ -1,0 +1,76 @@
+#!/opt/third-party/bin/perl-std
+
+use strict;
+use warnings;
+
+my $pattern = shift @ARGV;
+my @files   = @ARGV;
+
+unless ($pattern && (scalar @files > 0) ) {
+  print_usage();
+}
+
+my $failure = 0;
+foreach my $file (@files) {
+  my $succeeded = run_sed($pattern, $file);
+
+  if ( not $failure ) {
+    if ( not $succeeded ) {
+      $failure = 1;
+    }
+  }
+}
+
+exit $failure;
+
+sub run_sed {
+  my $pattern = shift;
+  my $file    = shift;
+
+  my $tempfile = '/var/tmp/sed.tmp';
+
+  if ( -e $tempfile ) {
+    unlink $tempfile;
+  }
+
+  my $success = eval {
+    unless ( run_command("/bin/sed -e '$pattern' $file > $tempfile") ) {
+      return 0;
+    }
+
+    unless ( run_command("cp $tempfile $file") ) {
+      return 0;
+    }
+
+    return 1;
+  };
+
+  unlink $tempfile;
+  return $success;
+
+}
+
+sub run_command {
+  my $command = shift;
+  my $failure = system ( $command );
+
+  if ( $failure ) {
+    warn "Failed to run: $command\n";
+    return 0;
+  }
+
+  return 1;
+}
+
+
+sub print_usage {
+  print <<USAGE;
+  Runs sed, replaces input file
+
+  $0 PATTERN FILES
+
+Example:
+$0 's/SEARCH/REPLACE/' /var/tmp/file1 /var/tmp/file2
+
+USAGE
+}

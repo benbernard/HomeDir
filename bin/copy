@@ -1,0 +1,14 @@
+#!/opt/third-party/bin/perl
+
+use strict;
+use warnings;
+
+my $message = join(' ', @ARGV);
+
+my $user = (getpwuid($<))[0];
+
+my $COPY_FILE = "/var/tmp/clipboard-$user";
+
+open (my $fh, '>', $COPY_FILE) or die "Could not open $COPY_FILE: $!";
+print $fh $message . "\n";
+close $fh;

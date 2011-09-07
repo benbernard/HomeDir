@@ -1,0 +1,34 @@
+#!/opt/third-party/bin/perl 
+
+use strict;
+use warnings;
+
+use POSIX qw(setsid);
+use Data::Dumper;
+
+my $pid = fork();
+
+if ( $pid ) {
+  exit 0;
+}
+
+open STDOUT, "/dev/null";
+open STDIN,  "/dev/null";
+open STDERR, "/dev/null";
+setsid;
+
+my $SSH_CMD = '/usr/bin/ssh -2 -x';
+my $HOST_FILE = '/var/tmp/laptopHost';
+my $DEFAULT_HOST = 'laptop'
+
+my @args = @ARGV;
+
+my $host = $DEFAULT_HOST;
+if(-r $HOST_FILE) {
+  $host = `cat $HOST_FILE`;
+  chomp $host;
+}
+
+my @command = (qw(/usr/bin/ssh -2 -x ), $host, 'growlNote.pl', map { "'$_'" } @args);
+system(@command);
+exit $?;

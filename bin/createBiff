@@ -1,0 +1,69 @@
+#!/usr/bin/perl -w
+# vim: set ft=perl:
+
+# See print_usage funtion for more information on what this script does.
+# Author: Ben Bernard
+
+use warnings;
+use strict;
+
+use FindBin qw($Bin); use lib $Bin . "/perl/lib";;
+use BiffBuff::Queue;
+
+use Getopt::Long;
+
+my $DEFAULT_EXPIRE = 10;
+
+my ($subject, $program, $description);
+my $expire_in = $DEFAULT_EXPIRE;
+my $urgent    = 0;
+my $url       = '';
+
+GetOptions(
+  'subject=s'     => \$subject,
+  'program=s'     => \$program,
+  'description=s' => \$description,
+  'expire-in=s'   => \$expire_in,
+  'urgent'        => \$urgent,
+  'url=s'         => \$url,
+);
+
+print_usage('Must have --program') unless ( $program );
+
+$subject     = "Biff from $program" unless ( $subject );
+$description = "No description!" unless ( $description);
+
+my $queue = BiffBuff::Queue->new();
+
+my %args = (
+  subject     => $subject,
+  program     => $program,
+  expire_in   => $expire_in,
+  urgent      => $urgent,
+  description => $description,
+  url         => $url,
+);
+
+my $item = BiffBuff::Item->new(%args);
+$queue->add_item($item);
+
+sub print_usage {
+  my $message = shift || '';
+  print <<USAGE;
+$message
+  Creates a biff for biffBuff.
+
+  --subject     - Subject of biff, should be short abstract
+  --description - Full description
+  --program     - original source of biff, Mandatory
+  --expire-in   - Length of life for biff (default: $DEFAULT_EXPIRE)
+  --urgent      - Sets a biff to be an urgent biff defaults to off
+  --url         - sets the url for a biff
+
+Examples:
+  $0 --subject "Got IM message from Ben" --program "gaim" --description "Hey how are you?"
+  $0 --subject "Meeting: US1/110" --program "calender" --description "Meeting about refactoring the service"
+USAGE
+
+  exit 1;
+}

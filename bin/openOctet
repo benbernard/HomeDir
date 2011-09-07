@@ -1,0 +1,25 @@
+#!/opt/third-party/bin/perl -w
+
+use File::Basename qw(basename);
+
+my $file = shift @ARGV;
+
+my $base = basename($file);
+my $new_file = "/var/tmp/openOctet.$base";
+
+system("cp $file $new_file");
+
+if ( $file =~ m/\.pdf$/ ) {
+  my $pid = fork();
+
+  if ( $pid ) {
+  }
+  else {
+     system("xpdf $new_file");
+     unlink $new_file;
+  }
+}
+else {
+  print "No viewer for $file\n";
+  exit 1;
+}

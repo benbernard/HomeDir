@@ -1,0 +1,7 @@
+#!/usr/bin/zsh
+
+foreach i (`fetchotp`) {
+   echo $i | perl -pi -e 'chop;' | xclip -i
+   echo $i | perl -pi -e 'chop;' | xclip -i -selection clipboard
+   echo $i
+}

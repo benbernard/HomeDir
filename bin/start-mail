@@ -1,0 +1,4 @@
+#!/bin/zsh
+
+/usr/bin/gnome-terminal --geometry 152x57+1280+0 &
+disown

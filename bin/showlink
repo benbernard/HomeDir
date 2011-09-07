@@ -1,0 +1,5 @@
+#!/usr/bin/perl
+
+foreach my $arg (@ARGV) {
+  print readlink($arg) . "\n";
+}

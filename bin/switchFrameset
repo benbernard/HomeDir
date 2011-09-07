@@ -1,0 +1,75 @@
+#!/usr/bin/perl -w
+
+use strict;
+
+use FindBin qw($Bin); use lib $Bin . "/perl/lib";;
+
+use Ratpoison;
+use HumanStorable qw(store_file read_file);
+
+use Data::Dumper;
+
+use Getopt::Long;
+
+my ($set, $last_set, $set_dir);
+
+my $user = (getpwuid($<))[0];
+
+my $last_set_id;
+my $sets_file  = "/home/$user/.ratpoison/fsets";
+my $clear;
+
+GetOptions(
+  'set=s'      => \$set,
+  'lastset=s'  => \$last_set_id,
+  'setsfile=s' => \$sets_file,
+  'clear'      => \$clear,
+);
+
+my $rt = Ratpoison->new();
+
+my $display = $rt->get_display();
+
+my $fset_key = 'currentfset' . $display;
+
+if ( $clear ) {
+  unlink $sets_file;
+  $rt->set_env($fset_key, 1);
+  exit 0;
+}
+
+die "Must specify --set!" unless ( $set );
+
+my $all_sets = read_file($sets_file, {});
+
+$all_sets->{$display} = {} if ( ! $all_sets->{$display} );
+my $sets = $all_sets->{$display};
+
+if ( $set eq 'last' ) {
+  $set = $sets->{'last'};
+}
+
+if ( !$last_set_id ) {
+  $last_set_id = $rt->get_env($fset_key) || 1;
+}
+
+print "Got last id: $last_set_id\n";
+
+my $new_set = $sets->{$set};
+
+my $current_set = $rt->run_rat('fdump');
+my $current_set_string = join('', @$current_set);
+$sets->{$last_set_id} = $current_set_string if ($last_set_id);
+$sets->{'last'}       = $last_set_id;
+$new_set              = $current_set_string if ( $set eq $last_set_id );
+
+if ( $new_set ) {
+  $rt->run_rat("frestore $new_set");
+} else {
+  $rt->run_rat('only');
+  $rt->run_rat('select -');
+}
+
+$rt->set_env($fset_key, $set);
+
+store_file($sets_file, $all_sets);

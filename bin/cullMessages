@@ -1,0 +1,203 @@
+#!/opt/third-party/bin/perl -w
+
+use strict;
+use Data::Dumper;
+use Date::Manip;
+use File::Basename;
+use Getopt::Long;
+
+my $DEFAULT_DESTINATION_BOX = 'deleted';
+
+my ($mail_boxes, $keep_days, $log_file, $destination_box, $exclude_boxes, $really_delete);
+GetOptions(
+  'boxes=s'           => \$mail_boxes,
+  'daysToKeep=s'      => \$keep_days,
+  'logfile=s'         => \$log_file,
+  'destination-box=s' => \$destination_box,
+  'exclude-boxes=s'   => \$exclude_boxes,
+  'reallyDelete'      => \$really_delete
+);
+
+unless($mail_boxes && $keep_days) {
+  die "Must define --boxes (comma separated) and --daysToKeep optional: -logFile and -reallyDelete!\n";
+}
+
+unless($destination_box) {
+  $destination_box = $DEFAULT_DESTINATION_BOX;
+}
+
+my $user = (getpwuid($<)) [0] ||
+  die "Error: cannot identify user!\n";
+
+my $DEFAULT_LOG_FILE = "/home/$user/mail/cullMessagesLog";
+
+unless($log_file) {
+  $log_file = $DEFAULT_LOG_FILE;
+}
+
+my $MAIL_HOME = "/home/$user/mail";
+
+my @boxes;
+
+if($mail_boxes eq 'all') {
+  @boxes = `/usr/bin/find $MAIL_HOME -maxdepth 1 -mindepth 1 -type d | /usr/bin/xargs -i@ basename @`;
+  chomp @boxes;
+}
+else {
+  @boxes = split( /,/, $mail_boxes);
+}
+
+my %excluded_boxes = map { $_ => 1 } split( /,/, $exclude_boxes);
+
+@boxes = grep { not exists $excluded_boxes{$_} } @boxes;
+
+foreach my $box (@boxes) {
+  cullBox($box, $keep_days, $destination_box, $really_delete );
+}
+
+sub cullBox {
+  my $mail_box      = shift;
+  my $keep_days     = shift;
+  my $box           = shift;
+  my $really_delete = shift;
+
+  my $mail_box_path = "$MAIL_HOME/$mail_box";
+  unless(-e $mail_box_path) {
+    die "$mail_box must exist, could not find in $mail_box_path";
+  }
+
+  log_message("Culling $mail_box to only $keep_days old");
+  
+  my @files = get_all_messages($mail_box_path);
+  
+  my $keep_date = ParseDate("$keep_days days ago");
+  foreach my $file (@files) {
+    my $date = get_date($file);
+  
+    if( Date_Cmp($date, $keep_date) == 1 ) {
+      next;
+    }
+  
+    delete_message($file, $box, $really_delete);
+  }
+}
+
+sub delete_message {
+  my $file          = shift;
+  my $box           = shift;
+  my $really_delete = shift;
+
+  my $date = get_date($file);
+  my $date_string = UnixDate($date, '%c');
+
+  my $message = "Deleting: $file with date: $date_string";
+  if($really_delete) {
+    log_message("Permanently " . $message);
+    unlink $file;
+  }
+  else {
+    my $to_path = $MAIL_HOME . "/$box/new";
+    
+    unless(-e $to_path) {
+      log_message("making $to_path");
+      do_command("mkdir -p $to_path");
+    }
+
+    log_message($message);
+    do_command("mv $file $to_path/");
+  }
+}
+
+sub log_message {
+  my $message = shift;
+
+  open(LOG, ">>", $log_file) or die "Could not open $log_file: $!";
+  print LOG "$message\n";
+  close( LOG );
+}
+
+sub get_date_string {
+  my $file = shift;
+
+  my @lines = `grep 'Date:' $file`;
+  my $date_line = shift @lines;
+  chomp $date_line;
+
+  my ($date) = ($date_line =~ /Date:(.*)$/);
+  return $date;
+}
+
+
+my %dates;
+sub get_date {
+  my $file = shift;
+
+  if($dates{$file}) {
+    return $dates{$file};
+  }
+
+  my $date_string = get_date_string($file);
+  my $date = ParseDate($date_string);
+  $dates{$file} = $date;
+
+  return $date;
+}
+
+sub do_command {
+  my $command = shift;
+
+  system "$command 1>/dev/null 2>/dev/null";
+  return not $?;
+}
+
+sub get_all_messages {
+  my $dir = shift;
+
+  my @files = `find $dir -type f`;
+  chomp @files;
+
+  return @files;
+}
+
+# Old methods developed when this file was to run on the receipt of any
+# message
+
+#sub populate_date_strings {
+#  my $mbox = shift;
+#
+#  my @results = `grep -r -e '^Date: ' $mbox/*`;
+#  chomp @results;
+#
+#  foreach my $line (@results) {
+#    my @parts = split(/:Date:/, $line);
+#    my $date = ParseDate($parts[1]);
+#    my $file = basename($parts[0]);
+#
+#    $dates{$file} = $date;
+#  }
+#}
+
+#sub get_date_string_old {
+#  my $file = shift;
+#
+#  my $date;
+#  open(FILE, "<", $file) or die "Could not open $file: $!";
+#  while(my $line = <FILE>) {
+#    chomp $line;
+#
+#    if($line =~ /^Date:(.*)$/) {
+#      $date = $1;
+#      last;
+#    }
+#  }
+#  close( FILE );
+#
+#  if($date) {
+#    return $date;
+#  }
+#  else {
+#    die "Could not find date in $file";
+#  }
+#}
+
+

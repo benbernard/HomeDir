@@ -1,0 +1,14 @@
+#!/usr/bin/perl -w
+
+use strict;
+
+my $log = shift @ARGV;
+
+die "Must pass a log file to rotate!" unless ( $log );
+die "$log does not exist!" unless ( -e $log );
+
+my $count = 1;
+$count++ while ( -e "$log.$count" );
+
+print "Moving $log to $log.$count\n";
+system("mv $log $log.$count");

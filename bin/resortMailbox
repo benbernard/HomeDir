@@ -1,0 +1,76 @@
+#!/usr/bin/perl -w
+
+use strict;
+
+use Getopt::Long;
+
+my ($mail_box);
+GetOptions(
+  'box=s'   => \$mail_box,
+);
+
+unless($mail_box) {
+  die "Must define --box!\n";
+}
+
+my $user = (getpwuid($<)) [0] ||
+  die "Error: cannot identify user!\n";
+
+my $MAIL_HOME = "/home/$user/mail";
+my $TEMPDIR = "/var/tmp/$user-resortMail-$$";
+
+my $mail_box_path = "$MAIL_HOME/$mail_box";
+unless(-e $mail_box_path) {
+  die "$mail_box must exist, could not find in $mail_box_path";
+}
+
+do_command("mkdir $TEMPDIR");
+do_command("mv $mail_box_path/ $TEMPDIR");
+
+my @files = get_all_messages($TEMPDIR);
+
+my $count = 1;
+my $max_count = scalar @files;
+
+# Turn off buffering so status line is displayed
+$| = 1;
+
+foreach my $message_file (@files) {
+  print "\rProcessing message $count of $max_count";
+  process_message($message_file);
+  $count++;
+}
+
+print "\n";
+
+sub do_command {
+  my $command = shift;
+
+  system "$command 1>/dev/null 2>/dev/null";
+
+  return not $?;
+}
+
+sub process_message {
+  my $file = shift;
+
+  do_command("/usr/bin/formail -s /usr/bin/procmail < $file");
+}
+
+sub get_all_messages {
+  my $dir = shift;
+
+  my @files = `find $dir -type f`;
+  chomp @files;
+
+  return @files;
+}
+
+sub END {
+  if( $TEMPDIR ) {
+    if(-e $TEMPDIR) {
+      #system "rm -rf $TEMPDIR";
+    }
+  }
+}
+

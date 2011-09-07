@@ -1,0 +1,6 @@
+#!/apollo/bin/env -e envImprovement perl/bin/perl5.8/perl -w
+# vim: set ft=perl :
+
+my $url = shift;
+print "$url\n";
+exec('/usr/bin/ssh', '-x', '-2', '-A', 'desktop', 'DISPLAY=:0.0', '/usr/bin/firefox', "'$url'");

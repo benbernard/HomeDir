@@ -1,0 +1,301 @@
+#!/usr/bin/perl -w
+
+# See print_usage funtion for more information on what this script does.
+# Author: Ben Bernard
+
+use FindBin qw($Bin); use lib $Bin . "/perl/lib";;
+
+use warnings;
+use strict;
+
+use Curses;
+use Curses::UI;
+use File::Basename;
+
+use Data::Dumper;
+
+use BiffBuff::Config;
+use BiffBuff::Queue;
+use UrlOpener;
+
+use Getopt::Long;
+
+my $cui;
+my $win;
+my $listbox;
+my $display_count = 0;
+
+GetOptions(
+  #'filter=s'       => \$filter,
+);
+
+my $queue;
+my $config = BiffBuff::Config->new();
+
+eval {
+  show_biffs();
+};
+
+if ( $@ ) {
+  die "BiffBuff error: $@";
+}
+
+
+die "Curses failed, reached unreable point!";
+
+sub show_biffs {
+  $cui = Curses::UI->new();
+
+  $win = $cui->add('window_id', 'Window');
+
+  $queue = BiffBuff::Queue->new();
+  my ($values, $labels) = determine_values_and_labels($queue);
+
+  $listbox = $win->add(
+    'mylistbox',  'Listbox',
+    -values    => $values,
+    -labels    => $labels,
+    -onchange  => \&show_details,
+    -title     => 'BiffBuff: the Better, Buffer Biffer for Buffers',
+    -htmltext  => 1,
+    -padleft   => 0,
+    -border    => 1,
+    -padbottom => 1,
+  );
+
+  $listbox->focus();
+
+  $listbox->set_binding(\&quit, "q" );
+  $listbox->set_binding(\&quit, "Q" );
+
+  $listbox->set_binding(\&remove_item, "d" );
+  $listbox->set_binding(\&remove_item, "x" );
+
+  $listbox->set_binding(\&sticky_item,    "s" );
+  $listbox->set_binding(\&open_url,       "u" );
+  $listbox->set_binding(\&clear_items,    'c');
+  $listbox->set_binding(\&show_full_help, 'h');
+  $listbox->set_binding(\&show_dump,      'D');
+
+  add_help($win, $listbox);
+
+  $cui->set_timer('update_items', \&update_items);
+
+  $cui->mainloop();
+}
+
+sub show_dump {
+  my $text = Dumper($config);
+  show_text($text);
+}
+
+sub clear_items {
+  $queue->clear_items();
+  update_items();
+}
+
+sub open_url {
+  my $selection = $listbox->get_active_id();
+  my $item = $queue->get_item($selection);
+
+  unless ( $item ) {
+    $listbox->dobeep();
+    return;
+  }
+
+  open_url_for_item($item);
+}
+
+sub open_url_for_item {
+  my $item = shift;
+  if (my $url = $item->get_url()) {
+    $cui->status("Opening Url: $url");
+    UrlOpener::open_url($url, 1);
+  }
+  else {
+    $cui->status("No Url to open!");
+  }
+}
+
+sub remove_item {
+  my $selection = $listbox->get_active_id();
+  my $item = $queue->get_item($selection);
+
+  unless ( $item ) {
+    $listbox->dobeep();
+    return;
+  }
+
+  $queue->remove_item($item);
+  update_items();
+}
+
+sub sticky_item {
+  my $selection = $listbox->get_active_id();
+  my $item = $queue->get_item($selection);
+
+  unless ( $item ) {
+    $listbox->dobeep();
+    return;
+  }
+
+  $item->set_expire_in(-1);
+  update_items();
+}
+
+sub determine_values_and_labels {
+  my $queue = shift;
+  my $index = 0;
+  my @values;
+  my %labels;
+
+  $display_count++;
+
+  foreach my $item (@{$queue->get_items()}) {
+    push @values, $index;
+    $labels{$index} = $item->display_line($display_count % 2);
+    $index++;
+  }
+
+  return (\@values, \%labels);
+}
+
+my $update_count = 0;
+sub update_items {
+  $update_count++;
+
+  my $reloaded_items = $queue->reload_items();
+
+  my $dobeep = 0;
+
+  foreach my $item (@$reloaded_items) {
+    if ( $item->is_urgent() ) {
+      $dobeep = 1;
+    }
+  }
+
+  if ( $dobeep ) {
+    $listbox->dobeep();
+  }
+
+  $queue->update_items();
+  $config->run_programs();
+
+  my ($values, $labels) = determine_values_and_labels($queue);
+
+  my $id = $listbox->get_active_id();
+
+  $listbox->labels($labels);
+  $listbox->values(@$values);
+
+  # fixing bug in Curses::UI::Listbox
+  if ( (scalar @$values) == 0 ) {
+    $listbox->{'-values'} = [];
+  }
+
+  $listbox->{'-ypos'} = $id if ( (scalar @$values) >= $id );
+  $listbox->draw(1);
+}
+
+sub add_help {
+  my $win    = shift;
+  my $parent = shift;
+
+  $win->add(
+    undef, 'Label',
+    -y => -1,
+    -bold => 1,
+    -text => 'Hit "q" to exit, "h" for help,  Enter to view a biff item',
+    -parent => $parent,
+  );
+}
+
+sub quit {
+  $cui->leave_curses();
+  exit();
+}
+
+my $old_position;
+sub close_details {
+  my $viewer = $win->delete('mytextviewer');
+  $viewer->loose_focus();
+
+  $listbox->{'-ypos'} = $old_position;
+  $listbox->clear_selection();
+  $listbox->modalfocus();
+}
+
+sub show_full_help {
+  my $help_text = <<TEXT;
+HELP!
+
+hit 'q' at any point to exit help
+
+From the main selection box:
+
+  j, k     - move up and down the main list
+  up, down - also move up and down main list
+
+  enter    - view an item
+
+  d, x     - remove an item
+  c        - clear all items
+  s        - prevent an item from disappearing after expiring
+  u        - open the associated url for an item
+
+  q, Q     - quit biffBuff
+
+  h        - this help screen
+
+Details view:
+  q        - close details view
+  u        - open associated url
+
+hit 'q' at any point to exit help
+TEXT
+
+  show_text($help_text);
+}
+
+sub show_text {
+  my $text       = shift;
+  my $extra_args = shift || {};
+  my $callback   = shift || sub { };
+
+  my $selection = $listbox->get_active_id();
+  $old_position = $selection;
+  $listbox->clear_selection();
+  $listbox->{'-ypos'} = -1;
+
+  my $textviewer = $win->add( 
+    'mytextviewer', 'TextViewer',
+    -border    => 1,
+    -parent    => $listbox,
+    -padbottom => 1,
+    -text      => $text,
+    %$extra_args,
+  );
+
+  $textviewer->set_binding(\&close_details, "q" );
+  $textviewer->set_binding(\&close_details, "Q" );
+  $callback->($textviewer);
+
+  $textviewer->modalfocus();
+}
+
+sub show_details {
+  my $selection = $listbox->get_active_id();
+  my $item = $queue->get_item($selection);
+
+  unless ( $item ) {
+    $listbox->dobeep();
+    return;
+  }
+
+  my $callback = sub {
+    my $textarea = shift;
+    $textarea->set_binding(sub { open_url_for_item($item) }, 'u');
+  };
+
+  show_text($item->long_description(), {}, $callback);
+}

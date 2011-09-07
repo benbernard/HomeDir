@@ -1,0 +1,26 @@
+#!/usr/bin/perl -w
+
+use strict;
+
+use User::pwent;
+use Sys::Hostname;
+use Data::Dumper;
+
+my $passwdEntry = getpwuid($<);
+
+my $home_dir = $passwdEntry->dir;
+my $hostname = hostname();
+my $user = $passwdEntry->name;
+
+my $cron_file = "$home_dir/bin/crontabs/$hostname";
+
+if(-e $cron_file) {
+  print "Installing $cron_file!\n";
+  system ("crontab $cron_file");
+
+  exit 0;
+}
+else {
+  warn "Could not find: $cron_file\n";
+  exit 1;
+}

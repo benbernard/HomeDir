@@ -1,0 +1,31 @@
+#!/opt/third-party/bin/perl -w
+
+use Getopt::Long;
+
+my $module;
+my $open_in_editor;
+
+GetOptions(
+   'module=s'       => \$module,
+   'open'           => \$open_in_editor
+);
+
+unless(defined $module) {
+  print "Must define -module, optional: -open\n";
+  exit;
+}
+
+my $module_path = $module;
+$module_path =~ s/::/\//g;
+
+foreach my $path (@INC) {
+  my $current_path = "$path/$module_path.pm";
+  if(-e $current_path) {
+    print "Found $module in $path: $current_path\n";
+
+    if($open_in_editor) {
+      exec "vim $current_path";
+    }
+  }
+}
+

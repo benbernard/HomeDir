@@ -1,0 +1,98 @@
+#!/bin/zsh
+
+ratpoison -c "title main shell"
+ratpoison -c "number 0"
+
+switchFrameset --clear
+
+echo Getting sudo credentials:
+sudo ls 1>/dev/null
+
+echo Kerberos init
+kinit -f
+
+echo Starting fetchmail
+fetchmail
+
+startSynServer.sh
+znc
+
+#PATH=/apollo/env/envImprovement/bin:$PATH
+
+#startup vncservers
+#/usr/bin/vncserver/vncserver -kill :1
+#/usr/bin/vncserver/vncserver -kill :2
+#
+#/usr/bin/vncserver :1 -name rat -geometry 1200x700
+#/usr/bin/vncserver :2 -name gnome -geometry 1920x1200
+
+# Make sure there are no running firefoxes to mess us up
+killall chrome
+
+#sleep 1;
+
+google-chrome http://gmail.com 1>/dev/null 2>/dev/null &
+disown
+
+sleep 3;
+
+#disown
+
+#disown
+
+#kill the old screens
+killall biffBuff
+killall selectWindows.pl
+killall display_buffers.pl
+screen -ls | grep windows | grep Detached | awk '{print $1}' | cut -d. -f1 | xargs kill
+screen -ls | grep biffBuff | grep Detached | awk '{print $1}' | cut -d. -f1 | xargs kill
+screen -ls | grep buffer | grep Detached | awk '{print $1}' | cut -d. -f1 | xargs kill
+
+ratpoison -c "sfrestore `cat ~/standardframes.dump`"
+
+## Up right
+#DISPLAY=:0.3
+#
+#gkrellm &
+TITLE=Buffers gnome-terminal --title Buffers -e "screen -S buffer -c ~/.screenrc.buffers" &
+#xclock -d -twelve -font "12x24" -norender -update 5 &
+xclock -update 5 -strftime '%a %b %e %l:%M:%S %P' -d -norender &
+TITLE=Top gnome-terminal --title Top -e "screen -x -RR -S top -c ~/.screenrc.top" &
+##TITLE=minishell gnome-terminal --title "minishell" &
+#
+## Up left
+#
+##Re-enable with more monitors.
+##DISPLAY=:0.2
+#
+
+# Right
+
+#DISPLAY=:0.1
+#
+
+# Main
+DISPLAY=:0.0
+
+
+killall biffBuff
+
+# Wait for Firefox to startup
+sleep 2
+/usr/local/bin/ratpoison -c "fselect 7"
+xmessage "Has firefox started?"
+
+arrange_windows.sh
+
+# give the windows time to resize
+sleep 1
+
+# Startup programs
+screen -S biffBuff -X stuff ""
+screen -S windows -X stuff ""
+screen -S buffer -X stuff ""
+
+# return focus to the original window
+/usr/local/bin/ratpoison -c "fselect 0"
+
+screen -x -RR -S default

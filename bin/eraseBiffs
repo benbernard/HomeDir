@@ -1,0 +1,3 @@
+#!/bin/sh
+
+SCREENDIR=~/.screen screen -S biffBuff -X stuff c

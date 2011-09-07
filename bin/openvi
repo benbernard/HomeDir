@@ -1,0 +1,14 @@
+#!/opt/third-party/bin/perl -w
+
+my $vim = "vim";
+
+delete $ENV{SESSION_MANAGER};
+
+delete $ENV{DISPLAY};
+
+exec($vim, "-X", @ARGV);
+
+sub has_x_server {
+  my $status = system ( "/usr/bin/pgrep X >/dev/null 2>/dev/null"  );
+  return not $status;
+}

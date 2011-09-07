@@ -1,0 +1,20 @@
+#!/opt/third-party/bin/perl 
+
+use strict;
+use warnings;
+
+my $SSH_CMD = '/usr/bin/ssh -2 -x';
+my $HOST_FILE = '/var/tmp/laptopHost';
+my $DEFAULT_HOST = 'laptop';
+
+my $url = shift @ARGV;
+
+my $host = $DEFAULT_HOST;
+if(-r $HOST_FILE) {
+  $host = `cat $HOST_FILE`;
+  chomp $host;
+}
+
+my $cmd = "$SSH_CMD $host \"open '$url'\" 1>/dev/null 2>/dev/null";
+system($cmd);
+exit $?;

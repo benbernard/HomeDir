@@ -1,0 +1,18 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+$ENV{DISPLAY}    = ':0.0';
+$ENV{KRB5CCNAME} = '/tmp/krb5cc_29835';
+
+my @pids = `/usr/bin/pgrep xscreensaver`;
+chomp @pids;
+
+my $cnt = kill 15, @pids;
+
+unless ( $cnt == scalar(@pids) ) {
+  kill 9, @pids;
+}
+
+exec('/usr/local/bin/xscreensaver', '-nosplash');

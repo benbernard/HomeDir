@@ -1,0 +1,63 @@
+#!/opt/third-party/bin/perl -w
+
+use strict;
+use Getopt::Long;
+use Sys::Hostname qw(hostname);
+
+
+my ($pid_file, $page_email, $sentry_file);
+GetOptions(
+  'pidFile=s' => \$pid_file,
+  'pageEmail=s' => \$page_email,
+  'sentryFile=s' => \$sentry_file,
+);
+
+unless(defined $pid_file) {
+  print "Usage: -pidFile and -pageEmail (optional)\n";
+  exit 1;
+}
+
+unless(defined $page_email) {
+  $page_email = 'page@benjaminbernard.com';
+}
+
+unless(defined $sentry_file) {
+  $sentry_file = "/var/tmp/HAS_PAGED";
+}
+
+my @pids;
+open(PIDS, "$pid_file") or die "Could not open $pid_file: $!";
+while(<PIDS>) {
+  chomp;
+  push @pids, $_;
+}
+close PIDS;
+
+foreach my $pid (@pids) {
+  my $exit_code = system "ps -p $pid 1>/dev/null 2>/dev/null";
+  if($exit_code) {
+    page_me();
+    exit;
+  }
+}
+
+print "all pids fine\n";
+
+sub page_me {
+  my $hostname = hostname();
+
+  if ( -e $sentry_file )  {
+    print "Already paged!\n";
+  } else {
+    my $message_text = <<MESSAGE;
+One of the pids is no longer active! ARRGGG!
+-Monitoring script
+MESSAGE
+    open(MAIL, "| mail -s \"A monitored pid has stopped running on $hostname!\" $page_email") ;
+    print MAIL $message_text;
+    close (MAIL);
+
+    system("/bin/touch $sentry_file");
+  }
+
+}

@@ -1,0 +1,57 @@
+#!/usr/bin/perl -w
+
+use strict;
+use warnings;
+
+use FindBin qw($Bin); use lib $Bin . "/perl/lib";;
+
+use URI::Escape qw(uri_escape);
+use UrlOpener;
+use HumanStorable qw(read_file);
+
+my $actions = {
+  cpan => 'http://search.cpan.org/search?mode=all&query=%s',
+  imdb => 'http://www.imdb.com/find?s=all&q=%s',
+  g    => 'http://www.google.com/search?aq=f&sourceid=chrome&ie=UTF-8&q=%s',
+};
+
+my $config_file = "$ENV{HOME}/.ninja-search.site";
+if ( -e $config_file ) {
+  my $new_actions = read_file($config_file, {});
+
+  foreach my $action (keys %$new_actions) {
+    my $url = $new_actions->{$action};
+    $actions->{$action} = $url;
+  }
+}
+
+my $WARP_COMMAND = 'warpToNS --name Youtube --center';
+
+my $url = format_url(@ARGV);
+
+UrlOpener::open_url($url);
+system($WARP_COMMAND);
+
+sub format_url {
+  my $possible_action = shift;
+  my @args            = (@_);
+
+  my $url = $actions->{'u'};
+  my $is_url_action = 1;
+  if ( defined $actions->{$possible_action} ) {
+    $url = $actions->{$possible_action};
+    $is_url_action = 0 if ( $possible_action ne 'u' );
+  }
+  else {
+    unshift @args, $possible_action;
+  }
+
+  my $extra_args = uri_escape(join(' ', @args));
+  if ( $is_url_action ) {
+    $extra_args = join('', @args);
+  }
+
+  $url =~ s/\%s/$extra_args/g;
+  #print "Opening URL: $url\n";
+  return $url;
+}

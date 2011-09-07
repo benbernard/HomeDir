@@ -1,0 +1,12 @@
+#!/opt/third-party/bin/perl
+
+use strict;
+use warnings;
+
+my $user = (getpwuid($<))[0];
+
+my $COPY_FILE = "/var/tmp/clipboard-$user";
+
+unlink $COPY_FILE;
+
+exec("vim", "-c", "set paste", $COPY_FILE);

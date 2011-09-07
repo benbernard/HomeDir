@@ -1,0 +1,120 @@
+#!/usr/bin/perl -w
+#!/apollo/bin/env -e envImprovement perl/bin/perl5.8/perl -w
+
+use warnings;
+use strict;
+use FindBin qw($Bin); use lib $Bin . "/perl/lib";;
+
+my $POS_FILE = $ENV{HOME} . '/.xmouseposition';
+
+use Getopt::Long;
+use Ratpoison;
+
+my $rt = Ratpoison->new();
+
+my ($pop, $name, $center, $not_pattern, $display, $screen, $no_mouse);
+
+GetOptions(
+  "pop"       => \$pop,
+  "name=s"    => \$name,
+  "center"    => \$center,
+  "screen=s"  => \$screen,
+  "display=s" => \$display,
+  'nomouse'   => \$no_mouse,
+  "not=s"     => \$not_pattern,
+);
+
+if ( $display ) {
+  my $user             = (getpwuid($<))[0];
+  $ENV{'DISPLAY'}      = $display;
+}
+
+if ( $pop ) {
+  exit 0 unless ( -e $POS_FILE );
+
+  my ($x, $y) = read_pos();
+  unlink $POS_FILE;
+  move_cursor_to($x, $y);
+  
+  exit 0;
+}
+
+# save mouse position
+save_position();
+
+my $frame = get_window_position($rt, $name, $not_pattern);
+
+my $x = $frame->{'x'};
+my $y = $frame->{'y'};
+my $width = $frame->{'width'};
+my $height = $frame->{'height'};
+#my ($x, $y, $width, $height) = ($frame->{'x'}, $frame->{'y'}, $frame->{'width'}, $frame->{'height'});
+
+if ( $center ) {
+  $y += $height/2;
+  $x += $width/2;
+}
+else {
+  $x += $width/2;
+  $y += 10;
+}
+
+$screen = $frame->{'window_data'}->{'screen_number'} unless ( defined $screen);
+
+$rt->select($frame->{'window_data'}->{'window_number'});
+move_cursor_to($x, $y, $screen) unless ( $no_mouse );
+
+#broken for non-main screens
+sub move_cursor_to {
+  my $x             = shift;
+  my $y             = shift;
+  my $screen        = shift;
+
+  $rt->ratwarp($x, $y);
+}
+
+sub save_position {
+  my ($x, $y) = get_mouse_position();
+  write_pos($x, $y);
+}
+
+sub get_window_position {
+  my $rt          = shift;
+  my $name        = shift || 'Ninja Search';
+  my $not_pattern = shift || '';
+
+  my $frames = $rt->get_screen_frames();
+
+  foreach my $frame (values %$frames) {
+    my $title = $frame->{'window_data'}->{'title'};
+    next unless ( $title );
+    next unless ( $title =~ m/$name/ );
+    next if ($not_pattern &&  $title =~ m/$not_pattern/ );
+
+    return $frame;
+  }
+
+  die "Could not find window with name: $name";
+}
+
+sub get_mouse_position {
+  return $rt->ratinfo();
+}
+
+sub write_pos {
+  my $x = shift;
+  my $y = shift;
+
+  open ( my $fh, '>', $POS_FILE ) or die "Could not open $POS_FILE: $!";
+  print $fh "$x $y\n";
+  close $fh;
+}
+
+sub read_pos {
+  open ( my $fh, '<', $POS_FILE ) or die "Could not open $POS_FILE: $!";
+  my $line = <$fh>;
+  close $fh;
+
+  my ($x, $y) = $line =~ m/(\S+) (\S+)/;
+  return ($x, $y);
+}

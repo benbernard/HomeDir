@@ -1,0 +1,2037 @@
+#!/bin/sh
+# the next line restarts using wish \
+exec wish "$0" "$@"
+
+global PRINT ENSCRIPT BUFMAX
+set PRINT "lpr"
+set MAIL "mailx -s \"\""
+set ENSCRIPT "enscript -2r"
+set BUFMAX 0
+
+global env;
+
+if [regexp -- {-L} $argv] {
+	wm maxsize . 1 1
+#	wm geometry . =5x5+1+1
+} elseif ![info exists env(QUICK_CLIP_BG)] {
+	set env(QUICK_CLIP_BG) "1";
+	eval exec quickClip $argv &
+	after 500;
+	exit 0;
+}
+
+global Program Copyright
+set Program quickClip
+set Copyright "$Program v0.3 Copyright (c) 1994-1998 Karl J. Runge"
+
+
+#-----------------------------------------------------------
+# BEGIN MAKELISTBOX
+proc makeListBox { 			\
+                 {frame_name}		\
+		 {insert ""}		\
+                 {width ""}		\
+                 {height ""}		\
+                 {type "listbox"} 	\
+                 {hscroll "True"} 	\
+                 {vscroll "True"} 	\
+                 {font ""} 		\
+               }			\
+{
+
+	# Procedure to create a simple resizable listbox or text widget.
+
+	global DebugMe;
+
+	set listbox_max_height "40";
+	set listbox_min_height  "5";
+
+	if {"$font" == "" || "$font" == "default_font"} {	
+		# default font just in case...
+		set font -adobe-helvetica-bold-r-*-*-*-140-*-*-*-*-*-*;
+		set font -*-lucidatypewriter-medium-*-*-*-12-*-*-*-*-*-*-*;	# hack of module..
+	}
+
+	# Todo: MUST fix height+width for text widget as well
+					
+# WORK OUT HEIGHT
+	if { "$height" == "" } {
+		# default height is # of elements
+		if { $type == "listbox" } {
+			set height [llength $insert];
+		} else {
+			set height 0;
+			foreach line [split $insert \n] {
+				incr height;
+			}
+		}
+	}
+
+	if { $height > $listbox_max_height } {
+		set height $listbox_max_height;
+	}
+	if { $height < $listbox_min_height } {
+		set height $listbox_min_height;
+	}
+					
+# WORK OUT WIDTH
+	if { "$width" == "" } {
+		# default width is max(5,max_width)
+		set width 5;		# min width
+		if { $type == "listbox" } {
+			set split " ";
+		} else {
+			set split "\n";
+		}
+		foreach line [split $insert $split] {
+			set tmp_width [string length $line];
+			if { $tmp_width > $width } {
+				set width $tmp_width;
+			}
+		}
+	}
+
+# DEBUG INFO
+	if { [info exists DebugMe] && $DebugMe } {	
+		# debugging purposes print out vars
+		foreach var {frame_name insert width height font} {
+			eval puts stdout \"makeListBox: $var is: \${$var}\";
+		}
+	}
+
+# MAKE FRAME
+	if { ![winfo exists $frame_name] } {
+		# create the frame to place widgets in
+		frame $frame_name -bd 1m;	
+	}
+
+				# setup for resizing... this is garbage so far...
+	set relief "raised";	# set relief of list area
+	set relief "groove";	
+				# "sunken" and "" are other choices
+
+		# Cases for "listbox" or "text" types...
+
+# CASE LISTBOX
+	if { "$type" == "listbox" } {
+					# now make listbox with scroll cmds
+		global tk_version
+		if { $tk_version < 4.0 } {
+			listbox $frame_name.listbox \
+				-geom ${width}x${height} \
+				-setgrid 1 \
+				-yscrollcommand "$frame_name.scrolly set" \
+				-xscrollcommand "$frame_name.scrollx set" \
+				-relief $relief \
+				-bd 2 \
+				-font $font
+		} else {
+			listbox $frame_name.listbox \
+				-width ${width} \
+				-height ${height} \
+				-setgrid 1 \
+				-yscrollcommand "$frame_name.scrolly set" \
+				-xscrollcommand "$frame_name.scrollx set" \
+				-relief $relief \
+				-bd 2 \
+				-font $font
+			
+		}
+
+# CASE TEXT AREA
+	} elseif { "$type" == "text" } {
+					# or make text widget with scroll cmd
+		text $frame_name.text \
+			-width $width \
+			-height $height \
+			-setgrid 1 \
+                	-yscrollcommand "$frame_name.scrolly set" \
+                	-relief $relief \
+                	-bd 2 \
+			-font $font
+	}
+
+# SCROLLBARS
+					# create the two scrollbars
+	scrollbar $frame_name.scrolly \
+		-relief sunken \
+		-command "$frame_name.$type yview"
+
+	if { "$type" != "text" } {	# "text" doesn''t scroll horizontally
+		scrollbar $frame_name.scrollx \
+			-orient horizontal \
+			-relief sunken \
+			-command "$frame_name.$type xview"
+	} else {
+		set hscroll "False";
+	}
+
+# INSERT DATA
+					# clear and insert list entries
+	if { "$type" == "listbox" } {
+		$frame_name.$type delete 0 end;	
+		eval $frame_name.$type insert 0 $insert;
+	} elseif { "$type" == "text" } {
+		$frame_name.$type insert 1.0 $insert;
+	}
+
+# PACKING
+					# pack them together
+	if { "$vscroll" == "True" } {	# if doing vertical scrollbar
+		pack $frame_name.scrolly \
+			-side right \
+			-fill y
+	}
+
+	pack $frame_name.$type \
+		-side top \
+		-fill both \
+		-expand 1
+
+	if { "$hscroll" == "True" } {	# if doing horizontal scrollbar
+		pack $frame_name.scrollx \
+			-side top \
+			-fill x
+	}
+
+# BINDINGS
+					# A load of paging/motion bindings:
+					# probably broke for Sun...
+					# I comment out real characters so one can enter text
+	bind $frame_name.$type <Enter> 		"focus %W";
+	bind $frame_name.$type <Next>		"pageDown $frame_name $type";
+	bind $frame_name.$type <Control-f>	"pageDown $frame_name $type";
+	bind $frame_name.$type <Control-d>	"pageDown $frame_name $type half";
+	bind $frame_name.$type <Shift-Down>	"pageDown $frame_name $type line";
+	bind $frame_name.$type <Control-n>	"pageDown $frame_name $type line";
+	bind $frame_name.$type <Prior>		"pageUp $frame_name $type";
+	bind $frame_name.$type <Control-b>	"pageUp $frame_name $type";
+	bind $frame_name.$type <Control-u>	"pageUp $frame_name $type half";
+	bind $frame_name.$type <Shift-Up>	"pageUp $frame_name $type line";
+	bind $frame_name.$type <Control-p>	"pageUp $frame_name $type line";
+}
+# END MAKELISTBOX
+
+
+#-----------------------------------------------------------
+# PAGING BINDINGS
+# paging Down procedure, fullpage, halfpage, line
+proc pageDown {frame_name type {step full}} {
+					# get scrollbar position info
+    global tk_version
+
+    if { $tk_version < "4.0" } {
+    	
+	set win_hgt [lindex [$frame_name.scrolly get] 1];
+	set win_p_min [lindex [$frame_name.scrolly get] 2];
+
+	if { $step == "half" } {
+		set win_hgt [expr int($win_hgt/2)];
+	} elseif { $step == "line" } {
+		set win_hgt 1;
+	}
+					# scroll the text/listbox window
+	$frame_name.$type yview [expr $win_p_min+$win_hgt];
+    } else {
+        if { $step == "half" } {
+		set fList [$frame_name.scrolly get]
+        	set win_start [lindex $fList 0];
+        	set win_stop [lindex $fList 1];
+		set win_hgt [expr "$win_stop - $win_start"]
+                set win_half [expr $win_hgt/2];
+	        $frame_name.$type yview moveto [expr $win_start+$win_half];
+        } elseif { $step == "line" } {
+        	$frame_name.$type yview scroll 1 unit
+	} else {
+        	$frame_name.$type yview scroll 1 page
+        }
+
+	return -code break
+    }
+}
+
+# paging Up procedure, fullpage, halfpage, line
+proc pageUp {frame_name type {step full}} {
+
+    global tk_version
+					# get scrollbar position info
+    if { $tk_version < "4.0" } {
+	set win_hgt [lindex [$frame_name.scrolly get] 1];
+	set win_p_min [lindex [$frame_name.scrolly get] 2];
+#	set win_p_max [lindex [$frame_name.scrolly get] 3];
+
+	if { $step == "half" } {
+		set win_hgt [expr int($win_hgt/2)];
+	} elseif { $step == "line" } {
+		set win_hgt 1;
+	}
+
+	set diff [expr $win_p_min-$win_hgt];
+	if { "$diff" < 0 } { set diff 0 }
+					# scroll the text/listbox window
+	$frame_name.$type yview $diff;
+    } else {
+        if { $step == "half" } {
+		set fList [$frame_name.scrolly get]
+        	set win_start [lindex $fList 0];
+        	set win_stop [lindex $fList 1];
+		set win_hgt [expr "$win_stop - $win_start"]
+                set win_half [expr $win_hgt/2];
+	        $frame_name.$type yview moveto [expr $win_start-$win_half];
+        } elseif { $step == "line" } {
+        	$frame_name.$type yview scroll -1 unit
+	} else {
+        	$frame_name.$type yview scroll -1 page
+        }
+
+	return -code break
+    }
+}
+
+# START OF BINDING ACTIONS
+
+#-----------------------------------------------------------
+# LPR PRINTING
+proc print_it {textWidget} {
+	global PRINT
+	set text [$textWidget get 1.0 end];
+
+	set FH [open "|$PRINT" w];
+	puts $FH $text;
+	close $FH;
+}
+
+#-----------------------------------------------------------
+# ENSCRIPTING
+proc enscript_it {textWidget} {
+	global ENSCRIPT
+	set text [$textWidget get 1.0 end];
+	
+	set FH [open "|$ENSCRIPT" w];
+	puts $FH $text;
+	close $FH;
+}
+
+#-----------------------------------------------------------
+# ARBITRARY FILTER
+proc filter_it {entryWidget textWidget} {
+	set text [$textWidget get 1.0 end];
+
+	set cmd [$entryWidget get]
+
+	regsub {^[ 	]*} $cmd "" cmd;
+	
+	if ![regexp {^\|} $cmd] {
+		set cmd "| $cmd"
+	}
+
+	set FH [open "$cmd" w];
+	puts $FH $text;
+	close $FH;
+}
+
+#-----------------------------------------------------------
+# PRINT ACTION WIDGETS
+proc print {textWidget} {
+	global PRINT
+	global font fontb;
+	global ButtonFrame
+
+	set text_var print_entry_var;
+	global $text_var;
+
+	set pw $ButtonFrame.print_frame;
+
+	set $text_var " |$PRINT"
+
+	catch {destroy $pw};
+	frame $pw -bd 1;
+
+	set filter_width 16;
+
+	entry $pw.entry \
+		-relief sunken \
+		-width $filter_width \
+		-font $font \
+		-textvariable $text_var
+
+	bind $pw.entry <Return> "
+		filter_it $pw.entry $textWidget;
+		after 400;
+		destroy $pw;
+		focus $textWidget;
+		";  
+
+	button $pw.filter    \
+		-text "Filter: " \
+		-font $fontb \
+		-command "
+			filter_it $pw.entry $textWidget;
+			after 400;
+			destroy $pw;
+			focus $textWidget;
+			";
+
+	label $pw.label;
+	$pw.label config \
+		-text "  Print: " \
+		-font $fontb
+
+	button $pw.lpr    \
+		-text "$PRINT" \
+		-font $fontb \
+		-command "
+			print_it $textWidget;
+			after 400;
+			destroy $pw;
+			focus $textWidget;
+			";
+
+	button $pw.ens    \
+		-text "Enscript" \
+		-font $fontb \
+		-command "
+			enscript_it $textWidget;
+			after 400;
+			destroy $pw;
+			focus $textWidget;
+			";
+
+	button $pw.cancel \
+		-text "X" \
+		-font $fontb \
+		-command "destroy $pw; focus $textWidget"
+
+	pack $pw.filter \
+		-side left \
+		-fill x \
+		-expand 0
+
+	pack $pw.entry \
+		-side left \
+		-fill x \
+		-expand 1
+
+	pack $pw.cancel $pw.ens $pw.lpr $pw.label \
+		-side right \
+		-fill x \
+		-expand 0
+
+	pack $pw \
+		-side bottom \
+		-fill x 
+
+	focus $pw.entry
+}
+
+#-----------------------------------------------------------
+# CLEAR ACTION
+proc clear {textWidget} {
+	global BufferNo
+	$textWidget delete 1.0 end;
+	set BufferNo 0
+}
+
+#-----------------------------------------------------------
+# SAVE ACTION WIDGETS
+proc save {textWidget} {
+	global font fontb;
+	global ButtonFrame
+####	set text [$textWidget get 1.0 end];
+
+	set text_var save_entry_var;
+	global $text_var;
+
+	set sw $ButtonFrame.save_frame;
+
+	catch {destroy $sw};
+	frame $sw -bd 1;
+
+	set save_width 36;
+	set save_width 28;
+
+	label $sw.label;
+	$sw.label config \
+		-text "File: " \
+		-font $fontb
+
+	entry $sw.entry \
+		-relief sunken \
+		-width $save_width \
+		-font $font \
+		-textvariable $text_var
+
+	button $sw.save   \
+		-text "Save"   \
+		-font $fontb \
+		-command "
+			save_it save   $textWidget $sw.entry;
+			after 400;
+			destroy $sw;
+			focus $textWidget;
+			";
+
+	button $sw.append \
+		-text "Append" \
+		-font $fontb \
+		-command "
+			save_it append $textWidget $sw.entry;
+			after 400;
+			destroy $sw;
+			focus $textWidget;
+			";
+
+	bind $sw.entry <Control-a> "
+		save_it append $textWidget $sw.entry;
+		after 400;
+		destroy $sw;
+		focus $textWidget;
+		";  
+
+	global MAIL
+	bind $sw.entry <Control-m> "
+		$sw.entry delete 0 end;
+		$sw.entry insert 0 {| $MAIL};
+		";  
+		
+
+	button $sw.misc  \
+		-text "Etc..." \
+		-font $fontb \
+		-command "
+			destroy $sw;
+			save_misc $textWidget;
+			";
+
+	bind $sw.entry <Control-t> "
+		title_it $sw.entry;
+		after 400;
+		destroy $sw;
+		focus $textWidget;
+		";  
+
+	button $sw.cancel \
+		-text "X" \
+		-font $fontb \
+		-command "destroy $sw; focus $textWidget"
+
+	bind $sw.entry <Shift-Escape> "
+		destroy $sw;
+		focus $textWidget;
+		";  
+
+	bind $sw.entry <Control-c> "
+		destroy $sw;
+		focus $textWidget;
+		";  
+
+
+	pack $sw.label \
+		-side left \
+		-fill x \
+		-expand 0
+	pack $sw.entry \
+		-side left \
+		-fill x \
+		-expand 1
+	pack $sw.save $sw.append $sw.misc $sw.cancel \
+		-side left \
+		-fill x \
+		-expand 0
+	pack $sw \
+		-side bottom \
+		-fill x 
+
+	bind $sw.entry <Return> "
+		save_it save   $textWidget $sw.entry;
+		after 400;
+		destroy $sw;
+		focus $textWidget;
+		";
+
+	foreach key {Escape Tab Meta-Tab} {
+		bind $sw.entry <$key> "
+			set complete \[fileComplete \$$text_var\];
+			$sw.entry delete 0 end;
+			$sw.entry insert 0 \$complete;
+			focus $sw.entry;
+			update;
+			";
+
+	}
+
+	global tk_version
+	if { $tk_version >= 4.0 } {
+		set swe $sw.entry
+		eval bindtags $swe \{Entry . all $swe\}
+	}
+
+	bind $sw.entry <Control-d> "
+		filePossibilities $sw.entry True \$$text_var $fontb;
+		";
+
+	bind $sw.entry <Control-u> "
+		$sw.entry delete 0 end;
+		";
+
+	bind $sw.entry <Enter> {focus %W}
+	bind $sw.entry <2> { %W insert insert [selection get] };
+
+	focus $sw.entry;
+}
+
+#-----------------------------------------------------------
+# SAVE MISC ACTION => NEW WIDGETS
+proc save_misc {textWidget} {
+	global font fontb;
+	global ButtonFrame
+####	set text [$textWidget get 1.0 end];
+
+	set text_var save_entry_var;
+	global $text_var;
+
+	set sw $ButtonFrame.save_frame;
+	catch {destroy $sw};
+	frame $sw -bd 1;
+
+	set save_width 20;
+
+	label $sw.label;
+	$sw.label config \
+		-text "File: " \
+		-font $fontb
+
+	entry $sw.entry \
+		-relief sunken \
+		-width $save_width \
+		-font $font \
+		-textvariable $text_var
+
+	button $sw.title  \
+		-text "Title" \
+		-font $fontb \
+		-command "
+			title_it $sw.entry;
+			after 400;
+			destroy $sw;
+			focus $textWidget;
+			";
+
+	bind $sw.entry <Control-t> "
+		title_it $sw.entry;
+		after 400;
+		destroy $sw;
+		focus $textWidget;
+		";  
+
+	bind $sw.entry <Control-u> "
+		$sw.entry delete 0 end;
+		";
+
+	button $sw.read   \
+		-text "Read" \
+		-font $fontb \
+		-command "
+			read_it $textWidget $sw.entry;
+			after 400;
+			destroy $sw;
+			focus $textWidget;
+			";
+
+	bind $sw.entry <Control-r> "
+		read_it $textWidget $sw.entry;
+		after 400;
+		destroy $sw;
+		focus $textWidget;
+		";  
+
+	bind $sw.entry <Control-e> "
+		enscript_it $textWidget;
+		after 400;
+		destroy $sw;
+		focus $textWidget;
+		";  
+
+	button $sw.cancel \
+		-text "X" \
+		-font $fontb \
+		-command "
+			destroy $sw;
+			focus $textWidget;
+			";
+
+	bind $sw.entry <Shift-Escape> "
+		destroy $sw;
+		focus $textWidget;
+		";  
+
+	bind $sw.entry <Control-c> "
+		destroy $sw;
+		focus $textWidget;
+		";  
+
+	pack $sw.label \
+		-side left \
+		-fill x \
+		-expand 0
+
+	pack $sw.entry \
+		-side left \
+		-fill x \
+		-expand 1
+
+	pack $sw.title $sw.read $sw.cancel \
+		-side left \
+		-fill x \
+		-expand 0
+
+	pack $sw \
+		-side top \
+		-fill x
+
+#	bind $sw.entry <Return> "
+#		save_it save   $textWidget $sw.entry;
+#		after 400;
+#		destroy $sw;
+#		focus $textWidget;
+#		";
+	bind $sw.entry <Return> "
+		title_it $sw.entry;
+		after 400;
+		destroy $sw;
+		focus $textWidget;
+		";  
+
+	bind $sw.entry <Control-u> "
+		$sw.entry delete 0 end;
+		";
+
+	foreach key {Escape Tab Meta-Tab} {
+		bind $sw.entry <$key> "
+			set complete \[fileComplete \$$text_var\];
+			$sw.entry delete 0 end;
+			$sw.entry insert 0 \$complete;
+			focus $sw.entry;
+			";
+	}
+
+	global tk_version
+	if { $tk_version >= 4.0 } {
+		set swe $sw.entry
+		eval bindtags $swe \{Entry . all $swe\}
+	}
+
+	bind $sw.entry <Control-d> "
+		filePossibilities $sw.entry True \$$text_var $fontb;
+		";
+
+	bind $sw.entry <Enter> {focus %W}
+	bind $sw.entry <2> { %W insert insert [selection get] };
+
+	focus $sw.entry;
+}
+
+#-----------------------------------------------------------
+# FIND ACTION WIDGETS
+proc find {textWidget} {
+	global font fontb;
+	global ButtonFrame;
+	set text [$textWidget get 1.0 end];
+
+	set text_var find_entry_var;
+	global $text_var;
+
+	set sw $ButtonFrame.find_frame;
+	catch {destroy $sw};
+	frame $sw -bd 1;
+
+	set find_width 36;
+	set find_width 28;
+
+	label $sw.label;
+	$sw.label config \
+		-text "Find: " \
+		-font $fontb
+	entry $sw.entry \
+		-relief sunken \
+		-width $find_width \
+		-font $font \
+		-textvariable $text_var
+	button $sw.fwd   \
+		-text "Forward"   \
+		-font $fontb \
+		-command "search_forward  $textWidget $sw.entry"
+
+	bind $sw.entry <Control-f> "
+		search_forward  $textWidget $sw.entry;
+		focus $sw.entry;
+		";  
+
+	button $sw.back   \
+		-text "Back"   \
+		-font $fontb \
+		-command "search_backward  $textWidget $sw.entry"
+
+	bind $sw.entry <Control-b> "
+		search_backward  $textWidget $sw.entry;
+		focus $sw.entry;
+		";  
+
+	button $sw.cancel \
+		-text "X" \
+		-font $fontb \
+		-command "
+			destroy $sw;
+			catch \"$textWidget tag delete tagFound\";
+			focus $textWidget;
+			";
+
+	bind $sw.entry <Escape> "
+		destroy $sw;
+		catch \"$textWidget tag delete tagFound\";
+		focus $textWidget;
+		";  
+
+	bind $sw.entry <Control-c> "
+		destroy $sw;
+		catch \"$textWidget tag delete tagFound\";
+		focus $textWidget;
+		";  
+
+	bind $sw.entry <Control-u> "
+		$sw.entry delete 0 end;
+		";
+
+	pack $sw.label \
+		-side left \
+		-fill x \
+		-expand 0
+
+	pack $sw.entry \
+		-side left \
+		-fill x \
+		-expand 1
+
+	pack $sw.fwd $sw.back $sw.cancel \
+		-side left \
+		-fill x \
+		-expand 0
+
+	pack $sw \
+		-side top \
+		-fill x
+
+	bind $sw.entry <Return> "
+		search_forward $textWidget $sw.entry;
+		focus $sw.entry
+		";
+
+	bind $sw.entry <Shift-Return> "
+		search_backward $textWidget $sw.entry;
+		focus $sw.entry
+		";
+
+	bind $sw.entry <Enter> {focus %W}
+	bind $sw.entry <2> { %W insert insert [selection get] };
+
+	focus $sw.entry;
+}
+
+#-----------------------------------------------------------
+# FIND SEARCH ACTION FORWARD
+proc search_forward {textWidget entryWidget} {
+
+	focus $textWidget; update; after 50;
+
+	set blob [$textWidget get insert end];
+
+	set exp [$entryWidget get];
+
+	if { $exp == "" } {
+		return;
+	}
+
+	if [regexp -indices -- "$exp" $blob location] {
+		regexp "($exp)" $blob l1 match;
+		set shift [lindex $location 0];
+
+		if { $shift == "0" } {
+			set blob2 [string range $blob 1 end]; 
+			if [regexp -indices -- "$exp" $blob2 location2] {
+				set shift [lindex $location2 0];
+				incr shift;
+			}
+		}
+
+
+		$textWidget mark set insert "insert + $shift chars";
+		$textWidget yview -pickplace insert;
+
+		catch "$textWidget tag delete tagFound";
+		$textWidget tag add tagFound insert "insert + [string length $match] chars";
+		$textWidget tag configure tagFound \
+			-background {light yellow}
+	}
+
+}
+
+#-----------------------------------------------------------
+# FIND SEARCH ACTION BACKWARD
+proc search_backward {textWidget entryWidget} {	# only strings no regexp
+
+	focus $textWidget; update; after 50;
+
+	set blob [$textWidget get 1.0 insert];
+
+	set exp [$entryWidget get];
+
+	if { $exp == "" } {
+		return;
+	}
+
+	if [regexp -indices -- "$exp" $blob location] {
+
+		set match $exp;
+		set shift [string last $exp $blob];
+		set shift [expr "[string length $blob] - $shift"];
+
+		if { $shift == "0" } {
+			set blob_length [string length $blob];
+			set blob_m [expr "$blob_length - 2"];
+			set blob2 [string range $blob 0 $blob_m ]; 
+			if [regexp -indices -- "$exp" $blob2 location2] {
+				set shift [string last $exp $blob2];
+				set shift [expr "[string length $blob] - $shift"];
+				incr shift;
+			}
+		}
+
+
+		$textWidget mark set insert "insert - $shift chars";
+		$textWidget yview -pickplace insert;
+
+		catch "$textWidget tag delete tagFound";
+		$textWidget tag add tagFound insert "insert + [string length $match] chars";
+		$textWidget tag configure tagFound \
+			-background {light yellow}
+	}
+
+}
+
+#-----------------------------------------------------------
+# CHANGE TITLE ACTION
+proc title_it {entryWidget} {
+	wm title . "[$entryWidget get]";
+	wm iconname . "[$entryWidget get]";
+}
+
+#-----------------------------------------------------------
+# SAVE AS FILE ACTION
+proc save_it {mode textWidget entryWidget} {
+
+	if { $mode == "save" } {
+		set access "w";
+	} elseif { $mode == "append" } {
+		set access "a";
+	}
+
+	set file [$entryWidget get];
+
+	if {$file == "" } {
+		set spot [$entryWidget index end];
+		$entryWidget insert end " --NOT SAVED--";
+		update;
+		after 1000;
+		$entryWidget delete $spot end;
+		return;
+	}
+
+	set FH [open $file $access];
+
+	puts $FH [$textWidget get 1.0 end] 
+
+	close $FH;
+}
+
+#-----------------------------------------------------------
+# READ IN A FILE TO THE TEXTAREA ACTION
+proc read_it {textWidget entryWidget} {
+
+	set file [$entryWidget get];
+
+	if {![file exists "$file"] && \
+            ![regexp {^[ 	]*\|} $file] } {
+		set spot [$entryWidget index end];
+		$entryWidget insert end " --NO SUCH FILE--";
+		update;
+		after 1000;
+		$entryWidget delete $spot end;
+		return;
+	}
+
+	set FH [open $file r];
+
+	set all [read $FH];
+	$textWidget insert end $all;
+
+	close $FH;
+}
+
+#-----------------------------------------------------------
+# FILE COMPLETION FOR FILENAME
+#-----File Complete Begin--------#
+proc fileComplete {partial_path} {
+
+	# simple function to do file completion on string "partial_path"
+
+	set debug 0;
+#	regsub {/[^/]*} "$partial_path" "/" dir_name;
+
+				# get the glob list straight off:
+	set list [glob -nocomplain ${partial_path}*];
+
+	if {$debug} {puts "list is: $list";}
+
+	if { "$list" == "" } {	# if no matches, send him back what he gave us
+		return "$partial_path";
+	}
+
+	set n_files [llength [split "$list"]];	# the number of matches
+
+	if {"$n_files" == "1" } {		# if only one return it
+		set return_file [lindex $list 0];
+		if [file isdirectory $return_file] {	# tack "/" on directory
+			regsub {$} "$return_file" "/" return_file;
+		}
+		return $return_file;
+	}
+				# We have to loop
+	set base_length [string length $partial_path];
+
+	set i [expr ${base_length}-1];		# definitely matches to this index
+
+	set matching 1;
+
+	while {$matching} {
+
+		set igood $i;			# maximum "good" index
+		set matching 0;
+
+		incr i;				# try next index
+		if {$debug} {puts "i is: $i";}
+
+		set count 0;
+		if [info exists tally] {
+			unset tally;		# tallies all characters at $i
+		}
+		foreach file $list {
+			if {$debug} {puts "file is: $file";}
+			set char [string index $file $i];	# get $i position
+			if {$debug} {puts "char is: $char";}
+			if {"$char" == ""} {	# call no char "NULL"
+				set index "NULL";
+			} else {		# otherwise call it char
+				set index "$char";
+			}
+
+			if [info exists tally($index)] {	# tally it
+				incr tally($index); 
+			} else {
+				set tally($index) 1;
+			}
+		}
+		if {[array size tally] == "1" } {	# if only one they all matched
+			set matching 1;
+		}
+	}
+						# return maximum match string
+	set return_string [string range [lindex $list 0] 0 $igood];
+
+	if {$debug} {puts stdout $return_string;}
+	return $return_string;
+}
+
+#-----------------------------------------------------------
+# CONTROL-D LISTING
+proc filePossibilities {window entryInsert partial_path {font ""}} {
+
+	# simple function to make a selectable listbox of glob file matches to "partial_path"
+
+	set debug 0;
+
+	set w .filePossibilitiesList;		# toplevel widget name
+
+	catch {destroy $w}
+
+	toplevel $w;
+						# glob it
+	set list [glob -nocomplain ${partial_path}*];		
+
+	set list_len [llength $list];
+
+	if { $list_len == "0" } {		# one empty  line if no matches
+		set list_len 1;
+	}
+
+	
+	if { $list_len < 7 } {			# scroll > 7
+		set lheight $list_len
+	} else {
+		set lheight 7;
+	}
+
+#	set list0 $list;
+
+	set list0 [lsort $list]; 		# sort them
+
+	unset list;
+	set list "";
+
+	foreach item $list0 {			# trailing "/" for directories
+		if [file isdirectory $item] {
+			set item "${item}/";
+		}
+		lappend list "$item";
+		
+	}
+
+	if {"$window" == "ListOnly" } {		# hook for list only
+		return $list;
+	}
+
+	set p_x [winfo rootx $window];		# place it below $window
+	set p_y [winfo rooty $window];
+	set p_h [winfo height $window];
+		# tweak for alignment...
+	set p_x [expr ${p_x}-2];
+	set p_y [expr $p_y+$p_h+3];
+		# set the geometry position
+	wm geometry $w +$p_x+$p_y;
+
+	wm transient $w .;			# no decorations
+
+	makeListBox $w.listbox $list "" $lheight listbox;
+
+	$w.listbox configure -bd 0;		# trim excess border
+	$w.listbox.listbox configure -bd 0;
+
+						# we can insert selection into an 
+						# entry box....
+	if {"$entryInsert" == "True" } {
+						# single click gets it
+##		bind $w.listbox.listbox <Double-1> "
+		bind $w.listbox.listbox <B1-ButtonRelease> "
+			set sel \[selection get\];
+			$window delete 0 end;
+			$window insert 0 \$sel;
+			focus $window;
+			destroy $w;
+			";
+
+						# keypress to kill listbox
+		foreach key {Tab Meta-Tab} {
+		    foreach place "$w.listbox $w.listbox.listbox" {
+			if {$debug} {puts "place is $place";}
+			bind $place <$key>	"
+				focus $window;
+				destroy $w;
+				";
+		    }
+		}
+	}
+
+						# dismiss button
+	button $w.dismiss \
+		-text Dismiss \
+		-command "
+			destroy $w;
+			focus $window;
+			";
+
+	bind $w.listbox.listbox <Escape> "
+		focus $window;
+		destroy $w;
+		";
+
+	global tk_version
+	if { $tk_version >= 4.0 } {
+		set wll $w.listbox.listbox
+		eval bindtags $wll \{Listbox $wll . all\}
+	}
+
+	if { "$font" != "" } {
+		$w.dismiss configure \
+			-font $font
+	}
+						# pack together
+	pack $w.listbox $w.dismiss \
+		-side top \
+		-fill x
+						# focus here for keypress exit
+#	focus $w.listbox
+	focus $w.listbox.listbox
+
+	if {$debug} {puts "list is: $list";}
+
+}
+#-----File Complete End----------#
+
+#-----------------------------------------------------------
+# SELECT ALL ACTION
+proc select_it {textWidget} {
+	global LoopMode
+	if {$LoopMode} {
+		bell
+		return
+	}
+	$textWidget tag add sel 1.0 end;
+	update; update idletasks
+}
+
+#-----------------------------------------------------------
+# POP UP THE HELP TEXT IN A WINDOW
+proc do_help {} {
+	global font fontb
+
+	set top ".help"
+	catch {destroy $top}
+	toplevel $top
+	wm title $top "quickClip Help"
+	set f "$top.help_frame"
+	frame $f
+	set t "$f.help"
+	set text [help_text]
+	makeListBox $t "$text" "" "" text True True $font;
+	set b "$f.dismiss"
+	button $b -text "Dismiss" -command "destroy $top" -font $fontb
+	pack $b -side bottom -fill x -expand 0
+	pack $t -side top -fill both -expand 1
+	pack $f -fill both -expand 1
+	wm resizable $top 0 1
+	bind $top <Escape> "destroy $top"
+}
+
+#-----------------------------------------------------------
+# RETURNS THE HELP TEXT
+proc help_text {} {
+	global Program Copyright
+	global PRINT ENSCRIPT MAIL
+	set pg $Program
+
+	set text \
+"
+            $Copyright
+
+
+$pg:  an X-windows Selection Clipboard
+
+Usage:
+	$pg \[-l\] \[-b <n>\] \[-|file\]
+
+
+Description:
+------------
+
+$pg is an X selection clipboard with many features. It is meant to be
+convenient: when invoked it will automatically grab the current X-selection
+and place it in its TextArea. This is in contrast to \"xclipboard\" where
+once started one must paste in the selection with the mouse. It is useful
+to bind the launching $pg to easily executed keystrokes or mouse events
+so one can very quickly capture X-selections for later use. For example,
+one can bind it to a button press on a toolbar (e.g. GoodStuff in fvwm),
+or to \"window-ops\" popup menus, and/or mouseless, keystroke-only
+window-manager invocation, an editor macro, etc.
+
+Unlike \"xclipboard's\" multiple pages, all the selections are simply
+kept in a single TextArea. To have separate multiple selections
+start up additional \"$pg's\". Also, when in Loop Mode simple buffers 
+of each new selection are kept and delimited in the TextArea.
+
+
+
+Features:
+---------
+
+Here are the main buttons: 
+
+    Append		Append a selection to bottom of Clipboard TextArea.
+    Looping mode	Continuously updates selection.
+    Printing		$PRINT, $ENSCRIPT, or arbitrary filter.
+    Save		To file, append to file, or to pipe cmd.
+    Rename window	Change wm title.
+    Read		Read in text from a file.
+    Find		Search fwd/bwd for patterns in the selection.
+    Select All		Quickly grab all of selection in TextArea.
+    Clear		Clean out the TextArea.
+    Help		This help.
+    Quit		Exit $pg.
+
+
+Starting:
+---------
+
+If started with no command line arguments, $pg will attempt to capture
+the current X-selection (PRIMARY only, CUT_BUFFERS are currently not
+handled), and display it in its text widget (referred to here at the
+TextArea). If there is no current selection, the TextArea is initially
+empyt. If started with an argument \"-\" it reads all of its standard
+input and displays it in the TextArea. If a file name is given on the
+command line, the text from that file is displayed in the TextArea.
+
+If started with the \"-l\" flag $pg immediately goes into \"Looping\" mode:
+it loops continuously looking for changes in the X-selection and 
+scrolls the new selections in its TextArea. See \"Looping\" below.
+
+Starting with \"-b <n>\" will limit the number of loop buffers kept
+to <n>.
+
+
+Basic Bindings:
+---------------
+
+    <Control-a>		Append current X-selection.
+    <Control-p>		Print dialog.
+    <Control-s>		Save dialog.
+    <Control-f>		Find dialog.
+    <Control-e>		Select all text in TextArea.
+    <Control-c>		Clear TextArea.
+    <Control-H>		This help.
+    <Control-q>		Quit.
+    <Escape>		Quit.
+
+    
+Appending:
+----------
+
+Click the \"Append\" button or press <Control-a> to append the current
+X-selection to the bottom of the TextArea. The TextArea is scrolled to
+the bottom to make the added text visible.
+
+
+Printing:
+---------
+
+Clicking the \"Print\" button or pressing <Control-p> starts up a Print dialog.
+The current contents of the TextArea will be sent to various filters.
+
+	You can type and arbitrary filter command in the EntryBox,
+	    either \"|command\" or just \"command\". Then click \"Filter\"
+	    or press <Return>.
+
+	Click the \"$PRINT\" button to pass the Text to the line printer.
+	Click the \"Enscript\" button to pass the Text to \"$ENSCRIPT\".
+	    (two columns rotated output).
+	Click the \"X\" button to terminate the Print dialog. Pressing
+	<Escape> when in the EntryBox (NOT TextArea) also terminates it.
+
+
+Saving:
+-------
+
+Clicking the \"Save\" button or pressing <Control-s> starts up a Save dialog.
+The current contents of the TextArea will be saved.
+
+	Type in the name of a file in the EntryBox. c-shell like
+	    file completion may be used: press <Control-d> to get a list
+	    of file/directory alternatives (Click the one you want), or
+	    press <Tab> or <Escape> to complete the filename until it
+	    is ambiguous. 
+
+	Then click the \"Save\" button to save to the filename in the 
+	    EntryBox. Pressing <Return> has the same effect. The file will
+	    be overwritten; click the \"Append\" button to append to that
+	    filename. 
+
+	Click the \"Etc...\" button for even more actions:
+	    Enter a new window manager title name in the EntryBox
+	        and click \"Title\" to set the window title.
+	    Or Enter filename in the EntryBox and click the \"Read\"
+	        button to append the contents of that file to the
+	        TextArea.
+
+	Click the \"X\" button to terminate the Save dialog.Pressing
+	<Escape> when in the EntryBox (NOT TextArea) also terminates it.
+
+
+Searching:
+----------
+
+Clicking the \"Find\" button or pressing <Control-f> starts up a Find dialog.
+The current contents of the TextArea can be searched.
+
+	Type in the pattern to search for in the EntryBox.
+
+	Then click the \"Forward\" button or press <Control-f> to search
+	    forward through the TextArea. Matches are highlighted in yellow.
+	    Pressing <Return> searches forward.
+
+	Or click the \"Back\" button or press <Control-b> to search
+	    backward through the TextArea. Matches are highlighted in yellow.
+
+	Click the \"X\" button to terminate the Find dialog. Pressing
+	<Escape> when in the EntryBox (NOT TextArea) also terminates it.
+
+	Note that the cursor is usually at the bottom of the TextArea
+	    so it may be best to search backwards.
+
+
+Selecting:
+----------
+
+Click the \"Select All\" button or press <Control-/> to select all of the
+text in the TextArea. Press <Control-\\> to deselect it all. Selecting
+other text in any application will also remove the selection.
+
+
+Clearing:
+----------
+
+Click the \"Clear\" button or press <Control-c> to remove all text from
+the TextArea.
+
+
+?:
+--
+
+Clicking the \"?\" button displays this help.
+
+
+Quitting:
+---------
+
+Click the \"Quit\" button or press <Control-q> or <Escape> to  
+
+
+Looping:
+--------
+
+If started with the \"-l\" flag, $pg starts up in a loop watching for
+the X selection to change. Each time the selection changes, it is
+appended to the TextArea. The separate selections are delimited by 
+lines beginning \"---- buffer # -------\", where # is the \"buffer\" number.
+
+You can toggle into or out of \"Looping Mode\" by pressing any of
+<Control-l>, <Control-w>, or <F1> or clicking button 3 (the right-most
+button). When in Looping Mode the \"Append\" button's label is changed
+to the string \"Looping\". You can click the \"Looping\" button to get
+out of Looping Mode.
+
+The \"Select All\" button is disabled in Looping Mode because you could
+get into a terrible loop (i.e. the automatically appended text changes
+the X-selection, it is appended, and so on...). In general be careful
+selecting text from the TextArea when Looping. It is safest to get out
+of Loop Mode before doing any selecting.
+
+You can cycle backward thru the buffers by pressing <Control-b>. To 
+cycle forwards press <Control-g>. You can also use <Control-B> and
+<Control-F>, respectively if you want to. When in Looping Mode the
+buffers are highlighted in yellow as you cycle through them. When not
+in Looping Mode each one is exported to the X-selection as you cycle
+through them.
+
+
+Misc. Features:
+---------------
+
+In the TextArea, if you click Mouse button 1 while holding down <Shift>,
+this will spawn a new $pg process that will grab the current 
+X selection.
+
+Starting with \"-L\" will delete all windows and just scroll \"Loop Mode\"
+seleciton buffers to the standard output.
+
+Starting with \"-S\" will initially highlight and export the selection.
+
+
+TextArea Bindings:
+------------------
+
+<PageUp> <Control-b>	Up a page
+<PageDn> <Control-f>	Down a page
+<Control-u>		Up 1/2 a page
+<Control-d>		Down 1/2 a page
+<Shift-UpArrow>		Up a line
+<Shift-DownArrow>	Down a line
+<UpArrow> <Control-n>	Cursor up a line
+<DownArrow> <Control-p>	Cursor down a line
+<Shift-Button1>		Start a new $pg
+<Button2>		Insert selection at mouse		
+<Insert>		Insert selection at cursor		
+<Control-x> <Meta-x>	Delete selected text
+
+
+<Control-w> <Control-l> <F1> Toggle LoopMode
+<Control-b> <Control-B>	Cycle backward one buffer 
+<Control-g> <Control-F>	Cycle forward one buffer 
+
+<Escape> <Control-q>	Quit in non-LoopMode
+
+(N.B. when two or more keypresses are noted, e.g. <Control-w> <Control-l>, 
+it means you can press either one to get the action, not both in succession)
+
+EntryBox Bindings:
+------------------
+
+<Control-u>		Clear EntryBox.
+<Button-2> <Insert>	Insert selection into EntryBox.
+
+In Print Dialog:
+
+    <Return>		Pass all text through filter in EntryBox.
+    <Escape>		End Print dialog.
+
+In Save Dialog:
+
+    <Return>		Save all text to file in EntryBox.
+    <Control-a>		Append all to file in EntryBox.
+    <Control-m>		Insert | $MAIL  into EntryBox. 
+    <Control-t>		Set window title to text in EntryBox.
+    <Escape> <Tab> 
+	and <Meta-Tab>	Filename Completion (expand non-ambiguous).
+    <Control-d>		Filename Completion (list of possibilities)
+			(select with Mouse or press <Escape>)
+    <Escape> <Control-c>End Save dialog.
+
+In Save/Etc Dialog:
+    <Control-t>		Set window title to text in EntryBox.
+    <Control-r>		Read file in EntryBox, append to TextArea.
+    (File Completion as under Save)
+    <Escape>		End Save/Etc dialog.
+
+In Find Dialog:
+
+    <Control-f> <Return>Search forward  for match of string in EntryBox.
+    <Control-b>	<Shift-Return>	
+			Search backward for match of string in EntryBox.
+    <Escape> <Control-c>End Find dialog.
+"
+	return $text
+}
+
+#-----------------------------------------------------------
+# HIGHLIGHT THE NEXT SEL LOOPING "BUFFER" IN THE TEXTAREA
+proc next_buffer {{direction "backwards"}} {
+	global widget LoopMode BufferNo BufferPre BufferPost
+	set text $widget.text
+
+	set index1 ""
+	set index2 ""
+
+	set bmatch "^${BufferPre}.*${BufferPost}"
+
+	if {$direction == "backwards"} {
+		set index1 [$text search -backwards -regexp "^$bmatch" "insert - 1 chars"]
+	} elseif {$direction == "forwards"} {
+		set index1 [$text search -forwards -regexp "^$bmatch" "insert + 1 chars"]
+	}
+	if {$index1 != ""} {
+		set index2 [$text search -forwards -regexp "^$bmatch" "$index1 + 1 chars" end]
+		$text mark set insert $index1
+		if {$index2 == ""} {
+			set index2 "end"
+		}
+	}
+
+	if {$direction == "backwards"} {
+		$text yview -pickplace insert
+	} elseif {$direction == "forwards"} {
+		if {$index2 != ""} {
+			$text yview -pickplace $index2
+		} else {
+			$text yview -pickplace $index1
+		}
+	} 
+
+	if {$index2 != ""} {
+		if {$LoopMode} {
+			catch {$text tag delete bufFound}
+			$text tag add bufFound "$index1 + 1 lines" "$index2 - 1 chars"
+			$text tag configure bufFound \
+				-background {light yellow}
+		} else {
+			catch {$text tag remove sel 1.0 end}
+			$text tag add sel "$index1 + 1 lines" "$index2 - 1 chars"
+		}
+	} else {
+		bell
+	}
+	update; update idletasks
+}
+
+#-----------------------------------------------------------
+# APPEND THE X-SELECTION TO THE TEXTAREA
+proc append_selection {{mode ""}} {
+	global LastSelection widget LoopStdout
+	
+	set sel ""
+	catch {set sel [selection get]} 
+	if {$sel == ""} {
+		return
+	}
+	if {$mode == "ifnew"} {
+		if {$sel == $LastSelection} {
+			return
+		}
+		set LastSelection $sel
+		set sel "[header_line]$sel"
+	} else {
+		set LastSelection $sel
+		set s "\n$sel"
+	}
+	if {$LoopStdout}  {
+		puts stdout $sel
+		flush stdout
+		return
+	}
+	$widget.text insert end "$sel";
+	$widget.text yview -pickplace end;
+	$widget.text mark set insert end;
+	update; update idletasks
+}
+
+#-----------------------------------------------------------
+# PRODUCE A HEADER LINE INDICATING WHICH LOOP MODE BUFFER IT IS
+proc header_line {} {
+	global BufferNo BufferPre BufferPost BUFMAX widget
+	global HeaderWidth
+	set date ""
+#	set date " [exec date] "
+	if { $BufferNo != 0} {
+		set nl "\n"
+	} else {
+		set nl ""
+		if [winfo exists $widget.text] {
+			set text [$widget.text get 1.0 end]
+			if {$text != "\n"} {
+				set nl "\n";
+			}
+		}
+		
+	}
+	set no [format "%3d" $BufferNo]
+	set header "${nl}${BufferPre}$no ${BufferPost}${date}${BufferPost}\n"
+	if [winfo exists $widget.text] {
+		if ![info exists HeaderWidth] {
+			set twp [winfo width $widget.text]
+			set inc [lindex [wm grid .] 2]
+			set wid [expr "int($twp.0/$inc - 1.0)"]
+			#set wid [$widget.text cget -width]
+			#puts "wid: $wid"
+			set HeaderWidth $wid
+		}
+		set len [string length $header]
+		set wid $HeaderWidth
+		if {$len > $wid} {
+			set header [string range $header 0 [expr "$wid-1"]]
+			append header "\n";
+		}
+	}
+	incr BufferNo
+	if {$BUFMAX > 0 && $BufferNo > $BUFMAX} {
+		global BufferPre BufferPost
+		set bmatch "^${BufferPre}.*${BufferPost}"
+		set index1 [$widget.text search -forwards -regexp "^$bmatch" 1.0]
+		if {$index1 != "" } {
+			set index2 [$widget.text search -forwards -regexp "^$bmatch" "$index1 + 1 chars"]
+			if {$index2 != "" } {
+				$widget.text delete 1.0 $index2 
+			}
+		}
+		
+	}
+	return $header
+}
+
+#-----------------------------------------------------------
+# SWITCH BETWEEN X-SELECTION LOOPING AND NOT
+proc toggle_loop_mode {} {
+	global LoopMode LoopDebug StopLooping
+	global widget buttons
+
+	set toggle_exportselection 0
+
+	if {$LoopDebug} {
+		puts "into toggle_loop_mode: LoopMode $LoopMode"
+	}
+	if {$LoopMode} {
+		set LoopMode 0
+		set StopLooping 1
+		update
+		after 10
+		update; update idletasks
+		$buttons.select configure -state normal
+		$buttons.append configure \
+			-text "Append" \
+			-command {append_selection}
+		set test ""
+		catch {set test [$widget.text tag configure bufFound]}
+		if {$test != ""} {
+			set ranges [$widget.text tag ranges bufFound]
+			set index1 [lindex $ranges 0]
+			set index2 [lindex $ranges 1]
+			if {$index1 != "" && $index2 != ""} {
+				catch {$widget.text tag delete bufFound};
+				catch {$widget.text tag remove sel 1.0 end};
+				catch {$widget.text tag add sel $index1 $index2};
+			}
+		}
+		if {$toggle_exportselection} {
+			$widget.text configure \
+				 -exportselection 1
+		}
+	} else {
+		set LoopMode 1
+		$buttons.select configure -state disabled
+		catch {$widget.text tag remove sel 1.0 end};
+		
+		$buttons.append configure \
+			-command {toggle_loop_mode}
+		$buttons.append configure -text "Looping"
+		if {$toggle_exportselection} {
+			$widget.text configure \
+				-exportselection 0
+		}
+		update; update idletasks
+		append_loop
+	}
+}
+
+#-----------------------------------------------------------
+# GO INTO A LOOP WATCHING FOR THE X-SELECTION TO CHANGE
+proc append_loop {} {
+	global LoopMode LoopDebug StopLooping
+
+	if {$LoopDebug} {
+		puts "into append_loop"
+		set c 0
+	}
+	set nap 25; 	# 0.25 secs
+	set n 10
+
+	set StopLooping 0
+	while {$LoopMode} {
+		for {set i 0} {$i < $n} {incr i}  {
+			after $nap
+			if {!$LoopMode} {
+				break;
+			}
+			update; update idletasks
+		}
+		if {$LoopDebug} {
+			puts "$c \($LoopMode\)"
+			incr c
+			flush stdout
+		}
+		if {$StopLooping} {
+			return
+		}
+		append_selection ifnew
+		catch {update}
+	}
+}
+
+
+#-----------------------------------------------------------
+# main() ########## MAIN starts here ################
+
+global LastSelection LoopMode BufferNo BufferPre BufferPost
+global DebugMe; set DebugMe 0;
+global LoopDebug; set LoopDebug 0;
+global ResizeMin ResizeMax;
+global ButtonFrame
+global font fontb;
+global StopLooping LoopStdout
+
+set StopLooping 0
+
+set BufferNo 0
+set BufferPre  "---- buffer"
+set BufferPost "-------------------------------"
+
+set LoopMode 0
+set LastSelection ""
+set LoopStdout 0
+
+# FONTS
+#set font -adobe-helvetica-medium-r-*-*-*-180-*-*-*-*-*-*;
+#set font -*-times-medium-r-*-*-*-*-*-*-*-*-*-*;
+#set font -*-lucidatypewriter-medium-*-*-*-12-*-*-*-*-*-*-*;
+#set font -*-times-medium-r-*-*-*-*-*-*-*-*-*-*;
+#set font -misc-fixed-medium-r-semicondensed--13-120-75-75-c-60-iso8859-1
+set font fixed
+#set fontb -*-lucidatypewriter-bold-*-*-*-12-*-*-*-*-*-*-*;
+set fontb -adobe-helvetica-bold-r-*-*-*-120-*-*-*-*-*-*;
+#set fontb -adobe-helvetica-bold-r-*-*-*-140-*-*-*-*-*-*;
+
+global env;
+
+# GEOM
+#wm minsize . 1 1;	# good choice for this example to not lose hscrollbar
+wm geometry . "+2+2";
+wm title . "quickClip";
+
+# COLORS
+option add	*selectBackground         grey70
+option add	*activeBackground         grey65
+option add	*background               grey80
+#option add	*frame*background         grey80
+option add	*scrolly*foreground       grey80
+option add	*scrolly*activeForeground grey65
+option add	*scrollx*foreground       grey80
+option add	*scrollx*activeForeground grey65
+
+option add	*Button*padY 2
+option add	*Button*padX 2
+
+. configure -background grey80
+
+set selection "";
+set do_title "";
+
+set opt_count "0"
+foreach item [split $argv] {
+	set opt($opt_count) $item
+	incr opt_count
+}
+
+set do_loop 0
+set start_file ""
+set start_files ""
+set file_count 0
+set select_initial 0
+
+for {set i 0} {$i < $opt_count} {incr i} {
+
+	set arg $opt($i)
+	if {$arg == "-f"} {
+		incr i
+		set start_file $opt($i)
+	} elseif {$arg == "-S"} {
+		set select_initial 1
+	} elseif {$arg == "-l"} {
+		set LoopMode 1
+	} elseif {$arg == "-L"} {
+		set LoopMode 1
+		set LoopStdout 1
+	} elseif {$arg == "-b"} {
+		incr i
+		set BUFMAX $opt($i)
+	} elseif {$arg == "--h"} {
+		puts [help_text]
+		flush stdout
+		exit 0
+	} elseif {$arg == "-"} {
+		set start_file "-"
+	} elseif ![regexp {^-} $arg]  {
+		set start_file $opt($i)
+		lappend start_files $opt($i)
+		incr file_count
+	}
+}
+
+global widget buttons
+set widget NONE
+
+set empty_loop_sel 0
+if { $start_file == "-" } {
+	while {[gets stdin line] > -1} {
+		append selection $line;
+		append selection "\n";
+	}
+} elseif { $file_count > 0 } {
+	foreach file $start_files {
+		if ![file exists $file] {
+			append selection "\n** No such file: $file **\n"
+		} else {
+			set FH [open $file "r"]; 
+			append do_title "$file "
+			if {$file_count > 1} {
+				append selection "\n** FILE $file: **\n"
+			}
+			while {[gets $FH line] > -1} {
+				append selection $line;
+				append selection "\n";
+			}
+		}
+	}
+} else {
+	catch {set selection [selection get]};
+	if { $selection == "" } {
+		if { ! $LoopStdout } {
+			puts stderr "no selection found, empty box"
+		}
+#		puts stderr "no selection, trying cutbuffer ..."
+#		catch {set selection [exec cutbuffer.tcl]};
+#		set error_foo "error waiting for process to exit: No child processes";
+#		regsub $error_foo $selection "" selection;
+	}
+	set LastSelection $selection
+	if {$LoopMode} {
+		if {$selection == ""} {
+			set empty_loop_sel 1
+		}
+		set selection "[header_line]$selection"
+	}
+}
+
+if {$LastSelection == ""} {
+	set LastSelection $selection
+}
+
+makeListBox .foo "$selection" "" "" text True True $font;
+set w ".foo";
+set widget $w
+bind $w.text <Escape> "destroy .; exit 0";
+
+global tk_version
+if { $tk_version < 4.0 } {
+	bind $w.text <2> {%W insert insert [selection get]; %W yview -pickplace insert};
+	bind $w.text <Control-x> {%W delete sel.first sel.last};
+	bind $w.text <Meta-x> {%W delete sel.first sel.last};
+	bind $w.text <Left>  {%W mark set insert "insert - 1 chars"; %W yview -pickplace insert};
+	bind $w.text <Right> {%W mark set insert "insert + 1 chars"; %W yview -pickplace insert};
+	bind $w.text <Shift-Left>  {%W mark set insert "insert - 4 chars"; %W yview -pickplace insert};
+	bind $w.text <Shift-Right> {%W mark set insert "insert + 4 chars"; %W yview -pickplace insert};
+	bind $w.text <Up>  {%W mark set insert "insert - 1 lines"; %W yview -pickplace insert};
+	bind $w.text <Down>  {%W mark set insert "insert + 1 lines"; %W yview -pickplace insert};
+}
+
+# MAKE MAIN WIDGETS HERE IN MAIN
+set ButtonFrame .buttonframe;
+frame $ButtonFrame;
+set wb $ButtonFrame.always
+frame $wb -bd 1;
+
+set buttons $wb
+
+button $wb.ok \
+	-text "Quit" \
+	-command {destroy .; exit 0} \
+	-font $fontb
+
+	bind $w.text <Control-q> {destroy .; exit 0};
+
+button $wb.help \
+	-text "?" \
+	-command {do_help} \
+	-font $fontb
+
+	bind $w.text <Control-H> {do_help};
+
+button $wb.print \
+	-text "Print..." \
+	-command {print $w.text} \
+	-font $fontb
+
+	bind $w.text <Control-p> {print $w.text};
+
+button $wb.save \
+	-text "Save..." \
+	-command {save $w.text} \
+	-font $fontb
+
+	bind $w.text <Control-s> {save $w.text};
+
+button $wb.select \
+	-text "Select All" \
+	-command {select_it $w.text} \
+	-font $fontb
+
+	bind $w.text <Control-e> {select_it $w.text};
+
+button $wb.find \
+	-text "Find..." \
+	-command {find $w.text} \
+	-font $fontb
+
+	bind $w.text <Control-f> {find $w.text};
+
+button $wb.clear \
+	-text "Clear" \
+	-command {clear $w.text} \
+	-font $fontb
+
+	bind $w.text <Control-c> {clear $w.text};
+
+button $wb.append \
+	-text "Append" \
+	-width 8 \
+	-font $fontb \
+	-command {append_selection}
+
+	bind $w.text <Control-a> {append_selection}
+	bind $w.text <Shift-1> "
+				set wm_title \[wm title .\];
+				wm title . {Spawning New Clip};
+				update;
+				after 200;
+				exec quickClip &;
+				after 300; 
+				wm title . \$wm_title;
+				update;
+				";
+
+if {[info exists tk_version] && $tk_version > 4.1} {
+	event delete <<Cut>> <Control-Key-w>
+}
+bind . <Control-l> {toggle_loop_mode}
+bind . <Control-w> {toggle_loop_mode}
+bind . <F1> {toggle_loop_mode}
+bind . <3> {toggle_loop_mode}
+
+bind Text <Control-b> {}
+bind $w.text <Control-b> {next_buffer backwards}
+bind . <Control-B> {next_buffer backwards}
+bind . <Control-g> {next_buffer forwards}
+bind . <Control-F> {next_buffer forwards}
+
+pack $ButtonFrame \
+	-side bottom \
+	-fill x 
+
+pack $w \
+	-side top \
+	-fill both \
+	-expand 1
+
+pack $wb \
+	-side top \
+	-fill x 
+
+pack $wb.append $wb.print $wb.save $wb.find $wb.select $wb.clear \
+	-side left \
+	-fill x \
+	-expand 1
+
+pack $wb.help \
+	-side left \
+	-expand 0
+
+pack $wb.ok \
+	-side left \
+	-fill x \
+	-expand 1
+
+if { $empty_loop_sel } {
+	set BufferNo 0 
+	clear $w.text;
+}
+
+update
+
+if {$do_title != ""} {
+	wm title . $do_title
+	wm iconname . $do_title
+}
+
+if {$select_initial} {
+	select_it $w.text
+}
+
+if {$LoopMode} {
+	set LoopMode 0
+	if {$LoopStdout} {
+		wm withdraw .
+	}
+	toggle_loop_mode
+}

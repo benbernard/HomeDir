@@ -1,0 +1,12 @@
+#!/bin/zsh
+
+pgrep -f 'firefox.*-P default' | xargs kill
+
+sleep 1;
+
+env DISPLAY=:0.0 ~/ff/firefox/firefox -P default 1>/dev/null 2>/dev/null &
+disown
+
+xmessage "has ff started?"
+
+move_window_to_frame.pl --number 1 --title 'Firefox main' --name 'DevCentral|Firefox main|Vimperator' --frame 6

@@ -1,0 +1,9 @@
+#!/bin/sh
+
+env > /var/tmp/copybuff.env
+
+date > /var/tmp/date
+
+xclip -l 1 -verbose -i </var/tmp/date >/var/tmp/xclip.out
+
+#strace -f -o /var/tmp/strace.out xclip -i </var/tmp/date

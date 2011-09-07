@@ -1,0 +1,235 @@
+#!/opt/third-party/bin/perl
+
+# Made by kamling@
+# also ti-fix.pl
+
+# Changes to use storables are mine
+
+use strict;
+use warnings;
+use Fcntl;
+use Storable qw(store retrieve);
+
+# TODO: more efficient [de]serialization?
+my $tidbfn;
+if($ENV{'TIDB'})
+{
+   $tidbfn = $ENV{'TIDB'};
+}
+else
+{
+   $tidbfn = $ENV{'HOME'} . "/.tidb";
+}
+
+my %h;
+
+get_db(\%h, $tidbfn);
+
+sub get_db {
+  my $h    = shift;
+  my $file = shift;
+
+  my $dat_file = "$file.dat";
+  if(-e $dat_file) {
+    %$h = %{get_storable_db($dat_file)};
+  }
+  else {
+    #get_text_format_db($h, $file);
+    %$h = %{get_storable_db($file)};
+  }
+}
+
+sub get_storable_db {
+  my $file = shift;
+  return retrieve($file);
+}
+
+sub get_text_format_db {
+  my $h      = shift;
+  my $tidbfn = shift;
+  # TODO: handle autovivification of TIDB
+  if(-f $tidbfn)
+  {
+     sysopen(TIDB, $tidbfn, O_RDONLY()) || die "Unable to open " . $tidbfn . ": " . $! . "\n";
+     while(<TIDB>)
+     {
+        chomp;
+        if(/(.*)\|(.*)/)
+        {
+           $h->{$1} = $2;
+        }
+        else
+        {
+           die "Borked line in TIDB: " . $_ . "\n";
+        }
+     }
+     close(TIDB);
+  }
+}
+
+my @a = ();
+
+while(<>)
+{
+   chomp;
+   push @a, $_;
+}
+
+my $id = "";
+my $ti2 = "";
+my $irt = 0;
+my $firt = 0;
+my $st = 1;
+
+foreach(@a)
+{
+   if($st && /Message-ID: (.*)/)
+   {
+      $id = $1;
+   }
+   if($st && /^[tT]hread-[iI]ndex: (.*)$/)
+   {
+      my $ti = $1;
+      $ti2 = debase64($ti);
+   }
+   if($st && /^In-Reply-To: /)
+   {
+      $irt = 1;
+   }
+   if($st && ($_ eq "In-Reply-To-Is-Fake: Yes"))
+   {
+      $firt = 1;
+   }
+   if($_ eq "")
+   {
+      $st = 0;
+   }
+}
+
+my $replace = 0;
+if((!$irt || $firt) && $ti2)
+{
+   $replace = 1;
+}
+
+my $bestid = "";
+if($replace)
+{
+   my $bestlen = -1;
+   foreach(keys(%h))
+   {
+      if($id eq $_)
+      {
+         next;
+      }
+      my $tti2 = $h{$_};
+
+      my $l = length($tti2);
+      if(length($ti2) >= $l && substr($ti2, 0, length($tti2)) eq $tti2 && $l > $bestlen)
+      {
+         $bestid = $_;
+         $bestlen = $l;
+      }
+
+      #my $i = 0;
+      #while(1)
+      #{
+      #   if(($i >= length($tti2)) ||
+      #      ($i >= length($ti2)) ||
+      #      (substr($ti2, 0, $i) ne substr($tti2, 0, $i)))
+      #   {
+      #      last;
+      #   }
+      #   ++$i;
+      #}
+      #print STDERR "Finding for " . $id . " (ti2 = " . $ti2 . "), matching against " . $_ . " (ti2 = " . $tti2 . ", length = " . $i . "\n";
+      #if($i > $bestlen)
+      #{
+      #   $bestid = $_;
+      #   $bestlen = $i;
+      #}
+   }
+}
+
+if($id && $ti2)
+{
+   $h{$id} = $ti2;
+}
+
+store_db(\%h, $tidbfn);
+
+sub store_db {
+  store_db_storable(@_);
+}
+
+sub store_db_storable {
+  my $h = shift;
+  my $file = shift;
+  $file = "$file.dat";
+
+  store($h, $file);
+}
+
+sub store_db_text_file {
+  my $h    = shift;
+  my $file = shift;
+
+  sysopen(TIDB, $file, O_TRUNC() && O_CREAT() && O_WRONLY()) || die "Unable to open " . $file . ": " . $! . "\n";
+  foreach(keys(%$h))
+  {
+     print TIDB $_ . "|" . $h->{$_} . "\n";
+  }
+  close(TIDB);
+}
+
+$st = 1;
+foreach(@a)
+{
+   if($st && $bestid && $replace)
+   {
+      if(/^In-Reply-To: /)
+      {
+         next;
+      }
+      if(/^In-Reply-To-Is-Fake: /)
+      {
+         next;
+      }
+      if(/^[tT]hread-[iI]ndex: /)
+      {
+         print "In-Reply-To: " . $bestid . "\n";
+         print "In-Reply-To-Is-Fake: Yes\n";
+      }
+   }
+   if($_ eq "")
+   {
+      $st = 0;
+   }
+   print $_ . "\n";
+}
+
+sub debase64
+{
+   my ($s) = @_;
+   my $xlate = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+   my $r = "";
+
+   while($s)
+   {
+      my $c = substr($s, 0, 1);
+      $s = substr($s, 1);
+      my $idx = index($xlate, $c);
+      if($idx != -1)
+      {
+         my $c2 = "";
+         for(my $i = 0; $i < 6; ++$i)
+         {
+            $c2 = (($idx & 1) ? "1" : "0") . $c2;
+            $idx >>= 1;
+         }
+         $r .= $c2;
+      }
+   }
+
+   return $r;
+}

@@ -1,0 +1,91 @@
+#!/opt/third-party/bin/perl -w 
+
+#Run commands in passed file, with output logging
+
+use strict;
+
+use Getopt::Long;
+
+my ($file, $interval, $interval_file);
+
+GetOptions(
+   'commands=s'          => \$file,
+   'interval=s'      => \$interval,
+   'interval-file=s' => \$interval_file,
+);
+
+unless($file && -e $file) {
+  print_usage('Must specify a readable file');
+}
+
+if ( $interval && $interval_file ) {
+  print_usage("Only specify one of --interval or --interval-file");
+}
+
+my @cmds = `cat $file`;
+chomp @cmds;
+
+foreach my $cmd (@cmds) {
+  print "Running: $cmd\n";
+  system $cmd;
+
+  my $sig = $? & 127;
+  print "Done, got: $?\n";
+
+  if ( $sig ) {
+    die "Got a signal exit: $sig, dieing\n";
+  }
+
+  interval_sleep();
+
+}
+
+$SIG{INT} = \&interrupt;
+
+sub interrupt {
+  exit 1;
+}
+
+sub interval_sleep {
+  unless ( $interval || $interval_file ) {
+    return;
+  }
+
+  my $seconds = get_interval();
+  print "Waiting for $seconds seconds\n";
+  sleep $seconds;
+  print "Done Waiting!\n";
+}
+
+sub get_interval {
+  if ( $interval ) {
+    return $interval;
+  }
+
+  open (my $fh, "<", $interval_file) or die "Could not read: $interval_file: $!";
+  my $seconds = <$fh>;
+  close $fh;
+
+  chomp $seconds;
+
+  return $seconds;
+}
+
+sub print_usage {
+  my $message = shift || '';
+  print <<USAGE;
+$message
+$0
+  Runs commands in the passed file with logging of exit code.
+  optionally with an interval
+
+  --commands      - File with commands to run
+  --interval      - Delay to wait in between commands
+  --interval-file - A file that specifies the interval, for dynamic throttling
+
+Example:
+$0 commands.txt
+$0 commands.txt 5 #5 second pause in between commands
+USAGE
+  exit 1;
+}

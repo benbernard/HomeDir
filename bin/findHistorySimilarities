@@ -1,0 +1,84 @@
+#!/opt/third-party/bin/perl -w
+
+use Getopt::Long;
+use File::Basename;
+
+my $history_file;
+my $open_in_editor;
+
+GetOptions(
+   'history=s'       => \$history_file,
+);
+
+unless(defined $history_file) {
+  print_usage("Must define -module, optional: -open");
+}
+
+my %commands;
+my %arguments;
+
+open(HIST, "<", $history_file) or die "Could not open $history_file: $!";
+@lines = <HIST>;
+close HIST;
+
+my $current_command = shift @lines;
+$current_command =~ s/^[^;]*;//;
+foreach my $line (@lines) {
+  chomp $line;
+  $line =~ s/\\$//;
+  if($line =~ m/^:/) {
+    process_command($current_command);
+    $current_command = $line;
+    $current_command =~ s/^[^;]*;//;
+  }
+  else {
+    $current_command .= $line;
+  }
+}
+
+foreach my $command (keys %commands) {
+  my $num = $commands{$command};
+  if($num > 50) {
+    print "$command: $num\n";
+
+    my $args_string =  "Common args:\n";
+    my $has_args = 0;
+    foreach my $arg (keys %{$arguments{$command}}) {
+      my $argNum = $arguments{$command}->{$arg};
+      if($argNum > 5) {
+        $has_args = 1;
+        $args_string .= "\t$arg: $argNum\n";
+      }
+    }
+    print "$args_string" if($has_args);
+  }
+}
+
+sub process_command {
+  my $full_command = shift;
+
+  my @parts = split(/\s+/, $full_command);
+
+  my $command = basename(shift @parts);
+  $commands{$command}++;
+
+  foreach my $argument (@parts) {
+    $arguments{$command}->{$argument}++;
+  }
+}
+
+
+sub print_usage {
+  my $message = shift;
+  print <<USAGE;
+$message
+$0
+  Analyzes the passed history file for command commands and
+  arguments and suggests alias.
+
+  --history-file - History file to analyze
+USAGE
+
+  exit 1;
+}
+
