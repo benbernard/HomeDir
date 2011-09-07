@@ -1,0 +1,98 @@
+#!/usr/bin/perl
+
+$| = 1;
+
+use strict;
+use warnings;
+
+use Getopt::Long;
+
+my $simple;
+
+my @options =
+(
+    "simple|s!" => \$simple,
+    "help" => sub { usage(0); },
+);
+
+GetOptions(@options) || usage(1);
+
+my %judgement;
+{
+    open(my $fh, "-|", "git-judge-branches", "list-branches") || die "Cannot open 'git-judge-branches list-branches'";
+    while(my $line = <$fh>)
+    {
+        chomp $line;
+        if($line =~ /^(.*): (.*)$/)
+        {
+            my ($branch, $judgement) = ($1, $2);
+
+            $judgement{$branch} = $judgement;
+        }
+    }
+    close($fh) || die "Cannot close 'git-judge-branches list-branches'";
+}
+
+{
+    open(my $fh, "-|", "git", "branch", "-a") || die "Cannot open 'git branch -a'";
+    while(my $line = <$fh>)
+    {
+        chomp $line;
+
+        my $name;
+        my $current;
+
+        # note, we never skip the current
+        if($line =~ /^\* (.*)$/)
+        {
+            $current = 1;
+            $name = $1;
+        }
+        elsif($line =~ /^  (.*)$/)
+        {
+            $current = 0;
+            $name = $1;
+            my $judgement = $judgement{$name};
+            if($judgement eq "DEFAULT")
+            {
+                if($name =~ /^remotes\//)
+                {
+                    $judgement = "N";
+                }
+                else
+                {
+                    $judgement = "Y";
+                }
+            }
+            if(defined($judgement) && $judgement eq "N")
+            {
+                next;
+            }
+        }
+        else
+        {
+            die "Bad git branch line: $line";
+        }
+
+        if(!$simple)
+        {
+            print ($current ? "* " : "  ");
+        }
+
+        print "$name\n";
+    }
+    close($fh) || die "Cannot close 'git branch -a'";
+}
+
+sub usage
+{
+    my $ec = shift;
+
+    print <<EOF;
+Usage: $0 <options>
+   --simple                           Do not mark current branch with star.
+   --help                             Print this help.
+EOF
+
+    exit $ec;
+}

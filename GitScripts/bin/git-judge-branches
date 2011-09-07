@@ -1,0 +1,66 @@
+#!/usr/bin/perl
+
+$| = 1;
+
+use strict;
+use warnings;
+
+use Cwd ('abs_path');
+use File::Basename;
+
+my $type = shift || die "No type?";
+
+my $root = abs_path();
+while(1)
+{
+    if(-d "$root/.git")
+    {
+        last;
+    }
+    if($root eq "/")
+    {
+        die "Cannot findup .git for repo root";
+    }
+    $root = dirname($root);
+}
+
+my $judger = '{}';
+my $spec_file = "$root/.git/branch-types";
+if(-f $spec_file)
+{
+    my $fh;
+    open($fh, "<", $spec_file) || die "Cannot open branch-types file: $!";
+
+    $judger = join("", map { "$_\n" } (<$fh>));
+
+    close($fh) || die "Cannot close branch-types file: $!";
+}
+$judger = eval 'sub { local $_ = shift; ' . $judger . ' }';
+if($@)
+{
+    die "Could not compile judger: $@";
+}
+
+{
+    open(my $fh, "-|", "git", "branch", "-a") || die "Cannot open 'git branch -a'";
+    while(my $branch = <$fh>)
+    {
+        chomp $branch;
+
+        $branch =~ s/^..//;
+        if($branch eq "(no branch)")
+        {
+            next;
+        }
+        $branch =~ s/ .*$//; # arggh, symbolics sometimes end up like this?
+
+        my $judgement_hash = $judger->($branch);
+        my $judgement = "DEFAULT";
+        if(exists($judgement_hash->{$type}))
+        {
+            $judgement = $judgement_hash->{$type};
+        }
+        print "$branch: $judgement\n";
+    }
+    close($fh) || die "Cannot open 'git branch -a'";
+}

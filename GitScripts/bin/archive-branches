@@ -1,0 +1,35 @@
+#!/usr/bin/perl
+
+$| = 1;
+
+use strict;
+use warnings;
+
+use Cwd ('abs_path');
+use File::Basename;
+use POSIX ('strftime');
+
+my $root = abs_path();
+
+while(1)
+{
+    if(-d "$root/.git")
+    {
+        last;
+    }
+    if($root eq "/")
+    {
+        die "Cannot findup .git for repo root";
+    }
+    $root = dirname($root);
+}
+
+my $time = strftime('%Y%m%d-%H%M%S', localtime(time()));
+
+my @push = ("git", "push", "$root/.git/archive-repo", (map { "$_:$time--$_" } @ARGV));
+print "Running: (" . join(" ", map { "'$_'" } @push) . ")...\n";
+(system(@push) == 0) || die "Could not push: $!";
+
+my @del = ("git", "branch", "-D", @ARGV);
+print "Running: (" . join(" ", map { "'$_'" } @del) . ")...\n";
+(system(@del) == 0) || die "Could not delete: $!";

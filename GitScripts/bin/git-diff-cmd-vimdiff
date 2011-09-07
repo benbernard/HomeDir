@@ -1,0 +1,43 @@
+#!/usr/bin/perl
+
+$| = 1;
+
+use strict;
+use warnings;
+
+use Cwd ('abs_path');
+use File::Basename;
+
+my ($path, $file1, $hash1, $mode1, $file2, $hash2, $mode2) = @ARGV;
+
+# Supa' hack to guess path for missing files.  We estimate that the working
+# tree and the right side are close enough to always the same to substitute
+# this way.
+my $rm = 0;
+if($file2 eq "/dev/null")
+{
+    my $root = abs_path();
+    while(1)
+    {
+        if(-d "$root/.git")
+        {
+            last;
+        }
+        if($root eq "/")
+        {
+            die "Cannot findup .git for repo root";
+        }
+        $root = dirname($root);
+    }
+
+    $file2 = "$root/$path";
+    system("mkdir", "-p", "--", dirname($file2));
+    $rm = 1;
+}
+
+system("vimdiff", $file1, '+set ro', $file2);
+
+if($rm)
+{
+    system("rmdir", "-p", "--", dirname($file2));
+}

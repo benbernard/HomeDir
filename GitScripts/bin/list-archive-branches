@@ -1,0 +1,44 @@
+#!/usr/bin/perl
+
+$| = 1;
+
+use strict;
+use warnings;
+
+use Cwd ('abs_path');
+use File::Basename;
+
+my $root = abs_path();
+
+while(1)
+{
+    if(-d "$root/.git")
+    {
+        last;
+    }
+    if($root eq "/")
+    {
+        die "Cannot findup .git for repo root";
+    }
+    $root = dirname($root);
+}
+
+open(my $ls_fh, '-|', 'git', 'ls-remote', '-h', "$root/.git/archive-repo") || die "Cannot open ls-remote: $!";
+while(my $l = <$ls_fh>)
+{
+    chomp $l;
+    if($l =~ /^([0-9a-f]{40})\t(.*)$/)
+    {
+        my $sha1 = $1;
+        my $ref = $2;
+
+        $ref =~ s/^refs\/heads\///;
+
+        print "$ref\n";
+    }
+    else
+    {
+        die "Bad line: $l";
+    }
+}
+close($ls_fh) || die "Cannot close ls-remote: $!";

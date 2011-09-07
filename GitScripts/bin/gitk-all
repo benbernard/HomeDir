@@ -1,0 +1,43 @@
+#!/usr/bin/perl
+
+$| = 1;
+
+use strict;
+use warnings;
+
+my @args;
+{
+    open(my $fh, "-|", "git-judge-branches", "gitk-all") || die "Cannot open 'git-judge-branches gitk-all'";
+    while(my $line = <$fh>)
+    {
+        chomp $line;
+
+        if($line =~ /^(.*): (.*)$/)
+        {
+            my ($branch, $judgement) = ($1, $2);
+
+            if($judgement eq "DEFAULT")
+            {
+                if($branch =~ /^remotes\//)
+                {
+                    $judgement = "N";
+                }
+                else
+                {
+                    $judgement = "Y+";
+                }
+            }
+            if($judgement eq "Y+")
+            {
+                push @args, $branch;
+            }
+            if($judgement eq "Y-")
+            {
+                push @args, "$branch..$branch";
+            }
+        }
+    }
+    close($fh) || die "Cannot close 'git-judge-branches gitk-all'";
+}
+
+exec("gitk", @args, "--", @ARGV);

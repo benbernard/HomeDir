@@ -1,0 +1,28 @@
+#!/usr/bin/perl
+
+$| = 1;
+
+use strict;
+use warnings;
+
+use Cwd ('abs_path');
+use File::Basename;
+
+my $root = abs_path();
+
+while(1)
+{
+    if(-d "$root/.git")
+    {
+        last;
+    }
+    if($root eq "/")
+    {
+        die "Cannot findup .git for repo root";
+    }
+    $root = dirname($root);
+}
+
+my @fetch = ("git", "fetch", "$root/.git/archive-repo", (map { "$_:unarchived-$_" } @ARGV));
+print "Running: (" . join(" ", map { "'$_'" } @fetch) . ")...\n";
+(system(@fetch) == 0) || die "Could not fetch: $!";

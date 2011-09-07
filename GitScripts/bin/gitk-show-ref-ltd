@@ -1,0 +1,45 @@
+#!/usr/bin/perl
+
+$| = 1;
+
+use strict;
+use warnings;
+
+my %judgement;
+{
+    open(my $fh, "-|", "git-judge-branches", "gitk") || die "Cannot open 'git-judge-branches gitk'";
+    while(my $line = <$fh>)
+    {
+        chomp $line;
+        if($line =~ /^(.*): (.*)$/)
+        {
+            my ($branch, $judgement) = ($1, $2);
+
+            $judgement{$branch} = $judgement;
+        }
+    }
+    close($fh) || die "Cannot close 'git-judge-branches gitk'";
+}
+
+{
+    open(my $fh, "-|", "git", "show-ref", "-d") || die "Cannot open 'git show-ref -d'";
+    while(my $line = <$fh>)
+    {
+        chomp $line;
+
+        if($line =~ /^[0-9a-f]{40} (.*)$/)
+        {
+            my $name = $1;
+            $name =~ s/^refs\/(heads\/)?//;
+
+            my $judgement = $judgement{$name};
+            if(defined($judgement) && $judgement eq "N")
+            {
+                next;
+            }
+        }
+
+        print "$line\n";
+    }
+    close($fh) || die "Cannot close 'git show-ref -d'";
+}
