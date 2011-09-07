@@ -1,0 +1,89 @@
+#!/usr/bin/perl -w
+
+$| = 1;
+
+use strict;
+
+use Getopt::Long;
+use Data::Dumper;
+
+use Text::CSV;
+use IPC::Open3;
+
+my $users_str = $ENV{'GOOGLE_CL_USERS'} || '';
+
+my @users = split(':', $users_str);
+
+my $limit = 10;
+
+GetOptions(
+  'user'    => \@users,
+  'limit=n' => \$limit,
+);
+
+die "Must specify a user with --user or GOOGLE_CL_USERS" if ( scalar @users == 0 );
+
+my $docs = {};
+
+my $csv = Text::CSV->new ( { binary => 1 } );
+
+foreach my $user (@users) {
+  $docs->{$user} = [];
+  my ($in, $out, $err);
+  open3($in, $out, $err, 'google', 'docs', '-u', $user, 'list') or die "Could not run google docs -u $user list: $!";
+
+  close $in;
+
+  my $count = 0;
+  while ( my $row = $csv->getline($out) ) {
+    $count ++;
+    last if ( $count > $limit );
+    if ( $row->[0] =~ m/Google Sign up for a new Google Account/ ) {
+      warn "Account: '$user' not authorized for google cl, please run:\n";
+      warn "    google docs -u $user list\n";
+      die "Cannot continue until authorized\n";
+    }
+    push @{$docs->{$user}}, { TITLE => $row->[0], USER => $user };
+  }
+
+  close $out;
+}
+
+my $count = 0;
+foreach my $user (@users) {
+  print "Docs for: $user:\n";
+  foreach my $doc_info ( @{$docs->{$user}} ) {
+    $count++;
+    my $title = $doc_info->{'TITLE'};
+    printf("  %3d - %s\n", $count, $title);
+  }
+  print "\n";
+}
+
+my $doc_info;
+until( $doc_info = get_title($docs) ) {
+}
+
+my $title = $doc_info->{'TITLE'};
+my $user  = $doc_info->{'USER'};
+print "Editting '$title'\n";
+print "Running: google docs -u $user edit --title '$title'\n";
+exec('google', 'docs', '-u', $user, 'edit', '--title', $title);
+
+sub get_title {
+  my $docs = shift;
+  print "Which doc to edit? (q to quit): ";
+  my $doc = <>;
+  chomp $doc;
+  if ( $doc =~ m/^\d+$/ ) {
+    my @docs_array = (map { @{$docs->{$_}} } @users);
+    return $docs_array[$doc-1];
+  }
+  else {
+    if ( $doc eq 'q' ) {
+      die "quitting\n";
+    }
+    print "'$doc' not a number!\n";
+  }
+  return;
+}
