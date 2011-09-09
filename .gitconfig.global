@@ -12,8 +12,9 @@
     color = true
 
 [color]
-    ui = true
-    interactive = always
+  ui = true
+  interactive = always
+  diff = true
 
 [color "diff"]
   whitespace = red reverse
