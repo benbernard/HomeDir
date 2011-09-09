@@ -14,6 +14,9 @@ kinit -f
 echo Starting fetchmail
 fetchmail
 
+pgrep -f pycl.py | xargs kill
+$HOME/emacs_chrome/servers/pycl.py -e $HOME/bin/foreground-vim >>~/.edit-server.log 2>&1 &!
+
 startSynServer.sh
 znc
 
