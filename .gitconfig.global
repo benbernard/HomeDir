@@ -39,7 +39,8 @@
     prompt = no
 
 [merge]
-    tool = kidff3
+  tool = kidff3
+  conflictstyle = diff3
 
 [gc]
   auto = 0
