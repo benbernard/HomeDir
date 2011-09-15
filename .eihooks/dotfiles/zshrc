@@ -193,6 +193,8 @@ then
     local TITLE=${PWD:t}
     if [[ $LONG_TITLE == "YES" ]]; then
       TITLE=${HOST}:${(S)PWD/src\/appgroup\/*\/*\//.../}
+      # Example that also truncated common domains in the host
+      # TITLE=${HOST/.example.com/}:${(S)PWD/src\/appgroup\/*\/*\//.../}
     fi
     # 'screen' sets STY as well, so for users who override the TERM
     # environment variable, checking STY is nice
