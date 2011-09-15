@@ -192,7 +192,7 @@ then
   {
     local TITLE=${PWD:t}
     if [[ $LONG_TITLE == "YES" ]]; then
-      TITLE=${HOST/.corp.google.com/}:${(S)PWD/src\/appgroup\/*\/*\//.../}
+      TITLE=${HOST}:${(S)PWD/src\/appgroup\/*\/*\//.../}
     fi
     # 'screen' sets STY as well, so for users who override the TERM
     # environment variable, checking STY is nice

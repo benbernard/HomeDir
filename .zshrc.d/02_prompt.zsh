@@ -35,10 +35,6 @@ setopt NO_CORRECT_ALL
 # 
 # Also switches between blue and red depending on the exit code of the last command.
 
-setenv MY_PROMPT $'%(?.%{\e[0m%}.%{\e[0;31m%})%B%m%#%b%{\e[0;34m%} '
-setenv PROMPT $MY_PROMPT
-#setenv RPROMPT "";
-
 # auto-quote special shell characters as you type a URL, so that you don't have
 # to single quote it
 #
@@ -48,6 +44,40 @@ if autoload +X url-quote-magic 2> /dev/null; then
   # we successfully loaded the url-quote-magic function
   zle -N self-insert url-quote-magic
 fi
+
+########### This section tries to display i or c for insert and command code
+########### in the prompt... unfortunately it clears the color state for last executed
+########### command... I think this could be fixed with precmd or something, not sure...
+#setopt prompt_subst
+#VIMODE=" i"
+##REAL_PS1='%B%n%b@%U%m%u${VIMODE}%(!.#.>) '
+##PS1=${REAL_PS1}
+#bindkey -v
+#function zle-line-init() {
+# # Must match the VIMODE initial value above.
+#  zle -K viins
+#} #zle -N zle-line-init
+#
+## Show insert/command mode in vi.
+## zle-keymap-select is executed every time KEYMAP changes.
+## See http://zshwiki.org/home/examples/zlewidgets for details.
+#function zle-keymap-select {
+# # Traditional right-hand side vi standard mode display
+#  # RPS1="${${KEYMAP/vicmd/-- NORMAL --}/(main|viins)/-- INSERT --}"
+#  # Shorter version on the left.
+# VIMODE="${${KEYMAP/vicmd/ c}/(main|viins)/ i}"
+# PROMPT=$MY_PROMPT
+# zle reset-prompt
+#}
+#
+#zle -N zle-keymap-select
+
+setenv MY_PROMPT $'%(?.%{\e[0m%}.%{\e[0;31m%})%B%m${VIMODE}%#%b '
+
+# This prompt tries to set the characters typed after the prompt to blue, but this doesn't work (except in command mode, for some reason...)
+#setenv MY_PROMPT $'%(?.%{\e[0m%}.%{\e[0;31m%})%B%m${VIMODE}%#%b%{\e[0;34m%} '
+
+setenv PROMPT $MY_PROMPT
 
 setopt TRANSIENT_RPROMPT # RPROMPT disappears in terminal history great for copying
 
