@@ -72,7 +72,7 @@ fi
 #
 #zle -N zle-keymap-select
 
-setenv MY_PROMPT $'%(?.%{\e[0m%}.%{\e[0;31m%})%B%m${VIMODE}%#%b '
+setenv MY_PROMPT $'%(?.%{\e[0m%}.%{\e[0;31m%})%B%m%#%b '
 
 # This prompt tries to set the characters typed after the prompt to blue, but this doesn't work (except in command mode, for some reason...)
 #setenv MY_PROMPT $'%(?.%{\e[0m%}.%{\e[0;31m%})%B%m${VIMODE}%#%b%{\e[0;34m%} '
