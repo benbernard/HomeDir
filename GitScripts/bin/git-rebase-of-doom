@@ -23,10 +23,11 @@ use warnings;
 use FindBin;
 use lib "$FindBin::RealBin/../libs";
 
-use Amling::GRD::Operation;
-use Amling::GRD::Parser;
-use Amling::GRD::Utils;
-use Amling::GRD::Exec::Context;
+use Amling::Git::GRD::Exec::Context;
+use Amling::Git::GRD::Operation;
+use Amling::Git::GRD::Parser;
+use Amling::Git::GRD::Utils;
+use Amling::Git::Utils;
 use Getopt::Long;
 
 # TODO: no die's!  need to all call common bail() infrastructure so we can reset cleanly, maybe even need to allow expectation to be passed into bail() and bail can give user option to cleanup to meet it and continue...
@@ -57,14 +58,14 @@ my @specs = @ARGV;
 
 if(defined($onto_option))
 {
-    $onto_option = Amling::GRD::Utils::convert_commitlike($onto_option);
+    $onto_option = Amling::Git::Utils::convert_commitlike($onto_option);
 }
 
 my @scripts;
 my $onto_final;
 for my $spec (@specs)
 {
-    my ($ok, $base, $lines) = Amling::GRD::Operation::parse($spec);
+    my ($ok, $base, $lines) = Amling::Git::GRD::Operation::parse($spec);
     if(!$ok)
     {
         die "Could not parse operation $spec";
@@ -96,7 +97,7 @@ if(!defined($onto_final))
     usage(1);
 }
 
-Amling::GRD::Utils::run_shell(0, 0, 0);
+Amling::Git::GRD::Utils::run_shell(0, 0, 0);
 
 my $lines = [];
 if(@scripts == 1)
@@ -115,16 +116,16 @@ else
     }
 }
 
-my @commands = @{Amling::GRD::Parser::edit_loop($lines, $skip_edit)};
+my @commands = @{Amling::Git::GRD::Parser::edit_loop($lines, $skip_edit)};
 unless(@commands)
 {
     print "Nothing to do.\n";
     exit 0;
 }
 
-my $ctx = Amling::GRD::Exec::Context->new();
+my $ctx = Amling::Git::GRD::Exec::Context->new();
 
-Amling::GRD::Utils::run("git", "checkout", $onto_final) || die "Cannot checkout $onto_final";
+Amling::Git::GRD::Utils::run("git", "checkout", $onto_final) || die "Cannot checkout $onto_final";
 
 my $ct = scalar(@commands);
 my $n = 1;
@@ -143,7 +144,7 @@ for my $command (@commands)
         # TODO: backup option...
         print "Updating: $branch => " . $branches->{$branch} . "\n";
         # TODO: better reason
-        Amling::GRD::Utils::run("git", "update-ref", "-m", "GRD", "refs/heads/$branch", $branches->{$branch}) || die "Cannot update $branch";
+        Amling::Git::GRD::Utils::run("git", "update-ref", "-m", "GRD", "refs/heads/$branch", $branches->{$branch}) || die "Cannot update $branch";
     }
 }
 
@@ -156,12 +157,12 @@ for my $command (@commands)
         if($type == 0)
         {
             print "Leaving detached head at $v1.\n";
-            Amling::GRD::Utils::run("git", "checkout", $v1) || die "Cannot checkout $v1";
+            Amling::Git::GRD::Utils::run("git", "checkout", $v1) || die "Cannot checkout $v1";
         }
         elsif($type == 1)
         {
             print "Leaving head at branch $v1.\n";
-            Amling::GRD::Utils::run("git", "checkout", $v1) || die "Cannot checkout $v1";
+            Amling::Git::GRD::Utils::run("git", "checkout", $v1) || die "Cannot checkout $v1";
         }
         else
         {

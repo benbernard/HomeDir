@@ -63,3 +63,144 @@ bind ^L escape "^Ll"
 #turn on logging
 # log on
 #logfile ~/.screen/output/screenlog
+
+
+# Register binds
+# Read default into a register
+bind W command -c pushmap
+bind -c pushmap a readreg a
+bind -c pushmap b readreg b
+bind -c pushmap c readreg c
+bind -c pushmap d readreg d
+bind -c pushmap e readreg e
+bind -c pushmap f readreg f
+bind -c pushmap g readreg g
+bind -c pushmap h readreg h
+bind -c pushmap i readreg i
+bind -c pushmap j readreg j
+bind -c pushmap k readreg k
+bind -c pushmap l readreg l
+bind -c pushmap m readreg m
+bind -c pushmap n readreg n
+bind -c pushmap o readreg o
+bind -c pushmap p readreg p
+bind -c pushmap q readreg q
+bind -c pushmap r readreg r
+bind -c pushmap s readreg s
+bind -c pushmap t readreg t
+bind -c pushmap u readreg u
+bind -c pushmap v readreg v
+bind -c pushmap w readreg w
+bind -c pushmap x readreg x
+bind -c pushmap y readreg y
+bind -c pushmap z readreg z
+
+# Paste to default register
+bind R command -c popmap
+bind -c popmap a paste a .
+bind -c popmap b paste b .
+bind -c popmap c paste c .
+bind -c popmap d paste d .
+bind -c popmap e paste e .
+bind -c popmap f paste f .
+bind -c popmap g paste g .
+bind -c popmap h paste h .
+bind -c popmap i paste i .
+bind -c popmap j paste j .
+bind -c popmap k paste k .
+bind -c popmap l paste l .
+bind -c popmap m paste m .
+bind -c popmap n paste n .
+bind -c popmap o paste o .
+bind -c popmap p paste p .
+bind -c popmap q paste q .
+bind -c popmap r paste r .
+bind -c popmap s paste s .
+bind -c popmap t paste t .
+bind -c popmap u paste u .
+bind -c popmap v paste v .
+bind -c popmap w paste w .
+bind -c popmap x paste x .
+bind -c popmap y paste y .
+bind -c popmap z paste z .
+bind -c popmap A paste A .
+bind -c popmap B paste B .
+bind -c popmap C paste C .
+bind -c popmap D paste D .
+bind -c popmap E paste E .
+bind -c popmap F paste F .
+bind -c popmap G paste G .
+bind -c popmap H paste H .
+bind -c popmap I paste I .
+bind -c popmap J paste J .
+bind -c popmap K paste K .
+bind -c popmap L paste L .
+bind -c popmap M paste M .
+bind -c popmap N paste N .
+bind -c popmap O paste O .
+bind -c popmap P paste P .
+bind -c popmap Q paste Q .
+bind -c popmap R paste R .
+bind -c popmap S paste S .
+bind -c popmap T paste T .
+bind -c popmap U paste U .
+bind -c popmap V paste V .
+bind -c popmap W paste W .
+bind -c popmap X paste X .
+bind -c popmap Y paste Y .
+bind -c popmap Z paste Z .
+
+#Paste binds
+bind P command -c pastemap
+bind -c pastemap a paste a
+bind -c pastemap b paste b
+bind -c pastemap c paste c
+bind -c pastemap d paste d
+bind -c pastemap e paste e
+bind -c pastemap f paste f
+bind -c pastemap g paste g
+bind -c pastemap h paste h
+bind -c pastemap i paste i
+bind -c pastemap j paste j
+bind -c pastemap k paste k
+bind -c pastemap l paste l
+bind -c pastemap m paste m
+bind -c pastemap n paste n
+bind -c pastemap o paste o
+bind -c pastemap p paste p
+bind -c pastemap q paste q
+bind -c pastemap r paste r
+bind -c pastemap s paste s
+bind -c pastemap t paste t
+bind -c pastemap u paste u
+bind -c pastemap v paste v
+bind -c pastemap w paste w
+bind -c pastemap x paste x
+bind -c pastemap y paste y
+bind -c pastemap z paste z
+bind -c pastemap A paste A
+bind -c pastemap B paste B
+bind -c pastemap C paste C
+bind -c pastemap D paste D
+bind -c pastemap E paste E
+bind -c pastemap F paste F
+bind -c pastemap G paste G
+bind -c pastemap H paste H
+bind -c pastemap I paste I
+bind -c pastemap J paste J
+bind -c pastemap K paste K
+bind -c pastemap L paste L
+bind -c pastemap M paste M
+bind -c pastemap N paste N
+bind -c pastemap O paste O
+bind -c pastemap P paste P
+bind -c pastemap Q paste Q
+bind -c pastemap R paste R
+bind -c pastemap S paste S
+bind -c pastemap T paste T
+bind -c pastemap U paste U
+bind -c pastemap V paste V
+bind -c pastemap W paste W
+bind -c pastemap X paste X
+bind -c pastemap Y paste Y
+bind -c pastemap Z paste Z

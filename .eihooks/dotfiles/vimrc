@@ -46,11 +46,11 @@
   set helpfile=$VIMRUNTIME/doc/help.txt
   set guifont=Courier\ 10\ Pitch\ 10
   set path+=.,..,../..,../../..,../../../..,/usr/include
-  
+
   " Suffixes that get lower priority when doing tab completion for filenames.
   " These are files I am not likely to want to edit or read.
   set suffixes=.bak,~,.swp,.o,.info,.aux,.log,.dvi,.bbl,.blg,.brf,.cb,.ind,.idx,.ilg,.inx,.out,.toc,.class
-  
+
 "Use a temp directory in the home dir rather than in tmp where it can get
 "cleaned up without our consent
 perl <<EOT
@@ -94,14 +94,14 @@ EOT
 
   "vimspell variables
     "don't automatically spell check!
-    let spell_auto_type=""    
+    let spell_auto_type=""
 
   "taglist.vim settings
   if exists("g:useNinjaTagList") && g:useNinjaTagList == 1
     set updatetime=1000 "interval to update list window
 
     let Tlist_Auto_Open=1 "Auto open the list window
-    let Tlist_Compact_Format=1 
+    let Tlist_Compact_Format=1
     let Tlist_Ctags_Cmd = '/usr/bin/ctags' "Ctags binary to use
     let Tlist_Enable_Fold_Column=0 "Turn off the fold column for list window
     let Tlist_Exit_OnlyWindow=1 "Exit if list is only window
@@ -129,9 +129,6 @@ syntax on
 
 "mappings
   "normal mode maps
-    "Map \pe to editing the file in perforce
-    "nmap <Leader>pe :!PWD=`/apollo/env/envImprovement/bin/realdir %` p4 edit `basename %`<CR>
-
     "Map \e to edit a file from the directory of the current buffer
     if has("unix")
       nmap <Leader>e :e <C-R>=expand("%:p:h") . "/"<CR>
@@ -174,11 +171,11 @@ endif
 "When editing a file, make screen display the name of the file you are editing
 function! SetTitle()
   if $TERM =~ "^screen"
-    let l:title = 'vi: ' . expand('%:t')        
-    
+    let l:title = 'vi: ' . expand('%:t')
+
     if (l:title != 'vi: __Tag_List__')
       let l:truncTitle = strpart(l:title, 0, 15)
-      silent exe '!echo -e -n "\033k' . l:truncTitle . '\033\\"'     
+      silent exe '!echo -e -n "\033k' . l:truncTitle . '\033\\"'
     endif
   endif
 endfunction

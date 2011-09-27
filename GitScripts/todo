@@ -36,3 +36,6 @@ GBD (git-bisect-of-doom)
         operation: init <bad> [<good>*]
         operation: winit <perl> <bad> [<good>*]
             would require better argument parsing in interactive mode than I was planning on...
+github pull requester
+    worked: curl -n -d '{"title":"Please pull upstream/20110915-typo-fix","base":"8e90ecf3b8edae14b1b34663a7e0298040bf6435","head":"5a9814923942b2099862aa6503c8af8bd7b3e7d9"}' 'https://api.github.com/repos/benbernard/RecordStream/pulls'
+    also worked: curl -n -d '{"title":"Please pull upstream/20110915-other-doc","base":"benbernard:master","head":"amling:upstream/20110915-other-doc"}' 'https://api.github.com/repos/benbernard/RecordStream/pulls'

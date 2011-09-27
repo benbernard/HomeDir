@@ -5,26 +5,12 @@ $| = 1;
 use strict;
 use warnings;
 
-use Cwd ('abs_path');
-use File::Basename;
+use Amling::Git::Utils;
 
-my $root = abs_path();
-if(!defined($root))
+my $root = Amling::Git::Utils::find_root(1);
+if(!$root)
 {
-    bail("Cannot get current directory!");
-}
-
-while(1)
-{
-    if(-d "$root/.git")
-    {
-        last;
-    }
-    if($root eq "/")
-    {
-        bail("Cannot findup .git for repo root");
-    }
-    $root = dirname($root);
+    bail("Cannot find root?");
 }
 
 open(my $head_fh, "<", "$root/.git/HEAD") || bail("Cannot open HEAD: $!");

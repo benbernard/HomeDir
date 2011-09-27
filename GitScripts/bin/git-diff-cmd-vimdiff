@@ -5,8 +5,9 @@ $| = 1;
 use strict;
 use warnings;
 
-use Cwd ('abs_path');
 use File::Basename;
+
+use Amling::Git::Utils;
 
 my ($path, $file1, $hash1, $mode1, $file2, $hash2, $mode2) = @ARGV;
 
@@ -16,19 +17,7 @@ my ($path, $file1, $hash1, $mode1, $file2, $hash2, $mode2) = @ARGV;
 my $rm = 0;
 if($file2 eq "/dev/null")
 {
-    my $root = abs_path();
-    while(1)
-    {
-        if(-d "$root/.git")
-        {
-            last;
-        }
-        if($root eq "/")
-        {
-            die "Cannot findup .git for repo root";
-        }
-        $root = dirname($root);
-    }
+    my $root = Amling::Git::Utils::find_root();
 
     $file2 = "$root/$path";
     system("mkdir", "-p", "--", dirname($file2));

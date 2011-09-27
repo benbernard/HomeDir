@@ -5,24 +5,11 @@ $| = 1;
 use strict;
 use warnings;
 
-use Cwd ('abs_path');
-use File::Basename;
+use Amling::Git::Utils;
 
 my $type = shift || die "No type?";
 
-my $root = abs_path();
-while(1)
-{
-    if(-d "$root/.git")
-    {
-        last;
-    }
-    if($root eq "/")
-    {
-        die "Cannot findup .git for repo root";
-    }
-    $root = dirname($root);
-}
+my $root = Amling::Git::Utils::find_root();
 
 my $judger = '{}';
 my $spec_file = "$root/.git/branch-types";

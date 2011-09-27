@@ -5,9 +5,9 @@ $| = 1;
 use strict;
 use warnings;
 
-use Cwd ('abs_path');
-use File::Basename;
 use Getopt::Long;
+
+use Amling::Git::Utils;
 
 # TODO: allow custom metadata per match (derived from filename, line number, or matched line) (where would this be stored?  in the DB?)
 # TODO: allow match against custom metadata
@@ -31,19 +31,7 @@ GetOptions(@options) || usage(1);
 # STEP 0: find/read config
 if(!defined($config_file))
 {
-    my $root = abs_path();
-    while(1)
-    {
-        if(-d "$root/.git")
-        {
-            last;
-        }
-        if($root eq "/")
-        {
-            die "Cannot findup .git for repo root";
-        }
-        $root = dirname($root);
-    }
+    my $root = Amling::Git::Utils::find_root();
 
     $config_file = "$root/.git/git-tagulator.cfg";
 }

@@ -5,23 +5,9 @@ $| = 1;
 use strict;
 use warnings;
 
-use Cwd ('abs_path');
-use File::Basename;
+use Amling::Git::Utils;
 
-my $root = abs_path();
-
-while(1)
-{
-    if(-d "$root/.git")
-    {
-        last;
-    }
-    if($root eq "/")
-    {
-        die "Cannot findup .git for repo root";
-    }
-    $root = dirname($root);
-}
+my $root = Amling::Git::Utils::find_root();
 
 open(my $ls_fh, '-|', 'git', 'ls-remote', '-h', "$root/.git/archive-repo") || die "Cannot open ls-remote: $!";
 while(my $l = <$ls_fh>)

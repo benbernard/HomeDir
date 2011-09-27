@@ -36,13 +36,23 @@ $dir =~ s/\.tar\.gz$//;
 
 chdir $dir;
 
-run_command('dh-make-perl --depends gnuplot .');
+run_command('dh-make-perl -e ppa@benjaminbernard.com --arch all --depends gnuplot -i \'.*/fast-recs-collate/.*\'');
+
+if ($?) {
+   die "failed running dh-make-perl!";
+}
+
 run_command('sed -e \'s/perl\///g\' -i debian/control');
-run_command('debuild -i -us -uc -b');
+run_command('debuild -i -us -uc -A -b');
+
+if ($?) {
+   die "failed running debuild!";
+}
 
 chdir '..';
 
 my $deb = find_one_glob('*.deb');
+run_command("cp $deb ../");
 run_command("cp $deb ../libapp-recordstream.deb");
 
 sub cleanup {

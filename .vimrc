@@ -33,9 +33,9 @@ filetype plugin on          "turns on filetype plugin, lets matchit work well
 colorscheme zellner         "changes color scheme to something that looks decent on the mac
 
 " Set the vim info options
-" In order: local marks for N files are saved, global marks are saved, 
+" In order: local marks for N files are saved, global marks are saved,
 " a maximum of 500 lines for each register is saved,
-" command history number, search history number, 
+" command history number, search history number,
 " restore the buffer list and restore global variables
 
 "if so that older versions of vim won't barf on standard systems
@@ -95,16 +95,16 @@ au FileType c,cpp set cinkeys+=0#
 "rcsvers.vim settings
   let g:rvSaveDirectoryType = 1 "Use single directory for all files
   let g:rvSaveDirectoryName = "$HOME/.vim/RCSFiles/" "Place to save RCS files
-  
+
   "Setup exlcude expressions for rcs
   "1. Mutt mail files
   "2. p4 submit descriptions
   "3. tmp files from perforce form commands
-  let g:rvExcludeExpression = 'muttng-bernard-\d\+\|p4submitdesc\.txt\|\/tmp\.\d\+\.\d\+' 
+  let g:rvExcludeExpression = 'muttng-bernard-\d\+\|p4submitdesc\.txt\|\/tmp\.\d\+\.\d\+'
 
   let g:rvRlogOptions = '-zLT' "Display log in local timezone
 
-"YankRing settings... 
+"YankRing settings...
   "Don't remap <C-N> and <C-P>
   let g:yankring_replace_n_pkey = '<F3>'
   let g:yankring_replace_n_nkey = '<F2>'
@@ -126,12 +126,16 @@ au FileType c,cpp set cinkeys+=0#
 " Large file settings
   let g:LargeFile = 2
 
+" EasyMotion settings
+  " Use - as the leader for EasyMotion
+  let g:EasyMotion_leader_key = '-'
+
 """"""""""""""" Command mappings """"""""""""""""
 
 "Map statements
   "map comma to yank to mark a
-  map , y'a 
-  
+  map , y'a
+
   "map the buff explorer open key
   map <F8> \be
 
@@ -142,7 +146,7 @@ au FileType c,cpp set cinkeys+=0#
   " Next Line Doesn't work, why not?
   "noremap <Shift-Enter> O<ESC>j
   "nmap <Enter> o<ESC>k
-  
+
   "Use EnhancedCommentify for commenting
   noremap <silent> - :call EnhancedCommentify('no', 'comment')<CR>j
   noremap <silent> _ :call EnhancedCommentify('no', 'decomment')<CR>j
@@ -152,13 +156,13 @@ au FileType c,cpp set cinkeys+=0#
   "map control arrow to move between buffers
   nmap <C-n> :bn<CR>
   nmap <C-p> :bp<CR>
-  
+
   "map ctrl-e to edit file in perforce
   nmap <C-E> :!p4 edit %<CR>
 
   "map ctrl-w to make file writable
   nmap <C-W> :!chmod +w %<CR>
-  
+
   "map ctrl-c to chmod +w current file
   nmap <C-C> :r /var/tmp/clipboard-bernard<CR>
 
