@@ -23,8 +23,6 @@ augroup filetypedetect
 
   autocmd BufReadPost *.wiki       setfiletype Wikipedia " for use with wikiUtil
 
-  autocmd BufReadPost *.spt        setfiletype cheetah " for use with wikiUtil
-
   " Discover perforce type from first line of the file
   autocmd BufReadPost *  if getline(1) =~ '^# A Perforce .* Specification.'
   autocmd BufReadPost *    setfiletype perforce
