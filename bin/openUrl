@@ -1,8 +1,9 @@
 #!/usr/bin/perl
 # vim: set ft=perl :
 
-$ENV{DISPLAY} = ':0.0';
+use FindBin qw($Bin); use lib $Bin . "/perl/lib";;
+use UrlOpener;
 
 my $url = shift;
 
-exec('/usr/bin/firefox', $url);
+UrlOpener::open_url($url);
