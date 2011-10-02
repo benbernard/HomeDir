@@ -40,8 +40,10 @@ fi
 
 #Setup completion functions
 #FPATH=/usr/local/share/zsh/4.2.0/functions
-fpath=(~/.zshfuncs $fpath)
-autoload -U ~/.zshfuncs/*(:t)
+if [[ -d ~/.zshfuncs ]]; then
+  fpath=(~/.zshfuncs $fpath)
+  autoload -U ~/.zshfuncs/*(:t)
+fi
 
 # Add setup for Recs and GitScripts
 export PATH=$PATH:$HOME/RecordStream/bin:$HOME/GitScripts/bin
