@@ -29,11 +29,17 @@ sub init {
    $this->{'ELEMENTS'} = { map { $_ => 1 } @elements };
    $this->{'NESTED'}   = $nested;
 
-   my $has_files = scalar @{$this->_get_extra_args()};
+   my $has_files = scalar @$args;
    $this->{'HAS_URIS'} = $has_files;
+
+   $this->{'EXTRA_ARGS'} = $args;
 }
 
-sub run_operation {
+sub wants_input {
+   return 0;
+}
+
+sub stream_done {
    my $this = shift;
 
    my $elements = $this->{'ELEMENTS'};
@@ -107,13 +113,14 @@ sub push_value {
 sub get_xml_string {
    my $this = shift;
 
-   my $uris = $this->_get_extra_args();
+   my $uris = $this->{'EXTRA_ARGS'};
 
    my $contents;
    if ( $this->{'HAS_URIS'} ) {
       return undef unless ( @$uris );
 
       my $uri = shift @$uris;
+      $this->update_current_filename($uri);
 
       my $ua = $this->make_user_agent();
       my $response = $ua->request($this->get_request($uri));
@@ -149,15 +156,23 @@ sub make_user_agent {
 }
 
 sub usage {
+   my $this = shift;
+
+   my $options = [
+      [ 'elements <elements>', 'May be comma separated, may be specified multiple times.  Sets the elements to print records for'],
+      [ 'nested', 'search for elements at all levels of the xml document'],
+   ];
+
+   my $args_string = $this->options_string($options);
+
    return <<USAGE;
 Usage: recs-fromxml <args> [<URIs>]
+   __FORMAT_TEXT__
    Reads either from STDIN or from the specified URIs.  Parses the xml
    documents, and creates records for the specified elements
+   __FORMAT_TEXT__
 
-   --elements <elements> - May be comma separated, may be specified multiple
-                           times.  Sets the elements to print records for
-   --nested              - search for elements at all levels of the xml
-                           document
+$args_string
 
 Examples:
    Create records for the bar element at the top level of myXMLDoc

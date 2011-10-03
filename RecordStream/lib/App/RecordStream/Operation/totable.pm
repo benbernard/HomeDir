@@ -5,7 +5,7 @@ our $VERSION = "3.4";
 use strict;
 use warnings;
 
-use base qw(App::RecordStream::Accumulator App::RecordStream::Operation App::RecordStream::ScreenPrinter);
+use base qw(App::RecordStream::Accumulator App::RecordStream::Operation);
 
 use App::RecordStream::OutputStream;
 
@@ -39,7 +39,6 @@ sub init {
    $this->{'DELIMITER'}     = $delimiter;
    $this->{'SPREADSHEET'}   = $spreadsheet;
    $this->{'CLEAR'}         = $clear;
-   $this->{'OUTPUT_STREAM'} = App::RecordStream::OutputStream->new();
 }
 
 sub stream_done {
@@ -72,36 +71,36 @@ sub stream_done {
    $this->{'FIELDS'} = $fields;
 
    if(!$no_header) {
-      $this->print_value(
+      $this->push_line(
          $this->format_row(
             $fields,
             \%widths,
             sub { return $_[1]; },
             ""
-         ) . "\n"
+         )
       );
 
       if ( ! $this->{'SPREADSHEET'} ) {
-         $this->print_value(
+         $this->push_line(
             $this->format_row(
                $fields,
                \%widths,
                sub { return ("-" x $widths{$_[1]}); },
                ""
-            ) . "\n"
+            )
          );
       }
    }
 
    my %last = map { $_ => "" } (keys(%widths));
    foreach my $record (@$records) {
-      $this->print_value(
+      $this->push_line(
          $this->format_row(
             $fields,
             \%widths,
             \&format_field,
             [$record, \%last]
-         ) . "\n"
+         )
       );
    }
 }
@@ -116,7 +115,7 @@ sub format_field
 
    if ( ref($value) )
    {
-      $value = $this->{'OUTPUT_STREAM'}->hashref_string($value);
+      $value = App::RecordStream::OutputStream::hashref_string($value);
    }
 
    if($this->{'CLEAR'})
@@ -205,7 +204,7 @@ sub extract_field {
 
    if ( ref($value) )
    {
-      $value = $this->{'OUTPUT_STREAM'}->hashref_string($value);
+      $value = App::RecordStream::OutputStream::hashref_string($value);
    }
 
    return $value;
@@ -219,23 +218,26 @@ sub add_help_types {
 }
 
 sub usage {
+   my $this = shift;
+
+   my $options = [
+      ['no-header|n', 'Do not print column headers'],
+      ['key|k <field name>', 'May be comma separated, may be specified multiple times.  Specifies the fields to put in the table.  May be a keyspec or a keygroup, see --help-keys'],
+      ['spreadsheet', 'Print out in a format suitable for excel.  1. Does not print line of -s after header 2. Separates by single character rather than series of spaces'],
+      ['delimiter <string>', 'Only useful with --spreadsheet, delimit with <string> rather than the default of a tab'],
+      ['clear', 'Put blanks in cells where all of the row so far matches the row above.'],
+   ];
+
+   my $args_string = $this->options_string($options);
+
    return <<USAGE;
 Usage: recs-totable <args> [<files>]
+   __FORMAT_TEXT__
    Pretty prints a table of records to the screen.  Will read in the entire
    record stream to determine column size, and number of columns
+   __FORMAT_TEXT__
 
-   --no-header|n           Do not print column headers
-   --key|k <field name>    May be comma separated, may be specified multiple
-                           times.  Specifies the fields to put in the table.
-                           May be a keyspec or a keygroup, see --help-keys
-   --spreadsheet           Print out in a format suitable for excel.
-                           1. Does not print line of -s after header
-                           2. Separates by single character rather than series
-                               of spaces
-   --delimiter <string>    Only useful with --spreadsheet, delimit with
-                           <string> rather than the default of a tab
-   --clear                 Put blanks in cells where all of the row so far
-                           matches the row above.
+$args_string
 
 Examples:
    Display a table

@@ -1,20 +1,31 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl
 
 use strict;
+use warnings;
 require 'BuildTools.recbuildtool';
 use File::Glob qw(glob);
+use Getopt::Long;
+
+my $make_cpan = 1;
+my $all       = 1;
+my $clean     = 0;
+
+GetOptions(
+   '--just-cpan' => sub { $all = 0; $make_cpan=1 },
+   '--clean'     => \$clean,
+);
 
 my $DIST_DIR = 'deb-dist';
 
 my $CLEAN_COMMANDS = {
-   debian    => 'rm -rf debian',
+   #debian    => 'rm -rf debian',
    Makefile  => 'make clean',
    $DIST_DIR => "rm -rf $DIST_DIR",
 };
 
 cleanup($CLEAN_COMMANDS);
 
-if ( $ARGV[0] && $ARGV[0] eq '--clean' ) {
+if ( $clean ) {
    print "Clean only, bailing!\n";
    exit 0;
 }
@@ -22,7 +33,6 @@ if ( $ARGV[0] && $ARGV[0] eq '--clean' ) {
 run_command('./generate_manifest.sh');
 run_command('perl Makefile.PL');
 run_command('make dist');
-
 
 my $tar = find_one_glob('App-RecordStream-*.tar.gz');
 
@@ -33,6 +43,8 @@ run_command("tar -xzvf $tar");
 
 my $dir = $tar;
 $dir =~ s/\.tar\.gz$//;
+
+exit 0 if (!$all);
 
 chdir $dir;
 

@@ -29,7 +29,7 @@ sub init {
    Getopt::Long::Configure('no_ignore_case');
    $this->parse_options($args, $spec);
 
-   my $expression = $executor_options->get_string($this->_get_extra_args());
+   my $expression = $executor_options->get_string($args);
    my $executor = App::RecordStream::Executor->new($expression);
 
    $this->{'ANTI_MATCH'} = $anti_match;
@@ -83,6 +83,8 @@ sub accept_record {
      $this->push_record($record);
      $this->{'FORCED_OUTPUT'}--;
    }
+
+   return 1;
 }
 
 sub stream_done {
@@ -97,19 +99,28 @@ sub add_help_types {
 }
 
 sub usage {
+   my $this = shift;
+
+   my $options = [
+      ['v', 'Anti-match.  Records NOT matching <expr> will be returned'],
+      ['C NUM', 'Provide NUM records of context around matches, equivalent to -A NUM and -B NUM'],
+      ['A NUM', 'Print out NUM following records after a match'],
+      ['B NUM', 'Print out the previous NUM records on a match'],
+   ];
+
+   my $args_string = $this->options_string($options);
+
    return <<USAGE;
 Usage: recs-grep <args> <expr> [<files>]
+   __FORMAT_TEXT__
    <expr> is evaluated as perl on each record of input (or records from
    <files>) with \$r set to a App::RecordStream::Record object and \$line set to the current
    line number (starting at 1).  Records for which the evaluation is a perl
    true are printed back out.
+   __FORMAT_TEXT__
 
 Arguments:
-   -v       Anti-match.  Records NOT matching <expr> will be returned
-   -C NUM   Provide NUM records of context around matches, 
-            equivalent to -A NUM and -B NUM
-   -A NUM   Print out NUM following records after a match
-   -B NUM   Print out the previous NUM records on a match
+$args_string
 
 Examples:
    Filter to records with field 'name' equal to 'John'

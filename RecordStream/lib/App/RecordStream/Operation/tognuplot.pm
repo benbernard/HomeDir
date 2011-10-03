@@ -5,7 +5,7 @@ our $VERSION = "3.4";
 use strict;
 use warnings;
 
-use base qw(App::RecordStream::Operation App::RecordStream::ScreenPrinter);
+use base qw(App::RecordStream::Operation);
 
 use File::Temp qw(tempfile);
 
@@ -136,17 +136,20 @@ sub accept_record {
    my $line = '';
    foreach my $key (@{$this->{'FIELDS'}}) {
       my $value = ${$record->guess_key_from_spec($key)};
+      $value = 0 if not defined $value;
       $line .= "$value ";
    }
 
    chop $line;
    if ( $this->{'DUMP_TO_SCREEN'} ) {
-      $this->print_value($line . "\n");
+      $this->push_line($line);
    }
    else {
       my $tempfh = $this->{'TEMPFH'};
       print $tempfh $line . "\n";
    }
+
+   return 1;
 }
 
 sub stream_done {
@@ -211,7 +214,7 @@ CMDS
    $plot_script .= $plot_cmd;
 
    if ( $this->{'DUMP_TO_SCREEN'} ) {
-      $this->print_value($plot_script . "\n");
+      $this->push_line($plot_script);
    }
    else {
       open(my $plot, '|-', $this->{'GNUPLOT_COMMAND'});
@@ -225,7 +228,7 @@ CMDS
       return;
    }
 
-   $this->print_value("Wrote graph file: " . $this->{'PNG_FILE'} . "\n");
+   $this->push_line("Wrote graph file: " . $this->{'PNG_FILE'});
 }
 
 sub DESTROY {
@@ -248,8 +251,26 @@ sub add_help_types {
 }
 
 sub usage {
+   my $this = shift;
+
+   my $options = [
+      ['key|-k <keys>', 'May be specified multiple times, may be comma separated.  These are the keys to graph.  If you have more than 2 keys, you must specify a --using statement or use --bargraph or --lines May be a keyspec or keygroup, see \'--help-keys\' for more information'],
+      ['using <using spec>', 'A \'using\' string passed directly to gnuplot, you can use keys specified with --key in the order specified.  For instance --key count,date,avg with --using \'3:2\' would plot avg vs. date.  May be specified multiple times'],
+      ['plot <plot spec>', 'May be specified multiple times, may be comma separated.  A directive passed directly to plot, e.g. --plot \'5 title "threshold"\''],
+      ['precommand <gnuplot spec>', 'May be specified multiple times, may be comma separated.  A command executed by gnuplot before executing plot, e.g. --precommand \'set xlabel "foo"\''],
+      ['title <title>', 'Specify a title for the entire graph'],
+      ['label <label>', 'Labels each --using line with the indicated label'],
+      ['file <filename>', 'Name of output png file.  Will append .png if not present Defaults to tognuplot.png'],
+      ['lines', 'Draw lines between points, may specify more than 2 key, each field is a line'],
+      ['bargraph', 'Draw a bar graph, each field is a bar, may specify than 2 key, each field is a bar'],
+      ['gnuplot-command', 'Location of gnuplot binary if not on path'],
+   ];
+
+   my $args_string = $this->options_string($options);
+
    return <<USAGE;
 Usage: recs-tognuplot <args> [<files>]
+   __FORMAT_TEXT__
    Create a graph of points from a record stream using GNU Plot. Defaults to
    creatinga scatterplot of points, can also create a bar or line graph
 
@@ -257,34 +278,10 @@ Usage: recs-tognuplot <args> [<files>]
    tutorial, though it can get quite complex, here is one example:
 
    http://www.gnuplot.info/docs/node100.html
+   __FORMAT_TEXT__
 
 Arguments:
-   --key|-k <keys>                May be specified multiple times, may be
-                                  comma separated.  These are the keys to graph.  If you
-                                  have more than 2 keys, you must specify a --using
-                                  statement or use --bargraph or --lines
-                                  May be a keyspec or keygroup, see
-                                  '--help-keys' for more information
-   --using <using spec>           A 'using' string passed directly to gnuplot,
-                                  you can use keys specified with --key in the order
-                                  specified.  For instance --key count,date,avg with
-                                  --using '3:2' would plot avg vs. date.  May be
-                                  specified multiple times
-   --plot <plot spec>             May be specified multiple times, may be comma separated.
-                                  A directive passed directly to plot,
-                                  e.g. --plot '5 title "threshold"'
-   --precommand <gnuplot spec>    May be specified multiple times, may be comma separated.
-                                  A command executed by gnuplot before executing plot,
-                                  e.g. --precommand 'set xlabel "foo"'
-   --title <title>                Specify a title for the entire graph
-   --label <label>                Labels each --using line with the indicated label
-   --file <filename>              Name of output png file.  Will append .png if not
-                                  present Defaults to tognuplot.png
-   --lines                        Draw lines between points, may specify more
-                                  than 2 key, each field is a line
-   --bargraph                     Draw a bar graph, each field is a bar, may specify
-                                  than 2 key, each field is a bar
-   --gnuplot-command              Location of gnuplot binary if not on path
+$args_string
 
    Graph the count field
       recs-tognuplot --field count

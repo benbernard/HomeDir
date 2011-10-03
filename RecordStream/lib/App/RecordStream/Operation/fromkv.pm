@@ -10,7 +10,6 @@ use strict;
 use warnings;
 
 use Getopt::Long;
-use App::RecordStream::OutputStream;
 
 sub init {
    my $this = shift;
@@ -34,7 +33,11 @@ sub init {
 }
 
 
-sub run_operation {
+sub wants_input {
+   return 0;
+}
+
+sub stream_done {
    my $this = shift;
 
    my $kv_delim     = $this->{'KV_DELIM'};
@@ -46,6 +49,7 @@ sub run_operation {
          local $/ = $record_delim;
          chomp $line;
       }
+      $this->update_current_filename($ARGV);
 
       # trim trailing and leading whitespace from record
       $line =~ s/^\s+|\s+$//g;
@@ -75,16 +79,26 @@ sub read_until {
 
 sub usage
 {
+   my $this = shift;
+
+   my $options = [
+      [ 'record-delim|r <delim>', 'Delimiter to for separating records (defaults to "END\\n").'],
+      [ 'entry-delim|e  <delim>', 'Delimiter to for separating entries within records (defaults to "\\n").'],
+      [ 'kv-delim|f <delim>', 'Delimiter to for separating key/value pairs within an entry (defaults to " ").'],
+   ];
+
+   my $args_string = $this->options_string($options);
+
    return <<USAGE;
 Usage : recs-fromkv <args> [<files>]
-  Records are generated from charactr input with the form "<record><record-delim><record>...".
-  Records have the form "<entry><entry-delim><entry>...".  Entries are pairs of the form
-  "<key><kv-delim><value>".
+   __FORMAT_TEXT__
+   Records are generated from charactr input with the form "<record><record-delim><record>...".
+   Records have the form "<entry><entry-delim><entry>...".  Entries are pairs of the form
+   "<key><kv-delim><value>".
+   __FORMAT_TEXT__
 
 Arguments:
-  --record-delim|r <delim>   Delimiter to for separating records (defaults to "END\\n").
-  --entry-delim|e  <delim>   Delimiter to for separating entries within records (defaults to "\\n").
-  --kv-delim|f   <delim>     Delimiter to for separating key/value pairs within an entry (defaults to " ").
+$args_string
 
 Examples:
   Parse memcached stat metrics into records

@@ -5,6 +5,9 @@ $| = 1;
 use strict;
 use warnings;
 
+use FindBin;
+use lib "$FindBin::RealBin/../libs";
+
 use Getopt::Long;
 
 use Amling::Git::Utils;

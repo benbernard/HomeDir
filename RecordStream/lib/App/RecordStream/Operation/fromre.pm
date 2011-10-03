@@ -15,10 +15,10 @@ sub init {
    );
 
    $this->parse_options($args, \%options);
-   if(!@{$this->_get_extra_args()}) {
+   if(!@$args) {
       die "Missing expression\n";
    }
-   $this->_set_pattern(shift @{$this->_get_extra_args()});
+   $this->_set_pattern(shift @$args);
 }
 
 sub _set_pattern {
@@ -48,25 +48,23 @@ sub get_field {
    }
 }
 
-sub run_operation {
-   my ($this) = @_;
+sub accept_line {
+   my $this = shift;
+   my $line = shift;
 
-   local @ARGV = @{$this->_get_extra_args()};
-   while(my $line = <>) {
-      chomp $line;
+   if(my @groups = ($line =~ $this->get_pattern())) {
+      my $record = App::RecordStream::Record->new();
+      my $index = 0;
 
-      if(my @groups = ($line =~ $this->get_pattern())) {
-         my $record = App::RecordStream::Record->new();
-         my $index = 0;
-
-         foreach my $value (@groups) {
-            ${$record->guess_key_from_spec($this->get_field($index))} =  $value;
-            ++$index;
-         }
-
-         $this->push_record($record);
+      foreach my $value (@groups) {
+         ${$record->guess_key_from_spec($this->get_field($index))} =  $value;
+         ++$index;
       }
+
+      $this->push_record($record);
    }
+
+   return 1;
 }
 
 sub add_help_types {
@@ -75,18 +73,27 @@ sub add_help_types {
 }
 
 sub usage {
+   my $this = shift;
+
+   my $options = [
+      [ 'key|-k <key>', 'Comma separated list of key names.  May be specified multiple times. may be a key spec, see \'man recs\' for more'],
+   ];
+
+   my $args_string = $this->options_string($options);
+
    return <<USAGE;
 Usage: recs-fromre <args> <re> [<files>]
+   __FORMAT_TEXT__
    <re> is matched against each line of input (or lines of <files>).  Each
    successfully match results in one output record whose field values are the
    capture groups from the match.  Lines that do not match are ignored.  Keys
    are named numerically (0, 1, etc.) or as given by --key.
 
    For spliting on a delimeter, see recs-fromsplit.
+   __FORMAT_TEXT__
 
 Arguments:
-   --key|-k <key>   Comma separated list of key names.  May be specified multiple times.
-                    may be a key spec, see 'man recs' for more
+$args_string
 
 Examples:
    Parse greetings

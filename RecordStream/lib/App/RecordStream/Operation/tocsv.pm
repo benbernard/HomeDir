@@ -4,7 +4,7 @@ our $VERSION = "3.4";
 
 use strict;
 
-use base qw(App::RecordStream::Operation App::RecordStream::ScreenPrinter);
+use base qw(App::RecordStream::Operation);
 
 use App::RecordStream::Record;
 use Text::CSV;
@@ -24,7 +24,7 @@ sub init {
    $this->{'KEY_GROUPS'} = $key_groups;
 
    # Extra arguments are to handle new lines in field values
-   $this->{'CSV'}     = Text::CSV->new({ binary => 1, eol => $/ });
+   $this->{'CSV'}     = Text::CSV->new({ binary => 1 });
 
    $this->{'FIRST'}   = 1;
    $this->{'HEADERS'} = $header;
@@ -55,6 +55,8 @@ sub accept_record {
    }
 
    $this->output_values(\@values);
+
+   return 1;
 }
 
 sub output_values {
@@ -63,7 +65,7 @@ sub output_values {
 
    my $csv = $this->{'CSV'};
    $csv->combine(@$values);
-   $this->print_value($csv->string());
+   $this->push_line($csv->string());
 }
 
 sub add_help_types {
@@ -74,15 +76,23 @@ sub add_help_types {
 }
 
 sub usage {
+   my $this = shift;
+
+   my $options = [
+      ['noheader|--nh', 'Do not output headers on the first line'],
+      ['key|-k <keyspec>', 'Comma separated keys to output.  Defaults to all fields in first record.  May be a keyspec, may be a keyspec group'],
+   ];
+
+   my $args_string = $this->options_string($options);
+
    return <<USAGE;
 Usage: recs-tocsv <options> [files]
-  This script outputs csv formatted recs.
+   __FORMAT_TEXT__
+   This script outputs csv formatted recs.
+   __FORMAT_TEXT__
 
 Arguments:
-   --noheader|--nh    Do not output headers on the first line
-   --key|-k <keyspec> Comma separated keys to output.  Defaults to all
-                      fields in first record.  May be a keyspec, may be a
-                      keyspec group
+$args_string
 
 Examples
   # Print records to csv format with headers

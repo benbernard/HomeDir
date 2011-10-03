@@ -26,6 +26,7 @@ sub init {
    my $size = undef;
    my $cube = 0;
    my $cube_default = "ALL";
+   my $ignore_null_keys = 0;
    my $incremental = 0;
    my $list_aggregators = 0;
    my $aggregator = 0;
@@ -36,6 +37,7 @@ sub init {
    my $spec = {
       "key|k=s"           => sub { $key_groups->add_groups($_[1]); },
       "dlkey=s"           => sub { build_dlkey(\%dlkeys, $_[1]); },
+      "ignore-null"       => \$ignore_null_keys,
       "aggregator|a=s"    => sub { push @aggregators, split(/:/, $_[1]); },
       "dlaggregator=s"    => sub { build_dlaggregator(\%dlaggregators, $_[1]); },
       "size|sz|n=i"       => \$size,
@@ -70,6 +72,7 @@ sub init {
 
    $this->{'KEY_GROUPS'}         = $key_groups;
    $this->{'DLKEYS'}             = \%dlkeys;
+   $this->{'IGNORE_NULL'}        = $ignore_null_keys;
    $this->{'AGGREGATORS'}        = $aggregator_objects;
    $this->{'SIZE'}               = $size;
    $this->{'CUBE'}               = $cube;
@@ -106,7 +109,7 @@ sub build_dlaggregator {
       die "Bad domain language aggregator option: " . $string;
    }
 
-   $dlaggregators_ref->{$name} = App::RecordStream::DomainLanguage::Snippet->new($string)->evaluate_as('AGG');
+   $dlaggregators_ref->{$name} = App::RecordStream::DomainLanguage::Snippet->new($string)->evaluate_as('AGGREGATOR');
 }
 
 sub accept_record {
@@ -120,12 +123,23 @@ sub accept_record {
 
    my $record_keys = $this->get_keys($record);
 
+   if ( $this->{'IGNORE_NULL'} ) {
+      for (my $i = 0; $i < @{$this->{'KEYS'}}; $i++) {
+         my $key = @{$this->{'KEYS'}}[$i];
+         if (!defined(@{$record_keys}[$i])) {
+            @{$record_keys}[$i] = "";
+         }
+      }
+   }
+
    if ( $this->{'CUBE'} ) {
       $this->deep_put([], $record_keys, $record);
    }
    else {
       $this->put($record_keys, $record);
    }
+
+   return 1;
 }
 
 sub canonicalize {
@@ -167,6 +181,7 @@ sub put {
    my $value = $lru_sheriff->find($key);
 
    my $aggregator_values;
+
 
    if ( !$value ) {
       $aggregator_values = App::RecordStream::Aggregator::map_initial($aggregators);
@@ -278,34 +293,64 @@ sub add_help_types {
      sub { App::RecordStream::Aggregator::list_aggregators(); },
      'List the aggregators'
    );
+   $this->add_help_type(
+     'more',
+     sub { $this->more_help() },
+     'Larger help documentation'
+   );
 }
 
 sub usage {
+   my $this = shift;
+
+   my $options = [
+      [ 'key|-k <keys>', 'Comma separated list of key fields.  May be a key spec or key group'],
+      [ 'dlkey ...', 'Specify a domain language key.  See "Domain Language Integration" below.'],
+      [ 'dlaggregator ...', 'Specify a domain language aggregate.  See "Domain Language Integration" below.'],
+      [ 'aggregator|-a <aggregators>', 'Colon separated list of aggregate field specifiers.  See "Aggregates" section below.'],
+      [ 'size|--sz|-n <number>', 'Number of running clumps to keep.'],
+      [ 'adjacent|-1', 'Only group together adjacent records.  Avoids spooling records into memeory'],
+      [ 'cube', 'See "Cubing" section below.'],
+      [ 'cube-default', 'See "Cubing" section below.'],
+      [ 'incremental', 'Output a record every time an input record is added to a clump (instead of everytime a clump is flushed).'],
+      [ 'list-aggregators', 'Bail and output a list of aggregators' ],
+      [ 'show-aggregator <aggregator>', 'Bail and output this aggregator\'s detailed usage.'],
+      [ 'ignore-null', 'Ignore undefined or non-existant keys in records'],
+   ];
+
+   my $args_string = $this->options_string($options);
+
    return <<USAGE
 Usage: recs-collate <args> [<files>]
-   Collate records of input (or records from <files>) into output records.
+   __FORMAT_TEXT__
+   Take records, grouped togther by --keys, and compute statistics (like
+   average, count, sum, concat, etc) within those groups.
+
+   For starting with collate, try doing single --key collates with some number
+   of aggregators (list available in --list-agrregators)
+   __FORMAT_TEXT__
 
 Arguments:
-   --key|-k <keys>               Comma separated list of key fields.  May be a
-                                 key spec or key group
-   --dlkey ...                   Specify a domain language key.  See "Domain
-                                 Language Integration" below.
-   --dlaggregator ...            Specify a domain language aggregate.  See
-                                 "Domain Language Integration" below.
-   --aggregator|-a <aggregators> Colon separated list of aggregate field specifiers.
-                                 See "Aggregates" section below.
-   --size|--sz|-n <number>       Number of running clumps to keep.
-   --adjacent|-1                 Keep exactly one running clump.
-   --cube                        See "Cubing" section below.
-   --cube-default                See "Cubing" section below.
-   --incremental                 Output a record every time an input record is added
-                                 to a clump (instead of everytime a clump is flushed).
+$args_string
 
-Help / Usage Options:
-   --list-aggregators             Bail and output a list of aggregators.
-   --show-aggregator <aggregator> Bail and output this aggregator's detailed usage.
+Examples:
+   Count clumps of adjacent lines with matching x fields.
+      recs-collate --adjacent --key x --aggregator count
+   Count number of each x field value in the entire file.
+      recs-collate --key x --aggregator count
+   Finds the maximum latency for each date, hour pair
+      recs-collate --key date,hour --aggregator worst_latency=max,latency
+   Find the median value of x+y in records
+      recs-collate --dlaggregator "m=perc(50,snip(<<{{x}}+{{y}}>>))"
+USAGE
+}
+
+sub more_help {
+   my $this = shift;
+   my $usage = $this->usage() . <<USAGE;
 
 Aggregates:
+   __FORMAT_TEXT__
    Aggregates are specified as [<fieldname>=]<aggregator>[,<arguments>].  The
    default field name is aggregator and arguments joined by underscores.  See
    --list-aggregators for a list of available aggregators.
@@ -313,19 +358,22 @@ Aggregates:
    Fieldname maybe a key spec. (i.e. foo/bar=sum,field).  Additionally, all key
    name arguments to aggregators maybe be key specs (i.e.
    foo=max,latency/url), but not key groups
+   __FORMAT_TEXT__
 
 Cubing:
+   __FORMAT_TEXT__
    Instead of added one entry for each input record, we add 2 ** (number of key
    fields), with every possible combination of fields replaced with the default
    (which defaults to "ALL" but can be specified with --cube-default).  This is
    not meant to be used with --adjacent or --size.  If our key fields were x
    and y then we'd get output records for {x = 1, y = 2}, {x = 1, y = ALL}, {x
    = ALL, y = 2} and {x = ALL, y = ALL}.
+   __FORMAT_TEXT__
 
 Domain Lanuage Integration:
+   __FORMAT_TEXT__
 USAGE
-   . App::RecordStream::DomainLanguage::short_usage()
-   . <<USAGE
+   $usage .= App::RecordStream::DomainLanguage::short_usage() . <<USAGE;
 
    Either aggregates or keys may be specified using the recs domain language.
    Both --dlkey and --dlaggregator require an options of the format
@@ -336,6 +384,7 @@ USAGE
    and a list of available functions.
 
    See the examples below for a more gentle introduction.
+   __FORMAT_TEXT__
 
 Examples:
    Count clumps of adjacent lines with matching x fields.
@@ -353,13 +402,13 @@ Examples:
    Produce a list of hosts in each datacenter.
       recs-collate --key dc --dlaggregator "hosts=uconcat(', ', 'host')"
    Sum all time fields
-      recs-collate --key ... --dlaggregator "times=for_field(qr/^t/, 'sum(\\\$f)')"
+      recs-collate --key ... --dlaggregator 'times=for_field(qr/^t/, <<sum(\$f)>>)'
    Find the median value of x+y in records
-      recs-collate --dlaggregator "m=perc(50,snip('{{x}}+{{y}}'))"
+      recs-collate --dlaggregator "m=perc(50,snip(<<{{x}}+{{y}}>>))"
    Count people by first three letters of their name
-      recs-collate --dlkey "tla=snip('substr({{name}},0,3')"
+      recs-collate --dlkey "tla=<<substr({{name}},0,3)>>" -a ct
 USAGE
-   ;
+   print $this->format_usage($usage);
 }
 
 1;

@@ -1,9 +1,6 @@
 more aggregators
    linreg
    weighted percentile [map] (may be difficult to decide integration with the domain language...)
-perf test
-   recs-collate lru size 1 v. optimized adjacent recs collate
-   JSON v. old recs v. other serialization (Data::Dumper, Storable, ?)
 recs-frommultire
    block mechanism
       could be sed-esque script where there are primitives for shoving matched groups "into" a block in construction
@@ -17,10 +14,17 @@ recs-multiplex - divide incoming stream by a "thread/process" key, feeding to mu
 recs-annotate - memoized annotation of records based on a slice of keys
 recs-collate - use fastcollate when possible
 recs-from* - Add ability to annotate record with filename
+recs-tognuplot - use a library rather than invoking gnuplot directly
+recs-togchart - use google chart api, seems simplier than gnuplot, could support more options? also look at 'Chart' on CPAN, maybe that instead?, could also support graph viz charts, see: http://code.google.com/apis/chart/image/docs/gallery/graphviz.html
+refactor Aggregator/Deaggregator loading/registry code since we'll need it for clumper (and annotater?) as well
+recs-xform - add option to send null $r at the end of the stream to allow final actions after spooling records
+--help - have --help fit on one screen for all scripts, (maybe 40 lines), with additionall help available through drifferent help types
+Executor - add executor::options_help to all scripts that need it.
+tonguplot - scrap and start over?
+Options help - remove --filename-key from certain scripts (tognuplot, tohtml, etc)
 
 Distribution Notes:
   Set up PPA for updates
-  No-architecture .deb (32-bit needs love)
 
 Aribritation Collation clumps
   - suportt week over week
@@ -39,6 +43,7 @@ Key groups:
       !REGEX!v=numeric
       '!perc-(\d+)!v=Percentile: $1'
       '!perc-!v-eval=Percentile {{field}}'
+  "Pretty-ify field names for toptable"
 
 RecordShell idea:
   14:34 <ben_bernard> my idea is basically you have like status files in a history tree
@@ -94,7 +99,6 @@ RecordShell idea:
   14:49 <ben_bernard> like if I could get an interface that was like run this, but tell me the command name and what files were written to, oh and also here is your input stream
 
 Keith's personal section
-    decollate / deaggregators
     fix die w/in getopt
     --incr collate by time and by record count (--incr is by record count 1)
         maybe even windowed incremental?

@@ -1,7 +1,7 @@
 package App::RecordStream::Aggregator::Internal::ForField2;
 
 use strict;
-use lib;
+use warnings;
 
 use App::RecordStream::Aggregator::Aggregation;
 use App::RecordStream::DomainLanguage::Registry;
@@ -54,7 +54,7 @@ sub combine
 
          if(!exists($cookie->{$fieldc}))
          {
-            my $agg = $this->{'SNIPPET'}->evaluate_as('AGG', {'$f1' => $field1, '$f2' => $field2});
+            my $agg = $this->{'SNIPPET'}->evaluate_as('AGGREGATOR', {'$f1' => $field1, '$f2' => $field2});
             $cookie->{$fieldc} = [$agg, $agg->initial()];
          }
 

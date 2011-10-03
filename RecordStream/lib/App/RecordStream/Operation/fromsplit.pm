@@ -55,22 +55,16 @@ sub get_field {
    }
 }
 
-sub run_operation {
-   my ($this) = @_;
-
-   local @ARGV = @{$this->_get_extra_args()};
-
+sub accept_line {
+   my $this = shift;
+   my $line = shift;
 
    if ($this->{'HEADER'}) {
-      my $line = <>;
-      chomp $line;
       my $delim = $this->get_delimiter();
       $this->add_field($_) for @{$this->get_values_for_line($line)};
+      delete $this->{'HEADER'};
    }
-
-   while(my $line = <>) {
-      chomp $line;
-
+   else {
       my $record = App::RecordStream::Record->new();
       my $index = 0;
 
@@ -81,6 +75,8 @@ sub run_operation {
 
       $this->push_record($record);
    }
+
+   return 1;
 }
 
 sub get_values_for_line {
@@ -90,10 +86,10 @@ sub get_values_for_line {
    my @values;
    my $delim = $this->get_delimiter();
    if ( $this->{'STRICT'} ) {
-      @values = split(/\Q$delim\E/, $line);
+      @values = split(/\Q$delim\E/, $line, -1);
    }
    else {
-      @values = split(/$delim/, $line);
+      @values = split(/$delim/, $line, -1);
    }
 
    return \@values;
@@ -105,18 +101,27 @@ sub add_help_types {
 }
 
 sub usage {
+   my $this = shift;
+
+   my $options = [
+      [ 'delim|-d <delim>', 'Delimiter to use for splitting input lines (default ',').'],
+      [ 'key|-k <key>', 'Comma separated list of key names.  May be specified multiple times, may be key specs'],
+      [ 'header', 'Take key names from the first line of input.'],
+      [ 'strict', 'Delimiter is not treated as a regex'],
+   ];
+
+   my $args_string = $this->options_string($options);
+
    return <<USAGE;
 Usage: recs-fromsplit <args> [<files>]
+   __FORMAT_TEXT__
    Each line of input (or lines of <files>) is split on provided delimiter to
    produce an output record.  Keys are named numerically (0, 1, etc.) or as
    given by --key.
+   __FORMAT_TEXT__
 
 Arguments:
-   --delim|-d <delim> Delimiter to use for splitting input lines (default ',').
-   --key|-k <key>     Comma separated list of key names.  May be specified
-                      multiple times, may be key specs
-   --header           Take key names from the first line of input.
-   --strict           Delimiter is not treated as a regex
+$args_string
 
 Examples:
    Parse space separated keys x and y.

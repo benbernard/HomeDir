@@ -54,7 +54,11 @@ sub get_converter {
    return $this->{'CONVERTER'};
 }
 
-sub run_operation {
+sub wants_input {
+   return 0;
+}
+
+sub stream_done {
    my $this = shift;
 
    my $table  = $this->get_process_table();
@@ -77,25 +81,33 @@ sub run_operation {
 }
 
 sub usage {
+   my $this = shift;
+
    my @fields = Proc::ProcessTable->new()->fields();
    my $all_fields = join (', ', @fields);
+
+   my $options = [
+      [ 'keys <fields>', 'Fields to output.  May be specified multiple times, may be comma separated.  Default to all fields These are Proc::ProcessTable keys, and thus may not be keyspecs or groups'],
+   ];
+
+   my $args_string = $this->options_string($options);
+
    return <<USAGE;
 Usage: recs-fromps <args>
-   Prints out an html table for the records from input or from <files>.
-
-   --keys <fields> - Fields to output.  May be specified multiple
-                     times, may be comma separated.  Default to all fields
-                     These are Proc::ProcessTable keys, and thus may not be
-                     keyspecs or groups
+   __FORMAT_TEXT__
+   Prints out JSON records converted from the process table.
+   __FORMAT_TEXT__
 
 Default fields:
+   __FORMAT_TEXT__
    $all_fields
+   __FORMAT_TEXT__
 
 Examples:
    Get records for the process table
       recs-fromps
    Only get uid and pid
-      recs-fromps --fields uid,pid
+      recs-fromps --keys uid,pid
 USAGE
 }
 

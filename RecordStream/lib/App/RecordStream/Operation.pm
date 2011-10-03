@@ -8,37 +8,29 @@ use warnings;
 use Carp;
 use FindBin qw($Script $RealScript);
 use Getopt::Long;
-use App::RecordStream::InputStream;
-use App::RecordStream::Site;
+use Text::Autoformat;
+use Term::ReadKey;
 
 use App::RecordStream::DomainLanguage;
-use App::RecordStream::KeyGroups;
 use App::RecordStream::Executor;
+use App::RecordStream::KeyGroups;
+use App::RecordStream::Site;
+use App::RecordStream::Stream::Base;
+use App::RecordStream::Stream::Printer;
 
-require App::RecordStream::Operation::Printer;
-
-sub accept_record {
-   subclass_should_implement(shift);
-}
+use base 'App::RecordStream::Stream::Base';
 
 sub usage {
    subclass_should_implement(shift);
 }
 
-sub create_default_next {
-   my $printer = App::RecordStream::Operation::Printer->new();
-   $printer->init();
-   return $printer;
-}
-
 sub new {
    my $class    = shift;
    my $args     = shift;
-
-   my $default_next = $class->create_default_next();
+   my $next     = shift;
 
    my $this = {
-      NEXT => $default_next,
+      NEXT => $next,
    };
 
    bless $this, $class;
@@ -99,6 +91,88 @@ sub init_help {
    $this->add_help_types();
 }
 
+# Prints out unified options for usage.  $options is a hash with keys of the
+# argument spec and values of the description
+sub options_string {
+   my ($this, $options) = @_;
+
+   push @$options, ['filename-key|fk <keyspec>', 'Add a key with the source filename (if no filename is applicable will put NONE)'];
+
+   my $string = $this->_options_format($options);
+   $string .= "\n  Help Options:\n";
+
+   my $help_options = [];
+   foreach my $type (sort keys %{$this->{'HELP_TYPES'}}) {
+      my $info = $this->{'HELP_TYPES'}->{$type};
+      next unless ( $info->{'USE'} );
+
+      my $option_name = $info->{'OPTION_NAME'} || "help-$type";
+      my $description = $info->{'DESCRIPTION'};
+      push @$help_options, [$option_name, $description];
+   }
+
+   $string .= $this->_options_format($help_options, 2);
+
+   # Remove trailing whitespace
+   while (chomp $string > 0) {}
+
+   return $string;
+}
+
+sub _options_format {
+   my ($this, $options, $indent_level) = @_;
+   $indent_level = 1 if ( not defined $indent_level );
+
+   my $max_length = 0;
+   foreach my $pair (@$options) {
+      my ($name) = @$pair;
+      my $name_length = length($name);
+      $max_length = $name_length if ( $name_length > $max_length);
+   }
+
+   my $string = '';
+
+   my $description_indent_level = ($indent_level * 3) + $max_length + 4;
+
+   foreach my $pair (@$options) {
+      my ($name, $description) = @$pair;
+      my $formatted            = $this->format_text($description, $description_indent_level);
+      my $description_prefix   = (' ' x ($indent_level * 3)) . '--' . $name;
+
+      $description_prefix .= ' ' x ($description_indent_level - length($description_prefix));
+
+      my $prefix_size = length($description_prefix);
+      $string .= $description_prefix;
+      $string .= substr $formatted, $prefix_size;
+   }
+
+   return $string;
+}
+
+{
+   my $size_initialized = 0;
+   my $size = 80;
+   sub get_terminal_size {
+      if ( ! $size_initialized ) {
+         $size_initialized = 1;
+         eval {
+            $size = (Term::ReadKey::GetTerminalSize())[0];
+         };
+      }
+      return $size;
+   }
+}
+
+sub format_text {
+   my ($this, $text, $left_indent) = @_;
+   $left_indent ||= 0;
+   return autoformat $text, {
+      left  => $left_indent + 1,
+      right => get_terminal_size(),
+      all   => 1,
+   };
+}
+
 # this is a hook for subclasses
 sub add_help_types {
 }
@@ -133,6 +207,7 @@ sub parse_options {
    my $args         = shift || [];
    my $options_spec = shift || {};
 
+   # Add help options
    foreach my $help_type (keys %{$this->{'HELP_TYPES'}}) {
       my $type_info = $this->{'HELP_TYPES'}->{$help_type};
       next unless ( $type_info->{'USE'} );
@@ -145,13 +220,22 @@ sub parse_options {
       };
    }
 
+   # Add filename annotation option
+   $options_spec->{'--filename-key|fk=s'} = \($this->{'FILENAME_KEY'});
+
+
    local @ARGV = @$args;
    unless (GetOptions(%$options_spec)) {
       # output usage if there was a problem with option parsing
       $this->_set_wants_help(1);
    }
 
-   $this->_set_extra_args(\@ARGV);
+   @$args = @ARGV;
+}
+
+sub update_current_filename {
+  my ($this, $filename) = @_;
+  set_current_filename($filename);
 }
 
 sub _set_wants_help {
@@ -191,64 +275,73 @@ sub print_usage {
    #Remove all trailing newlines
    while (chomp $usage > 0) {}
 
-   print $usage . "\n\n";
-   print "Help Options:\n";
-   my $max_length = 0;
-   foreach my $type (sort keys %{$this->{'HELP_TYPES'}}) {
-      my $info = $this->{'HELP_TYPES'}->{$type};
-      next unless ( $info->{'USE'} );
-      my $option_name = $info->{'OPTION_NAME'} || "help-$type";
-      my $length      = length($option_name);
-      $max_length     = $length if ( $max_length < $length );
+   my $formatted_usage = $this->format_usage($usage);
+
+   #Remove all trailing newlines
+   while (chomp $formatted_usage > 0) {}
+
+   print $formatted_usage . "\n";
+}
+
+sub format_usage {
+   my ($this, $usage) = @_;
+
+   my $lines = [split("\n", $usage)];
+
+   my $output = '';
+   my $capturing      = 0;
+   my $accumulator    = 0;
+   my $current_indent = 0;
+
+   while(@$lines) {
+      my $line = shift @$lines;
+      chomp $line;
+      if ( $line =~ m/^\s*__FORMAT_TEXT__\s*$/ ) {
+         if ( $capturing ) {
+            $capturing = 0;
+            $output .= $this->format_text($accumulator, $current_indent);
+         }
+         else {
+            $capturing = 1;
+
+            my $first_line = shift @$lines;
+            chomp $first_line;
+            my ($indention)  = $first_line =~ m/^(\s*)/;
+            $first_line =~ s/\s*//;
+            $current_indent = length($indention);
+            $accumulator = $first_line;
+         }
+      }
+      elsif ( $capturing ) {
+         if ( $line =~ m/^\s*$/ ) {
+            $accumulator .= "\n\n";
+         }
+         else {
+           $line =~ s/^\s*//;
+           $accumulator .= " $line";
+         }
+      }
+      else {
+         $output .= $line . "\n";
+      }
    }
 
-   $max_length += 2;
-
-   foreach my $type (sort keys %{$this->{'HELP_TYPES'}}) {
-      my $info = $this->{'HELP_TYPES'}->{$type};
-      next unless ( $info->{'USE'} );
-
-      my $option_name = $info->{'OPTION_NAME'} || "help-$type";
-      my $description = $info->{'DESCRIPTION'};
-
-      my $length       = length($option_name);
-      my $spaces_count = $max_length - $length;
-      my $padding      = ' ' x $spaces_count;
-
-      print "   --$option_name$padding$description\n";
-   }
+   return $output;
 }
 
 sub init {
 }
 
+# subclasses can override to indicate they'll handle their own extra
+# args and input in stream_done()
+sub wants_input {
+   return 1;
+}
+
 sub finish {
    my $this = shift;
    $this->stream_done();
-   $this->_get_next_operation()->finish();
-}
-
-sub get_input_stream {
-   my $this = shift;
-   $this->{'INPUT_STREAM'} ||= App::RecordStream::InputStream->new_magic($this->_get_extra_args());
-   return $this->{'INPUT_STREAM'};
-}
-
-sub set_input_stream {
-   my $this   = shift;
-   my $stream = shift;
-   $this->{'INPUT_STREAM'} = $stream;
-}
-
-sub run_operation {
-   my $this = shift;
-
-   my $input = $this->get_input_stream();
-   set_current_filename($input->get_filename());
-
-   while ( my $record = $input->get_record() ) {
-      $this->accept_record($record);
-   }
+   $this->{'NEXT'}->finish();
 }
 
 {
@@ -273,16 +366,20 @@ sub stream_done {
 
 sub push_record {
    my ($this, $record) = @_;
+
+   if ( $this->{'FILENAME_KEY'} ) {
+     ${$record->guess_key_from_spec($this->{'FILENAME_KEY'})} = get_current_filename();
+   }
+
    $this->{'NEXT'}->accept_record($record);
 }
 
-sub _get_next_operation {
-   my $this = shift;
-   return $this->{'NEXT'};
+sub push_line {
+   my ($this, $line) = @_;
+   $this->{'NEXT'}->accept_line($line);
 }
 
 sub load_operation {
-   my $class  = shift;
    my $script = shift;
 
    my $operation = $script;
@@ -318,11 +415,10 @@ sub load_operation {
 }
 
 sub is_recs_operation {
-  my $class = shift;
   my $script = shift;
 
   if ( $script =~ m/^recs-/ ) {
-    eval { $class->load_operation($script) };
+    eval { load_operation($script) };
     return 0 if ( $@ );
     return 1;
   }
@@ -331,15 +427,15 @@ sub is_recs_operation {
 }
 
 sub create_operation {
-   my $class  = shift;
    my $script = shift;
-   my @args   = @_;
+   my $args   = shift;
+   my $next   = shift || App::RecordStream::Stream::Printer->new();
 
-   my $module = $class->load_operation($script);
+   my $module = load_operation($script);
 
    my $op;
    eval {
-      $op = $module->new(\@args);
+      $op = $module->new($args, $next);
    };
 
    if ( $@ || $op->get_wants_help() ) {
@@ -367,6 +463,8 @@ sub all_help {
       next if ( $info->{'SKIP_IN_ALL'} );
       next if ( !$info->{'USE'} );
 
+      print "Help from: --help-$type:\n";
+
       $info->{'CODE'}->($this);
       print "\n"
    }
@@ -381,41 +479,22 @@ sub keys_help {
 
 sub snippet_help {
    my $this = shift;
-   print App::RecordStream::Executor::usage();
+   print $this->format_usage(App::RecordStream::Executor::usage());
 }
 
 sub keyspecs_help {
    my $this = shift;
-   print App::RecordStream::Record::keyspec_help();
+   print $this->format_usage(App::RecordStream::Record::keyspec_help());
 }
 
 sub keygroups_help {
    my $this = shift;
-   print App::RecordStream::KeyGroups::usage();
+   print $this->format_usage(App::RecordStream::KeyGroups::usage());
 }
 
 sub domainlanguage_help {
    my $this = shift;
-   print App::RecordStream::DomainLanguage::usage();
-}
-
-sub _set_next_operation {
-   my $this = shift;
-   my $next = shift;
-
-   $this->{'NEXT'} = $next;
-}
-
-sub _set_extra_args {
-   my $this = shift;
-   my $args = shift;
-
-   $this->{'EXTRA_ARGS'} = $args;
-}
-
-sub _get_extra_args {
-   my $this = shift;
-   return $this->{'EXTRA_ARGS'};
+   print $this->format_usage(App::RecordStream::DomainLanguage::usage());
 }
 
 # A static method for a single-line operation bootstrap.  Operation wrappers
@@ -443,9 +522,18 @@ MESSAGE
   my @args = @ARGV;
   @ARGV = ();
 
-  my $op = App::RecordStream::Operation->create_operation($Script, @args);
+  my $op = App::RecordStream::Operation::create_operation($Script, \@args);
 
-  $op->run_operation();
+  if ( $op->wants_input() ) {
+    @ARGV = @args;
+    while(my $line = <>) {
+      chomp $line;
+      App::RecordStream::Operation::set_current_filename($ARGV);
+      if ( ! $op->accept_line($line) ) {
+          last;
+      }
+    }
+  }
   $op->finish();
 
   exit $op->get_exit_value();

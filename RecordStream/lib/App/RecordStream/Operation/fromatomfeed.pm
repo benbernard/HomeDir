@@ -32,10 +32,15 @@ sub init
 
    $this->{'FOLLOW'} = $follow;
    $this->{'MAX'}    = $max;
-   $this->{'URLS'}   = $this->_get_extra_args();
+   $this->{'URLS'}   = $args;
 }
 
-sub run_operation
+sub wants_input
+{
+   return 0;
+}
+
+sub stream_done
 {
    my ($this) = @_;
 
@@ -50,6 +55,7 @@ sub run_operation
 URL:
    while (my $url = shift @urls)
    {
+      $this->update_current_filename($url);
       $request->uri($url);
       my $response = $ua->request($request);
 
@@ -90,19 +96,28 @@ sub make_user_agent {
 
 sub usage
 {
+   my $this = shift;
+
+   my $options = [
+      [ '[no]follow', 'Follow atom feed next links (or not).  Defaults on.'],
+      [ 'max=<n>', 'Print at most <n> entries and then exit.'],
+   ];
+
+   my $args_string = $this->options_string($options);
+
    return <<USAGE;
 Usage: recs-fromatomfeed <args> [<uris>]
+   __FORMAT_TEXT__
    Produce records from atom feed entries.
 
    Recs from atom feed will get entries from paginated atom feeds and create
    a record stream from the results. The keys of the record will be the fields
    in the atom field entry. Recs from atom feed will follow the 'next' link in
    a feed to retrieve all entries.
+   __FORMAT_TEXT__
 
-
-Help / Usage Options:
-   --[no]follow                   Follow atom feed next links (or not).  Defaults on.
-   --max=<n>                      Print at most <n> entries and then exit.
+Arguments:
+$args_string
 
 Examples:
    Dump an entire feed

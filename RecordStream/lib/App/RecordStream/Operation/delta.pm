@@ -27,7 +27,7 @@ sub accept_record
 {
    my $this   = shift;
    my $record = shift;
-my $last_record = $this->{'LAST_RECORD'}; 
+   my $last_record = $this->{'LAST_RECORD'}; 
    if ( $last_record ) {
       foreach my $key (@{$this->{'KEY_GROUPS'}->get_keyspecs($last_record)})
       {
@@ -44,6 +44,8 @@ my $last_record = $this->{'LAST_RECORD'};
    }
 
    $this->{'LAST_RECORD'} = $record;
+
+   return 1;
 }
 
 sub add_help_types {
@@ -55,16 +57,22 @@ sub add_help_types {
 
 sub usage
 {
+   my $this = shift;
+
+   my $options = [
+      [ 'key|-k <keys>', 'Comma separated list of the fields that should be transformed.  Fields not in this list will be passed through unchanged, using the *first* record of each delta pair.  This may be a keyspec or a keygroup, see "--help-keyspecs" for more information'],
+   ];
+
+   my $args_string = $this->options_string($options);
+
    return <<USAGE;
 Usage: recs-delta <args> [<files>]
+   __FORMAT_TEXT__
    Transforms absolute values into deltas between adjacent records.
+   __FORMAT_TEXT__
 
 Arguments:
-   --key|-k <keys>  Comma separated list of the fields that should be
-                    transformed.  Fields not in this list will be passed
-                    through unchanged, using the *first* record of each delta
-                    pair.  This may be a keyspec or a keygroup, see
-                    '--help-keyspecs' for more information
+$args_string
 
 Examples:
    Transforms a cumulative counter of errors into a count of errors per record.
