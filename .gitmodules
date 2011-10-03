@@ -1,0 +1,3 @@
+[submodule "BOWQuotes"]
+	path = BOWQuotes
+	url = git@github.com:benbernard/BOWQuotes.git
