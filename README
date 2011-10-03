@@ -1,13 +1,12 @@
-Installing:
-
+# Installing: (not meant to be run as a script)
 git clone git://github.com/benbernard/HomeDir.git
-
 cd HomeDir
-
 git submodule init
-
 git submodule update
-
+cd ..
 sudo mv $HOME $HOME.old
+sudo mv HomeDir $HOME
 
-sudo mv ../HomeDir $HOME
+# Regenerate common files:
+bin/generate_config.pl .gitconfig
+bin/generate_config.pl irrsi/config
