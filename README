@@ -1,0 +1,13 @@
+Installing:
+
+git clone git://github.com/benbernard/HomeDir.git
+
+cd HomeDir
+
+git submodule init
+
+git submodule update
+
+sudo mv $HOME $HOME.old
+
+sudo mv ../HomeDir $HOME
