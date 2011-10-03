@@ -1,3 +1,9 @@
 [submodule "BOWQuotes"]
 	path = BOWQuotes
 	url = git@github.com:benbernard/BOWQuotes.git
+[submodule "GitScripts"]
+	path = GitScripts
+	url = git@github.com:benbernard/GitScripts.git
+[submodule "RecordStream"]
+	path = RecordStream
+	url = git@github.com:benbernard/RecordStream.git
