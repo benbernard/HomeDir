@@ -4,3 +4,9 @@
 [submodule "RecordStream"]
 	path = RecordStream
 	url = https://github.com/benbernard/RecordStream.git
+[submodule "GitScripts"]
+	path = GitScripts
+	url = https://github.com/benbernard/GitScripts.git
+[submodule "BOWQuotes"]
+	path = BOWQuotes
+	url = https://github.com/benbernard/BOWQuotes.git
