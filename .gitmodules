@@ -4,9 +4,6 @@
 [submodule "GitScripts"]
 	path = GitScripts
 	url = git@github.com:benbernard/GitScripts.git
-[submodule "RecordStream"]
-	path = RecordStream
-	url = git@github.com:benbernard/RecordStream.git
 [submodule "emacs_chrome"]
 	path = emacs_chrome
 	url = https://github.com/stsquad/emacs_chrome.git
