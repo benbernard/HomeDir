@@ -23,7 +23,6 @@ set softtabstop=2             " use 2 space indenting
 set textwidth=0               " turn wrapping off
 set visualbell                " Use a flash instead of a sound for bells
 set wildmode=longest:full     " Matches only to longest filename, displays to menu possible matches
-set sw=3 "Recs
 
 "set foldmethod=indent   " use indent unless overridden
 set foldlevel=0         " show contents of all folds
