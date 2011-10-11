@@ -130,8 +130,8 @@ au FileType c,cpp set cinkeys+=0#
 "Buff explorer settings
   let g:bufExplorerSplitOutPathName=-1 " Don't split the path and file name.
 
-" Large file settings
-  let g:LargeFile = 2
+" Large file settings in MB
+  let g:LargeFile = 4
 
 " EasyMotion settings
   " Use - as the leader for EasyMotion
