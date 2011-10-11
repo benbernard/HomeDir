@@ -58,7 +58,7 @@ perl <<EOT
   my $home_dir = (getpwuid($<))[7];
 
   if ( -e $home_dir ) {
-    my $temp_location = "$home_dir/.vim-tmp";
+    my $temp_location = $ENV{VIM_TEMP} || "$home_dir/.vim-tmp";
     my $tmp_dir       = $temp_location . '/vXXX';
     my $swp_dir       = $temp_location . '/swps';
     my $undo_dir      = $temp_location . '/undo';
@@ -72,7 +72,7 @@ perl <<EOT
 
     # Set TMPDIR and directory to the new location
     VIM::DoCommand("let \$TMPDIR = '" . $tmp_dir . "'") if ( -w $tmp_dir );
-    VIM::DoCommand("set directory=" . $swp_dir) if ( -w $swp_dir );
+    VIM::DoCommand("set directory=" . $swp_dir . '//') if ( -w $swp_dir );
     VIM::DoCommand("set undodir=" . $undo_dir) if ( -w $undo_dir );
   }
 EOT
