@@ -1,28 +1,35 @@
 " First setup variable for other variables
 "let g:useNinjaTagList=1
 
+
+if ( filereadable($HOME . "/.vimrc.site") )
+  source $HOME/.vimrc.site
+endif
+
 syntax on
 
+""""""""""""""" Global Setup """"""""""""""""""""
 "First source the environment location
 "source /apollo/env/envImprovement/var/vimrc
 source $HOME/.eihooks/dotfiles/vimrc
 
 """"""""""""""" Global Options """"""""""""""""""""
 
-set fo+=q                     " gq foramts with comments, see :help fo-table
-set foldcolumn=0              " turn off the foldcolumn
-set history=100               " Remember 100 lines of history, for commands and searches
-set hls                       " highlight serach terms
-set list                      " Show tabs differently
-set listchars=tab:>-          " Use >--- for tabs
-set nolinebreak               " don't wrap at words, messes up copying
-set shiftwidth=2              " use 2 space idnetning
-set smartcase                 " if any capitol in search, turns search case sensitive
-set softtabstop=2             " use 2 space indenting
-"set tags=~/.commontags,./tags " Setup the standard tags files
-set textwidth=0               " turn wrapping off
-set visualbell                " Use a flash instead of a sound for bells
-set wildmode=longest:full     " Matches only to longest filename, displays to menu possible matches
+set fo+=q                            " gq foramts with comments, see :help fo-table
+set foldcolumn=0                     " turn off the foldcolumn
+set history=100                      " Remember 100 lines of history, for commands and searches
+set hls                              " highlight serach terms
+set list                             " Show tabs differently
+set listchars=tab:>-                 " Use >--- for tabs
+set nolinebreak                      " don't wrap at words, messes up copying
+set shiftwidth=2                     " use 2 space idnetning
+set smartcase                        " if any capitol in search, turns search case sensitive
+set softtabstop=2                    " use 2 space indenting
+"set tags=~/.commontags,./tags       " Setup the standard tags files
+set textwidth=0                      " turn wrapping off
+set visualbell                       " Use a flash instead of a sound for bells
+set wildmode=longest:full            " Matches only to longest filename, displays to menu possible matches
+set undofile                         " Keep undo history around, across vim reboots
 
 "set foldmethod=indent   " use indent unless overridden
 set foldlevel=0         " show contents of all folds
@@ -226,8 +233,4 @@ if ( v:version >= 700 )
   " Change spelling colors to not suck, green and brown respectively
   highlight! SpellCap ctermbg=3
   highlight! SpellBad ctermbg=2
-endif
-
-if ( filereadable($HOME . "/.vimrc.site") )
-  source $HOME/.vimrc.site
 endif
