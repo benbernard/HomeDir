@@ -1,16 +1,14 @@
 " First setup variable for other variables
 "let g:useNinjaTagList=1
 
+syntax on
 
 if ( filereadable($HOME . "/.vimrc.site") )
   source $HOME/.vimrc.site
 endif
 
-syntax on
-
 """"""""""""""" Global Setup """"""""""""""""""""
 "First source the environment location
-"source /apollo/env/envImprovement/var/vimrc
 source $HOME/.eihooks/dotfiles/vimrc
 
 """"""""""""""" Global Options """"""""""""""""""""
@@ -234,3 +232,12 @@ if ( v:version >= 700 )
   highlight! SpellCap ctermbg=3
   highlight! SpellBad ctermbg=2
 endif
+
+" Highlight trailing whitespace in red so I can prevent that.
+" Must be below any colorscheme setting
+highlight ExtraWhitespace ctermbg=red guibg=red
+match ExtraWhitespace /\s\+$/
+autocmd BufWinEnter * match ExtraWhitespace /\s\+$/
+autocmd InsertEnter * match ExtraWhitespace /\s\+\%#\@<!$/
+autocmd InsertLeave * match ExtraWhitespace /\s\+$/
+autocmd BufWinLeave * call clearmatches()
