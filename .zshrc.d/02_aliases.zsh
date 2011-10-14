@@ -28,3 +28,6 @@ fi
 
 # p aliases to popd a directory
 alias 'p=popd'
+
+# Add --prompt to s3_upload.pl
+alias 's3_upload.pl=s3_upload.pl --prompt'

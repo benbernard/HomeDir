@@ -1,20 +1,24 @@
 #!/usr/bin/perl
 
+$|=1;
+
 use strict;
 use warnings;
 
 use Getopt::Long;
+use File::Basename qw(fileparse);
 
 my $file;
 my $upload_name;
 my $bucket = 'bernard-public';
+my $prompt_for_name = 0;
 
 GetOptions(
   'file=s'        => \$file,
   'name|upload=s' => \$upload_name,
   'bucket=s'      => \$bucket,
   'help'          => \&usage,
-
+  'prompt'        => \$prompt_for_name,
 );
 
 if ( ! $file && $ARGV[0]) {
@@ -25,6 +29,23 @@ if ( ! $file && $ARGV[0]) {
 }
 elsif ( ! $file ) {
   die "Must specify a file to upload\n";
+}
+
+if ( $prompt_for_name && (!$upload_name) ) {
+  my $extension = '.txt';
+  if ( $file =~ m/(\..*)$/ ) {
+    $extension = $1;
+  }
+
+  print "Upload name (will add $extension unless an extension is specified): ";
+  my $input = <STDIN>;
+  chomp $input;
+  $upload_name = $input;
+
+  if ( $input !~ m/\./ ) {
+    # If there is no extension, add the extension
+    $upload_name .= $extension;
+  }
 }
 
 $upload_name ||= $file;
@@ -46,6 +67,8 @@ $0 FILE
   --name    resulting name (defaults to --file)
   --bucket  bucket to upload to
   --upload  same as --name
+  --prompt  Prompt for a upload name, unless --name is specificed (--name
+            overrides this option)
 
 Example:
   # Upload a picture
