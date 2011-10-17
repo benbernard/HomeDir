@@ -6,7 +6,7 @@ use strict;
 use warnings;
 
 use Getopt::Long;
-use File::Basename qw(fileparse);
+use File::Basename qw(basename);
 
 my $file;
 my $upload_name;
@@ -37,9 +37,16 @@ if ( $prompt_for_name && (!$upload_name) ) {
     $extension = $1;
   }
 
-  print "Upload name (will add $extension unless an extension is specified): ";
+  my $default_name = basename($file);
+
+  print "Upload name (will add $extension unless an extension is specified, default name: $default_name)\nName: ";
   my $input = <STDIN>;
   chomp $input;
+
+  if ( $input eq '' ) {
+    $input = $default_name;
+  }
+
   $upload_name = $input;
 
   if ( $input !~ m/\./ ) {
