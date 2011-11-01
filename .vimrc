@@ -162,11 +162,8 @@ au FileType c,cpp set cinkeys+=0#
   nmap <C-n> :bn<CR>
   nmap <C-p> :bp<CR>
 
-  "map ctrl-e to edit file in perforce
-  nmap <C-E> :!p4 edit %<CR>
-
-  "map ctrl-w to make file writable
-  nmap <C-W> :!chmod +w %<CR>
+  "map ctrl-e to make file writable
+  nmap <C-E> :!chmod +w %<CR>
 
   "map ctrl-c to chmod +w current file
   nmap <C-C> :r /var/tmp/clipboard-bernard<CR>
