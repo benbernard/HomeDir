@@ -1,5 +1,3 @@
-# $Id: //share/user/bernard/.irssi/scripts/away.pl#1 $
-
 use Irssi 20020121.2020 ();
 $VERSION = "0.23";
 %IRSSI = (

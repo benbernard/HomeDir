@@ -23,7 +23,7 @@ $VERSION = "0.1";
 %IRSSI =
 (
     authors => "Ben Bernard and Keith Amling",
-    contact => "bernard\@amazon.com",
+    contact => "perlhacker\@benjaminbernard.com",
     name    => "public / privmsg biff",
     description => "confirm on channels and certain messages",
     license => "None",

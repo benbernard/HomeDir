@@ -8,7 +8,7 @@ $VERSION = "0.1";
 %IRSSI =
 (
     authors => "Ben Bernard and Keith Amling",
-    contact => "bernard\@amazon.com",
+    contact => "perlhacker\@benjaminbernard.com",
     name    => "public / privmsg biff",
     description => "Custom (crummy) biffer",
     license => "None",
@@ -16,6 +16,9 @@ $VERSION = "0.1";
     changed => "2007-03-09",
     changes => ""
 );
+
+
+my $HOME_DIR = (getpwuid($<))[7];
 
 # Helper for debugging
 sub print_msg
@@ -113,7 +116,7 @@ sub biff {
 
   push @args, '--urgent' if ( $urgent );
 
-  system("/home/benbernard/bin/createBiff", @args);
+  system("$HOME_DIR/bin/createBiff", @args);
 }
 
 Irssi::signal_add('message private', 'msg_private');
