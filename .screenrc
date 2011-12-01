@@ -204,3 +204,30 @@ bind -c pastemap W paste W
 bind -c pastemap X paste X
 bind -c pastemap Y paste Y
 bind -c pastemap Z paste Z
+
+# Window switching binds
+bind + command -c plustenmap
+bind = command -c plustenmap
+bind -c plustenmap 1 select 11
+bind -c plustenmap 2 select 12
+bind -c plustenmap 3 select 13
+bind -c plustenmap 4 select 14
+bind -c plustenmap 5 select 15
+bind -c plustenmap 6 select 16
+bind -c plustenmap 7 select 17
+bind -c plustenmap 8 select 18
+bind -c plustenmap 9 select 19
+bind -c plustenmap 0 select 10
+bind -c plustenmap + command -c plustwentymap
+bind -c plustenmap = command -c plustwentymap
+
+bind -c plustwentymap 1 select 21
+bind -c plustwentymap 2 select 22
+bind -c plustwentymap 3 select 23
+bind -c plustwentymap 4 select 24
+bind -c plustwentymap 5 select 25
+bind -c plustwentymap 6 select 26
+bind -c plustwentymap 7 select 27
+bind -c plustwentymap 8 select 28
+bind -c plustwentymap 9 select 29
+bind -c plustwentymap 0 select 20

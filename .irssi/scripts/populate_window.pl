@@ -45,7 +45,6 @@ sub print_log_event {
 sub print_log {
   my $witem = shift;
 
-  print_msg("start of print_log: $HOME_DIR");
   return unless $witem;
   # $witem (window item) may be undef.
 
@@ -54,8 +53,6 @@ sub print_log {
   my $log_file = "$HOME_DIR/.irclogs/$chatnet/$name.log";
 
   $log_file = "$HOME_DIR/.irclogs/$name.log" unless ( -e $log_file );
-
-  print_msg("Log file: $log_file");
 
   if ( -e $log_file ) {
     my $log_size  = Irssi::settings_get_int("print_log_size");

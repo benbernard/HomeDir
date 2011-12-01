@@ -138,3 +138,44 @@ bind C-8 restoreBuffer8
 bind C-9 restoreBuffer9
 bind C-0 restoreBuffer0
 bind C-minus restoreBufferLast
+
+
+#rebind numbers to select frames
+bind 0 fselect 0
+bind 1 fselect 2
+bind 2 fselect 10
+bind 3 fselect 1
+bind 4 fselect 3
+bind 5 fselect 6
+bind 6 fselect 5
+bind 7 fselect 12
+bind 8 fselect 8
+bind 9 fselect 4
+
+newkmap extraselects
+bind plus readkey extraselects
+bind equal readkey extraselects
+definekey extraselects 0 fselect 7
+definekey extraselects 1 fselect 11
+definekey extraselects 2 fselect 12
+definekey extraselects 3 fselect 13
+definekey extraselects 4 fselect 14
+definekey extraselects 5 fselect 15
+definekey extraselects 6 fselect 16
+definekey extraselects 7 fselect 17
+definekey extraselects 8 fselect 18
+definekey extraselects 9 fselect 19
+
+# bind \NUM to to original style selects
+newkmap originalselects
+bind backslash readkey originalselects
+definekey originalselects 0 select 0
+definekey originalselects 1 select 1
+definekey originalselects 2 select 2
+definekey originalselects 3 select 3
+definekey originalselects 4 select 4
+definekey originalselects 5 select 5
+definekey originalselects 6 select 6
+definekey originalselects 7 select 7
+definekey originalselects 8 select 8
+definekey originalselects 9 select 9
