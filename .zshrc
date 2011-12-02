@@ -75,3 +75,6 @@ then
   
   HISTFILE=~/.history.ninja-search
 fi
+
+# Must have this for custom completions
+compinit

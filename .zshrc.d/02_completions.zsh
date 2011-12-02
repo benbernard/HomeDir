@@ -3,7 +3,7 @@ zstyle ':completion:*' auto-description 'specify: %d'
 zstyle ':completion:*' completer _expand _complete _approximate
 zstyle ':completion:*' completions 1
 #zstyle ':completion:*' expand prefix suffix
-zstyle ':completion:*' format 'Completing %d'
+#zstyle ':completion:*' format 'Completing %d'
 zstyle ':completion:*' glob 1
 zstyle ':completion:*' insert-unambiguous true
 zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
@@ -31,5 +31,4 @@ zstyle :compinstall filename "$HOME/.zshrc"
 ##zstyle -e ':completion:*:*:*' hosts 'reply=($(cat $HOME/.hosts))'
 
 autoload -U compinit
-compinit 
-
+compinit
