@@ -13,6 +13,7 @@ my $actions = {
   cpan => 'http://search.cpan.org/search?mode=all&query=%s',
   imdb => 'http://www.imdb.com/find?s=all&q=%s',
   g    => 'http://www.google.com/search?aq=f&sourceid=chrome&ie=UTF-8&q=%s',
+  help => \&print_help,
 };
 
 my $config_file = "$ENV{HOME}/.ninja-search.site";
@@ -40,7 +41,13 @@ sub format_url {
   my $is_url_action = 1;
   if ( defined $actions->{$possible_action} ) {
     $url = $actions->{$possible_action};
-    $is_url_action = 0 if ( $possible_action ne 'u' );
+    if ( ref($url) eq 'CODE' ) {
+      $url->();
+      exit;
+    }
+    else {
+      $is_url_action = 0 if ( $possible_action ne 'u' );
+    }
   }
   else {
     unshift @args, $possible_action;
@@ -54,4 +61,8 @@ sub format_url {
   $url =~ s/\%s/$extra_args/g;
   #print "Opening URL: $url\n";
   return $url;
+}
+
+sub print_help {
+  print "Available keywords: " . join(' ', sort keys %$actions) . "\n";
 }
