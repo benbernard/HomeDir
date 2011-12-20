@@ -103,7 +103,7 @@ sub fix_colon_special_cases {
   }
 
   $line =~ s/https?:\/\/\S+//g;
-  
+
   return $line;
 }
 
@@ -114,7 +114,7 @@ sub check_for_stop {
 
   my $characters = Irssi::settings_get_str("confirm_characters");
 
-  my $regex = "^[^$characters].*[$characters]";
+  my $regex = "^[^$characters](.*)?[$characters]";
 
   return 0 if ( $IGNORE_LIST->{$witem->{'name'}} );
   return 1 if ( check_confirm($line, $server, $witem) );
@@ -173,5 +173,5 @@ Irssi::command_bind('show_confirm', 'show_confirm');
 Irssi::command_bind('add_ignore_channel', 'add_ignore_channel');
 Irssi::command_bind('remove_ignore_channel', 'remove_ignore_channel');
 Irssi::command_bind('show_ignore_list', 'show_ignore_list');
-Irssi::settings_add_str("confirm", "confirm_channels", ''); 
-Irssi::settings_add_str("confirm", "confirm_characters", ''); 
+Irssi::settings_add_str("confirm", "confirm_channels", '');
+Irssi::settings_add_str("confirm", "confirm_characters", '');
