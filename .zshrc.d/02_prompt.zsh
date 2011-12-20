@@ -78,16 +78,19 @@ fi
 # Note: using $fg_bold[color] inside a %(x.true.false) statment yields prompts
 # with lines longer than the width of the terminal
 #
-# %(0?.%{\e[1;32m%}.%{\e[1;31m%})
+# %(0?.%{\e[1;32m%}.%{\e[3;31m%})
 #   First, lets color the first section of the prompt on the command exit of the
 #   previous command %(x.true.false) is the syntax and x=? means the exit code of
 #   the previous command
-#   The \e[1;32m codes are colors.  1 for bold 32 or 31 for green/red
+#   The \e[1;32m codes are colors.  1 for bold 32 or 31 for green/red (1 vs 3
+#   for foreground vs. background)
 # ➜
 #   Literal character, unicode.
 # %*
 #   Current time.  For some reason p, P, Y all don't work.  zsh seems to have
 #   some alternatives that do work
+# %{$reset_color%}
+#   Reset the possible color from the previous command check
 # %(3L.S:$SHLVL .)
 #   Check the current SHLVL, if it is greater than 2 display S:$SHLVL so I can
 #   know if I'm in a sub shell
@@ -101,7 +104,11 @@ fi
 #   Literal character
 # %{$reset_color%}'
 #   Not sure what this does, but it was in the example.
-PROMPT=$'%(0?.%{\e[1;32m%}.%{\e[1;31m%})➜ %* %(3L.S:$SHLVL .)%{$fg_bold[blue]%}$(git_prompt_info)%{$fg_bold[blue]%}$(vi_mode_prompt_info) %{$reset_color%}'
+PROMPT=$'%(0?.%{\e[1;32m%}.%{\e[3;31m%})➜ %*%{$reset_color%} %(3L.S:$SHLVL .)%{$fg_bold[blue]%}$(git_prompt_info)%{$fg_bold[blue]%}$(vi_mode_prompt_info) %{$reset_color%}'
 setopt TRANSIENT_RPROMPT # RPROMPT disappears in terminal history great for copying
 
+#change branch name to yellow, not red
+ZSH_THEME_GIT_PROMPT_PREFIX="git:(%{$fg[yellow]%}"
+
+# Use "vicomd>" as the indicator for editing in command mode
 MODE_INDICATOR="%{$fg_bold[red]%}vicmd>"
