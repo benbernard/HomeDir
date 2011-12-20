@@ -72,12 +72,36 @@ fi
 #
 #zle -N zle-keymap-select
 
-setenv MY_PROMPT $'%(?.%{\e[0m%}.%{\e[0;31m%})%B%m%#%b '
-
-# This prompt tries to set the characters typed after the prompt to blue, but this doesn't work (except in command mode, for some reason...)
-#setenv MY_PROMPT $'%(?.%{\e[0m%}.%{\e[0;31m%})%B%m${VIMODE}%#%b%{\e[0;34m%} '
-
-setenv PROMPT $MY_PROMPT
-
+# This prompt uses oh-my-zsh prompt stuff for colors and the git prompt so lets deconstruct this:
+# Really useful reference for the prompt: http://www.nparikh.org/unix/prompt.php
+#
+# Note: using $fg_bold[color] inside a %(x.true.false) statment yields prompts
+# with lines longer than the width of the terminal
+#
+# %(0?.%{\e[1;32m%}.%{\e[1;31m%})
+#   First, lets color the first section of the prompt on the command exit of the
+#   previous command %(x.true.false) is the syntax and x=? means the exit code of
+#   the previous command
+#   The \e[1;32m codes are colors.  1 for bold 32 or 31 for green/red
+# ➜
+#   Literal character, unicode.
+# %*
+#   Current time.  For some reason p, P, Y all don't work.  zsh seems to have
+#   some alternatives that do work
+# %(3L.S:$SHLVL .)
+#   Check the current SHLVL, if it is greater than 2 display S:$SHLVL so I can
+#   know if I'm in a sub shell
+# %{$fg_bold[blue]%}$(git_prompt_info)%{$fg_bold[blue]%}
+#   Color the prompt blue, display the git prompt that has the current branch
+#   in it
+# $(vi_mode_prompt_info)
+#   Only set when in zle command line mode see .oh-my-zsh/plugins/vi-mode for
+#   more info, displays $MODE_INDICATOR when in command mode in the prompt
+# %
+#   Literal character
+# %{$reset_color%}'
+#   Not sure what this does, but it was in the example.
+PROMPT=$'%(0?.%{\e[1;32m%}.%{\e[1;31m%})➜ %* %(3L.S:$SHLVL .)%{$fg_bold[blue]%}$(git_prompt_info)%{$fg_bold[blue]%}$(vi_mode_prompt_info) %{$reset_color%}'
 setopt TRANSIENT_RPROMPT # RPROMPT disappears in terminal history great for copying
 
+MODE_INDICATOR="%{$fg_bold[red]%}vicmd>"

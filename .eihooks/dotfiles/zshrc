@@ -16,7 +16,7 @@ export GREP_COLOR=${GREP_COLOR:-1;35}    # Set the color for grep matches
 # a sane default prompt, most people will override this
 autoload colors
 colors
-PS1="%{${fg[$PROMPT_COLOR]}%}%B%n@%m] %b%{${fg[default]}%}"   # a nice colored prompt
+#PS1="%{${fg[$PROMPT_COLOR]}%}%B%n@%m] %b%{${fg[default]}%}"   # a nice colored prompt
 RPROMPT="%{${fg[$PROMPT_COLOR]}%}%B%(7~,.../,)%6~%b%{${fg[default]}%}"
 
 # Setup auto-titling screen windows
