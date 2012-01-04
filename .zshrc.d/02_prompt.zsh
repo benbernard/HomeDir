@@ -100,15 +100,20 @@ fi
 # $(vi_mode_prompt_info)
 #   Only set when in zle command line mode see .oh-my-zsh/plugins/vi-mode for
 #   more info, displays $MODE_INDICATOR when in command mode in the prompt
-# %
-#   Literal character
+# %%
+#   Literal character: %
 # %{$reset_color%}'
 #   Not sure what this does, but it was in the example.
-PROMPT=$'%(0?.%{\e[1;32m%}.%{\e[3;31m%})➜ %*%{$reset_color%} %(3L.S:$SHLVL .)%{$fg_bold[blue]%}$(git_prompt_info)%{$fg_bold[blue]%}$(vi_mode_prompt_info) %{$reset_color%}'
+PROMPT=$'%(0?.%{\e[1;32m%}.%{\e[3;31m%})➜ %*%{$reset_color%} %(3L.S:$SHLVL .)%{$fg_bold[blue]%}$(git_prompt_info)%{$fg_bold[blue]%}$(vi_mode_prompt_info) %%%{$reset_color%} '
 setopt TRANSIENT_RPROMPT # RPROMPT disappears in terminal history great for copying
+
+#RPROMPT="%{${fg[$PROMPT_COLOR]}%}%B%(7~,.../,)%6~%b%{${fg[default]}%} $(vi_mode_prompt_info)"
+
+# Remove a space
+ZSH_THEME_GIT_PROMPT_DIRTY="%{$fg[blue]%})%{$fg[yellow]%}✗%{$reset_color%}"
 
 #change branch name to yellow, not red
 ZSH_THEME_GIT_PROMPT_PREFIX="git:(%{$fg[yellow]%}"
 
-# Use "vicomd>" as the indicator for editing in command mode
-MODE_INDICATOR="%{$fg_bold[red]%}vicmd>"
+# change final % in prompt into red if in command mode
+MODE_INDICATOR="%{$fg_bold[red]%}"
