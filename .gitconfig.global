@@ -39,8 +39,10 @@
     prompt = no
 
 [merge]
-  tool = kidff3
-  conflictstyle = diff3
+  tool = mymeld
+
+[mergetool "mymeld"]
+      cmd = $HOME/bin/meldmerge $BASE $LOCAL $REMOTE $MERGED
 
 [gc]
   auto = 0

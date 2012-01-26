@@ -12,10 +12,11 @@ defscrollback 10000
 
 # Set the altscreen so that when you quit vi, it will go back to
 # what it was before
-altscreen on 
+altscreen on
 
 # allow scroll back
-termcapinfo xterm ti@:te@
+termcapinfo xterm|xterms|xs|rxvt ti@:te@
+termcapinfo xterm* ti@:te@
 
 #Always display status line, even if there is
 #only 1 window
@@ -231,3 +232,7 @@ bind -c plustwentymap 7 select 27
 bind -c plustwentymap 8 select 28
 bind -c plustwentymap 9 select 29
 bind -c plustwentymap 0 select 20
+
+# auto-log
+logfile $HOME/.screen-logs/%S-%Y%m%d-%n.log
+deflog on
