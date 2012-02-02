@@ -135,6 +135,16 @@ au FileType c,cpp set cinkeys+=0#
   " Use - as the leader for EasyMotion
   let g:EasyMotion_leader_key = '-'
 
+" Session settings
+  "When opened with a session, save the changes
+  let g:session_autosave = 'yes'
+
+  "When opened, use the latest session
+  let g:session_default_to_last = 'yes'
+
+  "Auto open the last session
+  let g:session_autoload = 'yes'
+
 """"""""""""""" Command mappings """"""""""""""""
 
 "Map statements
