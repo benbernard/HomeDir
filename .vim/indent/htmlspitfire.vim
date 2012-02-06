@@ -17,7 +17,11 @@ let b:did_indent = 1
 
 let b:indent_block_start = '^\s*#\(for\|if\|def\|else\|elif\|strip_lines\)'
 let b:indent_block_end = '^\s*#\(end\|else\|elif\)'
-let b:indent_ignore = '^\s*##'
+
+"Putting this back in would cause comment lines to be ignored for determining
+"current indent level... Among other things this causes follow-on comment
+"lines to be indented at a different level
+"let b:indent_ignore = '^\s*##'
 
 "setlocal indentexpr=GenericIndent(v:lnum)
 setlocal indentexpr=SpitfireIndent(v:lnum)
@@ -29,8 +33,36 @@ function! SpitfireIndent(lnum)
   " If the current line or the previous non blank line starts with a #, then
   " use the generic indent, otherwise to html indenting
   if getline(a:lnum) =~ '^\s*#' || getline(no_blank_lnum) =~ '^\s*#'
-    return GenericIndent(a:lnum)
+    return HtmlSpitfireGenericIndent(a:lnum)
   else
     return HtmlIndent()
   endif
 endfunction
+
+" This function is taken verbatim from the very useful genindent.vim plugin,
+" so that I don't have to bundle it with the syntax files
+function HtmlSpitfireGenericIndent(lnum)
+  if !exists('b:indent_ignore')
+    " this is safe, since we skip blank lines anyway
+    let b:indent_ignore='^$'
+  endif
+  " Find a non-blank line above the current line.
+  let lnum = prevnonblank(a:lnum - 1)
+  while lnum > 0 && getline(lnum) =~ b:indent_ignore
+    let lnum = prevnonblank(lnum - 1)
+  endwhile
+  if lnum == 0
+    return 0
+  endif
+  let curline = getline(a:lnum)
+  let prevline = getline(lnum)
+  let indent = indent(lnum)
+  if ( prevline =~ b:indent_block_start )
+    let indent = indent + &sw
+  endif
+  if (curline =~ b:indent_block_end )
+    let indent = indent - &sw
+  endif
+  return indent
+endfunction
+

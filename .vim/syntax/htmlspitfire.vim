@@ -28,5 +28,4 @@ syntax cluster htmlPreproc add=cheetahPlaceHolder
 syntax cluster htmlString add=cheetahPlaceHolder
 
 let b:current_syntax = "htmlspitfire"
-
-
+setlocal comments+=1:##
