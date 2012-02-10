@@ -215,11 +215,12 @@ au FileType c,cpp set cinkeys+=0#
 
 "Commands for perforce, from Scott Windsor
   " Perforce commands
-  command -nargs=0 Diff :!p4 diff %
-  command -nargs=0 Changes :!p4 changes %
-  command -nargs=1 Describe :!p4 describe <args> | more
-  command -nargs=0 Edit :!p4 edit %
-  command -nargs=0 Revert :!p4 revert %
+  " Works, but commented out for now, want these commands elsewhere
+  "command -nargs=0 Diff :!p4 diff %
+  "command -nargs=0 Changes :!p4 changes %
+  "command -nargs=1 Describe :!p4 describe <args> | more
+  "command -nargs=0 Edit :!p4 edit %
+  "command -nargs=0 Revert :!p4 revert %
 
 """"""""""""""" Syntax """"""""""""""""""""
 
