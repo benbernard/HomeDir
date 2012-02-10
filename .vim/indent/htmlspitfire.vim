@@ -41,7 +41,7 @@ endfunction
 
 " This function is taken verbatim from the very useful genindent.vim plugin,
 " so that I don't have to bundle it with the syntax files
-function HtmlSpitfireGenericIndent(lnum)
+function! HtmlSpitfireGenericIndent(lnum)
   if !exists('b:indent_ignore')
     " this is safe, since we skip blank lines anyway
     let b:indent_ignore='^$'
