@@ -1,3 +1,3 @@
 #!/bin/sh
 
-colordiff -u "$2" "$5" | cat
+diffcolor -u "$2" "$5" | cat

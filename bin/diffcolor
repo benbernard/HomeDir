@@ -24,6 +24,7 @@
 use strict;
 use Getopt::Long qw(:config pass_through);
 use IPC::Open2;
+use POSIX qw(isatty);
 
 my $app_name     = 'colordiff';
 my $version      = '1.0.9';
@@ -143,7 +144,7 @@ foreach $config_file (@config_files) {
 
 # If output is to a file, switch off colours, unless 'color_patch' is set
 # Relates to http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=378563
-if ((-f STDOUT) && ($color_patch == 0)) {
+if ((-f STDOUT) && ($color_patch == 0) || (! isatty(\*STDOUT))) {
     $plain_text  = '';
     $file_old    = '';
     $file_new    = '';
