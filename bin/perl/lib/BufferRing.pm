@@ -200,13 +200,11 @@ sub update_mac {
 
 sub update_screen {
   my $this      = shift;
-  my $exchange_file = '/var/tmp/buffer-exchange';
 
-  open(my $fh, '>', $exchange_file) or die "Could not open $exchange_file: $!";
-  print $fh $this->get_text();
-  close $fh;
-
-  system($ENV{'HOME'} . '/bin/update-screen-copy', $exchange_file);
+  my $script = $ENV{'HOME'} . '/bin/update-screen-copy';
+  open(my $cmd, '|-', $script) or die "Could not exec $script: $!";
+  print $cmd $this->get_text();
+  close $cmd;
 }
 
 1;

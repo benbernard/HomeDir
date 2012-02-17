@@ -78,6 +78,7 @@ sub logger {
     $ring->update_buffers();
     my $buffer = $ring->add_buffer($value);
     $buffer->update_mac();
+    $buffer->update_screen();
     return;
   }
 
@@ -85,7 +86,7 @@ sub logger {
     $current_value = $1;
     $accumulate = 1;
     return;
-  } 
+  }
 }
 
 sub get_nums {

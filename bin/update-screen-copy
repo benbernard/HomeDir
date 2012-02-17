@@ -1,5 +1,9 @@
 #!/usr/bin/zsh
 
+EXCHANGE_FILE=/var/tmp/buffer-exchange
+
+cat </dev/stdin >$EXCHANGE_FILE
+
 for i (default irc ninja-search) {
-  SCREENDIR=$HOME/.screen screen -S $i -X readbuf $1
+  SCREENDIR=$HOME/.screen screen -S $i -X readbuf $EXCHANGE_FILE
 }
