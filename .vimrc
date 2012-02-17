@@ -141,10 +141,10 @@ au FileType c,cpp set cinkeys+=0#
   let g:session_autosave = 'yes'
 
   "When opened, use the latest session
-  let g:session_default_to_last = 'yes'
+  "let g:session_default_to_last = 'yes'
 
   "Auto open the last session
-  let g:session_autoload = 'yes'
+  "let g:session_autoload = 'yes'
 
 """"""""""""""" Command mappings """"""""""""""""
 
