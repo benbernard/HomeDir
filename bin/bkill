@@ -1,0 +1,135 @@
+#!/usr/bin/perl -w
+
+use strict;
+use warnings;
+
+use Getopt::Long;
+use Data::Dumper;
+
+my $pattern;
+my $signal = 15;
+my $print_only = 0;
+my $except = { $$ => 1 };
+
+GetOptions(
+  'n'         => sub { $print_only = 1; },
+  'pattern=s' => \$pattern,
+  'signal=s'  => \$signal,
+  'help'      => sub {print_usage(); exit 1; },
+  '9'         => sub { $signal = 9; },
+  '0'         => sub { $signal = 0; },
+  'except=n'  => sub { $except->{$_[1]} = 1; },
+);
+
+unless ($pattern) {
+  die "Must specify --patern";
+}
+
+if ( ! ($signal =~ m/^\d+$/) ) {
+  if (exists signal_map()->{$signal}) {
+    $signal = signal_map()->{$signal};
+  }
+  else {
+    die "Signal $signal does not exist!";
+  }
+}
+
+my $pids = get_pids();
+
+my @matched;
+foreach my $pid (@$pids) {
+  next if exists $except->{$pid};
+  if ( pid_matches($pid, $pattern) ) {
+    push @matched, $pid;
+  }
+}
+
+if ( $print_only ) {
+  foreach my $pid (@matched) {
+    print "$pid - " . get_command_line($pid) . "\n";
+  }
+}
+else {
+  print "Killing " . join(' ', @matched) . "\n";
+  if ( $signal > 0 ) {
+    $signal *= -1;
+  }
+  kill $signal, @matched
+}
+
+sub pid_matches {
+  my $pid = shift;
+  my $pattern = shift;
+
+  my $cmdline = get_command_line($pid);
+  if ( $cmdline =~ m/$pattern/ ) {
+    return 1;
+  }
+  return 0;
+}
+
+sub get_command_line {
+  my $pid = shift;
+
+  my $cmdline_file = "/proc/$pid/cmdline";
+
+  open(my $fh, '<', $cmdline_file) or die "Could not open: $cmdline_file: $!";
+  local $/;
+  undef $/;
+  my $cmdline = <$fh>;
+  close $fh;
+
+  $cmdline =~ s/\0/ /g;
+  return $cmdline;
+}
+
+sub get_pids {
+  my $proc_dir = '/proc';
+
+  opendir(my $dh, $proc_dir) || die "can't opendir $proc_dir: $!";
+  my @pids = grep { /\d+/ && -e "$proc_dir/$_/cmdline" } readdir($dh);
+  closedir $dh;
+
+  return \@pids;
+}
+
+
+sub print_usage {
+  print <<HELP;
+$0 --pattern PATTERN
+  Kills processes matching PATTERN
+
+  --pattern <PATTERN>    - Pattern to match
+  -n                     - Do not kill, print matching pids
+  --signal <NUMBER|NAME> - Send signal NUMBER instead of $signal may send a
+                           name as below
+  --help                 - This help screen
+
+  Signals:
+HELP
+  print '    ' . join(' ', keys %{signal_map()}) . "\n";
+}
+
+sub signal_map {
+  return {
+    'HUP'  => 1,
+    'INT'  => 2,
+    'QUIT' => 3,
+    'ILL'  => 4,
+    'ABRT' => 6,
+    'FPE'  => 8,
+    'KILL' => 9,
+    'SEGV' => 11,
+    'PIPE' => 13,
+    'ALRM' => 14,
+    'TERM' => 15,
+    'USR1' => 30,
+    'USR2' => 31,
+    'CHLD' => 20,
+    'CONT' => 19,
+    'STOP' => 17,
+    'TSTP' => 18,
+    'TTIN' => 21,
+    'TTOU' => 22,
+  };
+}

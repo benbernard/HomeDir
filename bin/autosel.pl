@@ -56,8 +56,9 @@ sub logger {
   if ( $accumulate ) {
     if ( $line =~ m/^(.*)\036$/ ) {
       $current_value .= "\n$1";
-      $ring->update_buffers();
-      $ring->add_buffer($current_value);
+
+      add_buffer($ring, $current_value);
+
       print "Setting multiline buffer $current_value\n" if ( $verbose );
       #print get_nums($current_value) . "\n" if ( $verbose );
       $current_value = '';
@@ -75,10 +76,7 @@ sub logger {
     my $value   = $1;
     print "Setting buffer: $value\n" if ( $verbose );
     #print get_nums($value) . "\n" if ( $verbose );
-    $ring->update_buffers();
-    my $buffer = $ring->add_buffer($value);
-    $buffer->update_mac();
-    $buffer->update_screen();
+    add_buffer($ring, $value);
     return;
   }
 
@@ -87,6 +85,17 @@ sub logger {
     $accumulate = 1;
     return;
   }
+}
+
+sub add_buffer {
+  my $ring  = shift;
+  my $value = shift;
+
+  $ring->update_buffers();
+
+  my $buffer = $ring->add_buffer($value);
+  $buffer->update_mac();
+  $buffer->update_screen();
 }
 
 sub get_nums {
