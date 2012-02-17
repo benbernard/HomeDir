@@ -1,0 +1,5 @@
+#!/usr/bin/zsh
+
+for i (default irc ninja-search) {
+  SCREENDIR=$HOME/.screen screen -S $i -X readbuf $1
+}

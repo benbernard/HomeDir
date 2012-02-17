@@ -22,7 +22,7 @@ sub new {
   };
 
   bless $this, $class;
-  
+
   return $this;
 }
 
@@ -108,7 +108,7 @@ sub get_max_buffers {
 
 sub trim_buffers {
   my $this = shift;
-  
+
   my $max          = $this->get_max_buffers();
   my $buffers      = $this->get_buffers();
   my $buffers_size = scalar @$buffers;
@@ -177,6 +177,7 @@ sub make_current_selection {
   $this->xclip('secondary');
   $this->xclip('clipboard');
   $this->update_mac();
+  $this->update_screen();
 
   system("/usr/bin/ratpoison", "-c", "echo " . $this->get_text());
 }
@@ -195,6 +196,17 @@ sub update_mac {
   open(my $cmd, '|-', $NC, 'localhost', '24802') or die "Could not exec nc: $!";
   print $cmd $this->get_text();
   close $cmd;
+}
+
+sub update_screen {
+  my $this      = shift;
+  my $exchange_file = '/var/tmp/buffer-exchange';
+
+  open(my $fh, '>', $exchange_file) or die "Could not open $exchange_file: $!";
+  print $fh $this->get_text();
+  close $fh;
+
+  system($ENV{'HOME'} . '/bin/update-screen-copy', $exchange_file);
 }
 
 1;

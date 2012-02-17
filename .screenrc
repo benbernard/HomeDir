@@ -237,8 +237,6 @@ bind -c plustwentymap 0 select 20
 logfile $HOME/.screen-logs/%S-%Y%m%d-%n.log
 deflog on
 
-# set the second mark, write to the screen-exchange
-# file, and use xsel to synchronize the paste buffer
-# with the X selection.
-# Does not seem to work reliably with space, seemed to work better with '>'
-# bindkey -m " " eval "stuff ' '" writebuf "exec sh -c 'DISPLAY=:0 /usr/bin/xclip -i </tmp/screen-exchange'"
+# Setup ' ' (space) in copy mode to do the copy, then write the buffer out to
+# /tmp/screen-exchange (see writebuf) so that we can keep a log of the screen registers
+bindkey -m " " eval "stuff ' '" writebuf

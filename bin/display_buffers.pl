@@ -26,6 +26,7 @@ my $display_count = 0;
 my $TITLE = 'Buffer Ring';
 
 system($ENV{HOME} . "/bin/autosel.pl 1>/dev/null 2>/dev/null &");
+system($ENV{HOME} . "/bin/screen-copy-sync.sh 1>/dev/null 2>/dev/null &");
 
 GetOptions(
   #'filter=s'       => \$filter,
@@ -34,7 +35,7 @@ GetOptions(
 my $ring = BufferRing->new();
 
 print "calling show_buffers\n";
-eval { 
+eval {
   show_buffers();
 };
 
