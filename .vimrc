@@ -227,6 +227,16 @@ au FileType c,cpp set cinkeys+=0#
 " turn on syntax coloring
 syntax on
 
+
+" Add support for spitfire comments
+function EnhCommentifyCallback(ft)
+  if a:ft == 'htmlspitfire'
+    let b:ECcommentOpen = '##'
+    let b:ECcommentClose = ''
+  endif
+endfunction
+let g:EnhCommentifyCallbackExists = 'Yes'
+
 """"""""""""""" Version 7 Settings """"""""""""""""""""
 
 " The highlight changes at least have to be at the end here... not sure why
