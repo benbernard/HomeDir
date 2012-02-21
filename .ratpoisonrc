@@ -89,6 +89,10 @@ bind e eraseBiffs
 # remove resize binding
 bind r echo Use :resize
 
+# set up eraseBiffs binding
+alias joinlines exec /home/benbernard/bin/xselection-join-lines.pl
+bind J joinlines
+
 # Frame set bindings
 alias switchFrameset1 exec perl /home/benbernard/bin/switchFrameset --set 1
 alias switchFrameset2 exec perl /home/benbernard/bin/switchFrameset --set 2
