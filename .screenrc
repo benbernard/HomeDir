@@ -50,21 +50,21 @@ shelltitle "% |zsh"
  bind ^B source $HOME/.eihooks/dotfiles/screen.scrollback-urlview
  bind b source $HOME/.eihooks/dotfiles/screen.scrollback-urlview
 
-# set the second mark, write to the screen-exchange
-# file, and use xsel to synchronize the paste buffer
-# with the X selection.
-#bindkey -m > eval "stuff ' '" writebuf "exec sh -c 'env > /var/tmp/foo.env'"
-#bindkey -m > eval "stuff ' '" writebuf "exec /bin/zsh -c 'env -i DISPLAY=:0.0 XAUTHORITY=/home/bernard/.Xauthority /usr/X11R6/bin/xclip -i < /tmp/screen-exchange >/var/tmp/output 2>&1'"
-#bindkey -m > eval "stuff ' '" writebuf "exec /home/bernard/bin/copybuff"
-#bindkey -m > eval "stuff ' '" writebuf "exec sh -c '/usr/X11R6/bin/xclip -l 1 -i < /tmp/screen-exchange'"
-
 #flip bindings
 bind ^L escape "^Ll"
 
-#turn on logging
-# log on
-#logfile ~/.screen/output/screenlog
+# auto-log
+logfile $HOME/.screen-logs/%S-%Y%m%d-%n.log
+deflog on
 
+# Setup ' ' (space) in copy mode to do the copy, then write the buffer out to
+# /tmp/screen-exchange (see writebuf) so that we can keep a log of the screen
+# registers
+bindkey -m " " eval "stuff ' '" writebuf
+
+# Make messages appear for less time so that the copy things aren't as
+# intrusive
+msgwait 1
 
 # Register binds
 # Read default into a register
@@ -232,11 +232,3 @@ bind -c plustwentymap 7 select 27
 bind -c plustwentymap 8 select 28
 bind -c plustwentymap 9 select 29
 bind -c plustwentymap 0 select 20
-
-# auto-log
-logfile $HOME/.screen-logs/%S-%Y%m%d-%n.log
-deflog on
-
-# Setup ' ' (space) in copy mode to do the copy, then write the buffer out to
-# /tmp/screen-exchange (see writebuf) so that we can keep a log of the screen registers
-bindkey -m " " eval "stuff ' '" writebuf

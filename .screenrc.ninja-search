@@ -3,3 +3,4 @@ source $HOME/.screenrc
 
 hardstatus off
 hardstatus ignore
+msgwait 0
