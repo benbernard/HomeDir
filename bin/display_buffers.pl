@@ -76,6 +76,11 @@ sub show_buffers {
   $listbox->set_binding(\&show_buffer, "l" );
   $listbox->set_binding(\&edit_buffer, "v" );
 
+  # Navigation bindings
+  $listbox->set_binding(\&select_first, "0" );
+  $listbox->set_binding(\&select_first, "g" );
+  $listbox->set_binding(\&select_last, "G" );
+
   $listbox->set_binding(\&show_full_help, 'h');
 
   add_help($win, $listbox);
@@ -84,6 +89,14 @@ sub show_buffers {
 
   print "About to call mainloop\n";
   $cui->mainloop;
+}
+
+sub select_first {
+  $listbox->option_first();
+}
+
+sub select_last {
+  $listbox->option_last();
 }
 
 sub edit_buffer {
