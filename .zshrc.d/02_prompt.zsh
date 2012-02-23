@@ -94,9 +94,10 @@ fi
 # %(3L.S:$SHLVL .)
 #   Check the current SHLVL, if it is greater than 2 display S:$SHLVL so I can
 #   know if I'm in a sub shell
-# %{$fg_bold[blue]%}$(git_prompt_info)%{$fg_bold[blue]%}
-#   Color the prompt blue, display the git prompt that has the current branch
-#   in it $(git_prompt_info) is a call to that function
+# %{$fg_bold[blue]%}$(site_prompt_info)%{$fg_bold[blue]%}
+#   Color the prompt blue, display the site (machine) specific portion of the
+#   prompt with the call to site_prompt_info (which will be defined by
+#   99_last.zsh if nowhere else
 # $(vi_mode_prompt_info)
 #   Only set when in zle command line mode see .oh-my-zsh/plugins/vi-mode for
 #   more info, displays $MODE_INDICATOR when in command mode in the prompt
@@ -104,8 +105,7 @@ fi
 #   Literal character: %
 # %{$reset_color%}'
 #   Not sure what this does, but it was in the example.
-#PROMPT=$'%(0?.%{\e[1;32m%}.%{\e[3;31m%})➜ %*%{$reset_color%} %(3L.S:$SHLVL .)%{$fg_bold[blue]%}$(git_prompt_info)%{$fg_bold[blue]%}$(vi_mode_prompt_info) %%%{$reset_color%} '
-PROMPT=$'%(0?.%{\e[1;32m%}.%{\e[3;31m%})➜ %*%{$reset_color%} %(3L.S:$SHLVL .)%{$fg_bold[blue]%}$(current_client)%{$fg_bold[blue]%}$(vi_mode_prompt_info) %%%{$reset_color%} '
+PROMPT=$'%(0?.%{\e[1;32m%}.%{\e[3;31m%})➜ %*%{$reset_color%} %(3L.S:$SHLVL .)%{$fg_bold[blue]%}$(site_prompt_info)%{$fg_bold[blue]%}$(vi_mode_prompt_info) %%%{$reset_color%} '
 setopt TRANSIENT_RPROMPT # RPROMPT disappears in terminal history great for copying
 
 #RPROMPT="%{${fg[$PROMPT_COLOR]}%}%B%(7~,.../,)%6~%b%{${fg[default]}%} $(vi_mode_prompt_info)"
