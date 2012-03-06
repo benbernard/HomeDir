@@ -5,5 +5,9 @@ EXCHANGE_FILE=/var/tmp/buffer-exchange
 cat </dev/stdin >$EXCHANGE_FILE
 
 for i (default irc ninja-search) {
-  SCREENDIR=$HOME/.screen screen -S $i -X readbuf $EXCHANGE_FILE
+  # Set and unset msgwait so that we don't get annoying flashing all the
+  # time...
+  SCREENDIR=$LOCAL_HOME/screen screen -S $i -X msgwait 0
+  SCREENDIR=$LOCAL_HOME/screen screen -S $i -X readbuf $EXCHANGE_FILE
+  SCREENDIR=$LOCAL_HOME/screen screen -S $i -X msgwait 2
 }
