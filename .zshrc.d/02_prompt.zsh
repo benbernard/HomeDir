@@ -16,6 +16,10 @@ bindkey "^K" kill-line
 # helps debug completion problems, F2
 bindkey "^[OQ" _complete_debug
 
+# make backspace work in vi-insert mode
+bindkey -v ^H backward-delete-char
+bindkey -v  backward-delete-char
+
 # bind v in vi command mode to open current command in the $EDITOR
 autoload edit-command-line
 zle -N edit-command-line
