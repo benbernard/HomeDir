@@ -49,33 +49,6 @@ if autoload +X url-quote-magic 2> /dev/null; then
   zle -N self-insert url-quote-magic
 fi
 
-########### This section tries to display i or c for insert and command code
-########### in the prompt... unfortunately it clears the color state for last executed
-########### command... I think this could be fixed with precmd or something, not sure...
-#setopt prompt_subst
-#VIMODE=" i"
-##REAL_PS1='%B%n%b@%U%m%u${VIMODE}%(!.#.>) '
-##PS1=${REAL_PS1}
-#bindkey -v
-#function zle-line-init() {
-# # Must match the VIMODE initial value above.
-#  zle -K viins
-#} #zle -N zle-line-init
-#
-## Show insert/command mode in vi.
-## zle-keymap-select is executed every time KEYMAP changes.
-## See http://zshwiki.org/home/examples/zlewidgets for details.
-#function zle-keymap-select {
-# # Traditional right-hand side vi standard mode display
-#  # RPS1="${${KEYMAP/vicmd/-- NORMAL --}/(main|viins)/-- INSERT --}"
-#  # Shorter version on the left.
-# VIMODE="${${KEYMAP/vicmd/ c}/(main|viins)/ i}"
-# PROMPT=$MY_PROMPT
-# zle reset-prompt
-#}
-#
-#zle -N zle-keymap-select
-
 # This prompt uses oh-my-zsh prompt stuff for colors and the git prompt so lets deconstruct this:
 # Really useful reference for the prompt: http://www.nparikh.org/unix/prompt.php
 #
@@ -95,8 +68,8 @@ fi
 #   some alternatives that do work
 # %{$reset_color%}
 #   Reset the possible color from the previous command check
-# %(3L.S:$SHLVL .)
-#   Check the current SHLVL, if it is greater than 2 display S:$SHLVL so I can
+# %(4L.S:$SHLVL .)
+#   Check the current SHLVL, if it is greater than 3 display S:$SHLVL so I can
 #   know if I'm in a sub shell
 # %{$fg_bold[blue]%}$(site_prompt_info)%{$fg_bold[blue]%}
 #   Color the prompt blue, display the site (machine) specific portion of the
@@ -109,7 +82,7 @@ fi
 #   Literal character: %
 # %{$reset_color%}'
 #   Not sure what this does, but it was in the example.
-PROMPT=$'%(0?.%{\e[1;32m%}.%{\e[3;31m%})➜ %*%{$reset_color%} %(3L.S:$SHLVL .)%{$fg_bold[blue]%}$(site_prompt_info)%{$fg_bold[blue]%}$(vi_mode_prompt_info) %%%{$reset_color%} '
+PROMPT=$'%(0?.%{\e[1;32m%}.%{\e[3;31m%})➜ %*%{$reset_color%} %(4L.S:$SHLVL .)%{$fg_bold[blue]%}$(site_prompt_info)%{$fg_bold[blue]%}$(vi_mode_prompt_info) %%%{$reset_color%} '
 setopt TRANSIENT_RPROMPT # RPROMPT disappears in terminal history great for copying
 
 #RPROMPT="%{${fg[$PROMPT_COLOR]}%}%B%(7~,.../,)%6~%b%{${fg[default]}%} $(vi_mode_prompt_info)"

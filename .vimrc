@@ -1,5 +1,5 @@
 " First setup variable for other variables
-let g:useNinjaTagList=1
+"let g:useNinjaTagList=1
 
 syntax on
 
