@@ -10,6 +10,12 @@ alias 'la=ls --color=auto -A'
 alias 'lt=ls --color=auto -latr'
 alias 'lc=ls --color=never'
 
+#zmv stuff
+autoload zmv
+alias 'zcp=noglob zmv -C -W'
+alias 'zln=noglob zmv -L -W'
+alias 'zmv=noglob zmv -M -W'
+
 #A couple of u alias... but please remember u NUM
 alias 'uu=cd ../..'
 alias 'uuu=cd ../../..'

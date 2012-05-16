@@ -31,7 +31,10 @@ setopt AUTO_PUSHD #cd pushes directories on to the stack
 
 #Setting to fix bad settings in global zshrc
 #Do not autocorrect on enter, I don't like that much correction
-setopt NO_CORRECT_ALL 
+setopt NO_CORRECT_ALL
+
+#Report 'time' on things that took longer than 10 seconds
+REPORTTIME=10
 
 #Prompt
 # the cool thing about these prompt settings is that they make your command line
