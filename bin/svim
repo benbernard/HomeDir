@@ -1,0 +1,99 @@
+#!/usr/bin/perl -w
+
+$| = 1;
+
+use strict;
+
+use FindBin qw($Bin); use lib $Bin . "/perl/lib";;
+use lib $ENV{'HOME'} . '/bin/perl/lib';
+
+use Data::Dumper;
+use Cwd qw(getcwd);
+use StringMatch qw(match_strings);
+use Getopt::Long;
+
+my $SESSION_DIR = $ENV{'HOME'} . '/.vim/sessions';
+my $reset = 0;
+my $session = find_current_client();
+
+GetOptions(
+  'reset-session' => \$reset,
+  'session-dir'   => \$SESSION_DIR,
+  'help'          => \&print_usage,
+  'session=s'     => \$session,
+);
+
+my $file = $ARGV[0] || '';
+
+if ( ! $session ) {
+  die "Not in a citc client, or specify --session!\n";
+}
+
+if ( $reset ) {
+  print "Resetting session $session\n";
+  if ( session_exists($session) ) {
+    delete_session($session);
+  }
+}
+
+if ( ! -e $file ) {
+  if (! session_exists($session) ) {
+    die "New sessions must be run with editing a file!\n";
+  }
+}
+
+if ( -e $file ) {
+  if ( session_exists($session) ) {
+    print "Do you want to delete the current session $session? (Y/n) ";
+    my $input = getc;
+    unless ( lc($input) =~ m/^n/ ) {
+      delete_session($session);
+    }
+  }
+}
+
+print "Running with session: $session\n";
+run_vim($session, @ARGV);
+
+sub run_vim {
+  my $session = shift;
+  my $command = 'SaveSession';
+  if ( session_exists($session) ) {
+    $command = 'OpenSession';
+  }
+
+  exec('vim', @_, '-c', "$command $session");
+}
+
+sub find_current_client {
+  my $pwd = getcwd();
+
+  if ( $pwd =~ m!/google/src/cloud/benbernard/([^/]+)! ) {
+    return $1;
+  }
+
+  return '';
+}
+
+sub session_exists {
+  my $session = shift;
+  return -e "$SESSION_DIR/$session.vim";
+}
+
+sub delete_session {
+  my $session = shift;
+  unlink "$SESSION_DIR/$session.vim";
+}
+
+sub print_usage {
+  print <<USAGE;
+$0
+  Starts a vim session for the current citc client
+
+  --reset-session - Destroys the session file before starting
+  --session-dir   - Defaults to $SESSION_DIR, location of session files
+  --session NAME  - Session to load, defaults to current citc client name.
+  --help          - This screen
+USAGE
+  exit 1;
+}

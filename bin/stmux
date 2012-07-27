@@ -1,0 +1,35 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+use POSIX ":sys_wait_h";
+
+use IPC::Open3;
+
+my $name = shift @ARGV;
+
+$name ||= 'default';
+
+if ( run_tmux('has', '-t', $name) ) {
+  exec('tmux', 'attach', '-t', $name);
+}
+else {
+  exec('tmux', 'new', '-s', $name);
+}
+
+sub run_tmux {
+  return run_command('tmux', @_);
+}
+
+sub run_command {
+  my @command = @_;
+  my ($in, $out, $err);
+  my $pid = open3($in, $out, $err, @command) or die "Could not run: " . join(' ', @command) . " error: $!";
+  close $in;
+  local $/ = undef;
+  <$out>;
+  close $out;
+  waitpid($pid, 0);
+  return not $?;
+}
