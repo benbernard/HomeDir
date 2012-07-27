@@ -17,6 +17,7 @@ bind C-t focuslast
 
 # bind o to go to other
 bind o other
+bind O next
 
 # use to use alias for testing
 alias reload source /home/benbernard/.ratpoisonrc

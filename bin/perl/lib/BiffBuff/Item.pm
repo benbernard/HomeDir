@@ -162,7 +162,9 @@ sub reload {
   my $mtime     = (stat($file))[9];
   my $last_load = $this->get_last_load() || 0;
 
-  return 0 if ( $mtime < $last_load );
+  if ( defined $mtime && defined $last_load ) {
+    return 0 if ( $mtime < $last_load );
+  }
 
   my $contents = slurp($file);
   my $data = JSON::Syck::Load($contents);

@@ -15,7 +15,7 @@ source $HOME/.eihooks/dotfiles/vimrc
 
 set fo+=qr                     " q: gq foramts with comments, see :help fo-table, r: auto insert comments on new lines
 set foldcolumn=0               " turn off the foldcolumn
-set history=100                " Remember 100 lines of history, for commands and searches
+set history=200                " Remember 100 lines of history, for commands and searches
 set hls                        " highlight serach terms
 set list                       " Show tabs differently
 set listchars=tab:>-           " Use >--- for tabs
