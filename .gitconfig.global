@@ -38,11 +38,11 @@
 [difftool]
     prompt = no
 
-[merge]
-  tool = mymeld
-
-[mergetool "mymeld"]
-      cmd = $HOME/bin/meldmerge $BASE $LOCAL $REMOTE $MERGED
+#[merge]
+#  tool = mymeld
+#
+#[mergetool "mymeld"]
+#      cmd = $HOME/bin/meldmerge $BASE $LOCAL $REMOTE $MERGED
 
 [gc]
   auto = 0
