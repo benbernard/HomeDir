@@ -31,7 +31,7 @@ my $WARP_COMMAND = 'warpToNS --name Youtube --center';
 my $url = format_url(@ARGV);
 
 UrlOpener::open_url($url);
-system($WARP_COMMAND);
+#system($WARP_COMMAND);
 
 sub format_url {
   my $possible_action = shift;

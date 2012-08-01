@@ -27,7 +27,8 @@ sub _init {
   my $this      = shift;
   my $skip_load = shift;
   my $dir  = $this->get_queue_dir();
-  mkpath($dir);
+  #mkpath($dir);
+  system("mkdir -p $dir");
 
   $this->reload_items() unless ( $skip_load );
   $this->load_ids();
@@ -185,7 +186,8 @@ sub write_ids {
   my $file     = $this->get_ids_file();
   my $data_dir = dirname($file);
 
-  mkpath($data_dir) unless ( -e $data_dir );
+  #mkpath($data_dir) unless ( -e $data_dir );
+  system("mkdir -p $data_dir") unless ( -e $data_dir );
 
   my $ids = $this->{'IDS'} || {};
   my $json = JSON::Syck::Dump($ids);
@@ -238,8 +240,7 @@ sub _get_filename_for_item {
 }
 
 sub _get_home {
-  my $uid = (getpwuid($<))[0];
-  return "/home/$uid";
+  return (getpwuid($<))[7];
 }
 
 sub clear_items {

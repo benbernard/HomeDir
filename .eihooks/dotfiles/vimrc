@@ -53,29 +53,29 @@
 
 "Use a temp directory in the home dir rather than in tmp where it can get
 "cleaned up without our consent
-perl <<EOT
-  # Get the user name, should probably get the home dir...
-  my $home_dir = (getpwuid($<))[7];
-
-  if ( -e $home_dir ) {
-    my $temp_location = $ENV{VIM_TEMP} || "$home_dir/.vim-tmp";
-    my $tmp_dir       = $temp_location . '/vXXX';
-    my $swp_dir       = $temp_location . '/swps';
-    my $undo_dir      = $temp_location . '/undo';
-
-    # If the location doesn't exist, create it
-    mkdir $temp_location unless ( -e $temp_location );
-
-    mkdir $tmp_dir unless ( -e $tmp_dir );
-    mkdir $swp_dir unless ( -e $swp_dir );
-    mkdir $undo_dir unless ( -e $undo_dir );
-
-    # Set TMPDIR and directory to the new location
-    VIM::DoCommand("let \$TMPDIR = '" . $tmp_dir . "'") if ( -w $tmp_dir );
-    VIM::DoCommand("set directory=" . $swp_dir . '//') if ( -w $swp_dir );
-    VIM::DoCommand("set undodir=" . $undo_dir) if ( -w $undo_dir );
-  }
-EOT
+" perl <<EOT
+"   # Get the user name, should probably get the home dir...
+"   my $home_dir = (getpwuid($<))[7];
+"
+"   if ( -e $home_dir ) {
+"     my $temp_location = $ENV{VIM_TEMP} || "$home_dir/.vim-tmp";
+"     my $tmp_dir       = $temp_location . '/vXXX';
+"     my $swp_dir       = $temp_location . '/swps';
+"     my $undo_dir      = $temp_location . '/undo';
+"
+"     # If the location doesn't exist, create it
+"     mkdir $temp_location unless ( -e $temp_location );
+"
+"     mkdir $tmp_dir unless ( -e $tmp_dir );
+"     mkdir $swp_dir unless ( -e $swp_dir );
+"     mkdir $undo_dir unless ( -e $undo_dir );
+"
+"     # Set TMPDIR and directory to the new location
+"     VIM::DoCommand("let \$TMPDIR = '" . $tmp_dir . "'") if ( -w $tmp_dir );
+"     VIM::DoCommand("set directory=" . $swp_dir . '//') if ( -w $swp_dir );
+"     VIM::DoCommand("set undodir=" . $undo_dir) if ( -w $undo_dir );
+"   }
+" EOT
 
 "Disabled options
   "set list                    " Make tabs and trails explicit
