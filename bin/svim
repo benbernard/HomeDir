@@ -14,7 +14,7 @@ use Getopt::Long;
 
 my $SESSION_DIR = $ENV{'HOME'} . '/.vim/sessions';
 my $reset = 0;
-my $session = find_current_client();
+my $session;
 
 GetOptions(
   'reset-session' => \$reset,
@@ -23,11 +23,11 @@ GetOptions(
   'session=s'     => \$session,
 );
 
-my $file = $ARGV[0] || '';
-
-if ( ! $session ) {
-  die "Not in a citc client, or specify --session!\n";
+unless($session) {
+  $session = 'default';
 }
+
+my $file = $ARGV[0] || '';
 
 if ( $reset ) {
   print "Resetting session $session\n";
@@ -68,7 +68,7 @@ sub run_vim {
 sub find_current_client {
   my $pwd = getcwd();
 
-  if ( $pwd =~ m!/google/src/cloud/benbernard/([^/]+)! ) {
+  if ( $pwd =~ m!/benbernard/([^/]+)! ) {
     return $1;
   }
 
@@ -88,11 +88,11 @@ sub delete_session {
 sub print_usage {
   print <<USAGE;
 $0
-  Starts a vim session for the current citc client
+  Starts a vim session for the session
 
   --reset-session - Destroys the session file before starting
   --session-dir   - Defaults to $SESSION_DIR, location of session files
-  --session NAME  - Session to load, defaults to current citc client name.
+  --session NAME  - Session to load, defaults to 'default'
   --help          - This screen
 USAGE
   exit 1;

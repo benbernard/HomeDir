@@ -99,7 +99,7 @@ sub fix_colon_special_cases {
   }
 
   foreach my $nick (@nicks) {
-    $line =~ s/$nick://ig;
+    $line =~ s/\Q$nick\E://ig;
   }
 
   $line =~ s/https?:\/\/\S+//g;

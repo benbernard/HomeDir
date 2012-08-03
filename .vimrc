@@ -27,8 +27,10 @@ set softtabstop=4              " use 2 space indenting
 set textwidth=0                " turn wrapping off
 set visualbell                 " Use a flash instead of a sound for bells
 set wildmode=longest:full      " Matches only to longest filename, displays to menu possible matches
-set undofile                   " Keep undo history around, across vim reboots
 set complete=.,w,b,u           " complete from current file, and current buffers default: .,w,b,u,t,i  trying to keep down completion time
+set directory=$HOME/.vim/tmp   " set directory for tmp files to be in .vim, so that .swp files are not littered
+set undofile                   " Keep undo history around, across vim reboots
+set undodir=$HOME/.vim/tmp     " set directory for undo files
 
 "set foldmethod=indent   " use indent unless overridden
 set foldlevel=0         " show contents of all folds
