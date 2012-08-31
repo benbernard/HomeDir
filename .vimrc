@@ -22,7 +22,8 @@ set listchars=tab:>-           " Use >--- for tabs
 set nolinebreak                " don't wrap at words, messes up copying
 set shiftwidth=4               " use 2 space idnetning
 set smartcase                  " if any capitol in search, turns search case sensitive
-set softtabstop=4              " use 2 space indenting
+set softtabstop=4              " use 4 space indenting
+set ts=4                       " Default to 4 spaces for tabs
 "set tags=~/.commontags,./tags " Setup the standard tags files
 set textwidth=0                " turn wrapping off
 set visualbell                 " Use a flash instead of a sound for bells

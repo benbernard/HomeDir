@@ -15,8 +15,6 @@ augroup filetypedetect
   autocmd BufReadPost * endif
 
   autocmd BufReadPost .tags        setfiletype tags     " .tag files need love too
-  autocmd BufReadPost *.mi         setfiletype mason    " mason rules
-  autocmd BufReadPost *.m          setfiletype mason    " mason rules
   autocmd BufReadPost .z*          setfiletype zsh      " obscure zsh files need love too
 
   autocmd BufReadPost *.t          setfiletype perl     " perl unit test files
