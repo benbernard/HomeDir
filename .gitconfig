@@ -1,0 +1,51 @@
+# vim: set filetype=gitconfig :
+
+[diff]
+  color = auto
+  rename = copy
+
+[pager]
+    color = true
+	grep = false
+
+[status]
+    color = true
+
+[color]
+  ui = true
+  interactive = always
+  diff = true
+
+[color "diff"]
+  whitespace = red reverse
+
+[core]
+    whitespace=fix,-indent-with-non-tab,trailing-space,cr-at-eol
+    pager = less -XRMSIF
+
+[alias]
+    st = status
+    ci = commit
+    br = branch
+    co = checkout
+    df = diff
+    lg = log -p
+    l = log --oneline
+    lgfiles = log --name-only
+    lol = log --graph --decorate --pretty=oneline --abbrev-commit
+    lola = log --graph --decorate --pretty=oneline --abbrev-commit --all
+    ls = ls-files
+
+[difftool]
+    prompt = no
+
+#[merge]
+#  tool = mymeld
+#
+#[mergetool "mymeld"]
+#      cmd = $HOME/bin/meldmerge $BASE $LOCAL $REMOTE $MERGED
+
+[gc]
+  auto = 0
+  reflogExpire = never
+  reflogExpireUnreachable = never
