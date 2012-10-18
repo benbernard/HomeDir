@@ -22,3 +22,9 @@
 [submodule ".vim/bundle/YankRing.vim"]
 	path = .vim/bundle/YankRing.vim
 	url = git://github.com/vim-scripts/YankRing.vim.git
+[submodule ".vim/bundle/vim-visual-increment"]
+	path = .vim/bundle/vim-visual-increment
+	url = git://github.com/triglav/vim-visual-increment.git
+[submodule ".vim/bundle/vim-session"]
+	path = .vim/bundle/vim-session
+	url = git://github.com/xolox/vim-session.git
