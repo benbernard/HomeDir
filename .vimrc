@@ -1,3 +1,7 @@
+" Intialzie pathogen, a plugin management system that lets plugins live in
+" their own directories
+call pathogen#infect()
+
 " First setup variable for other variables
 "let g:useNinjaTagList=1
 
@@ -55,7 +59,7 @@ endif
 """"""""""""""" Status Line """"""""""""""""""""
 
 " Set the status line
-set statusline=%f\ %y%{GetStatusEx()}[b:%n]\ %m%r%=(%l/%L,%c%V)\ %P
+set statusline=%f\ %y%{GetStatusEx()}[b:%n]\ %{fugitive#statusline()}\ %m%r%=(%l/%L,%c%V)\ %P
 
 " Function for getting the file format and the encoding for the status line.
 function! GetStatusEx()
