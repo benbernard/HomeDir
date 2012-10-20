@@ -1,5 +1,6 @@
 " Intialzie pathogen, a plugin management system that lets plugins live in
 " their own directories
+
 call pathogen#infect()
 
 " First setup variable for other variables
@@ -121,10 +122,6 @@ au FileType c,cpp set cinkeys+=0#
   "Don't remap <C-N> and <C-P>
   let g:yankring_replace_n_pkey = '<F3>'
   let g:yankring_replace_n_nkey = '<F2>'
-
-  "Adding d'a and y'a to yankring keys
-  nnoremap y'a  :<C-U>YRYankCount 'y' . "'a'"<CR>
-  nnoremap d'a  :<C-U>YRYankCount 'd' . "'a'"<CR>
 
 "AddressComplete Settings
   "automatically address complete on exit
