@@ -85,7 +85,7 @@ fi
 #   Literal character: %
 # %{$reset_color%}'
 #   Not sure what this does, but it was in the example.
-PROMPT=$'%(0?.%{\e[1;32m%}.%{\e[3;31m%})➜ %*%{$reset_color%} %(4L.S:$SHLVL .)$(vi_mode_prompt_info) %%%{$reset_color%} '
+PROMPT=$'%(0?.%{\e[1;32m%}.%{\e[3;31m%})➜ %*%{$reset_color%} %(4L.S:$SHLVL .)%{$fg_bold[blue]%}$(git_prompt_info)%{$reset_color%}$(vi_mode_prompt_info) %%%{$reset_color%} '
 #PROMPT=$'%(0?.%{\e[1;32m%}.%{\e[3;31m%})➜ %*%{$reset_color%} %(4L.S:$SHLVL .)%{$fg_bold[blue]%}$(site_prompt_info)%{$fg_bold[blue]%}$(vi_mode_prompt_info) %%%{$reset_color%} '
 setopt TRANSIENT_RPROMPT # RPROMPT disappears in terminal history great for copying
 
@@ -95,7 +95,7 @@ setopt TRANSIENT_RPROMPT # RPROMPT disappears in terminal history great for copy
 ZSH_THEME_GIT_PROMPT_DIRTY="%{$fg[blue]%})%{$fg[yellow]%}✗%{$reset_color%}"
 
 #change branch name to yellow, not red
-ZSH_THEME_GIT_PROMPT_PREFIX="git:(%{$fg[yellow]%}"
+ZSH_THEME_GIT_PROMPT_PREFIX="g:(%{$fg[yellow]%}"
 
 # change final % in prompt into red if in command mode
 MODE_INDICATOR="%{$fg_bold[red]%}"
