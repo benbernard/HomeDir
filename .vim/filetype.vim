@@ -20,6 +20,7 @@ augroup filetypedetect
   autocmd BufReadPost *.t          setfiletype perl     " perl unit test files
 
   autocmd BufReadPost *.wiki       setfiletype Wikipedia " for use with wikiUtil
+  autocmd BufReadPost *.html       setfiletype htmldjango " for use with wikiUtil
 
   " Discover perforce type from first line of the file
   autocmd BufReadPost *  if getline(1) =~ '^# A Perforce .* Specification.'
