@@ -50,3 +50,5 @@
   auto = 0
   reflogExpire = never
   reflogExpireUnreachable = never
+[merge]
+	conflictstyle = diff3
