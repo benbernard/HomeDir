@@ -30,12 +30,14 @@
     co = checkout
     df = diff
     lg = log -p
-    l = log --oneline
-    lgfiles = log --name-only
-    lol = log --graph --decorate --pretty=oneline --abbrev-commit
-    lola = log --graph --decorate --pretty=oneline --abbrev-commit --all
+    l = log --oneline --no-merges
+    lgfiles = log --name-only --no-merges
+    lol = log --graph --decorate --pretty=oneline --abbrev-commit --no-merges
+    lola = log --graph --decorate --pretty=oneline --abbrev-commit --all --no-merges
     ls = ls-files
     p = pick --local-only
+    lf = log --no-merges --oneline --
+    log-file = log --no-merges --
 
 [difftool]
     prompt = no
