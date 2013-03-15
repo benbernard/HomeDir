@@ -17,7 +17,7 @@ bindkey "^K" kill-line
 bindkey "^[OQ" _complete_debug
 
 # make backspace work in vi-insert mode
-bindkey -v ^H backward-delete-char
+bindkey -v  backward-delete-char
 bindkey -v  backward-delete-char
 
 # bind v in vi command mode to open current command in the $EDITOR
