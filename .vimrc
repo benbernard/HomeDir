@@ -57,6 +57,9 @@ if (v:version >= 603)
   set viminfo='1000,f1,<500,:100,/100,%,!
 endif
 
+" Open a the quickfix window after any grep-style event
+autocmd QuickFixCmdPost *grep* cwindow
+
 """"""""""""""" Status Line """"""""""""""""""""
 
 " Set the status line

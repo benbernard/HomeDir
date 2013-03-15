@@ -54,3 +54,4 @@
   reflogExpireUnreachable = never
 [merge]
 	conflictstyle = diff3
+[hub]
