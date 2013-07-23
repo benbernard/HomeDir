@@ -1,14 +1,13 @@
 chatnets = {
-  google = { type = "IRC"; };
-  jabber = { type = "IRC"; };
   freenode = { type = "IRC"; nick = "ben_bernard"; };
+  bitlbee = { type = "IRC"; nick = "bernard_bitlbee"; };
 };
 
 channels = (
-  { name = "#gbow"; chatnet = "google"; autojoin = "yes"; },
+  { name = "#ex_bow"; chatnet = "freenode"; autojoin = "yes"; },
   {
     name = "&bitlbee";
-    chatnet = "jabber";
+    chatnet = "bitlbee";
     autojoin = "yes";
     autosendcmd = "msg &bitlbee identify iamben;";
   }
@@ -23,7 +22,7 @@ windows = {
         type = "CHANNEL";
         chat_type = "IRC";
         name = "&bitlbee";
-        tag = "jabber";
+        tag = "bitlbee";
       }
     );
   };
@@ -33,8 +32,8 @@ windows = {
       {
         type = "CHANNEL";
         chat_type = "IRC";
-        name = "#gbow";
-        tag = "google";
+        name = "#ex_bow";
+        tag = "freenode";
       }
     );
   };
@@ -44,8 +43,8 @@ windows = {
       {
         type = "CHANNEL";
         chat_type = "IRC";
-        name = "#ex_bow";
-        tag = "freenode";
+        name = "#twitter_bernard_ben";
+        tag = "bitlbee";
       }
     );
   };
@@ -259,15 +258,15 @@ settings = {
   };
   "fe-text" = { actlist_sort = "recent"; };
   "perl/core/scripts" = {
-    url_log_browser = "/home/benbernard/bin/openUrl '%f'";
-    autoaway_timeout = "0";
-    autoaway = "36000";
-    away_reason = "idle timeout";
-    nicklist_width = "16";
-    nicklist_automode = "screen";
+    url_log_browser = "/Users/bbernard/bin/openUrl '%f'";
+    #autoaway_timeout = "0";
+    #autoaway = "36000";
+    #away_reason = "idle timeout";
+    nicklist_width = "24";
+    nicklist_automode = "off";
     print_log_whole_log = "yes";
     chanact_show_all = "yes";
-    nicklist_height = "100";
+    nicklist_height = "50";
     confirm_characters = "/:";
     confirm_channels = "twitter_bernard_ben";
     url_log_auto_head = "no";
@@ -276,3 +275,4 @@ settings = {
 
 logs = { };
 ignores = ( );
+hilights = ( { text = "ben_bernard"; nick = "yes"; word = "yes"; } );
