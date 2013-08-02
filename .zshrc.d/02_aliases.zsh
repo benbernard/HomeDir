@@ -37,3 +37,6 @@ alias 'p=popd'
 
 # Add --prompt to s3_upload.pl
 alias 's3_upload.pl=s3_upload.pl --prompt'
+
+# Prompt when about to overwrite a file iwht mv (use -f to force)
+alias 'mv=mv -i'
