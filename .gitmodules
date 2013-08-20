@@ -37,3 +37,6 @@
 [submodule ".vim/bundle/ack.vim"]
 	path = .vim/bundle/ack.vim
 	url = https://github.com/mileszs/ack.vim.git
+[submodule ".vim/bundle/vim-autoformat-rails"]
+	path = .vim/bundle/vim-autoformat-rails
+	url = https://github.com/KurtPreston/vim-autoformat-rails.git

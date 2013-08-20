@@ -54,3 +54,7 @@ nsc () {
   screen -c ~/.screenrc.nested -x -RR -e l -S "$@"
 }
 
+mvscreenshot() {
+    FILE=`ls -tr ~/Desktop/Screen\ Shot* | tail -n 1`
+    mv $FILE ~/Desktop/$1
+}
