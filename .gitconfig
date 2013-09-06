@@ -38,6 +38,7 @@
     p = pick --local-only
     lf = log --no-merges --oneline --
     log-file = log --no-merges --
+    alog = log --date-order --all --graph --format=\"%C(green)%H%Creset %C(yellow)%an%Creset %C(blue bold)%ad%Creset %C(red bold)%d%Creset%s\"
 
 [difftool]
     prompt = no
