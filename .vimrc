@@ -37,6 +37,7 @@ set complete=.,w,b,u           " complete from current file, and current buffers
 set directory=$HOME/.vim/tmp   " set directory for tmp files to be in .vim, so that .swp files are not littered
 set undofile                   " Keep undo history around, across vim reboots
 set undodir=$HOME/.vim/tmp     " set directory for undo files
+set clipboard=unnamed          " Use the * register when a register is not specified - unifies with system clipboard!
 
 "set foldmethod=indent   " use indent unless overridden
 set foldlevel=0         " show contents of all folds
@@ -179,12 +180,6 @@ au FileType c,cpp set cinkeys+=0#
   "map control arrow to move between buffers
   nmap <C-n> :bn<CR>
   nmap <C-p> :bp<CR>
-
-  "map ctrl-e to make file writable
-  nmap <C-E> :!chmod +w %<CR>
-
-  "map ctrl-c to chmod +w current file
-  nmap <C-C> :r /var/tmp/clipboard-bernard<CR>
 
   "map F1 to paste in the selection buffer (*)
   nmap <F1> "*p
