@@ -40,3 +40,6 @@
 [submodule ".vim/bundle/vim-autoformat-rails"]
 	path = .vim/bundle/vim-autoformat-rails
 	url = https://github.com/KurtPreston/vim-autoformat-rails.git
+[submodule ".vim/bundle/vimtodo"]
+	path = .vim/bundle/vimtodo
+	url = https://github.com/mivok/vimtodo.git

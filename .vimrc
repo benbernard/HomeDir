@@ -40,7 +40,7 @@ set undodir=$HOME/.vim/tmp     " set directory for undo files
 set clipboard=unnamed          " Use the * register when a register is not specified - unifies with system clipboard!
 
 "set foldmethod=indent   " use indent unless overridden
-set foldlevel=0         " show contents of all folds
+"set foldlevel=0         " show contents of all folds
 "set foldcolumn=2        " set a column incase we need it
 
 filetype plugin on          "turns on filetype plugin, lets matchit work well
@@ -109,6 +109,17 @@ set cinkeys-=0#
 au FileType c,cpp set cinkeys+=0#
 
 """"""""""""""" Plugin Settings """"""""""""""""
+
+" vim todo settings
+  autocmd BufNewFile,BufRead *.todo set foldlevelstart=0 "todo files have a fold level..
+  autocmd BufNewFile,BufRead *.todo set filetype=todo " .todo files to filetype todo
+  " Force folds to display
+  autocmd BufNewFile,BufRead *.todo normal zX
+  let g:todo_done_file = ".todo_done_log.todo" " Set file to put done tasks in
+  let g:todo_browser = "open"
+
+
+
 
 "rcsvers.vim settings
   let g:rvSaveDirectoryType = 1 "Use single directory for all files
