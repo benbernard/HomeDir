@@ -128,7 +128,32 @@ au FileType c,cpp set cinkeys+=0#
   let g:todo_done_file = ".todo_done_log.todo" " Set file to put done tasks in
   let g:todo_browser = "open" " what browser to use to open incidents
 
+" calendar settings
+" PrePad taken from stackoverflow:
+" http://stackoverflow.com/questions/4964772/string-formatting-padding-in-vim
+  function! PrePad(s,amt,...)
+      if a:0 > 0
+          let char = a:1
+      else
+          let char = ' '
+      endif
+      return repeat(char,a:amt - len(a:s)) . a:s
+  endfunction
 
+  function InsertCalendarDueDate(day,month,year,week,dir)
+    " day   : day you actioned
+    " month : month you actioned
+    " year  : year you actioned
+    " week  : day of week (Mo=1 ... Su=7)
+    " dir   : direction of calendar
+    exe 'q'
+    exe 'normal A {' . a:year . '-' . PrePad(a:month, 2, '0') . '-' . PrePad(a:day, 2, '0') . '}'
+  endfunction
+  let calendar_action = 'InsertCalendarDueDate'
+
+  let g:calendar_no_mappings=0 " turn off default mappings
+  nmap <unique> <Leader>cal <Plug>CalendarH
+  nmap <unique> <Leader>caL <Plug>CalendarV
 
 
 "rcsvers.vim settings
@@ -186,6 +211,7 @@ au FileType c,cpp set cinkeys+=0#
 
   "Map for YRShow
   map <F4> :YRShow<CR>
+  map <Leader>yr :YRShow<CR>
 
   " Make enter and Sift-Enter insert lines without going to insert mode
   " Next Line Doesn't work, why not?
