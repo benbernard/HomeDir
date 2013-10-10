@@ -1,0 +1,72 @@
+#!/usr/bin/perl -w
+
+# Handling a file dropped by screen hardcopy.  We move it to a decent temporary
+# location, stripping trailing and leading blank lines, then invoke $EDITOR on
+# it and remove it afterwards.
+
+use strict;
+use warnings;
+
+use Getopt::Long;
+
+use File::Temp ("tempfile");
+use IO::Handle;
+
+my $filter = "cat";
+my $seek = 0;
+
+GetOptions(
+    "filter|f=s" => \$filter,
+    "reverse|r"  => sub { $filter = "tac"; },
+    "seek|s=s"   => \$seek,
+);
+
+if(@ARGV != 1)
+{
+    die "Bad extra args count (" . scalar(@ARGV) . "), expected 1";
+}
+
+my $oldfile = shift;
+
+open(OLDFILE, "-|", $filter, $oldfile) || die "Unable to open " . $oldfile . ": " . $!;
+my ($fh, $filename) = tempfile();
+my $start = 1;
+my $blanks = 0;
+
+if ( $seek ) {
+    seek OLDFILE, $seek, 2;
+}
+
+while(my $line = <OLDFILE>)
+{
+    if($line eq "\n")
+    {
+        ++$blanks;
+    }
+    else
+    {
+        if($start)
+        {
+            # trim leading blank lines
+            $start = 0;
+        }
+        else
+        {
+            print $fh ("\n" x $blanks);
+        }
+        print $fh $line;
+        $blanks = 0;
+    }
+}
+# trim trailing blank lines by leaking $blanks
+close(OLDFILE);
+if($?)
+{
+    die "Child filter died with exit " . $?;
+}
+system("/bin/rm", "--", $oldfile);
+
+$fh->flush();
+system($ENV{'EDITOR'} || "vi", $filename);
+
+system("/bin/rm", "--", $filename);
