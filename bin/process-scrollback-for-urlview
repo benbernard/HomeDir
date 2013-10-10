@@ -1,0 +1,73 @@
+#!/usr/bin/perl -w
+
+# Reverse and filter the contents of the scrollback buffer, possibly making
+# sense of them and dumping extra URLs.
+
+use strict;
+use warnings;
+
+use URI::Escape ('uri_escape');
+
+my %regexes =
+(
+   # Apollo deployments, created by e.g.  aCAD or aEC
+   qr/^Created \w* deployment (\d*) for /                                 => sub { return 'https://apollo.amazon.com/deployment_observe.html?deploymentId=' . $_[0]; },
+   # Submitted perforce CLNs, we guess the brazil depot
+   qr/^Change (\d*) (submitted|created)/                                  => \&process_cln,
+   # Login notifications
+   qr/^(\w*) has logged on /                                              => sub { return ns_url($_[0] . '@'); },
+   # host name
+   qr/([a-z0-9.-]*\.[a-z0-9.-]*\.amazon\.com)/                            => sub { return ns_url('host ' . $_[0]); },
+   # xx@amazon.com or xx@a9.com, etc.
+   qr/([a-z]*)\@(?:(?:amazon|lab126|a9|imdb)\.com|amazon\.co\.(?:uk|jp))/ => sub { return ns_url($_[0] . '@'); },
+   # perforce path
+   qr/(\/\/(share|brazil)\/[^ #@]*)/                                      => \&process_brazil_path,
+   # remedy ticket
+   qr/(?:ticket|tt)[# \t]*((?:000|)\d{7})/i                               => sub { return 'http://remedy.amazon.com/tt/client-hpd.cgi?CASE_ID=' . $_[0]; },
+);
+
+my @lines;
+while(my $line = <>)
+{
+    unshift @lines, $line;
+    chomp $line;
+    for my $regex (keys(%regexes))
+    {
+        my $func = $regexes{$regex};
+
+        my @match = ($line =~ $regex);
+        if(@match)
+        {
+            unshift @lines, reverse map { $_ . "\n" } ($func->(@match));
+        }
+    }
+}
+
+print @lines;
+
+sub process_cln
+{
+    my $cln = shift;
+    my $url = 'https://devcentral.amazon.com/source-views/p4db/brazil/changeView.cgi?CH=';
+    if ( $cln < 1000000 )
+    {
+        $url = 'https://devcentral.amazon.com/source-views/p4db/website-templates/changeView.cgi?CH=';
+    }
+    return $url . $cln;
+}
+
+sub ns_url
+{
+    return 'http://improvement-ninjas.amazon.com/ninja-search/?q=' . uri_escape($_[0]);
+}
+
+sub process_brazil_path
+{
+    my $path = shift;
+    my $url = 'https://devcentral.amazon.com/source-views/p4db/brazil/fileLogView.cgi?FSPC=';
+    if ( $path =~ m!/websiteTemplates/! )
+    {
+        $url = 'https://devcentral.amazon.com/source-views/p4db/website-templates/fileLogView.cgi?FSPC=';
+    }
+    return $url . uri_escape($path);
+}
