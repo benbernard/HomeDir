@@ -30,7 +30,7 @@ plugins=(git ruby nyan python perl vi-mode django)
 source $ZSH/oh-my-zsh.sh
 
 # Customize to your needs...
-export PATH=/usr/local/symlinks:/usr/local/scripts:/usr/local/buildtools/java/jdk/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/home/benbernard/bin:/home/benbernard/RecordStream/bin:/home/benbernard/GitScripts/bin:/home/benbernard/bin:/home/benbernard/RecordStream/bin:/home/benbernard/GitScripts/bin
+export PATH=/usr/local/bin:/usr/local/symlinks:/usr/local/scripts:/usr/local/buildtools/java/jdk/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/home/benbernard/bin:/home/benbernard/RecordStream/bin:/home/benbernard/GitScripts/bin:/home/benbernard/bin:/home/benbernard/RecordStream/bin:/home/benbernard/GitScripts/bin
 
 # Sets: ENV_IMPROVEMENT_ROOT, ZSH_VERSION
 
