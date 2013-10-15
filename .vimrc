@@ -250,6 +250,9 @@ au FileType c,cpp set cinkeys+=0#
 "    '[,']yank "*
 "  endfunction
 
+  " map \uo to open the first url on the line
+  map <Leader>uo :call OpenUrl()<CR>
+
 "Visual Mode Maps
   "Visual mode comment adding
   "vmap <Leader>c :s/^/#/g<enter>:nohl<enter> " leader-c comments block
