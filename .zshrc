@@ -114,4 +114,7 @@ fi
 compinit
 
 PATH=$PATH:$HOME/.rvm/bin # Add RVM to PATH for scripting
-source ~/.zprofile
+
+if [[ -e ~/.zproifle ]]; then
+    source ~/.zprofile
+fi
