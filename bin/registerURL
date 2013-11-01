@@ -1,0 +1,30 @@
+#!/opt/local/bin/perl -w
+
+use strict;
+use Tie::IxHash;
+use Data::Dumper;
+
+my $log_file = '/Users/bbernard/urllog';
+
+my $new_url = $ARGV[0];
+my $threshold = 100;
+my %hash;
+
+tie(%hash, 'Tie::IxHash');
+
+open(my $rh, '<', $log_file) or die "Could not open $log_file: $!";
+while(my $line = <$rh>) {
+    chomp $line;
+    $hash{$line} = 1;
+}
+close $rh;
+
+if(exists $hash{$new_url}) {
+    exit 0;
+}
+
+open(my $wh, '>>', "$log_file") or die "Could not open $log_file.tmp:$!";
+print $wh $new_url . "\n";
+close $wh;
+
+system("tail -n 100 $log_file | sponge $log_file");

@@ -1,0 +1,311 @@
+#!/usr/bin/perl -w
+
+$| = 1;
+
+use strict;
+use warnings;
+
+use Getopt::Long;
+use Term::ReadKey;
+
+my $dryrun       = 0;
+my $no_nl        = 0;
+my $sessionname;
+my $stdin        = 0;
+my $text;
+my $use_rlwrap   = 0;
+my $verbose      = 0;
+my $send_cr      = 1;
+my $echoing      = 1;
+
+my $ACTIONS = {
+    'sm-togglecr'  =>  {
+        ACTION      => sub { $send_cr = ! $send_cr; my $str = $send_cr ? "yes" : "no"; print "Set send cr to: $str\n"; },
+        DESCRIPTION => 'toggle sending carrage returns',
+    },
+    'sm-sendcr'    => {
+        ACTION      => sub { my ($line, $tabs) = @_; run_commands("\n", $tabs); },
+        DESCRIPTION => 'send a carrage return'
+    },
+    'sm-sendctrlc' => {
+        ACTION      => sub { my ($line, $tabs) = @_; run_commands("\x03", $tabs); },
+        DESCRIPTION => 'send a ctrl-c'
+    },
+    'sm-sudo' => {
+        ACTION      => \&safe_sudo,
+        DESCRIPTION => 'Do a "safe sudo" where it will require a password, set the echo mode to off'
+    },
+    'sm-noecho' => {
+        ACTION      => sub { $echoing = 0; ReadMode('noecho'); print "hidden:\n"; },
+        DESCRIPTION => 'Do not echo input to the terminal, useful for hiding passwords, unhides after the first line of input',
+    },
+    'sm-help' => {
+        ACTION      => \&interactive_help,
+        DESCRIPTION => 'see multiplex help',
+    },
+    'sm-settabs' => {
+        ACTION      => \&set_tabs,
+        DESCRIPTION => 'Set the screen tab numbers to send commands to',
+    },
+};
+
+# keep unrecognized args in @ARGV
+Getopt::Long::Configure('pass_through');
+
+GetOptions(
+    'rlwrap|rl' => \$use_rlwrap,
+);
+
+if ( $use_rlwrap )
+{
+    # The GetOptions above will have removed the --rlwrap, which is necessary
+    # to prevent this from causing a fork loop
+    exec("/opt/local/bin/rlwrap",
+         $0,
+         '--stdin',
+         @ARGV);
+}
+
+GetOptions(
+    'dryrun|n'        => \$dryrun,
+    'help'            => \&usage,
+    'no-nl'           => \$no_nl,
+    'sessionname|S=s' => \$sessionname,
+    'stdin|i'         => \$stdin,
+    'text=s'          => \$text,
+    'verbose|v+'      => \$verbose,
+);
+
+if(!defined($text) && !$stdin)
+{
+    if(!@ARGV && !$stdin)
+    {
+        warn "No text specified, specify text or use --stdin!\n";
+        usage();
+    }
+    $text = shift;
+}
+
+if ( defined $text && $stdin ) 
+{
+    warn "Cannot specify both --text and --stdin\n";
+    usage();
+}
+
+if(!@ARGV)
+{
+    # This fails `screen-multiplex nop` which one might expect to paste "nop"
+    # into no tabs.  Oh well.
+    warn "No tabs specified!\n";
+    usage();
+}
+
+my @tabs;
+
+populate_tabs(\@ARGV, \@tabs);
+
+if(!$no_nl)
+{
+    $text .= "\n";
+}
+
+if ( $stdin ) 
+{
+    print "Type sm-help for help\n";
+    print "> ";
+
+    while(my $line = <STDIN>) 
+    {
+        if ( ! $echoing ) {
+            print "\n";
+            ReadMode(0);
+            $echoing = 1;
+        }
+
+        my $command = find_command($line);
+        if ( $ACTIONS->{$command} ) {
+            $ACTIONS->{$command}->{'ACTION'}->($line, \@tabs);
+        }
+        else {
+          chomp $line if ( ! $send_cr );
+          run_commands($line, \@tabs);
+        }
+
+        print "> ";
+    }
+}
+else
+{
+    run_commands($text, \@tabs);
+}
+
+sub interactive_help {
+    print <<USAGE;
+Use the prompt to send commands to all the selected screen tabs.  Whitespace in
+front of the command is ok.
+
+Available screen-multiplex commands:
+USAGE
+
+    foreach my $command (sort keys %$ACTIONS) {
+        my $description = $ACTIONS->{$command}->{'DESCRIPTION'};
+        print "  $command - $description\n";
+    }
+
+    print <<EXAMPLE;
+
+Examples:
+  # Run a sudo command
+  > sm-sudo ls
+  hidden:
+  > *******
+  >
+
+  # Vim a file
+  > vim file
+  > sm-togglecr
+  Set send cr to: no
+  > 40j
+  > i I am line 40
+  > <CTRL-V><ESC>
+  > :wq
+  > sm-sendcr
+
+EXAMPLE
+}
+
+sub set_tabs {
+    my ($line, $tabs) = @_;
+
+    $line =~ s/sm-settabs *//;
+
+    my @new_tabs = split(/\s+/, $line);
+    populate_tabs(\@new_tabs, $tabs);
+}
+
+sub populate_tabs {
+    my ($tab_specs, $tabs) = @_;
+
+    foreach my $tab (@$tab_specs) {
+        if ( ! ($tab =~ m/^\d+$/ || $tab =~ m/^\d+-\d+$/) ) {
+            print "Not a number: [$tab], not replacing tab numbers!\n";
+            return;
+        }
+    }
+
+    @$tabs = ();
+
+    foreach my $tab (@$tab_specs) {
+        if ( $tab =~ m/^\d+$/ ) {
+            push @$tabs, $tab;
+        }
+        elsif ( $tab =~ m/^(\d+)-(\d+)$/ ) {
+            foreach my $i ($1..$2) {
+                push @$tabs, $i;
+            }
+        }
+        else {
+            print "Not a recognized tab number, this is a bug!\n"
+        }
+    }
+}
+
+sub safe_sudo {
+    my ($line, $tabs) = @_; 
+    $line =~ s/sm-sudo/sudo/; 
+
+    #First try to guarantee we're at a prompt
+    $ACTIONS->{'sm-sendctrlc'}->{'ACTION'}->("", $tabs);
+
+    # Send the kill and thend send the sudo
+    run_commands("sudo -k\n", $tabs); 
+    run_commands($line, $tabs); 
+
+    #Set noecho, because next input is password
+    $ACTIONS->{'sm-noecho'}->{'ACTION'}->("", $tabs);
+}
+
+sub find_command {
+    my $input_line = shift;
+
+    if($input_line =~ m/^\s*(\S+)/) {
+      return $1;
+    }
+
+    return "";
+}
+
+sub run_commands 
+{
+    my $command = shift;
+    my $tabs    = shift;
+
+    foreach my $tab (@$tabs) 
+    {
+        print "Stuffing to tab " . $tab . "\n" if($verbose >= 1);
+        my @run_screen = ("screen");
+
+        if(defined($sessionname))
+        {
+            push @run_screen, ("-x", $sessionname);
+        }
+
+        my @cmd = (@run_screen, "-p", $tab, "-X", "stuff", $command);
+        if($dryrun)
+        {
+            print "system(" . join(", ", map { "'" . $_ . "'" } @cmd) . ")\n";
+        }
+        else
+        {
+            system(@cmd);
+        }
+
+        # Unfortunately the screen command succeeds even if there is no such tab : (
+    }
+}
+
+sub usage
+{
+    print <<USAGE;
+Usage: screen-multiplex <args> <text> <tab numbers>
+    Stuffs text into multiple screen tabs' input queues.  Due to
+    limitations in screen's stuff command this won't work with very
+    large text.
+
+    Tab numbers should be screen tab numbers for tabs in the screen session
+    (defaults to current session), you may use ranges such as 1-4
+
+Arguments:
+    --dryrun|-n        Instead of actually running commands, print them
+    --no-nl            Don't append a newline to the stuffed text
+    --help             Induce this help screen and bail
+    --sessionname|-S   Spawn tabs in this screen session instead
+    --verbose|-v       Increase verbosity
+    --text <text>      Use this as the text (instead of the first extra arg)
+    --stdin|-i         Take input on stdin
+    --rlwrap|-rl       Use rlwrap to provide a readline enabled interface, implies --stdin
+
+Interactive commands:
+    With --stdin or --rlwrap, you will get a prompt asking for each command you
+    want to execute, there are a number of addition commands that control
+    screen-multiplex and allow you to do some interesting things.  Type sm-help
+    to see the commands, output of which is reproduced below:
+
+USAGE
+    
+    $ACTIONS->{'sm-help'}->{'ACTION'}->();
+
+    print <<USAGE;
+
+Examples:
+    Run `tail -f /var/log/messages` in several tabs (presumably on separate hosts):
+        screen-multiplex 'tail -f /var/log/messages' 0 1 2
+    Send a single keystroke x to several tabs:
+        screen-multiplex --no-nl x 5 6 7
+    Start an input session with readline support for tabs 5,6,7
+        screen-multiplex --rlwrap 5-7
+
+USAGE
+
+    exit 1;
+}
