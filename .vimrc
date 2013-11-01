@@ -35,8 +35,6 @@ set visualbell                 " Use a flash instead of a sound for bells
 set wildmode=longest:full      " Matches only to longest filename, displays to menu possible matches
 set complete=.,w,b,u           " complete from current file, and current buffers default: .,w,b,u,t,i  trying to keep down completion time
 set directory=$HOME/.vim/tmp   " set directory for tmp files to be in .vim, so that .swp files are not littered
-set undofile                   " Keep undo history around, across vim reboots
-set undodir=$HOME/.vim/tmp     " set directory for undo files
 set clipboard=unnamed          " Use the * register when a register is not specified - unifies with system clipboard!
 
 "set foldmethod=indent   " use indent unless overridden
@@ -279,7 +277,6 @@ au FileType c,cpp set cinkeys+=0#
 " turn on syntax coloring
 syntax on
 
-
 " Add support for spitfire comments
 function EnhCommentifyCallback(ft)
   if a:ft == 'htmlspitfire'
@@ -291,7 +288,6 @@ let g:EnhCommentifyCallbackExists = 'Yes'
 
 """"""""""""""" Version 7 Settings """"""""""""""""""""
 
-" The highlight changes at least have to be at the end here... not sure why
 if ( v:version >= 700 )
   " Vim 7.0c+ options
   "set cursorline " Get a highlight of the line the cursor is on
@@ -304,6 +300,15 @@ if ( v:version >= 700 )
   highlight! SpellBad ctermbg=2
 endif
 
+
+if ( v:version >= 703 )
+  set undofile                   " Keep undo history around, across vim reboots
+  set undodir=$HOME/.vim/tmp     " set directory for undo files
+endif
+
+""""""""""""""" Version 7 Settings """"""""""""""""""""
+
+" The highlight changes at least have to be at the end here... not sure why
 " Highlight trailing whitespace in red so I can prevent that.
 " Must be below any colorscheme setting
 highlight ExtraWhitespace ctermbg=red guibg=red
