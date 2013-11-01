@@ -1,0 +1,19 @@
+#!/bin/zsh
+
+#osascript -e 'tell application "Xcode"
+#    activate
+#
+#    set targetProject to project of active project document
+#    if (build targetProject) is equal to "Build succeeded" then
+#        launch targetProject
+#    end if
+#end tell'
+
+osascript -e '
+tell application "Xcode"
+  activate
+end tell
+ 
+tell application "System Events"
+  key code 15 using {command down}
+end tell'
