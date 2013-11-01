@@ -43,3 +43,6 @@
 [submodule ".vim/bundle/vimtodo"]
 	path = .vim/bundle/vimtodo
 	url = https://github.com/mivok/vimtodo.git
+[submodule ".vim/bundle/vim-misc"]
+	path = .vim/bundle/vim-misc
+	url = https://github.com/xolox/vim-misc
