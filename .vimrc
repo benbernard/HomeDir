@@ -25,10 +25,10 @@ set hls                        " highlight serach terms
 set list                       " Show tabs differently
 set listchars=tab:>-           " Use >--- for tabs
 set nolinebreak                " don't wrap at words, messes up copying
-set shiftwidth=4               " use 2 space idnetning
 set smartcase                  " if any capitol in search, turns search case sensitive
-set softtabstop=4              " use 4 space indenting
-set ts=4                       " Default to 4 spaces for tabs
+set shiftwidth=2               " use 2 space idnetning
+set softtabstop=2              " use 4 space indenting
+set ts=2                       " Default to 4 spaces for tabs
 "set tags=~/.commontags,./tags " Setup the standard tags files
 set textwidth=0                " turn wrapping off
 set visualbell                 " Use a flash instead of a sound for bells
@@ -196,7 +196,36 @@ au FileType c,cpp set cinkeys+=0#
   "let g:session_default_to_last = 'yes'
 
   "Auto open the last session
-  "let g:session_autoload = 'yes'
+  let g:session_autoload = 'no'
+
+"Ctrlp settings
+  "Default to using regexes
+  let g:ctrlp_regexp = 1
+
+  " Use Ctrl-, rather than Ctrl-p
+  let g:ctrlp_map = '<C-a>'
+
+  " Keep the cache file across restarts for faster startup
+  let g:ctrlp_clear_cache_on_exit = 0
+
+  " Setup alternate command maps TODO: why don't they display?
+  map <Leader>ab :CtrlPBuffer<CR>
+  map <Leader>aq :CtrlPQuickfix<CR>
+
+"Syntastic Settings
+  " Automatically open the location list when there are errors
+  let g:syntastic_auto_loc_list = 1
+
+  " Use my jshintrc file rather than default
+  let g:syntastic_javascript_jshint_args="-c ~/.jshintrc"
+
+  " Map <leader>st to SyntasticToggleMode
+  map <Leader>st :SyntasticReset<CR>
+
+  " Setup javascript as the only active syntax
+  let g:syntastic_mode_map = { 'mode': 'passive',
+                             \ 'active_filetypes': ['javascript'],
+                             \ 'passive_filetypes': [] }
 
 """"""""""""""" Command mappings """"""""""""""""
 

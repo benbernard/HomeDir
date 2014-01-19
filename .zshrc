@@ -20,12 +20,12 @@ ZSH_THEME="robbyrussell"
 # DISABLE_AUTO_TITLE="true"
 
 # Uncomment following line if you want red dots to be displayed while waiting for completion
-# COMPLETION_WAITING_DOTS="true"
+COMPLETION_WAITING_DOTS="true"
 
 # Which plugins would you like to load? (plugins can be found in ~/.oh-my-zsh/plugins/*)
 # Example format: plugins=(rails git textmate ruby lighthouse)
 #plugins=(git ruby github nyan python perl vi-mode django)
-plugins=(git ruby nyan python perl vi-mode django)
+plugins=(git ruby python perl vi-mode)
 
 source $ZSH/oh-my-zsh.sh
 
@@ -118,3 +118,9 @@ PATH=$PATH:$HOME/.rvm/bin # Add RVM to PATH for scripting
 if [[ -e ~/.zproifle ]]; then
     source ~/.zprofile
 fi
+
+export PERL_LOCAL_LIB_ROOT="/Users/bernard/perl5:$PERL_LOCAL_LIB_ROOT";
+export PERL_MB_OPT="--install_base "/Users/bernard/perl5"";
+export PERL_MM_OPT="INSTALL_BASE=/Users/bernard/perl5";
+export PERL5LIB="/Users/bernard/perl5/lib/perl5:$PERL5LIB";
+export PATH="/Users/bernard/perl5/bin:$PATH";

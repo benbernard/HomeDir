@@ -2,7 +2,7 @@
 
 use strict;
 
-$ENV{'SCREENDIR'} = '/Users/bbernard/.screen';
+$ENV{'SCREENDIR'} = '/Users/bernard/.screen';
 my $temp_file = '/tmp/buffer-exchange';
 my $current_contents = get_clip();
 
@@ -19,9 +19,9 @@ while(1) {
   close $fh;
 
   foreach my $session (qw(irc default)) {
-    system(qw(/usr/local/bin/screen -S), $session,  qw(-X msgwait 0));
-    system(qw(/usr/local/bin/screen -S), $session, qw(-X readbuf), $temp_file);
-    system(qw(/usr/local/bin/screen -S), $session, qw(-X msgwait 2));
+    system(qw(/usr/bin/screen -S), $session,  qw(-X msgwait 0));
+    system(qw(/usr/bin/screen -S), $session, qw(-X readbuf), $temp_file);
+    system(qw(/usr/bin/screen -S), $session, qw(-X msgwait 2));
   }
 }
 

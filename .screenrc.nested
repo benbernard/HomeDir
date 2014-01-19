@@ -5,6 +5,6 @@ source $HOME/.screenrc
 escape "^Ll"
 
 #flip bindings
-bind ^X escape "^Xx"
+#bind ^X escape "^Xx"
 
 shell zsh
