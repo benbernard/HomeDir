@@ -209,8 +209,8 @@ au FileType c,cpp set cinkeys+=0#
   let g:ctrlp_clear_cache_on_exit = 0
 
   " Setup alternate command maps TODO: why don't they display?
-  map <Leader>ab :CtrlPBuffer<CR>
-  map <Leader>aq :CtrlPQuickfix<CR>
+  nn <silent> <Leader>ab :CtrlPBuffer<CR>
+  nn <silent> <Leader>aq :CtrlPQuickfix<CR>
 
 "Syntastic Settings
   " Automatically open the location list when there are errors
