@@ -5,7 +5,7 @@
     <key>Label</key>
     <string>paste-tracker</string>
     <key>Program</key>
-    <string>/Users/bbernard/bin/mac/paste-tracker.pl</string>
+    <string>/Users/bernard/bin/mac/paste-tracker.pl</string>
     <key>KeepAlive</key>
     <true/>
   </dict>

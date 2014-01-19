@@ -56,3 +56,8 @@
 [merge]
 	conflictstyle = diff3
 [hub]
+[user]
+	name = Ben Bernard
+	email = github@benjaminbernard.com
+[push]
+	default = matching

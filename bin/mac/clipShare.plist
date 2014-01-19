@@ -5,7 +5,7 @@
     <key>Label</key>
     <string>clipShare</string>
     <key>Program</key>
-    <string>/Users/bbernard/bin/mac/screen-copy-sync.sh</string>
+    <string>/Users/bernard/bin/mac/screen-copy-sync.sh</string>
     <key>WatchPaths</key>
     <array>
       <string>/tmp/screen-exchange</string>

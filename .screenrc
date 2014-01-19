@@ -51,7 +51,7 @@ shelltitle "% |zsh"
  bind b source $HOME/.eihooks/dotfiles/screen.scrollback-urlview
 
 #flip bindings
-bind ^L escape "^Ll"
+#bind ^L escape "^Ll"
 
 # auto-log
 logfile $HOME/.screen-logs/%S-%Y%m%d-%n.log
