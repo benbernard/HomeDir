@@ -89,7 +89,7 @@ sub print_log {
 }
 
 Irssi::command_bind('printlog', 'print_log_command');
-Irssi::signal_add_first('window item new', 'print_log_event');
+#Irssi::signal_add_first('window item new', 'print_log_event');
 
 Irssi::settings_add_int("populate_window", "print_log_size", 25);
 Irssi::settings_add_bool("populate_window", "print_log_whole_log", 0);

@@ -38,8 +38,9 @@ set directory=$HOME/.vim/tmp   " set directory for tmp files to be in .vim, so t
 set clipboard=unnamed          " Use the * register when a register is not specified - unifies with system clipboard!
 
 "set foldmethod=indent   " use indent unless overridden
-set foldlevel=0         " show contents of all folds
+"set foldlevel=0         " show contents of all folds
 "set foldcolumn=2        " set a column incase we need it
+set foldlevelstart=9999
 
 
 filetype plugin on          "turns on filetype plugin, lets matchit work well
@@ -203,7 +204,7 @@ au FileType c,cpp set cinkeys+=0#
   let g:ctrlp_regexp = 1
 
   " Use Ctrl-, rather than Ctrl-p
-  let g:ctrlp_map = '<C-a>'
+  let g:ctrlp_map = '<leader>aa'
 
   " Keep the cache file across restarts for faster startup
   let g:ctrlp_clear_cache_on_exit = 0
@@ -301,6 +302,82 @@ au FileType c,cpp set cinkeys+=0#
   "command -nargs=0 Edit :!p4 edit %
   "command -nargs=0 Revert :!p4 revert %
 
+" Unite
+  " Much of this is is borrowed from: https://github.com/terryma/dotfiles/blob/master/.vimrc
+  let g:unite_source_history_yank_enable = 1
+  call unite#filters#matcher_default#use(['matcher_fuzzy'])
+
+  " Unite mappers, the final word is the type of thing that will be serached, otherwise is fairly self-explanatory
+  nnoremap <leader>ut :<C-u>Unite -buffer-name=files   -start-insert file_rec/async:!<cr>
+  "nnoremap <leader>uf :<C-u>Unite -buffer-name=files   -start-insert file<cr>
+  nnoremap <leader>um :<C-u>Unite -buffer-name=mru     -start-insert file_mru<cr>
+  nnoremap <leader>ub :<C-u>Unite -buffer-name=buffer  buffer<cr>
+  nnoremap <leader>ug :Unite -buffer-name=grep grep:.<cr>
+  nnoremap <leader>ul :UniteWithCursorWord -buffer-name=grep grep:.<cr>
+  nnoremap <leader>uy :<C-u>Unite -buffer-name=yank    history/yank<cr>
+  nnoremap <leader>uh :<C-u>Unite -start-insert -buffer-name=help help<CR>
+  nnoremap <leader>uc :<C-u>Unite -buffer-name=commands command<CR>
+  nnoremap <leader>ur :<C-u>Unite -start-insert -buffer-name=register register<CR>
+  nnoremap <C-a> :<C-u>Unite -buffer-name=files   -start-insert file_rec/async:!<cr>
+
+  " For some reason <C-a> was getting mapped away, using autocmd to bypass
+  " that
+  autocmd VimEnter * nnoremap <C-a> :<C-u>Unite -buffer-name=files   -start-insert file_rec/async:!<cr>
+
+  " Start in insert mode
+  let g:unite_enable_start_insert = 1
+
+  " Setup a data directory
+  let g:unite_data_directory = "~/.unite"
+
+  " Enable history yank source
+  let g:unite_source_history_yank_enable = 1
+
+  " Open in bottom right
+  let g:unite_split_rule = "botright"
+
+  " Shorten the default update date of 500ms
+  let g:unite_update_time = 200
+
+  " Unite MRU settings
+  let g:unite_source_file_mru_limit = 1000
+  let g:unite_cursor_line_highlight = 'TabLineSel'
+  " let g:unite_abbr_highlight = 'TabLine'
+
+  " Custom mappings for the unite buffer
+  autocmd FileType unite call s:unite_settings()
+  function! s:unite_settings()
+    " Play nice with supertab
+    let b:SuperTabDisabled=1
+    " Enable navigation with control-j and control-k in insert mode
+    imap <buffer> <C-j>   <Plug>(unite_select_next_line)
+    imap <buffer> <C-k>   <Plug>(unite_select_previous_line)
+    nmap <buffer> <ESC> <Plug>(unite_exit)
+    imap <buffer> <ESC> <Plug>(unite_exit)
+    nmap <buffer> <c-j> <Plug>(unite_loop_cursor_down)
+    nmap <buffer> <c-k> <Plug>(unite_loop_cursor_up)
+    imap <buffer> <c-a> <Plug>(unite_choose_action)
+    imap <buffer> <Tab> <Plug>(unite_exit_insert)
+    imap <buffer> jj <Plug>(unite_insert_leave)
+    imap <buffer> <C-w> <Plug>(unite_delete_backward_word)
+    imap <buffer> <C-u> <Plug>(unite_delete_backward_path)
+    imap <buffer> '     <Plug>(unite_quick_match_default_action)
+    nmap <buffer> '     <Plug>(unite_quick_match_default_action)
+    nmap <buffer> <C-r> <Plug>(unite_redraw)
+    imap <buffer> <C-r> <Plug>(unite_redraw)
+    inoremap <silent><buffer><expr> <C-s> unite#do_action('split')
+    nnoremap <silent><buffer><expr> <C-s> unite#do_action('split')
+    inoremap <silent><buffer><expr> <C-v> unite#do_action('vsplit')
+    nnoremap <silent><buffer><expr> <C-v> unite#do_action('vsplit')
+  endfunction
+
+  " Use ag for search
+  if executable('ag')
+    let g:unite_source_grep_command = 'ag'
+    let g:unite_source_grep_default_opts = '--nogroup --nocolor --column'
+    let g:unite_source_grep_recursive_opt = ''
+  endif
+
 """"""""""""""" Syntax """"""""""""""""""""
 
 " turn on syntax coloring
@@ -342,7 +419,9 @@ endif
 " Must be below any colorscheme setting
 highlight ExtraWhitespace ctermbg=red guibg=red
 match ExtraWhitespace /\s\+$/
-autocmd BufWinEnter * match ExtraWhitespace /\s\+$/
-autocmd InsertEnter * match ExtraWhitespace /\s\+\%#\@<!$/
-autocmd InsertLeave * match ExtraWhitespace /\s\+$/
-autocmd BufWinLeave * call clearmatches()
+augroup WhiteSpaceMatching
+  autocmd BufWinEnter * if &modifiable && &ft!='unite' | match ExtraWhitespace /\s\+$/ | endif
+  autocmd InsertEnter * if &modifiable && &ft!='unite' | match ExtraWhitespace /\s\+\%#\@<!$/ | endif
+  autocmd InsertLeave * if &modifiable && &ft!='unite' | match ExtraWhitespace /\s\+$/ | endif
+  autocmd BufWinLeave * if &modifiable && &ft!='unite' | call clearmatches() | endif
+augroup END
