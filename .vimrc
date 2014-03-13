@@ -45,6 +45,8 @@ set foldlevelstart=9999
 
 filetype plugin on          "turns on filetype plugin, lets matchit work well
 
+"set background=dark
+"colorscheme solarized
 colorscheme zellner         "changes color scheme to something that looks decent on the mac
 
 " Set the vim info options
@@ -250,6 +252,14 @@ au FileType c,cpp set cinkeys+=0#
   noremap <silent> - :call EnhancedCommentify('no', 'comment')<CR>j
   noremap <silent> _ :call EnhancedCommentify('no', 'decomment')<CR>j
 
+  " Make Y work as expected
+  nnoremap Y y$
+
+  " Resize windows with the arrow keys
+  nnoremap <up>    <C-W>+
+  nnoremap <down>  <C-W>-
+  nnoremap <left>  3<C-W>>
+  nnoremap <right> 3<C-W><
 
 "Normal Mode Maps
   "map control arrow to move between buffers
@@ -279,7 +289,7 @@ au FileType c,cpp set cinkeys+=0#
 "  endfunction
 
   " map \uo to open the first url on the line
-  map <Leader>uo :call OpenUrl()<CR>
+  map <Leader>ou :call OpenUrl()<CR>
 
 "Visual Mode Maps
   "Visual mode comment adding
@@ -308,20 +318,44 @@ au FileType c,cpp set cinkeys+=0#
   call unite#filters#matcher_default#use(['matcher_fuzzy'])
 
   " Unite mappers, the final word is the type of thing that will be serached, otherwise is fairly self-explanatory
+
+  " Search all files from current dir
   nnoremap <leader>ut :<C-u>Unite -buffer-name=files   -start-insert file_rec/async:!<cr>
+
+  " Search files in current dir
   "nnoremap <leader>uf :<C-u>Unite -buffer-name=files   -start-insert file<cr>
+
+  " Search files in mru order
   nnoremap <leader>um :<C-u>Unite -buffer-name=mru     -start-insert file_mru<cr>
+
+  " Search buffer names
   nnoremap <leader>ub :<C-u>Unite -buffer-name=buffer  buffer<cr>
+
+  " Start unite with a grep
   nnoremap <leader>ug :Unite -buffer-name=grep grep:.<cr>
+
+  " Unite grep the word under the cursor
   nnoremap <leader>ul :UniteWithCursorWord -buffer-name=grep grep:.<cr>
+
+  " Search yank history
   nnoremap <leader>uy :<C-u>Unite -buffer-name=yank    history/yank<cr>
+
+  " Search Help docs !! (yay!)
   nnoremap <leader>uh :<C-u>Unite -start-insert -buffer-name=help help<CR>
-  nnoremap <leader>uc :<C-u>Unite -buffer-name=commands command<CR>
+
+  " search command history
+  nnoremap <leader>uc :<C-u>Unite -buffer-name=commands history/command<CR>
+
+  " Search registers
   nnoremap <leader>ur :<C-u>Unite -start-insert -buffer-name=register register<CR>
-  nnoremap <C-a> :<C-u>Unite -buffer-name=files   -start-insert file_rec/async:!<cr>
+
+  " Search outline, think taglist
+  nnoremap <leader>uo :<C-u>Unite -buffer-name=outline -start-insert outline<CR>
 
   " For some reason <C-a> was getting mapped away, using autocmd to bypass
   " that
+  " Search files with Ctrl-a
+  nnoremap <C-a> :<C-u>Unite -buffer-name=files   -start-insert file_rec/async:!<cr>
   autocmd VimEnter * nnoremap <C-a> :<C-u>Unite -buffer-name=files   -start-insert file_rec/async:!<cr>
 
   " Start in insert mode
@@ -332,6 +366,12 @@ au FileType c,cpp set cinkeys+=0#
 
   " Enable history yank source
   let g:unite_source_history_yank_enable = 1
+
+  " Also save clipboard values
+  let g:unite_source_history_yank_save_clipboard = 1
+
+  " Keep more yank history
+  let g:unite_source_history_yank_limit = 10000
 
   " Open in bottom right
   let g:unite_split_rule = "botright"
@@ -377,6 +417,18 @@ au FileType c,cpp set cinkeys+=0#
     let g:unite_source_grep_default_opts = '--nogroup --nocolor --column'
     let g:unite_source_grep_recursive_opt = ''
   endif
+
+  " Airline status bar settings
+  "Enable tab line when just one tab open
+  let g:airline#extensions#tabline#enabled = 1
+
+""""""""""""""" Typos """"""""""""""""""""
+" A list of iabbrev to correct common typos
+
+iabbrev colleicton collection
+iabbrev Colleicton Collection
+iabbrev restaurnt restaurant
+iabbrev restauarnt restaurant
 
 """"""""""""""" Syntax """"""""""""""""""""
 
