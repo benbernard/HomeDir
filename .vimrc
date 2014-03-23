@@ -222,6 +222,12 @@ au FileType c,cpp set cinkeys+=0#
   " Use my jshintrc file rather than default
   let g:syntastic_javascript_jshint_args="-c ~/.jshintrc"
 
+  let g:syntastic_ignore_files = [
+          \ '\m^/Users/bernard/fieldbook/node_modules',
+          \ '\m^/Users/bernard/fieldbook/lib/js',
+          \ '\m^/Users/bernard/jquery-handsontable',
+          \ '.*.user.js$' ]
+
   " Map <leader>st to SyntasticToggleMode
   map <Leader>st :SyntasticReset<CR>
 
@@ -316,6 +322,7 @@ au FileType c,cpp set cinkeys+=0#
   " Much of this is is borrowed from: https://github.com/terryma/dotfiles/blob/master/.vimrc
   let g:unite_source_history_yank_enable = 1
   call unite#filters#matcher_default#use(['matcher_fuzzy'])
+  call unite#filters#sorter_default#use(['sorter_rank'])
 
   " Unite mappers, the final word is the type of thing that will be serached, otherwise is fairly self-explanatory
 
@@ -351,6 +358,9 @@ au FileType c,cpp set cinkeys+=0#
 
   " Search outline, think taglist
   nnoremap <leader>uo :<C-u>Unite -buffer-name=outline -start-insert outline<CR>
+
+  " Resume looking at a unite session
+  nnoremap <leader>uu :<C-u>UniteResume<cr>
 
   " For some reason <C-a> was getting mapped away, using autocmd to bypass
   " that
@@ -429,6 +439,7 @@ iabbrev colleicton collection
 iabbrev Colleicton Collection
 iabbrev restaurnt restaurant
 iabbrev restauarnt restaurant
+iabbrev colleciton collection
 
 """"""""""""""" Syntax """"""""""""""""""""
 
