@@ -30,10 +30,10 @@ var main = function () {
 
   $('.commit-ref').each(function () {
     var user = $('.user', this).text();
-    $('.user', this).html('<a href="/' + user + '">' + user + '</a>');
+    var repo = $('input[data-repo]')[0].getAttribute('data-repo').split('/')[1];
+    $('.user', this).html('<a href="/' + user + '/' + repo + '">' + user + '</a>');
 
     var target = $('span:last-child', this).text();
-    var repo = $('input[data-repo]')[0].getAttribute('data-repo').split('/')[1];
     $('span:last-child', this).html('<a href="/' + user + '/' + repo + '/tree/' + target + '">' + target + '</a>');
   });
 
