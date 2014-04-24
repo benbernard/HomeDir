@@ -5,11 +5,11 @@
   rename = copy
 
 [pager]
-    color = true
-	grep = false
+  color = true
+  grep = false
 
 [status]
-    color = true
+  color = true
 
 [color]
   ui = true
@@ -20,25 +20,28 @@
   whitespace = red reverse
 
 [core]
-    whitespace=fix,-indent-with-non-tab,trailing-space,cr-at-eol
-    pager = less -XRMSIF
+  whitespace=fix,-indent-with-non-tab,trailing-space,cr-at-eol
+  pager = less -XRMSIF
 
 [alias]
-    st = status
-    ci = commit
-    br = branch
-    co = checkout
-    df = diff
-    lg = log -p
-    l = log --oneline --no-merges
-    lgfiles = log --name-only --no-merges
-    lol = log --graph --decorate --pretty=oneline --abbrev-commit --no-merges
-    lola = log --graph --decorate --pretty=oneline --abbrev-commit --all --no-merges
-    ls = ls-files
-    p = pick --local-only
-    lf = log --no-merges --oneline --
-    log-file = log --no-merges --
-    alog = log --date-order --all --graph --format=\"%C(green)%H%Creset %C(yellow)%an%Creset %C(blue bold)%ad%Creset %C(red bold)%d%Creset%s\"
+  # These I acutally use
+  br = branch
+  co = checkout
+  l = log --oneline --no-merges
+
+  # These I generally don't
+  st = status
+  ci = commit
+  df = diff
+  lg = log -p
+  lgfiles = log --name-only --no-merges
+  lol = log --graph --decorate --pretty=oneline --abbrev-commit --no-merges
+  lola = log --graph --decorate --pretty=oneline --abbrev-commit --all --no-merges
+  ls = ls-files
+  lf = log --no-merges --oneline --
+  log-file = log --no-merges --
+  alog = log --date-order --all --graph --format=\"%C(green)%H%Creset %C(yellow)%an%Creset %C(blue bold)%ad%Creset %C(red bold)%d%Creset%s\"
+  lfp = log --oneline --first-parent
 
 [difftool]
     prompt = no
@@ -53,11 +56,15 @@
   auto = 0
   reflogExpire = never
   reflogExpireUnreachable = never
+
 [merge]
-	conflictstyle = diff3
+  conflictstyle = diff3
+
 [hub]
+
 [user]
-	name = Ben Bernard
-	email = github@benjaminbernard.com
+  name = Ben Bernard
+  email = github@benjaminbernard.com
+
 [push]
-	default = matching
+  default = matching

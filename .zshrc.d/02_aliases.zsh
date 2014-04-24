@@ -5,10 +5,10 @@ alias 'rtt=recs-totable'
 alias 'ns=ninjaWarpSearch'
 
 #ls alias, mainly add --color
-alias 'ls=ls -G'
-alias 'la=ls -G -A'
-alias 'lt=ls -G -latr'
-alias 'lc=ls --color=never'
+alias 'ls=/bin/ls -G'
+alias 'la=/bin/ls -G -A'
+alias 'lt=/bin/ls -G -latr'
+alias 'lc=/bin/ls --color=never'
 
 #zmv stuff
 autoload zmv
