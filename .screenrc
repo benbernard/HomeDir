@@ -37,7 +37,7 @@ bindkey "^[[d" prev
 bindkey "^[[b" focus
 
 # Set the shell to execute
-shell /bin/zsh
+shell /usr/local/bin/zsh
 
 # Set the title to change with the command running
 shelltitle "% |zsh"
