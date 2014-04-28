@@ -19,9 +19,6 @@
 [submodule ".vim/bundle/vim-easymotion"]
 	path = .vim/bundle/vim-easymotion
 	url = git://github.com/Lokaltog/vim-easymotion.git
-[submodule ".vim/bundle/YankRing.vim"]
-	path = .vim/bundle/YankRing.vim
-	url = git://github.com/vim-scripts/YankRing.vim.git
 [submodule ".vim/bundle/vim-visual-increment"]
 	path = .vim/bundle/vim-visual-increment
 	url = git://github.com/triglav/vim-visual-increment.git
