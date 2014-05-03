@@ -318,119 +318,12 @@ au FileType c,cpp set cinkeys+=0#
   "command -nargs=0 Edit :!p4 edit %
   "command -nargs=0 Revert :!p4 revert %
 
+" Do not use folds in vim-markdown
+let g:vim_markdown_folding_disabled=1
+
 " Unite
-  " Much of this is is borrowed from: https://github.com/terryma/dotfiles/blob/master/.vimrc
-  let g:unite_source_history_yank_enable = 1
-  call unite#filters#matcher_default#use(['matcher_fuzzy'])
-  call unite#filters#sorter_default#use(['sorter_rank'])
-
-  " Unite mappers, the final word is the type of thing that will be serached, otherwise is fairly self-explanatory
-
-  " Search all files from current dir
-  nnoremap <leader>ut :<C-u>Unite -buffer-name=files   -start-insert file_rec/async:!<cr>
-
-  " Search files in current dir
-  "nnoremap <leader>uf :<C-u>Unite -buffer-name=files   -start-insert file<cr>
-
-  " Search files in mru order
-  nnoremap <leader>um :<C-u>Unite -buffer-name=mru     -start-insert file_mru<cr>
-
-  " Search buffer names
-  nnoremap <leader>ub :<C-u>Unite -buffer-name=buffer  buffer<cr>
-
-  " Start unite with a grep
-  nnoremap <leader>ug :Unite -buffer-name=grep grep:.<cr>
-
-  " Unite grep the word under the cursor
-  nnoremap <leader>ul :UniteWithCursorWord -buffer-name=grep grep:.<cr>
-
-  " Search yank history
-  nnoremap <leader>uy :<C-u>Unite -buffer-name=yank    history/yank<cr>
-
-  " Search Help docs !! (yay!)
-  nnoremap <leader>uh :<C-u>Unite -start-insert -buffer-name=help help<CR>
-
-  " search command history
-  nnoremap <leader>uc :<C-u>Unite -buffer-name=commands history/command<CR>
-
-  " Search registers
-  nnoremap <leader>ur :<C-u>Unite -start-insert -buffer-name=register register<CR>
-
-  " Search outline, think taglist
-  nnoremap <leader>uo :<C-u>Unite -buffer-name=outline -start-insert outline<CR>
-
-  " Resume looking at a unite session
-  nnoremap <leader>uu :<C-u>UniteResume<cr>
-
-  " For some reason <C-a> was getting mapped away, using autocmd to bypass
-  " that
-  " Search files with Ctrl-a
-  nnoremap <C-a> :<C-u>Unite -buffer-name=files   -start-insert file_rec/async:!<cr>
-  autocmd VimEnter * nnoremap <C-a> :<C-u>Unite -buffer-name=files   -start-insert file_rec/async:!<cr>
-
-  " Start in insert mode
-  let g:unite_enable_start_insert = 1
-
-  " Setup a data directory
-  let g:unite_data_directory = "~/.unite"
-
-  " Enable history yank source
-  let g:unite_source_history_yank_enable = 1
-
-  " Also save clipboard values
-  let g:unite_source_history_yank_save_clipboard = 1
-
-  " Keep more yank history
-  let g:unite_source_history_yank_limit = 10000
-
-  " Open in bottom right
-  let g:unite_split_rule = "botright"
-
-  " Shorten the default update date of 500ms
-  let g:unite_update_time = 200
-
-  " Unite MRU settings
-  let g:unite_source_file_mru_limit = 1000
-  let g:unite_cursor_line_highlight = 'TabLineSel'
-  " let g:unite_abbr_highlight = 'TabLine'
-
-  " Custom mappings for the unite buffer
-  autocmd FileType unite call s:unite_settings()
-  function! s:unite_settings()
-    " Play nice with supertab
-    let b:SuperTabDisabled=1
-    " Enable navigation with control-j and control-k in insert mode
-    imap <buffer> <C-j>   <Plug>(unite_select_next_line)
-    imap <buffer> <C-k>   <Plug>(unite_select_previous_line)
-    nmap <buffer> <ESC> <Plug>(unite_exit)
-    imap <buffer> <ESC> <Plug>(unite_exit)
-    nmap <buffer> <c-j> <Plug>(unite_loop_cursor_down)
-    nmap <buffer> <c-k> <Plug>(unite_loop_cursor_up)
-    imap <buffer> <c-a> <Plug>(unite_choose_action)
-    imap <buffer> <Tab> <Plug>(unite_exit_insert)
-    imap <buffer> jj <Plug>(unite_insert_leave)
-    imap <buffer> <C-w> <Plug>(unite_delete_backward_word)
-    imap <buffer> <C-u> <Plug>(unite_delete_backward_path)
-    imap <buffer> '     <Plug>(unite_quick_match_default_action)
-    nmap <buffer> '     <Plug>(unite_quick_match_default_action)
-    nmap <buffer> <C-r> <Plug>(unite_redraw)
-    imap <buffer> <C-r> <Plug>(unite_redraw)
-    inoremap <silent><buffer><expr> <C-s> unite#do_action('split')
-    nnoremap <silent><buffer><expr> <C-s> unite#do_action('split')
-    inoremap <silent><buffer><expr> <C-v> unite#do_action('vsplit')
-    nnoremap <silent><buffer><expr> <C-v> unite#do_action('vsplit')
-  endfunction
-
-  " Use ag for search
-  if executable('ag')
-    let g:unite_source_grep_command = 'ag'
-    let g:unite_source_grep_default_opts = '--nogroup --nocolor --column'
-    let g:unite_source_grep_recursive_opt = ''
-  endif
-
-  " Airline status bar settings
-  "Enable tab line when just one tab open
-  let g:airline#extensions#tabline#enabled = 1
+  " Got annoying having it all in this file, I've moved it to .vimrc.unite
+  source $HOME/.vimrc.unite
 
 """"""""""""""" Typos """"""""""""""""""""
 " A list of iabbrev to correct common typos
