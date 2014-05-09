@@ -6,6 +6,10 @@ $ENV{'SCREENDIR'} = '/Users/bernard/.screen';
 my $temp_file = '/tmp/buffer-exchange';
 my $screen_file = '/tmp/screen-exchange';
 
+if (!(-e $screen_file)) {
+  system('touch', $screen_file); # Initialize file if not present
+}
+
 my $current_contents = get_clip();
 my $screen_contents = get_screen_contents();
 
