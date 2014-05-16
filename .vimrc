@@ -29,13 +29,14 @@ set smartcase                  " if any capitol in search, turns search case sen
 set shiftwidth=2               " use 2 space idnetning
 set softtabstop=2              " use 4 space indenting
 set ts=2                       " Default to 4 spaces for tabs
-set tags+=tags                 " Setup the standard tags files
+set tags=./tags,~/fieldbook/tags  " Setup the standard tags files
 set textwidth=0                " turn wrapping off
 set visualbell                 " Use a flash instead of a sound for bells
 set wildmode=longest:full      " Matches only to longest filename, displays to menu possible matches
 set complete=.,w,b,u           " complete from current file, and current buffers default: .,w,b,u,t,i  trying to keep down completion time
 set directory=$HOME/.vim/tmp   " set directory for tmp files to be in .vim, so that .swp files are not littered
 set clipboard=unnamed          " Use the * register when a register is not specified - unifies with system clipboard!
+set omnifunc=syntaxcomplete#Complete " Turn on omni completion
 
 "set foldmethod=indent   " use indent unless overridden
 "set foldlevel=0         " show contents of all folds
@@ -372,6 +373,12 @@ if ( v:version >= 703 )
   set undofile                   " Keep undo history around, across vim reboots
   set undodir=$HOME/.vim/tmp     " set directory for undo files
 endif
+
+""""""""""""""" Filetype Settings """"""""""""""""""""
+
+" Do not use a backup file when editing a crontab, because OSX complains with
+" crontab: temp file must be edited in place
+autocmd filetype crontab setlocal nobackup nowritebackup
 
 """"""""""""""" Version 7 Settings """"""""""""""""""""
 
