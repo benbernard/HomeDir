@@ -29,7 +29,7 @@ set smartcase                  " if any capitol in search, turns search case sen
 set shiftwidth=2               " use 2 space idnetning
 set softtabstop=2              " use 4 space indenting
 set ts=2                       " Default to 4 spaces for tabs
-"set tags=~/.commontags,./tags " Setup the standard tags files
+set tags+=tags                 " Setup the standard tags files
 set textwidth=0                " turn wrapping off
 set visualbell                 " Use a flash instead of a sound for bells
 set wildmode=longest:full      " Matches only to longest filename, displays to menu possible matches
@@ -235,6 +235,11 @@ au FileType c,cpp set cinkeys+=0#
   let g:syntastic_mode_map = { 'mode': 'passive',
                              \ 'active_filetypes': ['javascript'],
                              \ 'passive_filetypes': [] }
+
+" Super tab Settings
+  " Have supertab look at characters before cursor to determine completion
+  " type
+  let g:SuperTabDefaultCompletionType = "context"
 
 """"""""""""""" Command mappings """"""""""""""""
 
