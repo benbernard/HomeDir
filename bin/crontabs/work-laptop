@@ -1,2 +1,4 @@
 # m h  dom mon dow   command
 * * * * * cd /Users/bernard/fieldbook && javascript-ctags 'client/**/*.js' 'server/**/*.js' 'common/**/*.js'
+# m h  dom mon dow   command
+*/5 * * * * cd /Users/bernard/fieldbook && javascript-ctags 'client/**/*.js' 'server/**/*.js' 'common/**/*.js'
