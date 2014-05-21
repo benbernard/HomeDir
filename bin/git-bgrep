@@ -1,1 +1,1 @@
-grep $@ `git ls`
+grep -r $@ `git ls`
