@@ -1,3 +1,12 @@
-#!/bin/zsh
+#!/usr/bin/perl
 
-git checkout master && git fetch team && git rebase team/master && git push origin master:master
+my $branch = `git branch | sed -n '/\* /s///p'`;
+
+if ($branch =~ m/^\(detached from (\S+)\)$/) {
+  $branch = $1;
+}
+
+print "Found branch $branch, checoking out master and fetching & rebasing\n";
+system('git checkout master && git fetch team && git rebase team/master && git push origin master:master');
+print "Checking out $branch\n";
+system("git checkout $branch");
