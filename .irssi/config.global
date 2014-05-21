@@ -11,6 +11,11 @@ channels = (
     autojoin = "yes";
     autosendcmd = "msg &bitlbee identify iamben;";
   }
+  {
+    name = "#fieldbook";
+    chatnet = "bitlbee";
+    autojoin = "yes";
+  }
 );
 
 windows = {
@@ -44,6 +49,17 @@ windows = {
         type = "CHANNEL";
         chat_type = "IRC";
         name = "#twitter_bernard_ben";
+        tag = "bitlbee";
+      }
+    );
+  };
+  5 = {
+    immortal = "yes";
+    items = (
+      {
+        type = "CHANNEL";
+        chat_type = "IRC";
+        name = "#fieldbook";
         tag = "bitlbee";
       }
     );

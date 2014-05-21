@@ -1,0 +1,2 @@
+#Triggers file version 1.0
+-all -nocase -regexp '^Message from unknown participant ' -replace '' 
