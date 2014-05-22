@@ -6,7 +6,22 @@ if ($branch =~ m/^\(detached from (\S+)\)$/) {
   $branch = $1;
 }
 
+chomp $branch;
+
+system('git diff --quiet HEAD');
+my $is_dirty = $?;
+
+if ($is_dirty) {
+  print "WARNING: Found a dirty working tree, stashing\n";
+  system('git stash');
+}
+
 print "Found branch $branch, checoking out master and fetching & rebasing\n";
 system('git checkout master && git fetch team && git rebase team/master && git push origin master:master');
 print "Checking out $branch\n";
 system("git checkout $branch");
+
+if ($is_dirty) {
+  print "Restoring working stree from stash\n";
+  system('git stash pop');
+}
