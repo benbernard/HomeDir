@@ -30,7 +30,7 @@
   l = log --oneline --no-merges
 
   # These I generally don't
-  st = status
+  st = status -uno
   ci = commit
   df = diff
   lg = log -p
@@ -46,11 +46,8 @@
 [difftool]
     prompt = no
 
-#[merge]
-#  tool = mymeld
-#
-#[mergetool "mymeld"]
-#      cmd = $HOME/bin/meldmerge $BASE $LOCAL $REMOTE $MERGED
+[merge]
+  tool = opendiff
 
 [gc]
   auto = 0
