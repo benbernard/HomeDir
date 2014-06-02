@@ -46,16 +46,22 @@
 [difftool]
     prompt = no
 
-[merge]
-  tool = opendiff
-
 [gc]
   auto = 0
   reflogExpire = never
   reflogExpireUnreachable = never
 
 [merge]
+
+[merge]
   conflictstyle = diff3
+  keepBackup = false;
+  keepTemporaries = false
+  tool = p4merge
+
+[mergetool "p4merge"]
+  cmd = p4merge "$BASE" "$LOCAL" "$REMOTE" "$MERGED"
+  trustExitCode = false
 
 [hub]
 
@@ -65,3 +71,5 @@
 
 [push]
   default = matching
+[mergetool]
+	keepBackup = false
