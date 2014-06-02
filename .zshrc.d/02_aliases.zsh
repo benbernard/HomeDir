@@ -40,3 +40,9 @@ alias 's3_upload.pl=s3_upload.pl --prompt'
 
 # Prompt when about to overwrite a file iwht mv (use -f to force)
 alias 'mv=mv -i'
+
+# If hub is installed alias git to it
+if type hub >/dev/null;
+then
+  alias 'git=hub'
+fi

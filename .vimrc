@@ -232,6 +232,9 @@ au FileType c,cpp set cinkeys+=0#
   " Map <leader>st to SyntasticToggleMode
   map <Leader>st :SyntasticReset<CR>
 
+  " Set js checkers to include jscs
+  let g:syntastic_javascript_checkers = ['jshint', 'jscs']
+
   " Setup javascript as the only active syntax
   let g:syntastic_mode_map = { 'mode': 'passive',
                              \ 'active_filetypes': ['javascript'],
@@ -241,6 +244,9 @@ au FileType c,cpp set cinkeys+=0#
   " Have supertab look at characters before cursor to determine completion
   " type
   let g:SuperTabDefaultCompletionType = "context"
+
+" Gundo Settings
+  nmap <Leader>gu :GundoToggle<CR>
 
 """"""""""""""" Command mappings """"""""""""""""
 
@@ -290,6 +296,12 @@ au FileType c,cpp set cinkeys+=0#
   " Map \r to grab the last paragraph, copy it, select the new copy, and pipe
   " it through a recs command
   :nmap <leader>r GV{yGpGV{j!recs-
+
+  " Map to make tabs more usable
+  nmap <Leader>TN :tabn<CR>
+  nmap <Leader>tN :tabn<CR>
+  nmap <Leader>tP :tabp<CR>
+  nmap <Leader>TP :tabp<CR>
 
 " Maybe if I had a real X buffer, this would be cool.  Too bad.
 "  " X buffer cut/paste
