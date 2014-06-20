@@ -46,3 +46,6 @@ if type hub >/dev/null;
 then
   alias 'git=hub'
 fi
+
+# Add an alias for mocha
+alias 'fm=foreman run -e server/config/environments/test.env,.env.local mocha'

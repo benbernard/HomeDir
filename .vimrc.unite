@@ -23,8 +23,14 @@ nnoremap <leader>ub :<C-u>Unite -buffer-name=buffer  buffer<cr>
 " Start unite with a grep
 nnoremap <leader>ug :Unite -buffer-name=grep grep:.<cr>
 
+" Start unite with a grep, prompt for files
+nnoremap <leader>uG :Unite -buffer-name=grep grep<cr>
+
 " Unite grep the word under the cursor
 nnoremap <leader>ul :UniteWithCursorWord -buffer-name=grep grep:.<cr>
+
+" Unite grep the word under the cursor
+nnoremap <leader>uL :UniteWithCursorWord -buffer-name=grep grep<cr>
 
 " Search yank history
 nnoremap <leader>uy :<C-u>Unite -buffer-name=yank    history/yank<cr>
