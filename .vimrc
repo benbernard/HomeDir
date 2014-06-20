@@ -129,6 +129,8 @@ au FileType c,cpp set cinkeys+=0#
 
   let g:todo_done_file = ".todo_done_log.todo" " Set file to put done tasks in
   let g:todo_browser = "open" " what browser to use to open incidents
+  let g:todo_log_into_drawer = "" " Do not log timestamps of state changes
+  let g:todo_log_done = 0 " Do not log timestamps of done
 
 " calendar settings
 " PrePad taken from stackoverflow:
