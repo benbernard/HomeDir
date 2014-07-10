@@ -1,0 +1,3 @@
+#!/bin/sh
+
+java -jar ~/ditaa/ditaa0_9.jar -o $1
