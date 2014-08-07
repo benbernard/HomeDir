@@ -94,3 +94,6 @@
 [submodule ".vim/bundle/gundo.vim.git"]
 	path = .vim/bundle/gundo.vim.git
 	url = http://github.com/sjl/gundo.vim.git
+[submodule ".vim/bundle/vim-mustache-handlebars"]
+	path = .vim/bundle/vim-mustache-handlebars
+	url = git@github.com:mustache/vim-mustache-handlebars.git

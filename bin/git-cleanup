@@ -1,0 +1,53 @@
+#!/usr/bin/perl
+
+sub run_command {
+  system(@_);
+
+  if ($?) {
+    print "Error running " . join(' ', @_);
+    exit 1;
+  }
+}
+
+my $branch = `git branch | sed -n '/\* /s///p'`;
+
+if ($branch =~ m/^\(detached from (\S+)\)$/) {
+  $branch = $1;
+}
+
+chomp $branch;
+
+run_command('git diff --quiet HEAD');
+my $is_dirty = $?;
+
+if ($is_dirty) {
+  print "WARNING: Found a dirty working tree, stashing\n";
+  run_command('git stash');
+}
+
+print "Checking out Master";
+run_command('git checkout master');
+
+print "Deleting any merged branches";
+my @branches = `git branch --merged master | grep -v "\* master"`;
+chomp @branches;
+
+foreach my $branch (@branches) {
+  $branch =~ s/^\s*(.*)\s*$/$1/;
+  next if ($branch eq 'master');
+
+  print "Removing branch $branch";
+  run_command("git branch -d $branch");
+  run_command("git push origin :refs/heads/$branch");
+}
+
+print "\n";
+print "\n";
+print "Cleaning up remote refs";
+run_command('git fetch --all -p');
+
+
+if ($is_dirty) {
+  print "Restoring working stree from stash\n";
+  run_command('git stash pop');
+}
