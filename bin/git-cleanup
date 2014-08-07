@@ -1,6 +1,7 @@
 #!/usr/bin/perl
 
 sub run_command {
+  print "Running: " . join(' ', @_) . "\n";
   system(@_);
 
   if ($?) {
@@ -25,29 +26,46 @@ if ($is_dirty) {
   run_command('git stash');
 }
 
-print "Checking out Master\n";
-run_command('git checkout master');
+if ($current_branch ne 'master') {
+  print "Checking out Master\n";
+  run_command('git checkout master');
+}
 
 print "Deleting any merged branches\n";
 my @branches = `git branch --merged master | grep -v "\* master"`;
 chomp @branches;
 
+run_command('git fetch origin');
+
 foreach my $branch (@branches) {
   $branch =~ s/^\s*(.*)\s*$/$1/;
   next if ($branch eq 'master');
 
+  my $delete_remote = 1;
+  system("git diff --quiet $branch..refs/remotes/origin/$branch");
+  if ($?) { $delete_remote = 0; }
+
   print "Removing branch $branch\n";
   run_command("git branch -d $branch");
-  run_command("git push origin :refs/heads/$branch");
+
+  if ($delete_remote) {
+    run_command("git push origin :refs/heads/$branch");
+  } else {
+    warn "\nWARNING: Not deleteing remote branch $branch, it was not insync with local branch\n";
+  }
 }
 
 print "\n";
 print "\n";
 print "Cleaning up remote refs\n";
-run_command('git fetch --all -p');
+run_command('git remote prune origin');
+run_command('git fetch -p team');
 
 
-run_command(qw(git checkout), $current_branch);
+if ($current_branch ne 'master') {
+  run_command(qw(git checkout), $current_branch);
+}
+
 if ($is_dirty) {
   print "Restoring working stree from stash\n";
   run_command('git stash pop');
