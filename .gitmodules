@@ -97,3 +97,12 @@
 [submodule ".vim/bundle/vim-mustache-handlebars"]
 	path = .vim/bundle/vim-mustache-handlebars
 	url = git@github.com:mustache/vim-mustache-handlebars.git
+[submodule ".vim/bundle/vim-javascript-syntax"]
+	path = .vim/bundle/vim-javascript-syntax
+	url = git@github.com:jelera/vim-javascript-syntax.git
+[submodule ".vim/bundle/javascript-libraries-syntax.vim"]
+	path = .vim/bundle/javascript-libraries-syntax.vim
+	url = git@github.com:othree/javascript-libraries-syntax.vim.git
+[submodule ".vim/bundle/JavaScript-Indent"]
+	path = .vim/bundle/JavaScript-Indent
+	url = git@github.com:vim-scripts/JavaScript-Indent.git

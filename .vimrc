@@ -45,6 +45,7 @@ set foldlevelstart=9999
 
 
 filetype plugin on          "turns on filetype plugin, lets matchit work well
+filetype plugin indent on
 
 "set background=dark
 "colorscheme solarized
@@ -112,6 +113,10 @@ set cinkeys-=0#
 au FileType c,cpp set cinkeys+=0#
 
 """"""""""""""" Plugin Settings """"""""""""""""
+
+" javascript-libraries-syntax settings
+  let g:used_javascript_libs = 'underscore,backbone,jquery'
+
 
 " vim todo settings
   autocmd BufNewFile,BufRead *.todo set foldlevelstart=0 "todo files have a fold level..
