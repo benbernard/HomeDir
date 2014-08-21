@@ -412,3 +412,8 @@ augroup WhiteSpaceMatching
   autocmd InsertLeave * if &modifiable && &ft!='unite' | match ExtraWhitespace /\s\+$/ | endif
   autocmd BufWinLeave * if &modifiable && &ft!='unite' | call clearmatches() | endif
 augroup END
+
+" Changing spelling highlight to be underline, must come at the end
+hi clear SpellBad
+hi SpellBad cterm=underline
+

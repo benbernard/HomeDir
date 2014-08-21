@@ -4,5 +4,6 @@ dom
 mixins
 plugin
 plugins
-vim
+#im
 foldcolumn
+vim/!
