@@ -78,6 +78,9 @@ let g:unite_split_rule = "botright"
 " Shorten the default update date of 500ms
 let g:unite_update_time = 200
 
+" Do not include node_modules in search sapce for file completions
+call unite#custom#source('file_rec, file_rec/async', 'ignore_pattern', 'node_modules')
+
 " Unite MRU settings
 let g:unite_source_file_mru_limit = 1000
 let g:unite_cursor_line_highlight = 'TabLineSel'
