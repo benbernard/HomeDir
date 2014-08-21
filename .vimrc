@@ -43,7 +43,6 @@ set omnifunc=syntaxcomplete#Complete " Turn on omni completion
 "set foldcolumn=2        " set a column incase we need it
 set foldlevelstart=9999
 
-
 filetype plugin on          "turns on filetype plugin, lets matchit work well
 filetype plugin indent on
 
@@ -417,3 +416,5 @@ augroup END
 hi clear SpellBad
 hi SpellBad cterm=underline
 
+hi clear SpellCap
+hi SpellCap cterm=underline
