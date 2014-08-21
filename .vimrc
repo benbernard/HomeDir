@@ -1,4 +1,4 @@
-" Intialzie pathogen, a plugin management system that lets plugins live in
+" Initialize pathogen, a plugin management system that lets plugins live in
 " their own directories
 
 call pathogen#infect()
@@ -21,12 +21,12 @@ source $HOME/.eihooks/dotfiles/vimrc
 set fo+=qr                     " q: gq foramts with comments, see :help fo-table, r: auto insert comments on new lines
 set foldcolumn=0               " turn off the foldcolumn
 set history=200                " Remember 100 lines of history, for commands and searches
-set hls                        " highlight serach terms
+set hls                        " highlight search terms
 set list                       " Show tabs differently
 set listchars=tab:>-           " Use >--- for tabs
 set nolinebreak                " don't wrap at words, messes up copying
 set smartcase                  " if any capitol in search, turns search case sensitive
-set shiftwidth=2               " use 2 space idnetning
+set shiftwidth=2               " use 2 space indenting
 set softtabstop=2              " use 4 space indenting
 set ts=2                       " Default to 4 spaces for tabs
 set tags=./tags,~/fieldbook/tags  " Setup the standard tags files
