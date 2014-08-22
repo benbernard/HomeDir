@@ -30,7 +30,7 @@ var main = function () {
 
   $('.commit-ref').each(function () {
     var user = $('.user', this).text();
-    var repo = $('input[data-repo]')[0].getAttribute('data-repo').split('/')[1];
+    var repo = $('.js-current-repository').text();
     $('.user', this).html('<a href="/' + user + '/' + repo + '">' + user + '</a>');
 
     var target = $('span:last-child', this).text();
