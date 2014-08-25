@@ -78,8 +78,10 @@ let g:unite_split_rule = "botright"
 " Shorten the default update date of 500ms
 let g:unite_update_time = 200
 
-" Do not include node_modules in search sapce for file completions
-call unite#custom#source('file_rec, file_rec/async', 'ignore_pattern', 'node_modules')
+" Do not include node_modules or .git in search sapce for file completions NOTE: SLOW?
+" call unite#custom#source('file_rec, file_rec/async', 'ignore_pattern', 'node_modules\|.git')
+" This is much faster:
+let g:unite_source_rec_async_command = 'ag --nocolor --nogroup --hidden --ignore node_modules --ignore .git -g ""'
 
 " Unite MRU settings
 let g:unite_source_file_mru_limit = 1000
