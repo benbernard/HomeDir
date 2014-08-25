@@ -1,5 +1,19 @@
 #!/usr/bin/perl
 
+use warnings;
+use strict;
+
+my $remote = `git config ninja.masterRemote`;
+
+if ($?) {
+  $remote = 'team';
+
+  system("git remote show $remote 1>/dev/null 2>/dev/null");
+  $remote = 'origin' if ($?);
+}
+
+print "Working against remote $remote\n";
+
 my $branch = `git branch | sed -n '/\* /s///p'`;
 
 if ($branch =~ m/^\(detached from (\S+)\)$/) {
@@ -17,7 +31,7 @@ if ($is_dirty) {
 }
 
 print "Found branch $branch, checoking out master and fetching & rebasing\n";
-system('git checkout master && git fetch team && git rebase team/master && git push origin master:master');
+system("git checkout master && git fetch $remote && git rebase $remote/master && git push origin master:master");
 print "Checking out $branch\n";
 system("git checkout $branch");
 
