@@ -349,6 +349,11 @@ let g:vim_markdown_folding_disabled=1
   " Got annoying having it all in this file, I've moved it to .vimrc.unite
   source $HOME/.vimrc.unite
 
+" Insert test data
+ let @t = 'O"*Pvi]:s/ €kb-  "/"/g€kbvi]=w'
+ nmap <Leader>ti @t
+
+
 """"""""""""""" Typos """"""""""""""""""""
 " A list of iabbrev to correct common typos
 

@@ -81,7 +81,8 @@ let g:unite_update_time = 200
 " Do not include node_modules or .git in search sapce for file completions NOTE: SLOW?
 " call unite#custom#source('file_rec, file_rec/async', 'ignore_pattern', 'node_modules\|.git')
 " This is much faster:
-let g:unite_source_rec_async_command = 'ag --nocolor --nogroup --hidden --ignore node_modules --ignore .git -g ""'
+"let g:unite_source_rec_async_command = 'ag --nocolor --nogroup --hidden --ignore node_modules --ignore .git -g ""'
+" Actually instead put this in a .agignore file
 
 " Unite MRU settings
 let g:unite_source_file_mru_limit = 1000
@@ -124,11 +125,14 @@ function! s:unite_settings()
 endfunction
 
 " Use ag for search
-if executable('ag')
-  let g:unite_source_grep_command = 'ag'
-  let g:unite_source_grep_default_opts = '--nogroup --nocolor --column'
-  let g:unite_source_grep_recursive_opt = ''
-endif
+"if executable('ag')
+"  let g:unite_source_grep_command = 'ag'
+"
+"  " Specifically adds ignore flags for things that we don't want to search
+"  let g:unite_source_grep_default_opts = '--nogroup --nocolor --column --ignore node_modules --ignore .git --ignore public/js/app.js'
+"  let g:unite_source_grep_recursive_opt = ''
+"endif
+" Actually instead put this in the .agignore
 
 " Airline status bar settings
 "Enable tab line when just one tab open

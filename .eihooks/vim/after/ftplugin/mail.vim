@@ -12,7 +12,7 @@
 " CreateMailFields
 " AddressComplete
 "
-" Author: Ben Bernard <bernard@amazon.com>
+" Author: Ben Bernard
 "         moved to after/ and modified by goodell@
 "
 " TODO:
