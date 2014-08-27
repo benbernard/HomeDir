@@ -109,3 +109,6 @@
 [submodule ".vim/bundle/UnconditionalPaste"]
 	path = .vim/bundle/UnconditionalPaste
 	url = git@github.com:vim-scripts/UnconditionalPaste.git
+[submodule ".vim/bundle/vim-jison"]
+	path = .vim/bundle/vim-jison
+	url = git@github.com:wizicer/vim-jison.git
