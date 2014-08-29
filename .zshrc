@@ -54,6 +54,10 @@ then
   fi
 fi
 
+if [[ -e $HOME/zsh-completions/src ]]; then
+  fpath=($HOME/zsh-completions/src $fpath);
+fi
+
 #Will get the zsh_version from eihooks
 ENV_IMPROVEMENT_ZSHRC=$HOME/.eihooks/dotfiles/zshrc
 
@@ -124,3 +128,13 @@ export PERL_MB_OPT="--install_base "/Users/bernard/perl5"";
 export PERL_MM_OPT="INSTALL_BASE=/Users/bernard/perl5";
 export PERL5LIB="/Users/bernard/perl5/lib/perl5:$PERL5LIB";
 export PATH="/Users/bernard/perl5/bin:$PATH";
+
+# This must come last, enables zsh prompt highlighting
+if [[ -e $HOME/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]]; then
+  source $HOME/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+fi
+
+if [[ -e $HOME/zaw ]]; then
+  source $HOME/zaw/zaw.zsh
+  bindkey '^O' zaw
+fi
