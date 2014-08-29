@@ -3,6 +3,9 @@ chatnets = {
   bitlbee = { type = "IRC"; nick = "bernard_bitlbee"; };
 };
 
+servers = (
+);
+
 channels = (
   { name = "#ex_bow"; chatnet = "freenode"; autojoin = "yes"; },
   {
@@ -10,12 +13,8 @@ channels = (
     chatnet = "bitlbee";
     autojoin = "yes";
     autosendcmd = "msg &bitlbee identify iamben;";
-  }
-  {
-    name = "#fieldbook";
-    chatnet = "bitlbee";
-    autojoin = "yes";
-  }
+  },
+  { name = "#fieldbook"; chatnet = "bitlbee"; autojoin = "yes"; }
 );
 
 windows = {
@@ -279,7 +278,7 @@ settings = {
     #autoaway = "36000";
     #away_reason = "idle timeout";
     nicklist_width = "24";
-    nicklist_automode = "off";
+    nicklist_automode = "screen";
     print_log_whole_log = "yes";
     chanact_show_all = "yes";
     nicklist_height = "50";
