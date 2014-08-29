@@ -8,3 +8,4 @@ plugins
 foldcolumn
 vim/!
 vim
+tooltip
