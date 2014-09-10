@@ -16,6 +16,8 @@ var main = function () {
   position: relative; \
   margin-top: -3px; \
   height: 5px; \
+  width: 51px; \
+  left: 95px; \
 } \
  \
 .compareLink hr { \
@@ -48,7 +50,7 @@ var main = function () {
       $('.discussion-timeline a.commit-id').each(function () {
         var baseUrl = this.href.replace(/\/commit\/[0-9a-f]+/, '');
         var commitId = $(this).text();
-        $(this).parent().prepend('<a class="link-enhancer-link" href="' + baseUrl + '/compare/' + commitId + '^...' + finalCommitId + '"><div class="compareLink"><hr/></div></a>');
+        $(this).parents('.commit-meta').prepend('<a class="link-enhancer-link" href="' + baseUrl + '/compare/' + commitId + '^...' + finalCommitId + '"><div class="compareLink"><hr/></div></a>');
       });
 
       $('.compareLink').hover(function () {
