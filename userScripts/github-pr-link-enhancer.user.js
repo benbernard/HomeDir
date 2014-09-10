@@ -14,10 +14,10 @@ var main = function () {
 <style> \
 .compareLink { \
   position: relative; \
-  margin-top: -3px; \
-  height: 5px; \
+  margin-top: -5px; \
   width: 51px; \
-  left: 95px; \
+  float: right; \
+  height: 5px; \
 } \
  \
 .compareLink hr { \
