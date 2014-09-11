@@ -293,5 +293,6 @@ ignores = ( );
 hilights = ( { text = "ben_bernard"; nick = "yes"; word = "yes"; } );
 keyboard = (
   { key = "home"; id = "command"; data = "scrollback home"; },
-  { key = "end"; id = "command"; data = "scrollback end"; }
+  { key = "end"; id = "command"; data = "scrollback end"; },
+  { key = "^R"; id = "command"; data = "history_search "; }
 );
