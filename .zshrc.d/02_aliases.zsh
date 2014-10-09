@@ -49,3 +49,6 @@ fi
 
 # Add an alias for mocha
 alias 'fm=foreman run -e server/config/environments/test.env,.env.local mocha'
+
+# Update browserify
+alias 'gb=grunt browserify:app'

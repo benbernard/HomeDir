@@ -9,3 +9,5 @@ foldcolumn
 vim/!
 vim
 tooltip
+autocomplete
+readonly
