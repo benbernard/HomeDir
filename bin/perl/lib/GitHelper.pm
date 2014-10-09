@@ -112,11 +112,12 @@ sub run_hub {
     my $output = run_command('hub', @_);
 }
 
+my $GITHUB_HOST = '';
 {
     my $has_run = 0;
     sub ensure_hub_config {
         if (not $has_run) {
-            set_config('hub.host', 'HOST_HERE');
+            set_config('hub.host', $GITHUB_HOST);
             set_config('hub.protocol', 'https');
         }
         $has_run = 1;
@@ -127,7 +128,7 @@ sub run_hub {
     my $tunnel_is_up = 0;
 
     sub needs_tunnel {
-        if(run_command('curl', 'https://HOST_HERE') =~ m/gdwall/) {
+        if(run_command('curl', "https://$GITHUB_HOST") =~ m/gdwall/) {
             return 1;
         }
         return 0;
@@ -141,15 +142,15 @@ sub run_hub {
         close_tunnel(1);
 
         my $user = (getpwuid($<))[0];
-        system("sudo ssh -f -N -L443:HOST_HERE:443 -i ~/.ssh/id_rsa $user\@BASTION_HERE");
+        system("sudo ssh -f -N -L443:$GITHUB_HOST:443 -i ~/.ssh/id_rsa $user\@BASTION_HERE");
         run_command("sudo cp /etc/hosts /etc/hosts.orig");
-        run_command("sudo sh -c 'echo 127.0.0.1	HOST_HERE >> /etc/hosts'");
+        run_command("sudo sh -c 'echo 127.0.0.1	$GITHUB_HOST >> /etc/hosts'");
     }
 
     sub close_tunnel {
         my $force = shift;
         return if (!$force && !$tunnel_is_up);
-        run_command("ps -ef | grep 'ssh.*HOST_HERE:443' | grep -v grep | awk '{print \$2}' | sudo xargs kill -9");
+        run_command("ps -ef | grep 'ssh.*$GITHUB_HOST:443' | grep -v grep | awk '{print \$2}' | sudo xargs kill -9");
         if ( -e '/etc/hosts.orig' ) {
             run_command("sudo cp /etc/hosts.orig /etc/hosts");
             run_command("sudo rm /etc/hosts.orig");
