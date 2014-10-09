@@ -43,6 +43,11 @@
   alog = log --date-order --all --graph --format=\"%C(green)%H%Creset %C(yellow)%an%Creset %C(blue bold)%ad%Creset %C(red bold)%d%Creset%s\"
   lfp = log --oneline --first-parent
 
+  # Assume-unchanged aliases
+  au = update-index --assume-unchanged
+  nau = update-index --no-assume-unchanged
+  lsau = !git ls-files -v | grep "^[[:lower:]]"
+
 [difftool]
     prompt = no
 
