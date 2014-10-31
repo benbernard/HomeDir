@@ -1,0 +1,37 @@
+#!/bin/bash
+
+set -e # Bail on any script failure
+
+BRANCH=$1
+
+if [[ $BRANCH == "" ]]
+then
+  BRANCH=`git symbolic-ref --short HEAD | sed 's/^heads\///'`
+
+  if [[ $BRANCH =~ master$ ]]
+  then
+    echo "Refusing to hide master!"
+    exit 1;
+  fi
+
+  echo Using current branch: $BRANCH
+fi
+
+if git show-ref --tags --quiet --verify -- "refs/tags/$BRANCH"
+then
+  read -p "Tag $BRANCH already exists! Overwrite? (y/N) " -n 1 -r
+  echo    # (optional) move to a new line
+  if [[ ! $REPLY =~ ^[Yy]$ ]]
+  then
+    echo Bailing!
+    exit 1;
+  fi
+fi
+
+echo Hiding $BRANCH
+git tag -f $BRANCH "refs/heads/$BRANCH"
+echo -n "Created tag $BRANCH: "
+git show-ref --abbrev "refs/tags/$BRANCH"
+
+git branch -D $BRANCH
+echo Removed branch $BRANCH
