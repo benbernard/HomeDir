@@ -40,7 +40,7 @@ var main = function () {
   });
 
   // If we are on a pull request
-  if (window.location.href.match(/pull\/\d+/)) {
+  if (window.location.href.match(/pull\/\d+/) || window.location.href.match(/pulls$/)) {
     waitForKeyElements('.discussion-timeline .commit-id', function () {
       $('.link-enhancer-link').remove();
       var commits = $('.discussion-timeline .commit-id');
