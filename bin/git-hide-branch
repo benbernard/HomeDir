@@ -3,6 +3,7 @@
 set -e # Bail on any script failure
 
 BRANCH=$1
+SWITCHED=0
 
 if [[ $BRANCH == "" ]]
 then
@@ -15,6 +16,9 @@ then
   fi
 
   echo Using current branch: $BRANCH
+  echo Switching to master
+  git checkout master
+  SWITCHED=1
 fi
 
 if git show-ref --tags --quiet --verify -- "refs/tags/$BRANCH"
@@ -24,6 +28,13 @@ then
   if [[ ! $REPLY =~ ^[Yy]$ ]]
   then
     echo Bailing!
+
+    if [[ $SWITCHED == 1 ]]
+    then
+      echo Moving back to original branch
+      git checkout $BRANCH
+    fi
+
     exit 1;
   fi
 fi
