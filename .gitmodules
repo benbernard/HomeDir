@@ -121,3 +121,12 @@
 [submodule "zaw"]
 	path = zaw
 	url = git://github.com/zsh-users/zaw.git
+[submodule ".vim/bundle/neocomplcache.vim"]
+	path = .vim/bundle/neocomplcache.vim
+	url = git@github.com:Shougo/neocomplcache.vim.git
+[submodule ".vim/bundle/neosnippet.vim"]
+	path = .vim/bundle/neosnippet.vim
+	url = https://github.com/Shougo/neosnippet.vim
+[submodule ".vim/bundle/neosnippet-snippets"]
+	path = .vim/bundle/neosnippet-snippets
+	url = git@github.com:Shougo/neosnippet-snippets.git
