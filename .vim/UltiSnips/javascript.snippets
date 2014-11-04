@@ -1,0 +1,41 @@
+snippet fn "simple function"
+function ($1) {
+	${2:${VISUAL:<++>}}
+}$3
+endsnippet
+
+snippet meth "method" 
+function ($1) {
+	${2:${VISUAL:<++>}}
+}${3:,}
+endsnippet
+
+snippet td "test describe with before" b
+test.describe('${1:<++>}', function () {
+	test.before(function () {
+		${2:${VISUAL:<++>}}
+	});
+
+	test.it('${3:<++>}', function () {
+		${4:<++>}
+	});
+})
+endsnippet
+
+snippet ti "test.it" b
+test.it('${1:<++>}', function () {
+	${2:${VISUAL:<++>}}
+})
+endsnippet
+
+snippet sig "todo signature" b
+- `echo $USER` `!v strftime("%Y-%m-%d")`
+endsnippet
+
+snippet todo "todo" b
+// TODO: $1 - `echo $USER` `!v strftime("%Y-%m-%d")`
+endsnippet
+
+snippet method "Description" b
+
+endsnippet

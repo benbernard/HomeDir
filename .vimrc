@@ -356,6 +356,37 @@ let g:vim_markdown_folding_disabled=1
 " Neocomplcache
  source $HOME/.vimrc.neocomplcache
 
+" Ultisnips
+  "let g:UltiSnipsJumpForwardTrigger="<c-w>"
+  "let g:UltiSnipsJumpBackwardTrigger="<c-q>"
+
+  " Map \us to unit search for snips
+  nnoremap <leader>us :<C-u>Unite -buffer-name=snippets -start-insert -no-empty ultisnips<cr>
+  let g:UltiSnipsEditSplit="vertical" " Open ultisnips editor vertically
+
+  " Trim trailing whitespace when possible for snippets
+  " Removes trailing spaces and <++> placeholders
+  function TrimWhiteSpaceAndPlaceholders()
+    %s/\s*$//
+    %s/^\s*<\+\+>$//;
+    %s/<\+\+>//g;
+    ''
+  :endfunction
+
+  " Various autocmds to trigger the clearing of whitespace / placeholders
+  autocmd FileWritePre *.js :call TrimWhiteSpaceAndPlaceholders()
+  autocmd FileAppendPre *.js :call TrimWhiteSpaceAndPlaceholders()
+  autocmd FilterWritePre *.js :call TrimWhiteSpaceAndPlaceholders()
+  autocmd BufWritePre *.js :call TrimWhiteSpaceAndPlaceholders()
+
+  " Use C-e / C-w to move forward / back between placeholders
+  nmap  ?<++><cr>v3l
+  nmap  /<++><cr>v3l
+  smap  <esc>?<++><cr>v3l
+  smap  <esc>/<++><cr>v3l
+  imap  <esc>?<++><cr>v3l
+  imap  <esc>/<++><cr>v3l
+
 
 """"""""""""""" Typos """"""""""""""""""""
 " A list of iabbrev to correct common typos
