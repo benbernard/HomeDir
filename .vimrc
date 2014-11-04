@@ -356,27 +356,6 @@ let g:vim_markdown_folding_disabled=1
 " Neocomplcache
  source $HOME/.vimrc.neocomplcache
 
-" Setup neosnippet, copied from github
-" Plugin key-mappings.
- imap <C-k>     <Plug>(neosnippet_expand_or_jump)
- smap <C-k>     <Plug>(neosnippet_expand_or_jump)
- xmap <C-k>     <Plug>(neosnippet_expand_target)
- imap <C-s>     <Plug>(neosnippet_expand_or_jump)
- nmap <C-s>     <Plug>(neosnippet_expand_or_jump)
-
- " SuperTab like snippets behavior.
- imap <expr><TAB> neosnippet#expandable_or_jumpable() ?
- \ "\<Plug>(neosnippet_expand_or_jump)"
- \: pumvisible() ? "\<C-n>" : "\<TAB>"
- smap <expr><TAB> neosnippet#expandable_or_jumpable() ?
- \ "\<Plug>(neosnippet_expand_or_jump)"
- \: "\<TAB>"
-
- " For snippet_complete marker.
- if has('conceal')
-   set conceallevel=2 concealcursor=i
- endif
-
 
 """"""""""""""" Typos """"""""""""""""""""
 " A list of iabbrev to correct common typos
