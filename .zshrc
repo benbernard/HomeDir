@@ -138,3 +138,6 @@ if [[ -e $HOME/zaw ]]; then
   source $HOME/zaw/zaw.zsh
   bindkey '^O' zaw
 fi
+
+### Added by the Heroku Toolbelt
+export PATH="/usr/local/heroku/bin:$PATH"

@@ -354,7 +354,7 @@ let g:vim_markdown_folding_disabled=1
  nmap <Leader>ti @t
 
 " Neocomplcache
- source $HOME/.vimrc.neocomplcache
+ "source $HOME/.vimrc.neocomplcache
 
 " Ultisnips
   "let g:UltiSnipsJumpForwardTrigger="<c-w>"

@@ -9,7 +9,7 @@
 	url = https://github.com/benbernard/GitScripts.git
 [submodule "BOWQuotes"]
 	path = BOWQuotes
-	url = https://github.com/benbernard/BOWQuotes.git
+	url = git@github.com:benbernard/BOWQuotes.git
 [submodule ".oh-my-zsh"]
 	path = .oh-my-zsh
 	url = http://github.com/robbyrussell/oh-my-zsh.git
