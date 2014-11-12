@@ -18,25 +18,26 @@ source $HOME/.eihooks/dotfiles/vimrc
 
 """"""""""""""" Global Options """"""""""""""""""""
 
-set fo+=qr                     " q: gq foramts with comments, see :help fo-table, r: auto insert comments on new lines
-set foldcolumn=0               " turn off the foldcolumn
-set history=200                " Remember 100 lines of history, for commands and searches
-set hls                        " highlight search terms
-set list                       " Show tabs differently
-set listchars=tab:>-           " Use >--- for tabs
-set nolinebreak                " don't wrap at words, messes up copying
-set smartcase                  " if any capitol in search, turns search case sensitive
-set shiftwidth=2               " use 2 space indenting
-set softtabstop=2              " use 4 space indenting
-set ts=2                       " Default to 4 spaces for tabs
-set tags=./tags,~/fieldbook/tags  " Setup the standard tags files
-set textwidth=0                " turn wrapping off
-set visualbell                 " Use a flash instead of a sound for bells
-set wildmode=longest:full      " Matches only to longest filename, displays to menu possible matches
-set complete=.,w,b,u           " complete from current file, and current buffers default: .,w,b,u,t,i  trying to keep down completion time
-set directory=$HOME/.vim/tmp   " set directory for tmp files to be in .vim, so that .swp files are not littered
-set clipboard=unnamed          " Use the * register when a register is not specified - unifies with system clipboard!
+set fo+=qr                           " q: gq foramts with comments, see :help fo-table, r: auto insert comments on new lines
+set foldcolumn=0                     " turn off the foldcolumn
+set history=200                      " Remember 100 lines of history, for commands and searches
+set hls                              " highlight search terms
+set list                             " Show tabs differently
+set listchars=tab:>-                 " Use >--- for tabs
+set nolinebreak                      " don't wrap at words, messes up copying
+set smartcase                        " if any capitol in search, turns search case sensitive
+set shiftwidth=2                     " use 2 space indenting
+set softtabstop=2                    " use 4 space indenting
+set ts=2                             " Default to 4 spaces for tabs
+set tags=./tags,~/fieldbook/tags     " Setup the standard tags files
+set textwidth=0                      " turn wrapping off
+set visualbell                       " Use a flash instead of a sound for bells
+set wildmode=longest:full            " Matches only to longest filename, displays to menu possible matches
+set complete=.,w,b,u                 " complete from current file, and current buffers default: .,w,b,u,t,i  trying to keep down completion time
+set directory=$HOME/.vim/tmp         " set directory for tmp files to be in .vim, so that .swp files are not littered
+set clipboard=unnamed                " Use the * register when a register is not specified - unifies with system clipboard!
 set omnifunc=syntaxcomplete#Complete " Turn on omni completion
+scriptencoding utf-8                 " Use utf-8 to encode vimscript (so that options key maps can work)
 
 "set foldmethod=indent   " use indent unless overridden
 "set foldlevel=0         " show contents of all folds
@@ -350,11 +351,11 @@ let g:vim_markdown_folding_disabled=1
   source $HOME/.vimrc.unite
 
 " Insert test data
- let @t = 'O"*Pvi]:s/ �kb-  "/"/g�kbvi]=w'
+ let @t = 'O"*Pvi]:s/ kb-  "/"/gkbvi]=w'
  nmap <Leader>ti @t
 
-" Neocomplcache
- "source $HOME/.vimrc.neocomplcache
+" Neocomplete
+ source $HOME/.vimrc.neocomplete
 
 " Ultisnips
   "let g:UltiSnipsJumpForwardTrigger="<c-w>"
@@ -364,19 +365,7 @@ let g:vim_markdown_folding_disabled=1
   nnoremap <leader>us :<C-u>Unite -buffer-name=snippets -start-insert -no-empty ultisnips<cr>
   let g:UltiSnipsEditSplit="vertical" " Open ultisnips editor vertically
 
-  " Trim trailing whitespace when possible for snippets
-  " Removes trailing spaces and <++> placeholders
-  function TrimWhiteSpaceAndPlaceholders()
-    :silent! %s/\s+$//
-    :silent! %s/^\s+<\+\+>$//;
-    :silent! %s/<\+\+>//g;
-  endfunction
-
-  " Various autocmds to trigger the clearing of whitespace / placeholders
-  autocmd FileWritePre *.js :call TrimWhiteSpaceAndPlaceholders()
-  autocmd FileAppendPre *.js :call TrimWhiteSpaceAndPlaceholders()
-  autocmd FilterWritePre *.js :call TrimWhiteSpaceAndPlaceholders()
-  autocmd BufWritePre *.js :call TrimWhiteSpaceAndPlaceholders()
+  let g:UltiSnipsExpandTrigger="<s-tab>"
 
   " Use C-e / C-w to move forward / back between placeholders
   nmap  ?<++><cr>v3l
@@ -385,6 +374,18 @@ let g:vim_markdown_folding_disabled=1
   smap  <esc>/<++><cr>v3l
   imap  <esc>?<++><cr>v3l
   imap  <esc>/<++><cr>v3l
+
+" Better Whitespace
+  let g:strip_whitespace_on_save = 1 " Strip whitespace on save
+
+" Auto pairs
+  " Make meta (option/alt) key work for autopairs stuff
+  let g:AutoPairsShortcutToggle     = 'π' " <m-p>
+  let g:AutoPairsShortcutFastWrap   = '∑' " <m-w>
+  let g:AutoPairsShortcutJump       = '∆' " <m-j>
+  let g:AutoPairsShortcutBackInsert = '∫' " <m-b>
+
+  let g:AutoPairsCenterLine = 0 " Do not center line after auto-inserting a CR
 
 
 """"""""""""""" Typos """"""""""""""""""""
@@ -437,18 +438,6 @@ endif
 autocmd filetype crontab setlocal nobackup nowritebackup
 
 """"""""""""""" Version 7 Settings """"""""""""""""""""
-
-" The highlight changes at least have to be at the end here... not sure why
-" Highlight trailing whitespace in red so I can prevent that.
-" Must be below any colorscheme setting
-highlight ExtraWhitespace ctermbg=red guibg=red
-match ExtraWhitespace /\s\+$/
-augroup WhiteSpaceMatching
-  autocmd BufWinEnter * if &modifiable && &ft!='unite' | match ExtraWhitespace /\s\+$/ | endif
-  autocmd InsertEnter * if &modifiable && &ft!='unite' | match ExtraWhitespace /\s\+\%#\@<!$/ | endif
-  autocmd InsertLeave * if &modifiable && &ft!='unite' | match ExtraWhitespace /\s\+$/ | endif
-  autocmd BufWinLeave * if &modifiable && &ft!='unite' | call clearmatches() | endif
-augroup END
 
 " Changing spelling highlight to be underline, must come at the end
 hi clear SpellBad

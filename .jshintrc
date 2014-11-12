@@ -1,0 +1,67 @@
+{
+  // Relaxing rules
+  "eqnull": true, // Allow == null (vs. ===)
+  "sub": true, // Suppress warnings about using obj['foo'] notation instead of obj.foo
+  "expr": true, // Suppress warnings about using expressions when you except assignments or functions.  Fixes expect().true case
+  "asi": true, // Do not complain about non-semicolon ended lines
+  "debug": true, // Do not complain about debugger; in test
+
+  // Enforcing more rules
+  "eqeqeq": true, // Require using triple equals
+  "camelcase": true, // Require camcelCase variables
+  "forin": true, // Require for (.. in ..) constructs to check hasOwnProperty
+  "freeze": true, // Do not allow modifying builtins like Array.prototype
+  "immed": true, // Require () after function calls
+  "indent": 2, // Enforce 2 space indenting
+  "noarg": true, // Complain about using arugments.caller and callee, which are deprecated
+  "noempty": true, // Complain about empty blocks
+  "nonew": true, // Complain about using new without assigning the result
+  "undef": true, // Complain about undefined varaibles being used (normally typos)
+  "trailing": true, // Complain about trailing whitespce
+  "maxlen": 150, // Complain about lines longer than 150 characters
+
+  // Globals
+  "node": true, // include node global variables
+  "jquery": true, // include browser standard global variables
+  "globals": {
+    "$": true, // Client sometimes imports $
+    "Q": true, // Client has to import Q, server doesn't
+    "_": false,
+    "dev": false,
+    "Tips": false,
+    "logger": false,
+    "prequire": false,
+    "projpath": false,
+    "require": false,
+    "rootdir": false,
+    "site": false,
+    "util": true,
+    "mixpanel": false,
+
+    // Browser globals, don't want to use preset in order to avoid things like
+    // the global event
+    "window": false,
+    "document": false,
+    "navigator": false,
+
+    // Testing related globals
+    "Delivery": false,
+    "server": false,
+    "chai": false,
+    "test": false,
+    "after": false,
+    "before": false,
+    "describe": false,
+    "expect": false,
+    "given": false,
+    "helpers": true,
+    "webdriver": true,
+    "pages": false,
+    "faker": false,
+    "Call": false,
+    "client": false,
+    "it": false,
+    "testUndo": false,
+    "scenarios": false
+  }
+}
