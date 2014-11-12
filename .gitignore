@@ -45,3 +45,5 @@ perl5/
 screen/
 .lesshst
 .rnd
+.vim/bundle/bufexplorer-7.3.0/doc/tags
+.vim/bundle/calendar-vim/doc/tags
