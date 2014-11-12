@@ -9,43 +9,43 @@ call unite#filters#sorter_default#use(['sorter_rank'])
 " Unite mappers, the final word is the type of thing that will be serached, otherwise is fairly self-explanatory
 
 " Search all files from current dir
-nnoremap <leader>ut :<C-u>Unite -buffer-name=files   -start-insert file_rec/async:!<cr>
+nnoremap <leader>ut :<C-u>Unite -buffer-name=files -prompt-direction=above  -start-insert file_rec/async:!<cr>
 
 " Search files in current dir
 "nnoremap <leader>uf :<C-u>Unite -buffer-name=files   -start-insert file<cr>
 
 " Search files in mru order
-nnoremap <leader>um :<C-u>Unite -buffer-name=mru     -start-insert file_mru<cr>
+nnoremap <leader>um :<C-u>Unite -buffer-name=mru  -prompt-direction=above   -start-insert file_mru<cr>
 
 " Search buffer names
-nnoremap <leader>ub :<C-u>Unite -buffer-name=buffer  buffer<cr>
+nnoremap <leader>ub :<C-u>Unite -buffer-name=buffer -prompt-direction=above buffer<cr>
 
 " Start unite with a grep
-nnoremap <leader>ug :Unite -buffer-name=grep grep:.<cr>
+nnoremap <leader>ug :Unite -buffer-name=grep -prompt-direction=above grep:.<cr>
 
 " Start unite with a grep, prompt for files
-nnoremap <leader>uG :Unite -buffer-name=grep grep<cr>
+nnoremap <leader>uG :Unite -buffer-name=grep  -prompt-direction=above grep<cr>
 
 " Unite grep the word under the cursor
-nnoremap <leader>ul :UniteWithCursorWord -buffer-name=grep grep:.<cr>
+nnoremap <leader>ul :UniteWithCursorWord -buffer-name=grep  -prompt-direction=above grep:.<cr>
 
 " Unite grep the word under the cursor
-nnoremap <leader>uL :UniteWithCursorWord -buffer-name=grep grep<cr>
+nnoremap <leader>uL :UniteWithCursorWord -buffer-name=grep  -prompt-direction=above grep<cr>
 
 " Search yank history
-nnoremap <leader>uy :<C-u>Unite -buffer-name=yank    history/yank<cr>
+nnoremap <leader>uy :<C-u>Unite -buffer-name=yank  -prompt-direction=above    history/yank<cr>
 
 " Search Help docs !! (yay!)
-nnoremap <leader>uh :<C-u>Unite -start-insert -buffer-name=help help<CR>
+nnoremap <leader>uh :<C-u>Unite -start-insert -prompt-direction=above  -buffer-name=help help<CR>
 
 " search command history
-nnoremap <leader>uc :<C-u>Unite -buffer-name=commands history/command<CR>
+nnoremap <leader>uc :<C-u>Unite -buffer-name=commands  -prompt-direction=above history/command<CR>
 
 " Search registers
-nnoremap <leader>ur :<C-u>Unite -start-insert -buffer-name=register register<CR>
+nnoremap <leader>ur :<C-u>Unite -start-insert -prompt-direction=above  -buffer-name=register register<CR>
 
 " Search outline, think taglist
-nnoremap <leader>uo :<C-u>Unite -buffer-name=outline -start-insert outline<CR>
+nnoremap <leader>uo :<C-u>Unite -buffer-name=outline -prompt-direction=above  -start-insert outline<CR>
 
 " Resume looking at a unite session
 nnoremap <leader>uu :<C-u>UniteResume<cr>
@@ -53,8 +53,8 @@ nnoremap <leader>uu :<C-u>UniteResume<cr>
 " For some reason <C-a> was getting mapped away, using autocmd to bypass
 " that
 " Search files with Ctrl-a
-nnoremap <C-a> :<C-u>Unite -buffer-name=files   -start-insert file_rec/async:!<cr>
-autocmd VimEnter * nnoremap <C-a> :<C-u>Unite -buffer-name=files   -start-insert file_rec/async:!<cr>
+nnoremap <C-a> :<C-u>Unite -buffer-name=files -prompt-direction=above  -start-insert file_rec/async:!<cr>
+autocmd VimEnter * nnoremap <C-a> :<C-u>Unite -buffer-name=files -prompt-direction=above  -start-insert file_rec/async:!<cr>
 
 " Start in insert mode
 let g:unite_enable_start_insert = 1
@@ -131,6 +131,9 @@ if executable('ag')
   " Specifically adds ignore flags for things that we don't want to search
   let g:unite_source_grep_default_opts = '--nogroup --nocolor --column --ignore node_modules --ignore .git --ignore public/js/app.js'
   let g:unite_source_grep_recursive_opt = ''
+
+"  let g:unite_source_rec_async_command='ag -p ~/.agignore --nocolor --nogroup --ignore node_modules ""'
+  let g:unite_source_rec_async_command= 'ag --nocolor --nogroup --hidden --ignore-dir node_modules -g ""'
 endif
 " Actually instead put this in the .agignore
 

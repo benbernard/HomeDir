@@ -367,11 +367,10 @@ let g:vim_markdown_folding_disabled=1
   " Trim trailing whitespace when possible for snippets
   " Removes trailing spaces and <++> placeholders
   function TrimWhiteSpaceAndPlaceholders()
-    %s/\s*$//
-    %s/^\s*<\+\+>$//;
-    %s/<\+\+>//g;
-    ''
-  :endfunction
+    :silent! %s/\s+$//
+    :silent! %s/^\s+<\+\+>$//;
+    :silent! %s/<\+\+>//g;
+  endfunction
 
   " Various autocmds to trigger the clearing of whitespace / placeholders
   autocmd FileWritePre *.js :call TrimWhiteSpaceAndPlaceholders()
