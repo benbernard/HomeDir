@@ -43,3 +43,5 @@ bin/selenium-server-standalone-2.38.0.jar
 fieldbook/
 perl5/
 screen/
+.lesshst
+.rnd
