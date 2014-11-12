@@ -377,6 +377,7 @@ let g:vim_markdown_folding_disabled=1
 
 " Better Whitespace
   let g:strip_whitespace_on_save = 1 " Strip whitespace on save
+  let g:better_whitespace_filetypes_blacklist = ['unite'] " Do not highlight trailing spaces in unite buffers
 
 " Auto pairs
   " Make meta (option/alt) key work for autopairs stuff
