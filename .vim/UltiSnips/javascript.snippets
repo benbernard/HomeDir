@@ -8,10 +8,10 @@ snippet fni "simple function, inline"
 function ($1) { ${2:${VISUAL:<++>}} }$3
 endsnippet
 
-snippet meth "method" 
-function ($1) {
-	${2:${VISUAL:<++>}}
-}${3:,}
+snippet meth "method"
+${1:<++>}: function ($2) {
+	${3:${VISUAL:<++>}}
+}${4:,}
 endsnippet
 
 snippet tdf "test describe with before and test.it" b
@@ -56,6 +56,10 @@ snippet todo "todo" b
 // TODO: $1 - `echo $USER` `!v strftime("%Y-%m-%d")`
 endsnippet
 
-snippet method "Description" b
+snippet wfn "waitForNetworkAndView" b
+page.waitForNetworkAndView();
+endsnippet
 
+snippet sleep "test sleep" b
+site.driver.sleep(2000000);
 endsnippet
