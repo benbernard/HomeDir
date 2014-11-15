@@ -136,3 +136,6 @@
 [submodule ".vim/bundle/auto-pairs"]
 	path = .vim/bundle/auto-pairs
 	url = git@github.com:jiangmiao/auto-pairs.git
+[submodule "userScripts/commentTracker"]
+	path = userScripts/commentTracker
+	url = git@github.com:benbernard/CommentTracker.git
