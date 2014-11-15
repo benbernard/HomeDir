@@ -1,14 +1,14 @@
-snippet fn "simple function"
+snippet fn "simple function" w
 function ($1) {
 	${2:${VISUAL:<++>}}
 }$3
 endsnippet
 
-snippet fni "simple function, inline"
+snippet fni "simple function, inline" w
 function ($1) { ${2:${VISUAL:<++>}} }$3
 endsnippet
 
-snippet meth "method"
+snippet meth "method" b
 ${1:<++>}: function ($2) {
 	${3:${VISUAL:<++>}}
 }${4:,}
@@ -45,6 +45,12 @@ endsnippet
 snippet ti "test.it" b
 test.it('${1:<++>}', function () {
 	${2:${VISUAL:<++>}}
+})
+endsnippet
+
+snippet tb "test.before" b
+test.before(function () {
+	${1:${VISUAL:<++>}}
 })
 endsnippet
 

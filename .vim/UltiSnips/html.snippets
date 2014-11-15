@@ -1,0 +1,25 @@
+snippet ti "tag" w
+<$1>${2:${VISUAL:<++>}}</$1>
+endsnippet
+
+snippet t "tag lines" w
+<${1:<++>}>
+	${2:${VISUAL:<++>}}
+</$1>
+endsnippet
+
+snippet each "each block" b
+{{#each ${1:<++>}}}
+	${2:${VISUAL:<++>}}
+{{/each}}
+endsnippet
+
+snippet if "if statement" b
+{{#if ${1:<++>}}}
+	${2:${VISUAL:<++>}}
+{{/if}}
+endsnippet
+
+snippet ifi "if statement, inline" w
+{{#if ${1:<++>}}} ${2:${VISUAL:<++>}} {{/if}}
+endsnippet
