@@ -58,14 +58,18 @@ snippet sig "todo signature" b
 - `echo $USER` `!v strftime("%Y-%m-%d")`
 endsnippet
 
-snippet todo "todo" b
-// TODO: $1 - `echo $USER` `!v strftime("%Y-%m-%d")`
-endsnippet
-
 snippet wfn "waitForNetworkAndView" b
 page.waitForNetworkAndView();
 endsnippet
 
 snippet sleep "test sleep" b
 site.driver.sleep(2000000);
+endsnippet
+
+snippet sig "TODO signature" w
+- `echo $USER` `!v strftime("%Y-%m-%d")`
+endsnippet
+
+snippet todo "TODO" b
+// TODO ${1:${VISUAL:<++>}} - `echo $USER` `!v strftime("%Y-%m-%d")`
 endsnippet
