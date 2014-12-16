@@ -15,7 +15,6 @@ RecordStream/
 .heroku/
 .history
 .irclogs/**
-.irssi/**
 .netrc
 .node-gyp/
 .npm/
@@ -49,3 +48,7 @@ screen/
 .vim/bundle/calendar-vim/doc/tags
 Google Drive/
 userScripts/commentTracker.zip
+.irssi/away.log
+Torrents/
+.irssi/url
+.irssi/config

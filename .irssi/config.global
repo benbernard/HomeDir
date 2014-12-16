@@ -285,6 +285,7 @@ settings = {
     confirm_characters = "/:";
     confirm_channels = "twitter_bernard_ben";
     url_log_auto_head = "no";
+    expand_url_privmsgs = "yes";
   };
 };
 
