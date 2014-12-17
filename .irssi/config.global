@@ -4,6 +4,7 @@ chatnets = {
 };
 
 servers = (
+    // Server config here
 );
 
 channels = (
@@ -273,7 +274,7 @@ settings = {
   };
   "fe-text" = { actlist_sort = "recent"; };
   "perl/core/scripts" = {
-    url_log_browser = "/Users/bbernard/bin/openUrl '%f'";
+    url_log_browser = "/Users/bernard/bin/openUrl '%f'";
     #autoaway_timeout = "0";
     #autoaway = "36000";
     #away_reason = "idle timeout";
@@ -282,7 +283,7 @@ settings = {
     print_log_whole_log = "yes";
     chanact_show_all = "yes";
     nicklist_height = "50";
-    confirm_characters = "/:";
+    confirm_characters = "/";
     confirm_channels = "twitter_bernard_ben";
     url_log_auto_head = "no";
     expand_url_privmsgs = "yes";
