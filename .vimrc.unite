@@ -42,7 +42,7 @@ nnoremap <leader>uh :<C-u>Unite -start-insert -prompt-direction=above  -buffer-n
 nnoremap <leader>uc :<C-u>Unite -buffer-name=commands  -prompt-direction=above history/command<CR>
 
 " Search registers
-nnoremap <leader>ur :<C-u>Unite -start-insert -prompt-direction=above  -buffer-name=register register<CR>
+nnoremap <leader>uvr :<C-u>Unite -start-insert -prompt-direction=above  -buffer-name=register register<CR>
 
 " Search outline, think taglist
 nnoremap <leader>uo :<C-u>Unite -buffer-name=outline -prompt-direction=above  -start-insert outline<CR>
@@ -50,11 +50,14 @@ nnoremap <leader>uo :<C-u>Unite -buffer-name=outline -prompt-direction=above  -s
 " Resume looking at a unite session
 nnoremap <leader>uu :<C-u>UniteResume<cr>
 
+" Search files with default action of require
+nnoremap <leader>ur :<C-u>Unite -start-insert -prompt-direction=above -buffer-name=require -default-action=require file_rec/async:!<CR>
+
 " For some reason <C-a> was getting mapped away, using autocmd to bypass
 " that
 " Search files with Ctrl-a
-nnoremap <C-a> :<C-u>Unite -buffer-name=files -prompt-direction=above  -start-insert file_rec/async:!<cr>
-autocmd VimEnter * nnoremap <C-a> :<C-u>Unite -buffer-name=files -prompt-direction=above  -start-insert file_rec/async:!<cr>
+nnoremap <C-a> :<C-u>Unite -buffer-name=files -prompt-direction=above -start-insert file_rec/async:!<cr>
+autocmd VimEnter * nnoremap <C-a> :<C-u>Unite -buffer-name=files -prompt-direction=above -start-insert file_rec/async:!<cr>
 
 " Start in insert mode
 let g:unite_enable_start_insert = 1
@@ -123,6 +126,18 @@ function! s:unite_settings()
   inoremap <silent><buffer><expr> <C-b> unite#do_action('below')
   nnoremap <silent><buffer><expr> <C-b> unite#do_action('below')
 endfunction
+
+let unite_require = {
+  \ 'description': 'add require line for file',
+  \ 'is_selectable': 1,
+\ }
+
+function! unite_require.func(candidates)
+  let line = system('relativePath.pl ' . a:candidates[0]['action__path'] . ' ' . expand('%:p') . ' 2>/dev/null')
+  execute "normal! mqgg}i" . line . "\<esc>`q"
+endfunction
+
+call unite#custom_action('file', 'require', unite_require)
 
 " Use ag for search
 if executable('ag')
