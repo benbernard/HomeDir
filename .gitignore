@@ -54,3 +54,9 @@ Torrents/
 .irssi/config
 .urlopener.log
 PrivateConfiguration/
+.cpanm/
+.cups/
+.dir
+.mplayer/
+test-destributer/
+upnp/

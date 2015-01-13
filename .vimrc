@@ -234,6 +234,7 @@ au FileType c,cpp set cinkeys+=0#
           \ '\m^/Users/bernard/fieldbook/node_modules',
           \ '\m^/Users/bernard/fieldbook/lib/js',
           \ '\m^/Users/bernard/jquery-handsontable',
+          \ '\m^/Users/bernard/test-destributer',
           \ '.*.user.js$' ]
 
   " Map <leader>st to SyntasticToggleMode

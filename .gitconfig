@@ -30,6 +30,7 @@
   l = log --oneline --no-merges
 
   # These I generally don't
+  s = status -s
   st = status -uno
   ci = commit
   df = diff
