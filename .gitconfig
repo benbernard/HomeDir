@@ -61,7 +61,7 @@
 
 [merge]
   conflictstyle = diff3
-  keepBackup = false;
+  keepBackup = false
   keepTemporaries = false
   tool = p4merge
 
@@ -77,8 +77,10 @@
 
 [push]
   default = matching
+
 [mergetool]
 	keepBackup = false
+
 [filter "media"]
 	clean = git-media-clean %f
 	smudge = git-media-smudge %f

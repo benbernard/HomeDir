@@ -61,3 +61,5 @@ PrivateConfiguration/
 test-destributer/
 upnp/
 bin/recs
+.floorc.json
+floobits/
