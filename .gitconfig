@@ -84,3 +84,9 @@
 [filter "media"]
 	clean = git-media-clean %f
 	smudge = git-media-smudge %f
+
+# These cause github origins to pull down refs for the pull requests (by number) as well
+[remote "origin"]
+	fetch = +refs/pull/*/head:refs/remotes/origin/pr/*
+[remote "team"]
+	fetch = +refs/pull/*/head:refs/remotes/team/pr/*
