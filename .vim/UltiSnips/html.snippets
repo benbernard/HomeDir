@@ -3,9 +3,9 @@ snippet ti "tag" w
 endsnippet
 
 snippet t "tag lines" w
-<${1:<++>}>
+<${1:div}>
 	${2:${VISUAL:<++>}}
-</$1>
+</${1/(\w+).*/$1/}>
 endsnippet
 
 snippet each "each block" b

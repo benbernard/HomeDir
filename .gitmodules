@@ -139,3 +139,6 @@
 [submodule "userScripts/commentTracker"]
 	path = userScripts/commentTracker
 	url = git@github.com:benbernard/CommentTracker.git
+[submodule "programming/devtools-snippets"]
+	path = programming/devtools-snippets
+	url = git@github.com:bgrins/devtools-snippets.git

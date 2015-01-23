@@ -389,6 +389,25 @@ let g:vim_markdown_folding_disabled=1
 
   let g:AutoPairsCenterLine = 0 " Do not center line after auto-inserting a CR
 
+" Add incremental move commands
+  " This is adapted from this article:
+  " http://reefpoints.dockyard.com/2013/09/26/vim-moving-lines-aint-hard.html
+  "
+  " Note: Ô - Option-shift-j on mac,  - Option-shift-k on mac
+  "
+
+  " Normal mode
+  nnoremap Ô :m .+1<CR>==
+  nnoremap  :m .-2<CR>==
+
+  " Insert mode
+  inoremap Ô <ESC>:m .+1<CR>==gi
+  inoremap  <ESC>:m .-2<CR>==gi
+
+  " Visual mode
+  vnoremap Ô :m '>+1<CR>gv=gv
+  vnoremap  :m '<-2<CR>gv=gv
+
 
 """"""""""""""" Typos """"""""""""""""""""
 " A list of iabbrev to correct common typos
