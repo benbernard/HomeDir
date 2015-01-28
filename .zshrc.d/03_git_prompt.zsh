@@ -38,7 +38,7 @@ function parsehead() {
       read head < "$gitdir/HEAD"
       case "$head" in
           ref:*) #normal ref
-              branch="${head##*/}"
+              branch="${head#ref: refs/heads/}"
               ;;
           "")
               branch=""
