@@ -352,7 +352,8 @@ let g:vim_markdown_folding_disabled=1
   source $HOME/.vimrc.unite
 
 " Insert test data
- let @t = 'O"*Pvi]:s/ kb-  "/"/gkbvi]=w'
+ " let @t = 'O"*Pvi]:s/^ *- *"/"/gvi]='
+ let @t = '"*pvi]:s/^ *- */<80>kb"<80>kb//^Mvi]=vi]:s/([^,])$/\1,/^Mu^Rvi]:s/$/,/^M:nohl^M'
  nmap <Leader>ti @t
 
 " Neocomplete

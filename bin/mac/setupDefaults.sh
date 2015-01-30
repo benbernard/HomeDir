@@ -15,3 +15,6 @@ then
 else
   echo "Could not modify Andriod file transfer: not present"
 fi
+
+
+echo "Remember to symlink jshint, jscs, and node into /bin"
