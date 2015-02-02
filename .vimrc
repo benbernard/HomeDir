@@ -182,6 +182,8 @@ au FileType c,cpp set cinkeys+=0#
   let g:yankring_replace_n_pkey = '<F3>'
   let g:yankring_replace_n_nkey = '<F2>'
 
+  nnoremap <silent> <Leader>yr :YRShow<CR>
+
 "AddressComplete Settings
   "automatically address complete on exit
   let g:addressCompleteOnExit = 1
@@ -311,38 +313,15 @@ au FileType c,cpp set cinkeys+=0#
   nmap <Leader>tP :tabp<CR>
   nmap <Leader>TP :tabp<CR>
 
-" Maybe if I had a real X buffer, this would be cool.  Too bad.
-"  " X buffer cut/paste
-"  nmap <Leader>xp "*p
-"  nmap <Leader>xy :set opfunc=XBufferYank<CR>g@
-"
-"  function! XBufferYank(type, ...)
-"    '[,']yank "*
-"  endfunction
-
   " map \uo to open the first url on the line
   map <Leader>ou :call OpenUrl()<CR>
 
 "Visual Mode Maps
-  "Visual mode comment adding
-  "vmap <Leader>c :s/^/#/g<enter>:nohl<enter> " leader-c comments block
-  "vmap <Leader>x :s/^#//g<enter>:nohl<enter> " leader-x uncomments block
-  vmap <C-A> :Align =<enter>                 " Align =  in block
-  vmap <Leader>h :Align =><enter>            " Align => in block
 
 "Insert Mode Maps
   "map ctrl-a and ctrl-e to act like emacs
   imap <C-A> <C-O>^
   imap <C-E> <C-O>$
-
-"Commands for perforce, from Scott Windsor
-  " Perforce commands
-  " Works, but commented out for now, want these commands elsewhere
-  "command -nargs=0 Diff :!p4 diff %
-  "command -nargs=0 Changes :!p4 changes %
-  "command -nargs=1 Describe :!p4 describe <args> | more
-  "command -nargs=0 Edit :!p4 edit %
-  "command -nargs=0 Revert :!p4 revert %
 
 " Do not use folds in vim-markdown
 let g:vim_markdown_folding_disabled=1
@@ -389,6 +368,35 @@ let g:vim_markdown_folding_disabled=1
   let g:AutoPairsShortcutBackInsert = '∫' " <m-b>
 
   let g:AutoPairsCenterLine = 0 " Do not center line after auto-inserting a CR
+
+" Multiple Cursors config
+  let g:multi_cursor_use_default_mapping=0 " Turn off default maps
+
+  let g:multi_cursor_next_key='<C-m>'
+  let g:multi_cursor_prev_key='<C-p>'
+  let g:multi_cursor_skip_key='<C-x>'
+  let g:multi_cursor_quit_key='<Esc>'
+
+  " Called once right before you start selecting multiple cursors
+  function! Multiple_cursors_before()
+    if exists(':NeoCompleteLock')==2
+      exe 'NeoCompleteLock'
+    endif
+  endfunction
+
+  " Called once only when the multiple selection is canceled (default <Esc>)
+  function! Multiple_cursors_after()
+    if exists(':NeoCompleteUnlock')==2
+      exe 'NeoCompleteUnlock'
+    endif
+  endfunction
+
+  let g:multi_cursor_exit_from_visual_mode=0 " Do not exist multi cursors with esc from visual mode
+  let g:multi_cursor_exit_from_insert_mode=0 " Do not exist multi cursors with esc from insert mode
+
+  let g:multi_cursor_normal_maps = {'d': 1, 'c': 1} " Map dw and cw work with multiple cursors
+
+
 
 " Add incremental move commands
   " This is adapted from this article:
