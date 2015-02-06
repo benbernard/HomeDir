@@ -265,7 +265,8 @@ au FileType c,cpp set cinkeys+=0#
   map , y'a
 
   " Make Y work like C, D (to the end of the line)
-  map Y y$
+  " Not working?!?
+  nnoremap Y y$
 
   "map the buff explorer open key
   map <F8> \be

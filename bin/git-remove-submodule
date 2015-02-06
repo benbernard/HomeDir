@@ -1,0 +1,23 @@
+#!/bin/bash
+
+SUBMODULE=$1
+
+echo Removing submodule $SUBMODULE
+
+if [ ! -d $SUBMODULE ]
+then
+  echo "$SUBMODULE does not exist (or is not a directory), bailing!"
+  exit 1
+fi
+
+git submodule status $SUBMODULE | grep $SUBMODULE
+
+if [ $? != 0 ];
+then
+  echo $SUBMODULE not a valid submodule, bailing!
+  exit 1
+fi
+
+git rm $SUBMODULE
+git config -f .git/config --remove-section submodule.$SUBMODULE
+rm -rf .git/modules/$SUBMODULE
