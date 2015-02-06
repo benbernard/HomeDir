@@ -199,7 +199,7 @@ au FileType c,cpp set cinkeys+=0#
 
 " EasyMotion settings
   " Use - as the leader for EasyMotion
-  let g:EasyMotion_leader_key = '-'
+  let g:EasyMotion_leader_key = '\|'
 
 " Session settings
   "When opened with a session, save the changes

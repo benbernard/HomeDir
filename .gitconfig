@@ -28,9 +28,9 @@
   br = branch
   co = checkout
   l = log --oneline --no-merges
+  s = ! git status -s | cut -f3- -d' '
 
   # These I generally don't
-  s = status -s
   st = status -uno
   ci = commit
   df = diff
