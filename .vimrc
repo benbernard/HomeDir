@@ -18,6 +18,9 @@ source $HOME/.eihooks/dotfiles/vimrc
 
 """"""""""""""" Global Options """"""""""""""""""""
 
+colorscheme zellner         "changes color scheme to something that looks decent on the mac
+
+set background=dark                  " Tell vim that I'm using a dark background terminal
 set fo+=qr                           " q: gq foramts with comments, see :help fo-table, r: auto insert comments on new lines
 set foldcolumn=0                     " turn off the foldcolumn
 set history=200                      " Remember 100 lines of history, for commands and searches
@@ -47,9 +50,6 @@ set foldlevelstart=9999
 filetype plugin on          "turns on filetype plugin, lets matchit work well
 filetype plugin indent on
 
-"set background=dark
-"colorscheme solarized
-colorscheme zellner         "changes color scheme to something that looks decent on the mac
 
 " Set the vim info options
 " In order: local marks for N files are saved, global marks are saved,
@@ -264,6 +264,9 @@ au FileType c,cpp set cinkeys+=0#
   "map comma to yank to mark a
   map , y'a
 
+  " Make Y work like C, D (to the end of the line)
+  map Y y$
+
   "map the buff explorer open key
   map <F8> \be
 
@@ -372,7 +375,7 @@ let g:vim_markdown_folding_disabled=1
 " Multiple Cursors config
   let g:multi_cursor_use_default_mapping=0 " Turn off default maps
 
-  let g:multi_cursor_next_key='<C-m>'
+  let g:multi_cursor_next_key='<C-i>'
   let g:multi_cursor_prev_key='<C-p>'
   let g:multi_cursor_skip_key='<C-x>'
   let g:multi_cursor_quit_key='<Esc>'
@@ -394,8 +397,7 @@ let g:vim_markdown_folding_disabled=1
   let g:multi_cursor_exit_from_visual_mode=0 " Do not exist multi cursors with esc from visual mode
   let g:multi_cursor_exit_from_insert_mode=0 " Do not exist multi cursors with esc from insert mode
 
-  let g:multi_cursor_normal_maps = {'d': 1, 'c': 1} " Map dw and cw work with multiple cursors
-
+  let g:multi_cursor_normal_maps = {'d': 1, 'c': 1, 't': 1} " Map dw and cw work with multiple cursors
 
 
 " Add incremental move commands
@@ -448,7 +450,7 @@ if ( v:version >= 700 )
   "set cursorline " Get a highlight of the line the cursor is on
 
   " Change cursor line to highlight the line
-  highlight! CursorLine cterm=NONE ctermbg=0
+  "highlight! CursorLine cterm=NONE ctermbg=0
 
   " Change spelling colors to not suck, green and brown respectively
   highlight! SpellCap ctermbg=3

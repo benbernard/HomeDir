@@ -11,3 +11,10 @@ vim
 tooltip
 autocomplete
 readonly
+vim
+filetype
+matchit
+incase
+vimscript
+javascript
+supertab
