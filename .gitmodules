@@ -160,6 +160,3 @@
 [submodule ".vim/bundle/splitjoin.vim"]
 	path = .vim/bundle/splitjoin.vim
 	url = git@github.com:AndrewRadev/splitjoin.vim.git
-[submodule ".vim/bundle/vim-sexp"]
-	path = .vim/bundle/vim-sexp
-	url = git@github.com:guns/vim-sexp.git
