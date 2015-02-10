@@ -1,5 +1,5 @@
 # -*- conf-space -*-
-###################### Setup Basic Mail Settings #################### 
+###################### Setup Basic Mail Settings ####################
 #
 # Set mailbox type to maildir
 set mbox_type="maildir"
@@ -12,7 +12,7 @@ set folder=~/mail
 set mail_check=5
 set timeout=10
 
-# set to use your printer (DDuplex means double sided) 
+# set to use your printer (DDuplex means double sided)
 # set print_command="enscript -DDuplex:true -P denali@10.21.132.29"
 
 # General settings
@@ -122,7 +122,6 @@ color tree	red black
 color index     white black [\-\.+_a-zA-Z0-9]+@[\-\.a-zA-Z0-9]+
 
 ## whitelist your homies
-color index yellow black "~f jeff@"
 color index yellow black "~f env-improvement-ninjas@"
 
 # Mail from any of my alternate addresses
