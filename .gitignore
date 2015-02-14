@@ -72,3 +72,5 @@ fieldbot/
 yankring_history_v2.txt
 programming/
 .vim/spell/*.spl
+s3cmd/
+.s3cfg
