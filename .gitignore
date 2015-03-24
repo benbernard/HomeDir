@@ -74,3 +74,13 @@ programming/
 .vim/spell/*.spl
 s3cmd/
 .s3cfg
+.Xauthority
+.dbshell
+.erlang.cookie
+.fontconfig/
+.ghc/
+.mongorc.js
+.npmrc
+.wireshark-etc/
+.wireshark/
+hardcopy.1
