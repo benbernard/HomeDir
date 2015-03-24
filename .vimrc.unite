@@ -134,7 +134,8 @@ let unite_require = {
 
 function! unite_require.func(candidates)
   let line = system('relativePath.pl ' . a:candidates[0]['action__path'] . ' ' . expand('%:p') . ' 2>/dev/null')
-  execute "normal! mqgg}O" . line . "\<esc>0w"
+  echo 'relativePath.pl ' . a:candidates[0]['action__path'] . ' ' . expand('%:p') . ' 2>/dev/null'
+  execute "normal! mqgg}O" . line . "\<esc>"
 endfunction
 
 call unite#custom_action('file', 'require', unite_require)

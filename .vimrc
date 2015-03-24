@@ -400,6 +400,10 @@ let g:vim_markdown_folding_disabled=1
 
   let g:multi_cursor_normal_maps = {'d': 1, 'c': 1, 't': 1} " Map dw and cw work with multiple cursors
 
+" Indent guides
+  let g:indent_guides_enable_on_vim_startup = 1
+  let g:indent_guides_exclude_filetypes = ['help', 'unite']
+
 
 " Add incremental move commands
   " This is adapted from this article:

@@ -4,7 +4,6 @@
   "sub": true, // Suppress warnings about using obj['foo'] notation instead of obj.foo
   "expr": true, // Suppress warnings about using expressions when you except assignments or functions.  Fixes expect().true case
   "asi": true, // Do not complain about non-semicolon ended lines
-  "debug": true, // Do not complain about debugger; in test
 
   // Enforcing more rules
   "eqeqeq": true, // Require using triple equals
@@ -19,6 +18,7 @@
   "undef": true, // Complain about undefined varaibles being used (normally typos)
   "trailing": true, // Complain about trailing whitespce
   "maxlen": 150, // Complain about lines longer than 150 characters
+  "debug": true, // Do not complain about debugger; in test
 
   // Globals
   "node": true, // include node global variables
@@ -37,6 +37,7 @@
     "site": false,
     "util": true,
     "mixpanel": false,
+    "io": false,
 
     // Browser globals, don't want to use preset in order to avoid things like
     // the global event
@@ -62,6 +63,9 @@
     "client": false,
     "it": false,
     "testUndo": false,
-    "scenarios": false
+    "scenarios": false,
+    "wait": false,
+    "promised": false,
+    "Fieldbook": false
   }
 }
