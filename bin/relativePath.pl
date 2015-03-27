@@ -13,6 +13,8 @@ if ($includedFile =~ m/index.js$/) {
   $includedFile = dirname($includedFile);
 }
 
+$includedFile =~ s/\.js$//;
+
 my $className = ucfirst((fileparse($includedFile, '.js'))[0]);
 
 if ($sourceFile =~ m/^$PROJECT_ROOT\/server/) {
