@@ -38,6 +38,7 @@
     "util": true,
     "mixpanel": false,
     "io": false,
+    "jobRegistry": false,
 
     // Browser globals, don't want to use preset in order to avoid things like
     // the global event
@@ -66,6 +67,8 @@
     "scenarios": false,
     "wait": false,
     "promised": false,
-    "Fieldbook": false
+    "Fieldbook": false,
+    "fixtures": true,
+    "circleTakeScreenshot": false
   }
 }
