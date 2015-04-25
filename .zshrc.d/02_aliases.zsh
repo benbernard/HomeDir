@@ -52,3 +52,4 @@ alias 'fm=foreman run -e server/config/environments/test.env,.env.local mocha --
 
 # Update browserify
 alias 'gb=grunt browserify:app'
+alias 'vnc=cd ~/fieldbook;circleci/setupVnc.sh'

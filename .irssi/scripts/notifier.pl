@@ -68,15 +68,44 @@ sub notifier_it {
 
     my $current_nick = $server->{nick};
     if($filter && !$force) {
+      if ($title =~ m/mbrubeck/) {
+        print_msg('filter and data', $filter, $data)
+      }
       return 0 if $data !~ /$filter/;
+      if ($title =~ m/mbrubeck/) {
+        print_msg('did not filter')
+      }
     }
-    if($channel_filter && $server->ischannel($channel) && !$force) {
+
+    if($channel_filter && !$force) {
       return 0 if $channel !~ /$channel_filter/;
     }
 
     $title = $title . " " . $channel;
+
+    if ($title =~ m/twitter_bernard_ben/) {
+      return 0;
+    }
+
+    print_msg('title and data', $title, $data, $force, $filter, $channel_filter, $channel);
+
     do_notifier($server, $title, $data);
 }
+
+use Data::Dumper;
+
+# sub log {
+#   my $msg = shift;
+#   open(my $fh, '>>', '/var/tmp/notifier-log')
+#   print $fh $msg . "\n";
+# }
+
+# Helper for debugging
+sub print_msg
+{
+    # Irssi::active_win()->print(join('', Data::Dumper->Dump([@_])));
+}
+
 
 # All the works
 sub notifier_message {
