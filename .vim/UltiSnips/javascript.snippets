@@ -48,6 +48,12 @@ test.it('${1:<++>}', function () {
 })
 endsnippet
 
+snippet it "it" b
+it('${1:<++>}', function () {
+	${2:${VISUAL:<++>}}
+})
+endsnippet
+
 snippet tb "test.before" b
 test.before(function () {
 	${1:${VISUAL:<++>}}
