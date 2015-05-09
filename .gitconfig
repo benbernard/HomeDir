@@ -76,7 +76,7 @@
   email = github@benjaminbernard.com
 
 [push]
-  default = matching
+	default = current
 
 [mergetool]
 	keepBackup = false
