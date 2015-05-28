@@ -166,3 +166,6 @@
 [submodule ".vim/bundle/tagbar"]
 	path = .vim/bundle/tagbar
 	url = git@github.com:majutsushi/tagbar.git
+[submodule ".vim/bundle/tern_for_vim"]
+	path = .vim/bundle/tern_for_vim
+	url = git@github.com:marijnh/tern_for_vim.git
