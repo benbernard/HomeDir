@@ -84,3 +84,9 @@ s3cmd/
 .wireshark-etc/
 .wireshark/
 hardcopy.1
+*.csv
+minecraft/
+.lpass/
+.fpp/
+*.log
+ftb/

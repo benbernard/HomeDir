@@ -25,7 +25,7 @@ COMPLETION_WAITING_DOTS="true"
 # Which plugins would you like to load? (plugins can be found in ~/.oh-my-zsh/plugins/*)
 # Example format: plugins=(rails git textmate ruby lighthouse)
 #plugins=(git ruby github nyan python perl vi-mode django)
-plugins=(git ruby python perl vi-mode)
+plugins=(git ruby python perl vi-mode frontend-search brew npm)
 
 source $ZSH/oh-my-zsh.sh
 
@@ -71,7 +71,7 @@ foreach i (`ls -1 ~/.zshrc.d/*.zsh`) {
   source $i
 }
 
-if [[ -z $ZSH_VERSION ]] 
+if [[ -z $ZSH_VERSION ]]
 then
   ZSH_VERSION=`$SHELL --version | /usr/bin/cut -d ' ' -f 2`
 fi

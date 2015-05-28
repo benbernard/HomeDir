@@ -39,6 +39,8 @@
     "mixpanel": false,
     "io": false,
     "jobRegistry": false,
+    "O": false,
+    "DomainContext": false,
 
     // Browser globals, don't want to use preset in order to avoid things like
     // the global event
