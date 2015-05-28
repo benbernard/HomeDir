@@ -1,0 +1,4 @@
+#!/bin/sh
+
+SEARCH=`urlencode "$1"`
+open https://www.google.com/search?q=$SEARCH

@@ -474,6 +474,10 @@ endif
 " crontab: temp file must be edited in place
 autocmd filetype crontab setlocal nobackup nowritebackup
 
+autocmd filetype vim setlocal keywordprg=:help
+autocmd filetype javascript setlocal keywordprg=$HOME/bin/openKeyword
+autocmd filetype css setlocal keywordprg=$HOME/bin/openKeyword
+
 """"""""""""""" Version 7 Settings """"""""""""""""""""
 
 " Changing spelling highlight to be underline, must come at the end
