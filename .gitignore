@@ -90,3 +90,7 @@ minecraft/
 .fpp/
 *.log
 ftb/
+.bundler/
+.ngrok2/
+bin/ngrok
+genghis/

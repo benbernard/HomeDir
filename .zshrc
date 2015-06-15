@@ -25,7 +25,7 @@ COMPLETION_WAITING_DOTS="true"
 # Which plugins would you like to load? (plugins can be found in ~/.oh-my-zsh/plugins/*)
 # Example format: plugins=(rails git textmate ruby lighthouse)
 #plugins=(git ruby github nyan python perl vi-mode django)
-plugins=(git ruby python perl vi-mode frontend-search brew npm)
+plugins=(git ruby python perl vi-mode frontend-search brew npm heroku)
 
 source $ZSH/oh-my-zsh.sh
 
@@ -67,14 +67,13 @@ setenv() {
   export $1=$2
 }
 
-foreach i (`ls -1 ~/.zshrc.d/*.zsh`) {
-  source $i
-}
-
 if [[ -z $ZSH_VERSION ]]
 then
   ZSH_VERSION=`$SHELL --version | /usr/bin/cut -d ' ' -f 2`
 fi
+
+# Must have this for custom completions
+compinit
 
 #Setup completion functions
 #FPATH=/usr/local/share/zsh/4.2.0/functions
@@ -82,6 +81,10 @@ if [[ -d ~/.zshfuncs ]]; then
   fpath=(~/.zshfuncs $fpath)
   autoload -U ~/.zshfuncs/*(:t)
 fi
+
+foreach i (`ls -1 ~/.zshrc.d/*.zsh`) {
+  source $i
+}
 
 # Add setup for Recs and GitScripts
 export PATH=$PATH:$HOME/RecordStream/bin:$HOME/GitScripts/bin
@@ -113,9 +116,6 @@ then
 
   HISTFILE=~/.history.ninja-search
 fi
-
-# Must have this for custom completions
-compinit
 
 PATH=$PATH:$HOME/.rvm/bin # Add RVM to PATH for scripting
 

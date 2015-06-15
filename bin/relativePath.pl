@@ -17,7 +17,7 @@ $includedFile =~ s/\.js$//;
 
 my $className = ucfirst((fileparse($includedFile, '.js'))[0]);
 
-if ($sourceFile =~ m/^$PROJECT_ROOT\/server/) {
+if ($sourceFile =~ m/^$PROJECT_ROOT\/(server|test)/ ) {
   my ($path) = $includedFile =~ m/^$PROJECT_ROOT\/(.*)$/;
   print "var $className = prequire('$path');";
   exit 0;

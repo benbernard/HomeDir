@@ -50,7 +50,6 @@ set foldlevelstart=9999
 filetype plugin on          "turns on filetype plugin, lets matchit work well
 filetype plugin indent on
 
-
 " Set the vim info options
 " In order: local marks for N files are saved, global marks are saved,
 " a maximum of 500 lines for each register is saved,
@@ -112,7 +111,18 @@ au Filetype mail  highlight! CursorLine cterm=NONE ctermbg=NONE
 set cinkeys-=0#
 au FileType c,cpp set cinkeys+=0#
 
+""""""""""""""" General speedups """"""""""""""""
+
+" Do not display the command mode editing window on q:
+map q: :q
+
 """"""""""""""" Plugin Settings """"""""""""""""
+" setup mustache abbreviations
+let g:mustache_abbreviations = 1
+
+" Setup for vim-expand-region
+  vmap v <Plug>(expand_region_expand)
+  vmap <C-v> <Plug>(expand_region_shrink)
 
 " javascript-libraries-syntax settings
   let g:used_javascript_libs = 'underscore,backbone,jquery'

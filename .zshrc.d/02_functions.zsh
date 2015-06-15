@@ -1,5 +1,5 @@
 # tail last
-tl() 
+tl()
 {
   tail $1 `ls -t1 $2* | head -1`
 }
@@ -27,7 +27,7 @@ here () {
 #color patterns
 colorpattern(){
   sed -e "s/\($1\)/\o033[1;32m\1\o033[0m/g"
-} 
+}
 
 copy () {
   echo "$@" | xclip -i
@@ -58,3 +58,5 @@ mvscreenshot() {
     FILE=`ls -tr ~/Desktop/Screen\ Shot* | tail -n 1`
     mv $FILE ~/Desktop/$1
 }
+
+source ~/env-improvement/dotfiles/functions.zsh
