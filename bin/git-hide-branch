@@ -46,3 +46,7 @@ git show-ref --abbrev "refs/tags/$BRANCH"
 
 git branch -D $BRANCH
 echo Removed branch $BRANCH
+
+echo
+echo You probably want to run a push:
+echo git push origin --tags
