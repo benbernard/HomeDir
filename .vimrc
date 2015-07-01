@@ -238,9 +238,18 @@ let g:mustache_abbreviations = 1
   nn <silent> <Leader>ab :CtrlPBuffer<CR>
   nn <silent> <Leader>aq :CtrlPQuickfix<CR>
 
+" Git Gutter
+  let g:gitgutter_sign_column_always = 1 " Always show git gutter (avoid re-indent on save)
+
+" Airline
+  let g:airline_powerline_fonts = 1 " Use special fonts
+
 "Syntastic Settings
   " Automatically open the location list when there are errors
-  let g:syntastic_auto_loc_list = 1
+  let g:syntastic_auto_loc_list = 0
+  let g:syntastic_always_populate_loc_list = 1
+  let g:syntastic_check_on_open = 1
+  let g:syntastic_check_on_wq = 0
 
   " Use my jshintrc file rather than default
   let g:syntastic_javascript_jshint_args="-c ~/.jshintrc"

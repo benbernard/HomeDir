@@ -78,7 +78,7 @@
 	url = git://github.com/thinca/vim-unite-history.git
 [submodule ".vim/bundle/vim-airline"]
 	path = .vim/bundle/vim-airline
-	url = git://github.com/bling/vim-airline
+	url = git@github.com:bling/vim-airline.git
 [submodule ".vim/bundle/vim-colors-solarized"]
 	path = .vim/bundle/vim-colors-solarized
 	url = git://github.com/altercation/vim-colors-solarized.git
