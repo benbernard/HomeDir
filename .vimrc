@@ -16,6 +16,9 @@ endif
 "First source the environment location
 source $HOME/.eihooks/dotfiles/vimrc
 
+" Setup 256 colors
+set t_Co=256
+
 """"""""""""""" Global Options """"""""""""""""""""
 
 colorscheme madeofcode         "changes color scheme to something that looks decent on the mac
@@ -418,8 +421,8 @@ let g:vim_markdown_folding_disabled=1
 
   " Define custom colors
   let g:indent_guides_auto_colors = 0
-  autocmd VimEnter,Colorscheme * :hi IndentGuidesOdd  guibg=red   ctermbg=darkgrey
-  autocmd VimEnter,Colorscheme * :hi IndentGuidesEven guibg=green ctermbg=grey
+  autocmd VimEnter,Colorscheme * :hi IndentGuidesOdd  guibg=red   ctermbg=236
+  autocmd VimEnter,Colorscheme * :hi IndentGuidesEven guibg=green ctermbg=240
 
 " Add incremental move commands
   " This is adapted from this article:

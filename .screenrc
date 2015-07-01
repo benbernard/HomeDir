@@ -45,7 +45,7 @@ shelltitle "% |zsh"
 #scrollback binds
  # Bind ^a H to edit the scrollback in an editor
  bind H source $HOME/.eihooks/dotfiles/screen.scrollback-edit
- 
+
  # Bind ^a H view urls from scrollback in urlview
  bind ^B source $HOME/.eihooks/dotfiles/screen.scrollback-urlview
  bind b source $HOME/.eihooks/dotfiles/screen.scrollback-urlview
@@ -66,6 +66,20 @@ bindkey -m " " eval "stuff ' '" writebuf
 # intrusive
 msgwait 1
 
+# ################ SETUP 256 COLOR ####################
+# allow bold colors - necessary for some reason
+attrcolor b ".I"
+# tell screen how to set colors. AB = background, AF=foreground
+# the first two are for other terminal emulators, just in case.
+
+# termcapinfo xterm "Co#256:AB=E[48;5;%dm:AF=E[38;5;%dm"
+# termcapinfo xterm-color "Co#256:AB=E[48;5;%dm:AF=E[38;5;%dm"
+# termcapinfo xterm-256color "Co#256:AB=E[48;5;%dm:AF=E[38;5;%dm"
+term xterm-256color
+# erase background with current bg color
+defbce "on"
+
+# ################ Register binds  ####################
 # Register binds
 # Read default into a register
 bind W command -c pushmap
