@@ -18,7 +18,7 @@ source $HOME/.eihooks/dotfiles/vimrc
 
 """"""""""""""" Global Options """"""""""""""""""""
 
-colorscheme zellner         "changes color scheme to something that looks decent on the mac
+colorscheme madeofcode         "changes color scheme to something that looks decent on the mac
 
 set background=dark                  " Tell vim that I'm using a dark background terminal
 set fo+=qr                           " q: gq foramts with comments, see :help fo-table, r: auto insert comments on new lines

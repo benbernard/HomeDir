@@ -4,6 +4,14 @@ use strict;
 use File::Spec;
 use File::Basename qw(fileparse dirname);
 
+my $LOWER_CASE_NAMES = {map {$_ => 1} (qw(
+  Strings
+  Values
+  Main
+  Heroku
+  Errors
+))};
+
 my $PROJECT_ROOT = '/Users/bernard/fieldbook';
 
 my $includedFile = $ARGV[0];
@@ -16,6 +24,9 @@ if ($includedFile =~ m/index.js$/) {
 $includedFile =~ s/\.js$//;
 
 my $className = ucfirst((fileparse($includedFile, '.js'))[0]);
+if ($LOWER_CASE_NAMES->{$className}) {
+  $className = lcfirst($className);
+}
 
 if ($sourceFile =~ m/^$PROJECT_ROOT\/(server|test)/ ) {
   my ($path) = $includedFile =~ m/^$PROJECT_ROOT\/(.*)$/;

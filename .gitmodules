@@ -169,3 +169,6 @@
 [submodule ".vim/bundle/vim-expand-region"]
 	path = .vim/bundle/vim-expand-region
 	url = git@github.com:terryma/vim-expand-region.git
+[submodule ".vim/bundle/madeofcode"]
+	path = .vim/bundle/madeofcode
+	url = git@github.com:bruschill/madeofcode.git
