@@ -413,7 +413,13 @@ let g:vim_markdown_folding_disabled=1
 " Indent guides
   let g:indent_guides_enable_on_vim_startup = 1
   let g:indent_guides_exclude_filetypes = ['help', 'unite']
+  let g:indent_guides_start_level = 3
+  let g:indent_guides_guide_size = 1
 
+  " Define custom colors
+  let g:indent_guides_auto_colors = 0
+  autocmd VimEnter,Colorscheme * :hi IndentGuidesOdd  guibg=red   ctermbg=darkgrey
+  autocmd VimEnter,Colorscheme * :hi IndentGuidesEven guibg=green ctermbg=grey
 
 " Add incremental move commands
   " This is adapted from this article:
