@@ -248,7 +248,7 @@ let g:mustache_abbreviations = 1
   " Automatically open the location list when there are errors
   let g:syntastic_auto_loc_list = 0
   let g:syntastic_always_populate_loc_list = 1
-  let g:syntastic_check_on_open = 1
+  let g:syntastic_check_on_open = 0
   let g:syntastic_check_on_wq = 0
 
   " Use my jshintrc file rather than default
@@ -423,12 +423,13 @@ let g:vim_markdown_folding_disabled=1
   let g:multi_cursor_normal_maps = {'d': 1, 'c': 1, 't': 1} " Map dw and cw work with multiple cursors
 
 " Indent guides
-  let g:indent_guides_enable_on_vim_startup = 1
-  let g:indent_guides_exclude_filetypes = ['help', 'unite']
-  let g:indent_guides_start_level = 3
-  let g:indent_guides_guide_size = 1
+  let g:indent_guides_enable_on_vim_startup = 1 " Use guides
+  let g:indent_guides_exclude_filetypes = ['help', 'unite'] " No guildes in help or unite windows
+  let g:indent_guides_guide_size = 1 " Only use 1 character for indent guides
 
-  " Define custom colors
+  " Define custom colors, better greys for terminal, need to be autocmd,
+  " because evidently the colorscheme resets them a bunch of times. (taken
+  " from documentation)
   let g:indent_guides_auto_colors = 0
   autocmd VimEnter,Colorscheme * :hi IndentGuidesOdd  guibg=red   ctermbg=236
   autocmd VimEnter,Colorscheme * :hi IndentGuidesEven guibg=green ctermbg=240
@@ -514,3 +515,7 @@ hi SpellBad cterm=underline
 
 hi clear SpellCap
 hi SpellCap cterm=underline
+
+" Change search hilights
+hi IncSearch guifg=NONE guibg=#233466 guisp=#233466 gui=NONE ctermfg=blue ctermbg=yellow cterm=NONE
+hi Search ctermfg=17 ctermbg=45 guifg=#00005f guibg=#00dfff guisp=#233466 gui=NONE
