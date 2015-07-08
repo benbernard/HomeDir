@@ -120,8 +120,9 @@ au FileType c,cpp set cinkeys+=0#
 map q: :q
 
 """"""""""""""" Plugin Settings """"""""""""""""
-" setup mustache abbreviations
-let g:mustache_abbreviations = 1
+" Mustache settings
+  autocmd BufNewFile,BufRead *.hbs set noai " Turn off autoindent, it gets in the way
+
 
 " Setup for vim-expand-region
   vmap v <Plug>(expand_region_expand)
@@ -246,7 +247,7 @@ let g:mustache_abbreviations = 1
 
 "Syntastic Settings
   " Automatically open the location list when there are errors
-  let g:syntastic_auto_loc_list = 0
+  let g:syntastic_auto_loc_list = 1
   let g:syntastic_always_populate_loc_list = 1
   let g:syntastic_check_on_open = 0
   let g:syntastic_check_on_wq = 0
