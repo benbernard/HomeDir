@@ -94,3 +94,6 @@ ftb/
 .ngrok2/
 bin/ngrok
 genghis/
+.babel.json
+.babel_history
+fieldbook-docs/

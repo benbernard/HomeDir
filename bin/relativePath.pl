@@ -10,6 +10,7 @@ my $LOWER_CASE_NAMES = {map {$_ => 1} (qw(
   Main
   Heroku
   Errors
+  Env
 ))};
 
 my $PROJECT_ROOT = '/Users/bernard/fieldbook';

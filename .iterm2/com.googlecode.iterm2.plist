@@ -24,6 +24,10 @@
 	<true/>
 	<key>Control</key>
 	<integer>1</integer>
+	<key>Coprocess MRU</key>
+	<array>
+		<string></string>
+	</array>
 	<key>CopyLastNewline</key>
 	<false/>
 	<key>CopySelection</key>
@@ -99,11 +103,13 @@
 	<key>NSWindow Frame SUStatusFrame</key>
 	<string>1088 967 384 129 0 0 2560 1417 </string>
 	<key>NSWindow Frame iTerm Window 0</key>
-	<string>-1440 199 1439 893 -1440 192 1440 900 </string>
+	<string>0 14 2559 1403 0 0 2560 1417 </string>
 	<key>NSWindow Frame iTerm Window 1</key>
 	<string>1280 14 1278 1403 0 0 2560 1417 </string>
 	<key>NSWindow Frame iTerm Window 2</key>
 	<string>0 14 1278 1403 0 0 2560 1417 </string>
+	<key>NeverWarnAboutShortLivedSessions_3978BA6E-63B6-4986-9112-9F4F0647C751</key>
+	<true/>
 	<key>New Bookmarks</key>
 	<array>
 		<dict>
@@ -811,16 +817,7 @@
 			<key>Transparency</key>
 			<real>0.0</real>
 			<key>Triggers</key>
-			<array>
-				<dict>
-					<key>action</key>
-					<string>HighlightTrigger</string>
-					<key>parameter</key>
-					<integer>1</integer>
-					<key>regex</key>
-					<string>[Ee][Rr][Rr][Oo][Rr]</string>
-				</dict>
-			</array>
+			<array/>
 			<key>Unlimited Scrollback</key>
 			<false/>
 			<key>Use Bold Font</key>
@@ -844,7 +841,7 @@
 	<key>NoSyncTimeOfLastPromo</key>
 	<real>453400636.829974</real>
 	<key>NoSyncTimeOfLastPromoDownload</key>
-	<real>457468907.17921799</real>
+	<real>458874165.04259199</real>
 	<key>OnlyWhenMoreTabs</key>
 	<true/>
 	<key>OpenArrangementAtStartup</key>
@@ -911,7 +908,7 @@
 	<key>SUHasLaunchedBefore</key>
 	<true/>
 	<key>SULastCheckTime</key>
-	<date>2015-07-01T18:40:08Z</date>
+	<date>2015-07-20T02:52:57Z</date>
 	<key>SavePasteHistory</key>
 	<false/>
 	<key>ShowBookmarkName</key>

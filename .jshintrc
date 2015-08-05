@@ -71,6 +71,9 @@
     "promised": false,
     "Fieldbook": false,
     "fixtures": true,
-    "circleTakeScreenshot": false
+    "circleTakeScreenshot": false,
+    "describeAndStash": false,
+    "anyBefore": false,
+    "anyAfter": false
   }
 }
