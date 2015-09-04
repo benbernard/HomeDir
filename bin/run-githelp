@@ -1,0 +1,7 @@
+#!/bin/zsh
+
+if man "$@" >/dev/null 2>/dev/null ; then
+  man $@
+else
+  "$@" --help
+fi

@@ -97,3 +97,5 @@ genghis/
 .babel.json
 .babel_history
 fieldbook-docs/
+.htoprc
+node_modules/

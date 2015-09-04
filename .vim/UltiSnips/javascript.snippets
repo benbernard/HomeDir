@@ -28,9 +28,7 @@ endsnippet
 
 snippet td "test describe with before" b
 test.describe('${1:<++>}', function () {
-	test.before(function () {
-		${2:${VISUAL:<++>}}
-	});
+  ${2:${VISUAL:<++>}}
 });
 endsnippet
 
@@ -82,4 +80,22 @@ endsnippet
 
 snippet sqt "Description" b
 var self = this;
+endsnippet
+
+snippet desc "Bare describe" b
+describe('${1:<++>}', function () {
+	${2:${VISUAL:<++>}}
+})
+endsnippet
+
+snippet rb "resolve before" b
+helpers.resolveBefore('${1:<++>}', function () {
+	${2:${VISUAL:<++>}}
+})
+endsnippet
+
+snippet before "mocha before" b
+before(function () {
+	${1:${VISUAL:<++>}}
+})
 endsnippet

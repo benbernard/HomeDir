@@ -27,6 +27,7 @@
     "$": true, // Client sometimes imports $
     "Q": true, // Client has to import Q, server doesn't
     "_": false,
+    "mongooseHelpers": false,
     "dev": false,
     "Tips": false,
     "logger": false,
@@ -37,10 +38,12 @@
     "site": false,
     "util": true,
     "mixpanel": false,
+    "ga": false,
     "io": false,
     "jobRegistry": false,
     "O": false,
     "DomainContext": false,
+    "FB": false,
 
     // Browser globals, don't want to use preset in order to avoid things like
     // the global event
@@ -54,7 +57,9 @@
     "chai": false,
     "test": false,
     "after": false,
+    "afterEach": false,
     "before": false,
+    "beforeEach": false,
     "describe": false,
     "expect": false,
     "given": false,

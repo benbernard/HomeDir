@@ -11,6 +11,10 @@ my $LOWER_CASE_NAMES = {map {$_ => 1} (qw(
   Heroku
   Errors
   Env
+  MemoryManagement
+  EventbriteHelpers
+  Helpers
+  Mailer
 ))};
 
 my $PROJECT_ROOT = '/Users/bernard/fieldbook';

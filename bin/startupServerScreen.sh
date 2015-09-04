@@ -20,7 +20,7 @@ screen
 
 screen -p 0 -X stuff "cdcl; foreman start web"
 screen -p 1 -X stuff "cdcl; foreman start worker"
-screen -p 2 -X stuff "cdcl; grunt observe"
+screen -p 2 -X stuff "cdcl; grunt handlebars browserify:app"
 screen -p 3 -X stuff "cdcl; node-inspector"
 screen -p 4 -X stuff "java -jar /Users/bernard/bin/selenium-server-standalone-2.38.0.jar"
 screen -p 5 -X stuff "cd; cd bin/mac; ./paste-tracker.pl"

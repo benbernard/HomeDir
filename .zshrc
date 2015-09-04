@@ -82,6 +82,11 @@ if [[ -d ~/.zshfuncs ]]; then
   autoload -U ~/.zshfuncs/*(:t)
 fi
 
+if [[ -d /usr/local/share/zsh/site-functions ]]; then
+  fpath=(/usr/local/share/zsh/site-functions $fpath)
+  autoload -U /usr/local/share/zsh/site-functions/*(:t)
+fi
+
 foreach i (`ls -1 ~/.zshrc.d/*.zsh`) {
   source $i
 }
