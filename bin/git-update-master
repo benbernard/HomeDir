@@ -30,7 +30,7 @@ if ($is_dirty) {
   system('git stash');
 }
 
-print "Found branch $branch, checoking out master and fetching & rebasing\n";
+print "Found branch $branch, checking out master and fetching & rebasing\n";
 system("git checkout master && git fetch $remote && git rebase $remote/master && git push origin master:master");
 print "Checking out $branch\n";
 system("git checkout $branch");

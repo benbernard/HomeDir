@@ -15,6 +15,7 @@ my $LOWER_CASE_NAMES = {map {$_ => 1} (qw(
   EventbriteHelpers
   Helpers
   Mailer
+  Constants
 ))};
 
 my $PROJECT_ROOT = '/Users/bernard/fieldbook';

@@ -260,7 +260,7 @@ map q: :q
           \ '\m^/Users/bernard/fieldbook/lib/js',
           \ '\m^/Users/bernard/jquery-handsontable',
           \ '\m^/Users/bernard/test-destributer',
-          \ '.*.user.js$' ]
+          \ '.*\.user\.js$' ]
 
   " Map <leader>st to SyntasticToggleMode
   map <Leader>st :SyntasticReset<CR>

@@ -97,5 +97,10 @@ genghis/
 .babel.json
 .babel_history
 fieldbook-docs/
+fieldbook-newnode/
+test-mocha/
 .htoprc
 node_modules/
+.local
+bin/chromedriver*
+bin/selenium*

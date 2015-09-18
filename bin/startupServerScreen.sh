@@ -20,9 +20,8 @@ screen
 
 screen -p 0 -X stuff "cdcl; foreman start web"
 screen -p 1 -X stuff "cdcl; foreman start worker"
-screen -p 2 -X stuff "cdcl; grunt handlebars browserify:app"
+screen -p 2 -X stuff "cdcl; grunt handlebars browserify:app watch"
 screen -p 3 -X stuff "cdcl; node-inspector"
-screen -p 4 -X stuff "java -jar /Users/bernard/bin/selenium-server-standalone-2.38.0.jar"
 screen -p 5 -X stuff "cd; cd bin/mac; ./paste-tracker.pl"
 screen -p 6 -X stuff "cd; genghisapp -L -F"
 screen -p 7 -X stuff "AUTOSSH_POLL=30 AUTOSSH_DEBUG=1 autossh -M2000 -L6667:localhost:6667 -N cmyers.org"
