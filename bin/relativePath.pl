@@ -16,6 +16,7 @@ my $LOWER_CASE_NAMES = {map {$_ => 1} (qw(
   Helpers
   Mailer
   Constants
+  Domains
 ))};
 
 my $PROJECT_ROOT = '/Users/bernard/fieldbook';
@@ -34,7 +35,7 @@ if ($LOWER_CASE_NAMES->{$className}) {
   $className = lcfirst($className);
 }
 
-if ($sourceFile =~ m/^$PROJECT_ROOT\/(server|test)/ ) {
+if ($sourceFile =~ m/^$PROJECT_ROOT\/(server|test|scripts)/ ) {
   my ($path) = $includedFile =~ m/^$PROJECT_ROOT\/(.*)$/;
   print "var $className = prequire('$path');";
   exit 0;

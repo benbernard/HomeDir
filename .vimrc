@@ -99,6 +99,9 @@ autocmd VimEnter * endt
 " This line should always be after file type plug-in
 autocmd BufNewFile,BufRead *.t set syntax=perl
 
+" .jake files are javascript
+autocmd BufNewFile,BufRead *.jake set syntax=javascript
+
 "Set an autocommand to turn off cindenting for mail types
 au FileType mail set nocindent
 
@@ -253,7 +256,7 @@ map q: :q
   let g:syntastic_check_on_wq = 0
 
   " Use my jshintrc file rather than default
-  let g:syntastic_javascript_jshint_args="-c ~/.jshintrc"
+  " let g:syntastic_javascript_jshint_args="-c ~/.jshintrc"
 
   let g:syntastic_ignore_files = [
           \ '\m^/Users/bernard/fieldbook/node_modules',

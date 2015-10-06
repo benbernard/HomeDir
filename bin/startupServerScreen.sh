@@ -17,6 +17,7 @@ screen
 screen
 screen
 screen
+screen
 
 screen -p 0 -X stuff "cdcl; foreman start web"
 screen -p 1 -X stuff "cdcl; foreman start worker"
@@ -25,3 +26,4 @@ screen -p 3 -X stuff "cdcl; node-inspector"
 screen -p 5 -X stuff "cd; cd bin/mac; ./paste-tracker.pl"
 screen -p 6 -X stuff "cd; genghisapp -L -F"
 screen -p 7 -X stuff "AUTOSSH_POLL=30 AUTOSSH_DEBUG=1 autossh -M2000 -L6667:localhost:6667 -N cmyers.org"
+screen -p 8 -X stuff "appium --session-override --no-reset -l --device-name 'iPhone 6' --platform-name 'iOS' --platform-version 9.0 --safari"

@@ -64,7 +64,7 @@
 [merge]
 
 [merge]
-  conflictstyle = diff3
+	conflictstyle = diff3
   keepBackup = false
   keepTemporaries = false
   tool = p4merge

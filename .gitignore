@@ -104,3 +104,8 @@ node_modules/
 .local
 bin/chromedriver*
 bin/selenium*
+.subversion/
+AppiumSetup.appiumconfig
+repos/
+savedLogs/
+sc-4.3.11-osx/
