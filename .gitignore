@@ -109,3 +109,4 @@ AppiumSetup.appiumconfig
 repos/
 savedLogs/
 sc-4.3.11-osx/
+.android/

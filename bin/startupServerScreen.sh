@@ -21,7 +21,7 @@ screen
 
 screen -p 0 -X stuff "cdcl; foreman start web"
 screen -p 1 -X stuff "cdcl; foreman start worker"
-screen -p 2 -X stuff "cdcl; grunt handlebars browserify:app watch"
+screen -p 2 -X stuff "cdcl; while (1) { grunt min-watch }"
 screen -p 3 -X stuff "cdcl; node-inspector"
 screen -p 5 -X stuff "cd; cd bin/mac; ./paste-tracker.pl"
 screen -p 6 -X stuff "cd; genghisapp -L -F"

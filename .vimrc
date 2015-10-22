@@ -117,6 +117,10 @@ au Filetype mail  highlight! CursorLine cterm=NONE ctermbg=NONE
 set cinkeys-=0#
 au FileType c,cpp set cinkeys+=0#
 
+" Settings for stylus
+" Keep keyword movement commands the same instead of including '-' in w,b
+au FileType stylus setl iskeyword-=#,-
+
 """"""""""""""" General speedups """"""""""""""""
 
 " Do not display the command mode editing window on q:
@@ -273,7 +277,7 @@ map q: :q
 
   " Setup javascript as the only active syntax
   let g:syntastic_mode_map = { 'mode': 'passive',
-                             \ 'active_filetypes': ['javascript'],
+                             \ 'active_filetypes': ['javascript', 'stylus'],
                              \ 'passive_filetypes': [] }
 
 " Super tab Settings

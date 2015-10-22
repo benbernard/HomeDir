@@ -1,0 +1,69 @@
+#!/usr/bin/perl
+
+use warnings;
+use strict;
+
+my $DEBUG = 0;
+
+my $remote = `git config ninja.masterRemote`;
+
+if ($?) {
+  $remote = 'team';
+
+  run_command("git remote show $remote 1>/dev/null 2>/dev/null");
+  $remote = 'origin' if ($?);
+}
+
+print "Working against remote $remote\n";
+
+my $branch = $ARGV[0];
+
+if (!$branch) {
+  $branch = get_current_branch()
+}
+
+run_command('git diff --quiet HEAD');
+my $is_dirty = $?;
+
+if ($is_dirty) {
+  print "WARNING: Found a dirty working tree, stashing\n";
+  run_command('git stash');
+}
+
+my $current_branch = get_current_branch();
+
+print "Found branch $branch, fetching & rebasing\n";
+run_command("git checkout $branch && git fetch $remote && git rebase $remote/$branch && git push origin $branch\:$branch");
+print "Checking out $branch\n";
+run_command("git checkout $current_branch");
+
+if ($is_dirty) {
+  print "Restoring working stree from stash\n";
+  run_command('git stash pop');
+}
+
+sub get_current_branch {
+  my $branch = `git branch | sed -n '/\* /s///p'`;
+
+  if ($branch =~ m/^\(detached from (\S+)\)$/) {
+    $branch = $1;
+  }
+
+  chomp $branch;
+
+  return $branch;
+}
+
+sub run_command {
+  my $cmd = shift @_;
+
+  if ($DEBUG) {
+    print "Running: $cmd";
+  }
+
+  system($cmd);
+
+  if ($?) {
+    die "Failed running $cmd\n";
+  };
+}

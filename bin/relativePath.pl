@@ -17,6 +17,7 @@ my $LOWER_CASE_NAMES = {map {$_ => 1} (qw(
   Mailer
   Constants
   Domains
+  GlobalEvents
 ))};
 
 my $PROJECT_ROOT = '/Users/bernard/fieldbook';
