@@ -57,3 +57,6 @@ alias 'vnc=cd ~/fieldbook;circleci/setupVnc.sh'
 # Use gcal instead of useless cal
 alias cal=gcal
 alias cal3='gcal .'
+
+# Fucking coreutils getting mapped as gutil...
+alias realpath=grealpath

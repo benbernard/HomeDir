@@ -25,6 +25,17 @@ COMPLETION_WAITING_DOTS="true"
 # Which plugins would you like to load? (plugins can be found in ~/.oh-my-zsh/plugins/*)
 # Example format: plugins=(rails git textmate ruby lighthouse)
 #plugins=(git ruby github nyan python perl vi-mode django)
-plugins=(git ruby python perl vi-mode frontend-search brew npm heroku)
+plugins=(git ruby python perl vi-mode frontend-search brew npm heroku history-substring-search)
 
 source $ZSH/oh-my-zsh.sh
+
+# Plugin configurations
+
+# History search
+  # bind Ctrl-P and Ctrl-N
+  bindkey '^P' history-substring-search-up
+  bindkey '^N' history-substring-search-down
+
+  # bind k and j for VI mode
+  bindkey -M vicmd 'k' history-substring-search-up
+  bindkey -M vicmd 'j' history-substring-search-down
