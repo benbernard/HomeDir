@@ -111,3 +111,17 @@ savedLogs/
 sc-4.3.11-osx/
 .android/
 notes
+.docker/
+.aws/
+VirtualBox VMs/
+api-access-logs/
+circle-analysis/
+codelets/
+intrusive/
+sc/
+.node_history
+.node_repl_history
+.webtask
+defaultBook.json
+foo.js
+mapcontacts/

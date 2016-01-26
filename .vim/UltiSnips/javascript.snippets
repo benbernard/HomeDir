@@ -94,6 +94,10 @@ helpers.resolveBefore('${1:<++>}', function () {
 })
 endsnippet
 
+snippet rbi "resolve before inline" b
+helpers.resolveBefore('${1:<++>}', () => ${2:${VISUAL:<++>}});
+endsnippet
+
 snippet before "mocha before" b
 before(function () {
 	${1:${VISUAL:<++>}}

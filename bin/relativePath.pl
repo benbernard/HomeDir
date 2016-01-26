@@ -20,6 +20,7 @@ my $LOWER_CASE_NAMES = {map {$_ => 1} (qw(
   GlobalEvents
   ApiJwtToken
   Metrics
+  Urls
 ))};
 
 my $PROJECT_ROOT = '/Users/bernard/fieldbook';
