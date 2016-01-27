@@ -36,6 +36,10 @@ snippet exp "expect" b
 return expect(${1:${VISUAL:<++>}}).eventually.${2:<++>}
 endsnippet
 
+snippet ex "expect no eventually" b
+return expect(${1:${VISUAL:<++>}}).${2:<++>}
+endsnippet
+
 snippet ta "test.after" b
 test.after(function () { ${1:${VISUAL:<++>}} });
 endsnippet
