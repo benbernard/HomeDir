@@ -60,3 +60,6 @@ alias cal3='gcal .'
 
 # Fucking coreutils getting mapped as gutil...
 alias realpath=grealpath
+
+# Make jcurl like curl but for json data
+alias 'jcurl=curl -H "Content-Type: application/json" -H "Accept: application/json"'

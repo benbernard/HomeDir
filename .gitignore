@@ -122,3 +122,6 @@ sc/
 .webtask
 defaultBook.json
 foo.js
+.cloud66/
+.papertrail.yml
+bin/cx
