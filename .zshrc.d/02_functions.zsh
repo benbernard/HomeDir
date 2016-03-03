@@ -58,5 +58,3 @@ mvscreenshot() {
     FILE=`ls -tr ~/Desktop/Screen\ Shot* | tail -n 1`
     mv $FILE ~/Desktop/$1
 }
-
-source ~/env-improvement/dotfiles/functions.zsh
