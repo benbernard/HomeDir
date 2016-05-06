@@ -92,14 +92,14 @@ describe('${1:<++>}', function () {
 })
 endsnippet
 
-snippet rb "resolve before" b
-helpers.resolveBefore('${1:<++>}', function () {
-	${2:${VISUAL:<++>}}
-})
+snippet rb "resolve before function" b
+helpers.resolveBefore('${1:<++>}', () => ${2:${VISUAL:<++>}});
 endsnippet
 
-snippet rbi "resolve before inline" b
-helpers.resolveBefore('${1:<++>}', () => ${2:${VISUAL:<++>}});
+snippet rbf "resolve before function" b
+helpers.resolveBefore('${1:<++>}', function () {
+	${2:${VISUAL:<++>}}
+});
 endsnippet
 
 snippet before "mocha before" b

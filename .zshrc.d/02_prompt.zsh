@@ -29,6 +29,12 @@ bindkey -M vicmd v edit-command-line
 setopt AUTO_CD    #if you type in a directory and hit enter, cd there
 setopt AUTO_PUSHD #cd pushes directories on to the stack
 
+# Copy earlier command argument
+bindkey "^[." insert-last-word
+autoload -Uz copy-earlier-word
+zle -N copy-earlier-word
+bindkey "^Y" copy-earlier-word
+
 #Setting to fix bad settings in global zshrc
 #Do not autocorrect on enter, I don't like that much correction
 setopt NO_CORRECT_ALL
@@ -39,7 +45,7 @@ REPORTTIME=10
 #Prompt
 # the cool thing about these prompt settings is that they make your command line
 # entries appear blue, but everything else stays the same.  Zany!
-# 
+#
 # Also switches between blue and red depending on the exit code of the last command.
 
 # auto-quote special shell characters as you type a URL, so that you don't have

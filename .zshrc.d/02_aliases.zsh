@@ -60,4 +60,3 @@ alias cal3='gcal .'
 
 # Fucking coreutils getting mapped as gutil...
 alias realpath=grealpath
-

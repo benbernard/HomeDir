@@ -126,6 +126,9 @@ au FileType stylus setl iskeyword-=#,-
 " Do not display the command mode editing window on q:
 map q: :q
 
+nmap <Leader>ra mb[{?function<CR>eli *<ESC>/{<CR>%li.async()<ESC>`b
+nmap <Leader>rA mb[{?function<CR>elxx/{<CR>%lxxxxxxxx`b
+
 """"""""""""""" Plugin Settings """"""""""""""""
 " Mustache settings
   autocmd BufNewFile,BufRead *.hbs set noai " Turn off autoindent, it gets in the way
@@ -337,9 +340,9 @@ map q: :q
   " Make \tp toggle paste mode
   nmap \tp :set paste!<CR>
 
-  " Map \r to grab the last paragraph, copy it, select the new copy, and pipe
-  " it through a recs command
-  :nmap <leader>r GV{yGpGV{j!recs-
+  " " Map \r to grab the last paragraph, copy it, select the new copy, and pipe
+  " " it through a recs command
+  " :nmap <leader>r GV{yGpGV{j!recs-
 
   " Map to make tabs more usable
   nmap <Leader>TN :tabn<CR>

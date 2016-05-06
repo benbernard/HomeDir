@@ -81,14 +81,25 @@ let g:unite_split_rule = "botright"
 " Shorten the default update date of 500ms
 let g:unite_update_time = 200
 
+"  \ '.', '*~', '*.o', '*.exe', '*.bak',
+"  \ 'DS_Store', '*.pyc', '*.sw[po]', '*.class',
+"  \ '.hg/**', '.git/**', '.bzr/**', '.svn/**',
+"  \ 'tags', 'tags-*',
+"  \ 'node_modules/**', 'public/js/**', 'public/assets/**',
+"  \ 'client/gen/**', 'common/gen/**', '.git/**'
+call unite#custom#source('file_rec, file_rec/async', 'ignore_globs', [
+  \ 'node_modules/**'
+  \ ])
+call unite#custom#source('file_rec, file_rec/async', 'max_candidates', 100000)
+
 " Do not include node_modules or .git in search sapce for file completions NOTE: SLOW?
 " call unite#custom#source('file_rec, file_rec/async', 'ignore_pattern', 'node_modules\|.git')
 " This is much faster:
-"let g:unite_source_rec_async_command = 'ag --nocolor --nogroup --hidden --ignore node_modules --ignore .git -g ""'
+" let g:unite_source_rec_async_command = 'ag --nocolor --nogroup --hidden --ignore node_modules --ignore .git -g ""'
 " Actually instead put this in a .agignore file
 
 " Unite MRU settings
-let g:unite_source_file_mru_limit = 1000
+let g:unite_source_file_mru_limit = 2000
 let g:unite_cursor_line_highlight = 'TabLineSel'
 " let g:unite_abbr_highlight = 'TabLine'
 
@@ -148,7 +159,7 @@ if executable('ag')
   let g:unite_source_grep_default_opts = '--nogroup --nocolor --column --ignore node_modules --ignore .git --ignore public/js/app.js'
   let g:unite_source_grep_recursive_opt = ''
 
-"  let g:unite_source_rec_async_command='ag -p ~/.agignore --nocolor --nogroup --ignore node_modules ""'
+  " let g:unite_source_rec_async_command='ag -p ~/.agignore --nocolor --nogroup --ignore node_modules ""'
   let g:unite_source_rec_async_command= 'ag --nocolor --nogroup --hidden --ignore-dir node_modules -g ""'
 endif
 " Actually instead put this in the .agignore
