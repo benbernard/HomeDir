@@ -2,7 +2,6 @@
 " .vimrc
 
 " Much of this is is borrowed from: https://github.com/terryma/dotfiles/blob/master/.vimrc
-let g:unite_source_history_yank_enable = 1
 call unite#filters#matcher_default#use(['matcher_fuzzy'])
 call unite#filters#sorter_default#use(['sorter_rank'])
 
@@ -65,15 +64,9 @@ let g:unite_enable_start_insert = 1
 " Setup a data directory
 let g:unite_data_directory = "~/.unite"
 
-" Enable history yank source
-let g:unite_source_history_yank_enable = 1
-
-" Also save clipboard values
-let g:unite_source_history_yank_save_clipboard = 1
-
 " Keep more yank history
 " Note: 10k was too much, reduced to 2k 2014-08-07
-let g:unite_source_history_yank_limit = 2000
+let g:neoyank#limit = 2000
 
 " Open in bottom right
 let g:unite_split_rule = "botright"
