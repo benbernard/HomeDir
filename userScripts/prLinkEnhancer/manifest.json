@@ -1,0 +1,16 @@
+{
+  "manifest_version": 2,
+
+  "name": "Github PR Link Enhancer",
+  "description": "Adds diff after links to commits in PRs",
+  "version": "1.0.0",
+
+  "permissions": [
+    "https://github.com/"
+  ],
+
+  "content_scripts": [{
+    "matches": ["*://github.com/*/pull*"],
+    "js": ["pr-link.js"]
+  }]
+}
