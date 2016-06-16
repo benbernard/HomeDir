@@ -178,3 +178,6 @@
 [submodule ".vim/bundle/vim-stylus"]
 	path = .vim/bundle/vim-stylus
 	url = git://github.com/wavded/vim-stylus.git
+[submodule ".vim/bundle/neoyank.vim"]
+	path = .vim/bundle/neoyank.vim
+	url = git://github.com/Shougo/neoyank.vim
