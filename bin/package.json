@@ -1,0 +1,14 @@
+{
+  "name": "ben-bin",
+  "version": "1.0.0",
+  "description": "My Scripts",
+  "main": "recastCode.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "dependencies": {
+    "recast": "*"
+  },
+  "license": "MIT"
+}
