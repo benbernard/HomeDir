@@ -125,3 +125,8 @@ foo.js
 .cloud66/
 .papertrail.yml
 bin/cx
+ancestry/
+.gitkraken/
+.sqlite_history
+.gtk-bookmarks
+
