@@ -56,6 +56,10 @@ it('${1:<++>}', function () {
 })
 endsnippet
 
+snippet tbi "test.before inline" b
+test.before(() => { ${1:${VISUAL:<++>}} });
+endsnippet
+
 snippet tb "test.before" b
 test.before(function () {
 	${1:${VISUAL:<++>}}
