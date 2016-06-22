@@ -386,12 +386,17 @@ let g:vim_markdown_folding_disabled=1
   let g:UltiSnipsExpandTrigger="<s-tab>"
 
   " Use C-e / C-w to move forward / back between placeholders
-  nmap  ?<++><cr>v3l
+
   nmap  /<++><cr>v3l
-  smap  <esc>?<++><cr>v3l
   smap  <esc>/<++><cr>v3l
-  imap  <esc>?<++><cr>v3l
   imap  <esc>/<++><cr>v3l
+
+  " Do not use CTRL-W mapping, conflicts with CTRL-W equals, and I don't use
+  " it anyway
+  " nmap  ?<++><cr>v3l
+  " smap  <esc>?<++><cr>v3l
+  " imap  <esc>?<++><cr>v3l
+
 
 " Better Whitespace
   let g:strip_whitespace_on_save = 1 " Strip whitespace on save
