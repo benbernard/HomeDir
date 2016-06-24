@@ -22,21 +22,9 @@
 [submodule ".vim/bundle/vim-visual-increment"]
 	path = .vim/bundle/vim-visual-increment
 	url = git://github.com/triglav/vim-visual-increment.git
-[submodule ".vim/bundle/vim-session"]
-	path = .vim/bundle/vim-session
-	url = git://github.com/xolox/vim-session.git
-[submodule ".vim/bundle/ctrlp.vim"]
-	path = .vim/bundle/ctrlp.vim
-	url = https://github.com/kien/ctrlp.vim.git
-[submodule ".vim/bundle/ack.vim"]
-	path = .vim/bundle/ack.vim
-	url = https://github.com/mileszs/ack.vim.git
 [submodule ".vim/bundle/vim-autoformat-rails"]
 	path = .vim/bundle/vim-autoformat-rails
 	url = https://github.com/KurtPreston/vim-autoformat-rails.git
-[submodule ".vim/bundle/vimtodo"]
-	path = .vim/bundle/vimtodo
-	url = https://github.com/mivok/vimtodo.git
 [submodule ".vim/bundle/vim-misc"]
 	path = .vim/bundle/vim-misc
 	url = https://github.com/xolox/vim-misc
@@ -52,9 +40,6 @@
 [submodule ".vim/bundle/vim-repeat"]
 	path = .vim/bundle/vim-repeat
 	url = git://github.com/tpope/vim-repeat.git
-[submodule ".vim/bundle/vim-speeddating"]
-	path = .vim/bundle/vim-speeddating
-	url = git://github.com/tpope/vim-speeddating.git
 [submodule ".vim/bundle/vim-unimpaired"]
 	path = .vim/bundle/vim-unimpaired
 	url = git://github.com/tpope/vim-unimpaired.git
@@ -118,9 +103,6 @@
 [submodule "zaw"]
 	path = zaw
 	url = git://github.com/zsh-users/zaw.git
-[submodule ".vim/bundle/neocomplcache.vim"]
-	path = .vim/bundle/neocomplcache.vim
-	url = git@github.com:Shougo/neocomplcache.vim.git
 [submodule ".vim/bundle/ultisnips.git"]
 	path = .vim/bundle/ultisnips.git
 	url = git@github.com:SirVer/ultisnips.git
@@ -163,15 +145,9 @@
 [submodule ".vim/bundle/vim-indent-guides"]
 	path = .vim/bundle/vim-indent-guides
 	url = git@github.com:nathanaelkane/vim-indent-guides.git
-[submodule ".vim/bundle/tagbar"]
-	path = .vim/bundle/tagbar
-	url = git@github.com:majutsushi/tagbar.git
 [submodule ".vim/bundle/vim-expand-region"]
 	path = .vim/bundle/vim-expand-region
 	url = git@github.com:terryma/vim-expand-region.git
-[submodule ".vim/bundle/madeofcode"]
-	path = .vim/bundle/madeofcode
-	url = git@github.com:bruschill/madeofcode.git
 [submodule ".vim/bundle/vim-gitgutter"]
 	path = .vim/bundle/vim-gitgutter
 	url = git://github.com/airblade/vim-gitgutter.git
