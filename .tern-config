@@ -1,0 +1,20 @@
+{
+  "libs": [
+    "browser",
+    "jquery",
+    "chai",
+    "ecma6",
+    "underscore"
+  ],
+  "loadEagerly": [
+    "/Users/bernard/fieldbook/test/lib/helpers.js",
+    "/Users/bernard/fieldbook/node_modules/intrusive/lib/**",
+    "/Users/bernard/fieldbook/client/models/**",
+    "/Users/bernard/fieldbook/server/models/**",
+    "/Users/bernard/fieldbook/common/**"
+  ],
+  "plugins": {
+    "node": {},
+    "node-express": {}
+  }
+}
