@@ -8,7 +8,8 @@ call dein#begin(expand($HOME . '/.config/nvim/dein-plugins'))
 " Let dein manage dein
 call dein#add('Shougo/dein.vim')
 call dein#add('Shougo/deoplete.nvim')
-call dein#add('ternjs/tern_for_vim')
+" call dein#add('ternjs/tern_for_vim', {'build': 'npm install'})
+" call dein#add('carlitux/deoplete-ternjs', {'build': 'npm install -g tern'})
 
 " Required:
 call dein#end()

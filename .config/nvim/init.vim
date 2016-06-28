@@ -288,11 +288,6 @@ nmap <Leader>rA mb[{?function<CR>elxx/{<CR>%lxxxxxxxx`b
 
   let g:syntastic_quiet_messages = { "regex": 'File ignored by default' }
 
-" Super tab Settings
-  " Have supertab look at characters before cursor to determine completion
-  " type
-  let g:SuperTabDefaultCompletionType = "context"
-
 " Gundo Settings
   nmap <Leader>gu :GundoToggle<CR>
 
@@ -380,8 +375,41 @@ let g:vim_markdown_folding_disabled=1
  " Setup dein
  source $HOME/.config/nvim/init.dein.vim
 
-" Use deoplete
-let g:deoplete#enable_at_startup = 1
+" Deoplete config
+  let g:deoplete#enable_at_startup = 1
+
+  " omni complete functions
+  if !exists('g:deoplete#omni#input_patterns')
+    let g:deoplete#omni#input_patterns = {}
+  endif
+
+  " omnifuncs
+  augroup omnifuncs
+    autocmd!
+    autocmd FileType css setlocal omnifunc=csscomplete#CompleteCSS
+    autocmd FileType html,markdown setlocal omnifunc=htmlcomplete#CompleteTags
+    autocmd FileType javascript setlocal omnifunc=javascriptcomplete#CompleteJS
+    autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
+    autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
+  augroup end
+
+  " tern
+  " if exists('g:plugs["tern_for_vim"]')
+  "   let g:tern_show_argument_hints = 'on_hold'
+  "   let g:tern_show_signature_in_pum = 1
+  "   autocmd FileType javascript setlocal omnifunc=tern#Complete
+  " endif
+
+  " let g:tern_request_timeout = 1
+  " let g:tern#command = ["tern"]
+  " let g:tern#arguments = ["--persistent"]
+
+  " " deoplete tab-complete
+  " inoremap <expr><tab> pumvisible() ? "\<c-n>" : "\<tab>"
+  " " tern
+  " autocmd FileType javascript nnoremap <silent> <buffer> gb :TernDef<CR>
+
+  " autocmd InsertLeave,CompleteDone * if pumvisible() == 0 | pclose | endif
 
 " Neocomplete
  " source $HOME/.vimrc.neocomplete
