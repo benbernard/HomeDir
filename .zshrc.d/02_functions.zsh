@@ -60,11 +60,18 @@ mvscreenshot() {
 }
 
 addVimPlugin() {
-  STARTING_PWD=`pwd`
+  local BASENAME=`basename $1 | sed 's/\.git$//'`
+
+  if [ -e $BASENAME ]; then
+    echo Removing $BASENAME
+    rm -rf $BASENAME
+  fi
+
+  local STARTING_PWD=`pwd`
   cd
 
-  echo git submodule add $1 .config/nvim/bundle/`basename $1 | sed 's/\.git$//'`
-  git submodule add $1 .config/nvim/bundle/`basename $1 | sed 's/\.git$//'`
+  echo git submodule add $1 .config/nvim/bundle/$BASENAME
+  git submodule add $1 .config/nvim/bundle/$BASENAME
 
   cd $STARTING_PWD
 }
