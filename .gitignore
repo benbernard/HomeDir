@@ -1,6 +1,17 @@
 .vim/tmp
 .vim/RCSFiles
 .vim/sessions
+.vim/spell/*.spl
+.vim/bundle/bufexplorer-7.3.0/doc/tags
+.vim/bundle/calendar-vim/doc/tags
+.config/nvim/tmp
+.config/nvim/RCSFiles
+.config/nvim/sessions
+.config/nvim/spell/*.spl
+.config/nvim/bundle/bufexplorer-7.3.0/doc/tags
+.config/nvim/bundle/calendar-vim/doc/tags
+.config/nvim/bundle
+.nvim*
 .screen/
 RecordStream/
 .CFUserTextEncoding
@@ -45,8 +56,6 @@ perl5/
 screen/
 .lesshst
 .rnd
-.vim/bundle/bufexplorer-7.3.0/doc/tags
-.vim/bundle/calendar-vim/doc/tags
 Google Drive/
 userScripts/commentTracker.zip
 .irssi/away.log
@@ -68,11 +77,9 @@ jquery-handsontable/
 programming/links/
 temp/
 env-improvement/
-.nvim*
 fieldbot/
 yankring_history_v2.txt
 programming/
-.vim/spell/*.spl
 s3cmd/
 .s3cfg
 .Xauthority

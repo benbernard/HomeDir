@@ -1,0 +1,123 @@
+snippet fn "simple function" w
+function ($1) {
+	${2:${VISUAL:<++>}}
+}$3
+endsnippet
+
+snippet fni "simple function, inline" w
+function ($1) { ${2:${VISUAL:<++>}} }$3
+endsnippet
+
+snippet meth "method" b
+${1:<++>}: function ($2) {
+	${3:${VISUAL:<++>}}
+}${4:,}
+endsnippet
+
+snippet tdf "test describe with before and test.it" b
+test.describe('${1:<++>}', function () {
+	test.before(function () {
+		${2:${VISUAL:<++>}}
+	});
+
+	test.it('${3:<++>}', function () {
+		${4:<++>}
+	});
+})
+endsnippet
+
+snippet td "test describe with before" b
+test.describe('${1:<++>}', function () {
+  ${2:${VISUAL:<++>}}
+});
+endsnippet
+
+snippet exp "expect" b
+return expect(${1:${VISUAL:<++>}}).eventually.${2:<++>}
+endsnippet
+
+snippet ex "expect no eventually" b
+return expect(${1:${VISUAL:<++>}}).${2:<++>}
+endsnippet
+
+snippet ta "test.after" b
+test.after(function () { ${1:${VISUAL:<++>}} });
+endsnippet
+
+snippet ti "test.it" b
+test.it('${1:<++>}', function () {
+	${2:${VISUAL:<++>}}
+})
+endsnippet
+
+snippet it "it" b
+it('${1:<++>}', function () {
+	${2:${VISUAL:<++>}}
+})
+endsnippet
+
+snippet tbi "test.before inline" b
+test.before(() => { ${1:${VISUAL:<++>}} });
+endsnippet
+
+snippet tb "test.before" b
+test.before(function () {
+	${1:${VISUAL:<++>}}
+})
+endsnippet
+
+snippet wfn "waitForNetworkAndView" b
+page.waitForNetworkAndView();
+endsnippet
+
+snippet sleep "test sleep" b
+site.driver.sleep(2000000);
+endsnippet
+
+snippet cut "Description" b
+if (true) return;
+endsnippet
+
+snippet try "Description" b
+try {
+  ${1:${VISUAL:<++>}}
+} catch (e) {
+  ${2:<++>}
+}
+endsnippet
+
+snippet sqt "Description" b
+var self = this;
+endsnippet
+
+snippet desc "Bare describe" b
+describe('${1:<++>}', function () {
+	${2:${VISUAL:<++>}}
+})
+endsnippet
+
+snippet rb "resolve before function" b
+helpers.resolveBefore('${1:<++>}', () => ${2:${VISUAL:<++>}});
+endsnippet
+
+snippet rbf "resolve before function" b
+helpers.resolveBefore('${1:<++>}', function () {
+	${2:${VISUAL:<++>}}
+});
+endsnippet
+
+snippet before "mocha before" b
+before(function () {
+	${1:${VISUAL:<++>}}
+})
+endsnippet
+
+snippet after "mocha after" b
+after(function () {
+	${1:${VISUAL:<++>}}
+})
+endsnippet
+
+snippet p "Description" b
+helpers.PAUSE();
+endsnippet
