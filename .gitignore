@@ -9,6 +9,7 @@ RecordStream/
 .bash_history
 .cache/
 .vim-old/
+.config/hub
 .cpan/
 .dropbox/
 .gem/
