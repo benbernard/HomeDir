@@ -10,6 +10,7 @@
 .config/nvim/spell/*.spl
 .config/nvim/bundle/bufexplorer-7.3.0/doc/tags
 .config/nvim/bundle/calendar-vim/doc/tags
+.config/nvim/dein-plugins/
 .nvim*
 .screen/
 RecordStream/
