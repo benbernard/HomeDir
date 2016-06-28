@@ -1,6 +1,8 @@
 " Initialize pathogen, a plugin management system that lets plugins live in
 " their own directories
 
+set runtimepath^=$HOME/.config/nvim/dein-plugins/repos/github.com/Shougo/dein.vim
+
 call pathogen#infect()
 
 " First setup variable for other variables
@@ -374,6 +376,12 @@ let g:vim_markdown_folding_disabled=1
  " let @t = 'O"*Pvi]:s/^ *- *"/"/gvi]='
  let @t = '"*pvi]:s/^ *- */<80>kb"<80>kb//^Mvi]=vi]:s/([^,])$/\1,/^Mu^Rvi]:s/$/,/^M:nohl^M'
  nmap <Leader>ti @t
+
+ " Setup dein
+ source $HOME/.config/nvim/init.dein.vim
+
+" Use deoplete
+let g:deoplete#enable_at_startup = 1
 
 " Neocomplete
  " source $HOME/.vimrc.neocomplete
