@@ -160,3 +160,123 @@
 [submodule ".vim/bundle/madeofcode"]
 	path = .vim/bundle/madeofcode
 	url = git@github.com:bruschill/madeofcode.git
+[submodule ".config/nvim/bundle/vim-gitgutter"]
+	path = .config/nvim/bundle/vim-gitgutter
+	url = git@github.com:airblade/vim-gitgutter.git
+[submodule ".config/nvim/bundle/vim-airline"]
+	path = .config/nvim/bundle/vim-airline
+	url = git@github.com:vim-airline/vim-airline.git
+[submodule ".config/nvim/bundle/vim-airline-themes"]
+	path = .config/nvim/bundle/vim-airline-themes
+	url = git@github.com:vim-airline/vim-airline-themes.git
+[submodule ".config/nvim/bundle/CamelCaseMotion"]
+	path = .config/nvim/bundle/CamelCaseMotion
+	url = git@github.com:bkad/CamelCaseMotion.git
+[submodule ".config/nvim/bundle/UnconditionalPaste"]
+	path = .config/nvim/bundle/UnconditionalPaste
+	url = git@github.com:vim-scripts/UnconditionalPaste.git
+[submodule ".config/nvim/bundle/auto-pairs"]
+	path = .config/nvim/bundle/auto-pairs
+	url = git@github.com:jiangmiao/auto-pairs.git
+[submodule ".config/nvim/bundle/gundo.vim"]
+	path = .config/nvim/bundle/gundo.vim
+	url = git@github.com:sjl/gundo.vim.git
+[submodule ".config/nvim/bundle/javascript-libraries-syntax.vim"]
+	path = .config/nvim/bundle/javascript-libraries-syntax.vim
+	url = git@github.com:othree/javascript-libraries-syntax.vim.git
+[submodule ".config/nvim/bundle/madeofcode"]
+	path = .config/nvim/bundle/madeofcode
+	url = git@github.com:bruschill/madeofcode.git
+[submodule ".config/nvim/bundle/vim-mustache-handlebars"]
+	path = .config/nvim/bundle/vim-mustache-handlebars
+	url = git://github.com/mustache/vim-mustache-handlebars.git
+[submodule ".config/nvim/bundle/neomru.vim"]
+	path = .config/nvim/bundle/neomru.vim
+	url = git://github.com/Shougo/neomru.vim.git
+[submodule ".config/nvim/bundle/neoyank.vim"]
+	path = .config/nvim/bundle/neoyank.vim
+	url = git://github.com/Shougo/neoyank.vim
+[submodule ".config/nvim/bundle/splitjoin.vim"]
+	path = .config/nvim/bundle/splitjoin.vim
+	url = git@github.com:AndrewRadev/splitjoin.vim.git
+[submodule ".config/nvim/bundle/vim-surround"]
+	path = .config/nvim/bundle/vim-surround
+	url = git://github.com/tpope/vim-surround.git
+[submodule ".config/nvim/bundle/syntastic"]
+	path = .config/nvim/bundle/syntastic
+	url = git://github.com/scrooloose/syntastic.git
+[submodule ".config/nvim/bundle/tabular"]
+	path = .config/nvim/bundle/tabular
+	url = git@github.com:godlygeek/tabular.git
+[submodule ".config/nvim/bundle/ultisnips"]
+	path = .config/nvim/bundle/ultisnips
+	url = git@github.com:SirVer/ultisnips.git
+[submodule ".config/nvim/bundle/unite-help"]
+	path = .config/nvim/bundle/unite-help
+	url = git://github.com/tsukkee/unite-help.git
+[submodule ".config/nvim/bundle/unite-outline"]
+	path = .config/nvim/bundle/unite-outline
+	url = git://github.com/Shougo/unite-outline.git
+[submodule ".config/nvim/bundle/vim-better-whitespace"]
+	path = .config/nvim/bundle/vim-better-whitespace
+	url = git@github.com:ntpeters/vim-better-whitespace.git
+[submodule ".config/nvim/bundle/vim-colors-solarized"]
+	path = .config/nvim/bundle/vim-colors-solarized
+	url = git://github.com/altercation/vim-colors-solarized.git
+[submodule ".config/nvim/bundle/vim-commentary"]
+	path = .config/nvim/bundle/vim-commentary
+	url = git@github.com:tpope/vim-commentary.git
+[submodule ".config/nvim/bundle/vim-easymotion"]
+	path = .config/nvim/bundle/vim-easymotion
+	url = git://github.com/Lokaltog/vim-easymotion.git
+[submodule ".config/nvim/bundle/vim-exchange"]
+	path = .config/nvim/bundle/vim-exchange
+	url = git@github.com:tommcdo/vim-exchange.git
+[submodule ".config/nvim/bundle/vim-expand-region"]
+	path = .config/nvim/bundle/vim-expand-region
+	url = git@github.com:terryma/vim-expand-region.git
+[submodule ".config/nvim/bundle/vim-fugitive"]
+	path = .config/nvim/bundle/vim-fugitive
+	url = git://github.com/tpope/vim-fugitive.git
+[submodule ".config/nvim/bundle/vim-indent-guides"]
+	path = .config/nvim/bundle/vim-indent-guides
+	url = git@github.com:nathanaelkane/vim-indent-guides.git
+[submodule ".config/nvim/bundle/vim-javascript-syntax"]
+	path = .config/nvim/bundle/vim-javascript-syntax
+	url = git@github.com:jelera/vim-javascript-syntax.git
+[submodule ".config/nvim/bundle/vim-jison"]
+	path = .config/nvim/bundle/vim-jison
+	url = git@github.com:wizicer/vim-jison.git
+[submodule ".config/nvim/bundle/vim-json"]
+	path = .config/nvim/bundle/vim-json
+	url = git@github.com:elzr/vim-json.git
+[submodule ".config/nvim/bundle/vim-markdown"]
+	path = .config/nvim/bundle/vim-markdown
+	url = git@github.com:plasticboy/vim-markdown.git
+[submodule ".config/nvim/bundle/vim-misc"]
+	path = .config/nvim/bundle/vim-misc
+	url = https://github.com/xolox/vim-misc
+[submodule ".config/nvim/bundle/vim-multiple-cursors"]
+	path = .config/nvim/bundle/vim-multiple-cursors
+	url = git@github.com:terryma/vim-multiple-cursors.git
+[submodule ".config/nvim/bundle/vim-repeat"]
+	path = .config/nvim/bundle/vim-repeat
+	url = git://github.com/tpope/vim-repeat.git
+[submodule ".config/nvim/bundle/vim-snippets"]
+	path = .config/nvim/bundle/vim-snippets
+	url = git@github.com:honza/vim-snippets.git
+[submodule ".config/nvim/bundle/vim-stylus"]
+	path = .config/nvim/bundle/vim-stylus
+	url = git@github.com:benbernard/vim-stylus.git
+[submodule ".config/nvim/bundle/vim-unimpaired"]
+	path = .config/nvim/bundle/vim-unimpaired
+	url = git://github.com/tpope/vim-unimpaired.git
+[submodule ".config/nvim/bundle/vim-unite-history"]
+	path = .config/nvim/bundle/vim-unite-history
+	url = git://github.com/thinca/vim-unite-history.git
+[submodule ".config/nvim/bundle/vim-visual-increment"]
+	path = .config/nvim/bundle/vim-visual-increment
+	url = git://github.com/triglav/vim-visual-increment.git
+[submodule ".config/nvim/bundle/unite.vim"]
+	path = .config/nvim/bundle/unite.vim
+	url = git://github.com/Shougo/unite.vim
