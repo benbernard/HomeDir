@@ -39,18 +39,21 @@ if ($LOWER_CASE_NAMES->{$className}) {
   $className = lcfirst($className);
 }
 
-if ($sourceFile =~ m/^$PROJECT_ROOT\/(server|test|scripts)/ ) {
-  my ($path) = $includedFile =~ m/^$PROJECT_ROOT\/(.*)$/;
-  print "var $className = prequire('$path');";
-  exit 0;
-}
+my ($path) = $includedFile =~ m/^$PROJECT_ROOT\/(.*)$/;
+print "var $className = prequire('$path');";
 
-my $base = dirname($sourceFile);
+# if ($sourceFile =~ m/^$PROJECT_ROOT\/(server|test|scripts)/ ) {
+#   my ($path) = $includedFile =~ m/^$PROJECT_ROOT\/(.*)$/;
+#   print "var $className = prequire('$path');";
+#   exit 0;
+# }
 
-my $path = File::Spec->abs2rel($includedFile, $base);
+# my $base = dirname($sourceFile);
 
-if (!($path =~ m/^\./)) {
-  $path = "./$path";
-}
+# my $path = File::Spec->abs2rel($includedFile, $base);
 
-print "var $className = require('$path');"
+# if (!($path =~ m/^\./)) {
+#   $path = "./$path";
+# }
+
+# print "var $className = require('$path');"
