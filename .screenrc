@@ -4,6 +4,9 @@ vbell_msg "Ring"
 # detach on hangup
 autodetach on
 
+# Recognize escape faster (don't wait for another key for a alt-KEY equivalent)
+maptimeout 10
+
 # don't display copyright page
 startup_message off
 

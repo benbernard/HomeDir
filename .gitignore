@@ -8,7 +8,7 @@ RecordStream/
 .Trash/
 .bash_history
 .cache/
-.config/
+.vim-old/
 .cpan/
 .dropbox/
 .gem/

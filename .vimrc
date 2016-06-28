@@ -43,6 +43,7 @@ set complete=.,w,b,u                 " complete from current file, and current b
 set directory=$HOME/.vim/tmp         " set directory for tmp files to be in .vim, so that .swp files are not littered
 set clipboard=unnamed                " Use the * register when a register is not specified - unifies with system clipboard!
 set omnifunc=syntaxcomplete#Complete " Turn on omni completion
+set mouse="none"                     " Turn off mouse support
 scriptencoding utf-8                 " Use utf-8 to encode vimscript (so that options key maps can work)
 
 "set foldmethod=indent   " use indent unless overridden

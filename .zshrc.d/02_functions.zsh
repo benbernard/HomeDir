@@ -58,3 +58,13 @@ mvscreenshot() {
     FILE=`ls -tr ~/Desktop/Screen\ Shot* | tail -n 1`
     mv $FILE ~/Desktop/$1
 }
+
+addVimPlugin() {
+  STARTING_PWD=`pwd`
+  cd
+
+  echo git submodule add $1 .config/nvim/bundle/`basename $1 | sed 's/\.git$//'`
+  git submodule add $1 .config/nvim/bundle/`basename $1 | sed 's/\.git$//'`
+
+  cd $STARTING_PWD
+}
