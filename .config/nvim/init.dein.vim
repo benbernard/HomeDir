@@ -1,14 +1,14 @@
 " Setup for dein plugin manager by shuogo
 
 " Required:
-set runtimepath^=.config/nvim/dein-plugins/repos/github.com/Shougo/dein.vim
 
 " Required:
-call dein#begin(expand('.config/nvim/dein-plugins'))
+call dein#begin(expand($HOME . '/.config/nvim/dein-plugins'))
 
 " Let dein manage dein
 call dein#add('Shougo/dein.vim')
 call dein#add('Shougo/deoplete.nvim')
+call dein#add('ternjs/tern_for_vim')
 
 " Required:
 call dein#end()
