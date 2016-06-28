@@ -252,6 +252,9 @@ nmap <Leader>rA mb[{?function<CR>elxx/{<CR>%lxxxxxxxx`b
   nn <silent> <Leader>ab :CtrlPBuffer<CR>
   nn <silent> <Leader>aq :CtrlPQuickfix<CR>
 
+" Setup CamelCaseMotion
+  call camelcasemotion#CreateMotionMappings(',')
+
 " Git Gutter
   let g:gitgutter_sign_column_always = 1 " Always show git gutter (avoid re-indent on save)
 
