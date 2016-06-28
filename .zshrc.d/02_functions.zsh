@@ -62,10 +62,10 @@ mvscreenshot() {
 addVimPlugin() {
   local BASENAME=`basename $1 | sed 's/\.git$//'`
 
-  if [ -e $BASENAME ]; then
-    echo Removing $BASENAME
-    rm -rf $BASENAME
-  fi
+  # if [ -e $BASENAME ]; then
+  #   echo Removing $BASENAME
+  #   rm -rf $BASENAME
+  # fi
 
   local STARTING_PWD=`pwd`
   cd
