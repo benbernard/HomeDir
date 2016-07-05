@@ -70,7 +70,7 @@ DIRSTACKSIZE=20   # number of directories in your pushd/popd stack
 
 # programs will use this by default if you need to edit something
 # default to vim, so we don't surprise anyone
-export EDITOR=${OVERRIDE_EDITOR:-vim}
+export EDITOR=${OVERRIDE_EDITOR:-nvim}
 export VISUAL=$EDITOR # some programs use this instead of EDITOR
 if [[ $EMACS == "t" ]]; then
     export PAGER=cat            # otherwise funkiness in M-x shell
