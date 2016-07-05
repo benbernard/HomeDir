@@ -137,4 +137,4 @@ ancestry/
 .gitkraken/
 .sqlite_history
 .gtk-bookmarks
-
+.config/configstore/update-notifier-nodemon.json
