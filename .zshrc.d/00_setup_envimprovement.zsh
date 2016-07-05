@@ -11,13 +11,7 @@ fi
 if [[ -n "$TITLE" ]]
 then
   AUTO_TITLE_SCREENS=NO
-
-  if [[ "$TERM" == "screen" ]]; then
-    echo -ne "\ek$TITLE\e\\"
-  fi
-  if [[ "$TERM" == "xterm" ]]; then
-    echo -ne "\e]0;$TITLE\a"
-  fi
+  echo -ne "\ek$TITLE\e\\"
 fi
 
 #Will get the zsh_version from eihooks

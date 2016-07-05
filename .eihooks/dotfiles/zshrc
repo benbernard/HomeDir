@@ -32,12 +32,7 @@ then
     # 'screen' sets STY as well, so for users who override the TERM
     # environment variable, checking STY is nice
     setopt UNSET # Avoid errors from undefined STY for users with 'NOUNSET'
-    if [[ $TERM == "screen" || -n $STY ]]; then
-        echo -ne "\ek$TITLE\e\\"
-    fi
-    if [[ $TERM == "xterm" ]]; then
-        echo -ne "\e]0;$TITLE\a"
-    fi
+    echo -ne "\ek$TITLE\e\\"
     setopt LOCAL_OPTIONS # restore value of UNSET
   }
 
@@ -55,12 +50,8 @@ then
       CMD=$CMDS[1]
     fi
     setopt UNSET # Avoid errors from undefined STY for users with 'NOUNSET'
-    if [[ $TERM == "screen" || -n "$STY" ]]; then
-      echo -ne "\ek$CMD\e\\"
-    fi
-    if [[ $TERM == "xterm" ]]; then
-      echo -ne "\e]0;$CMD\a"
-    fi
+
+    echo -ne "\ek$CMD\e\\"
     setopt LOCAL_OPTIONS # restore value of UNSET
   }
 
