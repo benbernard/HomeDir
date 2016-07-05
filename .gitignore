@@ -11,6 +11,7 @@
 .config/nvim/bundle/bufexplorer-7.3.0/doc/tags
 .config/nvim/bundle/calendar-vim/doc/tags
 .config/nvim/dein-plugins/
+.config/nvim/bundle/vimproc.vim/
 .nvim*
 .screen/
 RecordStream/
