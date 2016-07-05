@@ -33,11 +33,7 @@ while(1) {
     print $fh $new;
     close $fh;
 
-    foreach my $session (qw(irc default)) {
-      system(qw(/usr/local/bin/screen -S), $session,  qw(-X msgwait 0));
-      system(qw(/usr/local/bin/screen -S), $session, qw(-X readbuf), $temp_file);
-      system(qw(/usr/local/bin/screen -S), $session, qw(-X msgwait 2));
-    }
+    system(qw(tmux loadb), $temp_file)
   } elsif ($screen_contents ne $new_screen) {
     print "Found change in screen buffer\n";
     $screen_contents = $new_screen;
@@ -52,7 +48,7 @@ sub get_clip {
 }
 
 sub get_screen_contents {
-  open(my $fh, '<', $screen_file) or die "Could not open $screen_file: $!";
+  open(my $fh, '-|', qw(tmux saveb -)) or die "Could not open $screen_file: $!";
   local $/;
   my $contents = <$fh>;
   close $fh;
