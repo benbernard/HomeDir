@@ -54,6 +54,17 @@ nsc () {
   screen -c ~/.screenrc.nested -x -RR -e l -S "$@"
 }
 
+# Nested Screen
+nesttm () {
+  # Change the current screen title
+  echo -e -n '\033k'nt: $1'\033\\'
+
+  local TMUX=""
+
+  # and invoke screen
+  tmux attach-session -t "$@" || tmux new-session -s "$@"
+}
+
 mvscreenshot() {
     FILE=`ls -tr ~/Desktop/Screen\ Shot* | tail -n 1`
     mv $FILE ~/Desktop/$1
@@ -74,4 +85,8 @@ addVimPlugin() {
   git submodule add $1 .config/nvim/bundle/$BASENAME
 
   cd $STARTING_PWD
+}
+
+nt() {
+  tmux attach-session -t "$@" || tmux new-session -s "$@"
 }
