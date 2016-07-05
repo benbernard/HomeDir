@@ -1,5 +1,6 @@
 #Environment
-setenv EDITOR vim
+setenv EDITOR nvim
+setenv VISUAL nvim
 setenv PAGER less
 setenv SCREENDIR ~/.screen         # directory to put screen sockets
 setenv URLOPENER_LOG_FILE $HOME/.urlopener.log # Have the url opener log
