@@ -21,6 +21,7 @@ my $LOWER_CASE_NAMES = {map {$_ => 1} (qw(
   ApiJwtToken
   Metrics
   Urls
+  DelayedTriggerable
 ))};
 
 my $PROJECT_ROOT = '/Users/bernard/fieldbook';
