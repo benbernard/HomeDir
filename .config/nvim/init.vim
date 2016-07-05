@@ -42,7 +42,7 @@ set textwidth=0                      " turn wrapping off
 set visualbell                       " Use a flash instead of a sound for bells
 set wildmode=longest:full            " Matches only to longest filename, displays to menu possible matches
 set complete=.,w,b,u                 " complete from current file, and current buffers default: .,w,b,u,t,i  trying to keep down completion time
-set directory=$HOME/.vim/tmp         " set directory for tmp files to be in .vim, so that .swp files are not littered
+set directory=$HOME/.config/nvim/tmp " set directory for tmp files to be in .vim, so that .swp files are not littered
 set clipboard=unnamed                " Use the * register when a register is not specified - unifies with system clipboard!
 set omnifunc=syntaxcomplete#Complete " Turn on omni completion
 set updatetime=250                   " In ms, how often to update gitgutter and swap file
