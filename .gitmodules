@@ -22,6 +22,12 @@
 [submodule "zaw"]
 	path = zaw
 	url = git://github.com/zsh-users/zaw.git
+[submodule "userScripts/commentTracker"]
+	path = userScripts/commentTracker
+	url = git@github.com:benbernard/CommentTracker.git
+[submodule "programming/devtools-snippets"]
+	path = programming/devtools-snippets
+	url = git@github.com:bgrins/devtools-snippets.git
 [submodule ".config/nvim/bundle/vim-gitgutter"]
 	path = .config/nvim/bundle/vim-gitgutter
 	url = git@github.com:airblade/vim-gitgutter.git
