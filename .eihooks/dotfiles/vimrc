@@ -90,7 +90,7 @@
 " viminfo options
   " read/write a .viminfo file, don't store more than
   " 50 lines of registers
-  set viminfo='20,\"50    
+  set viminfo='20,\"50
 
 
 "Set variables for plugins to use
@@ -177,7 +177,8 @@ function! SetTitle()
 
     if (l:title != 'vi: __Tag_List__')
       let l:truncTitle = strpart(l:title, 0, 15)
-      silent exe '!echo -e -n "\033k' . l:truncTitle . '\033\\"'
+      " silent exe '!echo -e -n "\033k' . l:truncTitle . '\033\\"'
+      silent exe '!tmux rename-window "' . l:truncTitle . '"'
     endif
   endif
 endfunction
