@@ -129,6 +129,10 @@ au FileType stylus setl iskeyword-=#,-
 " Do not display the command mode editing window on q:
 map q: :q
 
+" Setup CTRL-X to be CTRL-O.  I almost never use CTRL-X, fixes problem with
+" CTRL-O sending tmux prefix
+nnoremap <C-X> <C-O>
+
 nmap <Leader>ra mb[{?function<CR>eli *<ESC>/{<CR>%li.async()<ESC>`b
 nmap <Leader>rA mb[{?function<CR>elxx/{<CR>%lxxxxxxxx`b
 
