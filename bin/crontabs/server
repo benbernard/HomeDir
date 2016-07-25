@@ -1,5 +1,5 @@
-@reboot screen -S znc /usr/bin/znc -D
-
 # From BOWQuotes repo
 # m h  dom mon dow   command
 0 10 * * * /home/bernard/BOWQuotes/print-fortune | mail -s 'Daily Quote' quotes@technofetish.net
+
+0 10 * * * /opt/znc/bin/znc -D | /usr/bin/tee -a /home/bernard/znc.log
