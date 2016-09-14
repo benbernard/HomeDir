@@ -8,6 +8,14 @@ call pathogen#infect()
 " First setup variable for other variables
 "let g:useNinjaTagList=1
 
+" Vundle Setup
+filetype off
+set rtp+=~/.config/nvim/vundle/Vundle.vim
+call vundle#begin('~/.config/nvim/vundle')
+Plugin 'VundleVim/Vundle.vim'
+Plugin 'floobits/floobits-neovim'
+call vundle#end()
+
 syntax on
 
 if ( filereadable($HOME . "/.vimrc.site") )
