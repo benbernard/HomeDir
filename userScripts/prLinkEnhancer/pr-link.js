@@ -10,25 +10,24 @@
 // ==/UserScript==
 
 var main = function () {
-  $('body').append('\
-<style> \
-.compareLink { \
-  position: relative; \
-  margin-top: -5px; \
-  width: 51px; \
-  float: right; \
-  height: 5px; \
-} \
- \
-.compareLink hr { \
-  margin: 0; \
-} \
- \
-.blue { \
-  border: 1px solid lightblue; \
-} \
- \
-</style>');
+  $('body').append(`
+<style>
+.compareLink {
+  position: relative;
+  margin-top: -5px;
+  width: 51px;
+  float: right;
+  height: 5px;
+}
+
+.compareLink hr {
+  margin: 0;
+}
+
+.compareLink:hover {
+  border: 1px solid lightblue;
+}
+</style>`);
 
   $('.commit-ref').each(function () {
     var user = $('.user', this).text();
@@ -39,28 +38,39 @@ var main = function () {
     $('span:last-child', this).html('<a href="/' + user + '/' + repo + '/tree/' + target + '">' + target + '</a>');
   });
 
+  setInterval(function () {
+    if ((new Date().valueOf() - timestamp) > 500) {
+      if (hasNew) fixLinks();
+    }
+  }, 1000)
+
   // If we are on a pull request
   if (window.location.href.match(/pull\/\d+/) || window.location.href.match(/pulls$/)) {
     waitForKeyElements('.discussion-timeline .commit-id', function () {
-      $('.link-enhancer-link').remove();
-      var commits = $('.discussion-timeline .commit-id');
-      var finalCommit = commits[commits.length-1];
-      var finalCommitId = $(finalCommit).text();
-
-      $('.discussion-timeline a.commit-id').each(function () {
-        var baseUrl = this.href.replace(/\/pull\/\d+\/commits\/[0-9a-f]+/, '');
-
-        var commitId = $(this).text();
-        $(this).parents('.commit-meta').prepend('<a class="link-enhancer-link" href="' + baseUrl + '/compare/' + commitId + '^...' + finalCommitId + '"><div class="compareLink"><hr/></div></a>');
-      });
-
-      $('.compareLink').hover(function () {
-        $('hr', this).addClass('blue');
-      }, function () {
-        $('hr', this).removeClass('blue');
-      });
+      timestamp = new Date().valueOf();
+      hasNew = true;
     });
   }
+}
+
+var timestamp = new Date().valueOf();
+var hasNew = true;
+
+var fixLinks = function () {
+  hasNew = false;
+  $('.link-enhancer-link').remove();
+  var commits = $('.discussion-timeline .commit-id');
+  var finalCommit = commits[commits.length-1];
+  var finalCommitId = $(finalCommit).text();
+
+  $('.discussion-timeline a.commit-id').each(function () {
+    var $this = $(this);
+    var baseUrl = this.href.replace(/\/pull\/\d+\/commits\/[0-9a-f]+/, '');
+
+    var commitId = $this.text();
+    var html = `<a class="link-enhancer-link" href="${baseUrl}/compare/${commitId}^...${finalCommitId}"><div class="compareLink"><hr/></div></a>`;
+    $this.parents('.commit-meta').prepend(html);
+  });
 }
 
 /*--- waitForKeyElements():  A utility function, for Greasemonkey scripts,
