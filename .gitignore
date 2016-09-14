@@ -178,3 +178,4 @@ ancestry/
 .sqlite_history
 .gtk-bookmarks
 .config/configstore/update-notifier-nodemon.json
+.neo4j/
