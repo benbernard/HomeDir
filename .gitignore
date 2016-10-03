@@ -182,3 +182,5 @@ ancestry/
 .psql_history
 .oracle_jre_usage/
 .config/nvim/vundle/floobits-neovim/
+.mono/
+.config/robomongo/
