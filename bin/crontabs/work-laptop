@@ -1,6 +1,0 @@
-# m h  dom mon dow   command
-* * * * * cp /Users/bernard/.history /Users/bernard/Dropbox/homedir-extras/zsh-history.txt
-
-# Should get ctags working at some point...
-#* * * * * cd /Users/bernard/fieldbook && javascript-ctags 'client/**/*.js' 'server/**/*.js' 'common/**/*.js'
-#*/5 * * * * cd /Users/bernard/fieldbook && javascript-ctags 'client/**/*.js' 'server/**/*.js' 'common/**/*.js'
