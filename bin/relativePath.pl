@@ -41,7 +41,7 @@ if ($LOWER_CASE_NAMES->{$className}) {
 }
 
 my ($path) = $includedFile =~ m/^$PROJECT_ROOT\/(.*)$/;
-print "var $className = prequire('$path');";
+print "const $className = prequire('$path');";
 
 # if ($sourceFile =~ m/^$PROJECT_ROOT\/(server|test|scripts)/ ) {
 #   my ($path) = $includedFile =~ m/^$PROJECT_ROOT\/(.*)$/;
