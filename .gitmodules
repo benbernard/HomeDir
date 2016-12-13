@@ -29,126 +29,169 @@
 	path = programming/devtools-snippets
 	url = git@github.com:bgrins/devtools-snippets.git
 [submodule ".config/nvim/bundle/vim-gitgutter"]
+  ignore = untracked
 	path = .config/nvim/bundle/vim-gitgutter
 	url = git@github.com:airblade/vim-gitgutter.git
 [submodule ".config/nvim/bundle/vim-airline"]
+  ignore = untracked
 	path = .config/nvim/bundle/vim-airline
 	url = git@github.com:vim-airline/vim-airline.git
 [submodule ".config/nvim/bundle/vim-airline-themes"]
+  ignore = untracked
 	path = .config/nvim/bundle/vim-airline-themes
 	url = git@github.com:vim-airline/vim-airline-themes.git
+  ignore = untracked
 [submodule ".config/nvim/bundle/CamelCaseMotion"]
+  ignore = untracked
 	path = .config/nvim/bundle/CamelCaseMotion
 	url = git@github.com:bkad/CamelCaseMotion.git
 [submodule ".config/nvim/bundle/UnconditionalPaste"]
+  ignore = untracked
 	path = .config/nvim/bundle/UnconditionalPaste
 	url = git@github.com:vim-scripts/UnconditionalPaste.git
 [submodule ".config/nvim/bundle/auto-pairs"]
+  ignore = untracked
 	path = .config/nvim/bundle/auto-pairs
 	url = git@github.com:jiangmiao/auto-pairs.git
 [submodule ".config/nvim/bundle/gundo.vim"]
+  ignore = untracked
 	path = .config/nvim/bundle/gundo.vim
 	url = git@github.com:sjl/gundo.vim.git
 [submodule ".config/nvim/bundle/javascript-libraries-syntax.vim"]
+  ignore = untracked
 	path = .config/nvim/bundle/javascript-libraries-syntax.vim
 	url = git@github.com:othree/javascript-libraries-syntax.vim.git
 [submodule ".config/nvim/bundle/madeofcode"]
+  ignore = untracked
 	path = .config/nvim/bundle/madeofcode
 	url = git@github.com:bruschill/madeofcode.git
 [submodule ".config/nvim/bundle/vim-mustache-handlebars"]
+  ignore = untracked
 	path = .config/nvim/bundle/vim-mustache-handlebars
 	url = git://github.com/mustache/vim-mustache-handlebars.git
 [submodule ".config/nvim/bundle/neomru.vim"]
+  ignore = untracked
 	path = .config/nvim/bundle/neomru.vim
 	url = git://github.com/Shougo/neomru.vim.git
 [submodule ".config/nvim/bundle/neoyank.vim"]
+  ignore = untracked
 	path = .config/nvim/bundle/neoyank.vim
 	url = git://github.com/Shougo/neoyank.vim
 [submodule ".config/nvim/bundle/splitjoin.vim"]
+  ignore = untracked
+  ignore = untracked
 	path = .config/nvim/bundle/splitjoin.vim
 	url = git@github.com:AndrewRadev/splitjoin.vim.git
 [submodule ".config/nvim/bundle/vim-surround"]
+  ignore = untracked
 	path = .config/nvim/bundle/vim-surround
 	url = git://github.com/tpope/vim-surround.git
 [submodule ".config/nvim/bundle/syntastic"]
+  ignore = untracked
 	path = .config/nvim/bundle/syntastic
 	url = git://github.com/scrooloose/syntastic.git
 [submodule ".config/nvim/bundle/tabular"]
+  ignore = untracked
 	path = .config/nvim/bundle/tabular
 	url = git@github.com:godlygeek/tabular.git
 [submodule ".config/nvim/bundle/ultisnips"]
+  ignore = untracked
 	path = .config/nvim/bundle/ultisnips
 	url = git@github.com:SirVer/ultisnips.git
 [submodule ".config/nvim/bundle/unite-help"]
+  ignore = untracked
 	path = .config/nvim/bundle/unite-help
 	url = git://github.com/tsukkee/unite-help.git
 [submodule ".config/nvim/bundle/unite-outline"]
+  ignore = untracked
 	path = .config/nvim/bundle/unite-outline
 	url = git://github.com/Shougo/unite-outline.git
 [submodule ".config/nvim/bundle/vim-better-whitespace"]
+  ignore = untracked
 	path = .config/nvim/bundle/vim-better-whitespace
 	url = git@github.com:ntpeters/vim-better-whitespace.git
 [submodule ".config/nvim/bundle/vim-colors-solarized"]
+  ignore = untracked
 	path = .config/nvim/bundle/vim-colors-solarized
 	url = git://github.com/altercation/vim-colors-solarized.git
 [submodule ".config/nvim/bundle/vim-commentary"]
+  ignore = untracked
 	path = .config/nvim/bundle/vim-commentary
 	url = git@github.com:tpope/vim-commentary.git
 [submodule ".config/nvim/bundle/vim-easymotion"]
+  ignore = untracked
 	path = .config/nvim/bundle/vim-easymotion
 	url = git://github.com/Lokaltog/vim-easymotion.git
 [submodule ".config/nvim/bundle/vim-exchange"]
+  ignore = untracked
 	path = .config/nvim/bundle/vim-exchange
 	url = git@github.com:tommcdo/vim-exchange.git
 [submodule ".config/nvim/bundle/vim-expand-region"]
+  ignore = untracked
 	path = .config/nvim/bundle/vim-expand-region
 	url = git@github.com:terryma/vim-expand-region.git
 [submodule ".config/nvim/bundle/vim-fugitive"]
+  ignore = untracked
 	path = .config/nvim/bundle/vim-fugitive
 	url = git://github.com/tpope/vim-fugitive.git
 [submodule ".config/nvim/bundle/vim-indent-guides"]
+  ignore = untracked
 	path = .config/nvim/bundle/vim-indent-guides
 	url = git@github.com:nathanaelkane/vim-indent-guides.git
 [submodule ".config/nvim/bundle/vim-javascript-syntax"]
+  ignore = untracked
 	path = .config/nvim/bundle/vim-javascript-syntax
 	url = git@github.com:jelera/vim-javascript-syntax.git
 [submodule ".config/nvim/bundle/vim-jison"]
+  ignore = untracked
 	path = .config/nvim/bundle/vim-jison
 	url = git@github.com:wizicer/vim-jison.git
 [submodule ".config/nvim/bundle/vim-json"]
+  ignore = untracked
 	path = .config/nvim/bundle/vim-json
 	url = git@github.com:elzr/vim-json.git
 [submodule ".config/nvim/bundle/vim-markdown"]
+  ignore = untracked
 	path = .config/nvim/bundle/vim-markdown
 	url = git@github.com:plasticboy/vim-markdown.git
 [submodule ".config/nvim/bundle/vim-misc"]
+  ignore = untracked
 	path = .config/nvim/bundle/vim-misc
 	url = https://github.com/xolox/vim-misc
 [submodule ".config/nvim/bundle/vim-multiple-cursors"]
+  ignore = untracked
 	path = .config/nvim/bundle/vim-multiple-cursors
 	url = git@github.com:terryma/vim-multiple-cursors.git
 [submodule ".config/nvim/bundle/vim-repeat"]
+  ignore = untracked
 	path = .config/nvim/bundle/vim-repeat
 	url = git://github.com/tpope/vim-repeat.git
 [submodule ".config/nvim/bundle/vim-snippets"]
+  ignore = untracked
 	path = .config/nvim/bundle/vim-snippets
 	url = git@github.com:honza/vim-snippets.git
 [submodule ".config/nvim/bundle/vim-stylus"]
+  ignore = untracked
 	path = .config/nvim/bundle/vim-stylus
 	url = git@github.com:benbernard/vim-stylus.git
 [submodule ".config/nvim/bundle/vim-unimpaired"]
+  ignore = untracked
 	path = .config/nvim/bundle/vim-unimpaired
 	url = git://github.com/tpope/vim-unimpaired.git
 [submodule ".config/nvim/bundle/vim-unite-history"]
+  ignore = untracked
 	path = .config/nvim/bundle/vim-unite-history
 	url = git://github.com/thinca/vim-unite-history.git
 [submodule ".config/nvim/bundle/vim-visual-increment"]
+  ignore = untracked
 	path = .config/nvim/bundle/vim-visual-increment
 	url = git://github.com/triglav/vim-visual-increment.git
 [submodule ".config/nvim/bundle/unite.vim"]
+  ignore = untracked
 	path = .config/nvim/bundle/unite.vim
 	url = git://github.com/Shougo/unite.vim
 [submodule ".config/nvim/bundle/vimproc.vim"]
+  ignore = untracked
 	path = .config/nvim/bundle/vimproc.vim
 	url = git@github.com:Shougo/vimproc.vim.git
 [submodule ".config/nvim/vundle/Vundle.vim"]
