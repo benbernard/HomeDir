@@ -55,6 +55,7 @@ set clipboard=unnamed                " Use the * register when a register is not
 set omnifunc=syntaxcomplete#Complete " Turn on omni completion
 set updatetime=250                   " In ms, how often to update gitgutter and swap file
 set mouse=                           " Turn off mouse support, don't want it in terminal
+set lazyredraw                       " Turn on lazy redraw, don't redraw during macros
 scriptencoding utf-8                 " Use utf-8 to encode vimscript (so that options key maps can work)
 
 "set foldmethod=indent   " use indent unless overridden
