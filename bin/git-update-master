@@ -5,6 +5,8 @@ use strict;
 
 my $remote = `git config ninja.masterRemote`;
 
+$ENV{'OVERCOMMIT_DISABLE'} = 1;
+
 if ($?) {
   $remote = 'team';
 
