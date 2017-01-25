@@ -184,3 +184,9 @@ ancestry/
 .config/nvim/vundle/floobits-neovim/
 .mono/
 .config/robomongo/
+.cargo/
+.multirust
+Dropbox*
+.rustup/
+gocode/
+.pgadmin/
