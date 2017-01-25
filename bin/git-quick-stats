@@ -1,0 +1,257 @@
+#!/usr/bin/env bash
+
+# This is taken from
+# https://github.com/arzzen/git-quick-stats
+
+set -o nounset
+set -o errexit
+
+show_menu() {
+    NORMAL=`echo "\033[m"`
+    MENU=`echo "\033[36m"`
+    NUMBER=`echo "\033[33m"`
+    FGRED=`echo "\033[41m"`
+    RED_TEXT=`echo "\033[31m"`
+    ENTER_LINE=`echo "\033[33m"`
+
+    echo -e ""
+    echo -e "${MENU} ${NUMBER} 1)${MENU} Suggest code reviewers based on git history ${NORMAL}"
+    echo -e "${MENU} ${NUMBER} 2)${MENU} Detailed stats per author, including contribution to the total change ${NORMAL}"
+    echo -e "${MENU} ${NUMBER} 3)${MENU} Git commits per day ${NORMAL}"
+    echo -e "${MENU} ${NUMBER} 4)${MENU} Git commits per author ${NORMAL}"
+    echo -e "${MENU} ${NUMBER} 5)${MENU} Get own stats for the day ${NORMAL}"
+    echo -e "${MENU} ${NUMBER} 6)${MENU} List repository contributors by author name (sorted by name) ${NORMAL}"
+    echo -e "${MENU} ${NUMBER} 7)${MENU} List of all the branches, ordered by most recent commits ${NORMAL}"
+    echo -e "${MENU} ${NUMBER} 8)${MENU} Generate git changelogs ${NORMAL}"
+    echo -e ""
+    echo -e "${ENTER_LINE}Please enter a menu option and enter or ${RED_TEXT}enter to exit. ${NORMAL}"
+    read opt
+}
+
+function option_picked() {
+    COLOR='\033[01;31m'
+    RESET='\033[00;00m'
+    MESSAGE=${@:-"${RESET}Error: No message passed"}
+    echo -e "${COLOR}${MESSAGE}${RESET}"
+}
+
+function detailedGitStats() {
+    option_picked "Detailed stats per author, including contribution to the total change:"
+    echo ""
+    git log --no-merges --numstat | LC_ALL=C awk '
+    function printStats(author) {
+      printf "\t%s:\n", author
+
+      printf "\t  insertions:    %d (%.0f%%)\n", more[author], (more[author] / more["total"] * 100)
+      printf "\t  deletions:     %d (%.0f%%)\n", less[author], (less[author] / less["total"] * 100)
+      printf "\t  files:         %d (%.0f%%)\n", file[author], (file[author] / file["total"] * 100)
+      printf "\t  commits:       %d (%.0f%%)\n", commits[author], (commits[author] / commits["total"] * 100)
+
+      if ( first[author] != "" ) {
+        printf "\t  first commit:  %s\n", first[author]
+        printf "\t  last commit:   %s\n", last[author]
+      }
+
+      printf "\n"
+    }
+
+    /^Author:/ {
+      author = $2 " " $3
+      commits[author] += 1
+      commits["total"] += 1
+    }
+
+    /^Date:/ {
+      $1="";
+      first[author] = substr($0, 2)
+      if(last[author] == "" ) { last[author] = first[author] }
+    }
+
+    /^[0-9]/ {
+      more[author] += $1
+      less[author] += $2
+      file[author] += 1
+
+      more["total"]  += $1
+      less["total"]  += $2
+      file["total"]  += 1
+    }
+
+    END {
+      for (author in commits) {
+        if (author != "total") {
+          printStats(author)
+        }
+      }
+      printStats("total")
+    }'
+}
+
+function suggestReviewers() {
+    option_picked "Suggest code reviewers based on git history:"
+    echo ""
+    git log --no-merges --pretty=%an $* | head -n 100 | sort | uniq -c | sort -nr | LC_ALL=C awk '
+    { args[NR] = $0; }
+    END {
+      for (i = 1; i <= NR; ++i) {
+        printf "%s\n", args[i]
+      }
+    }' | column -t -s,
+}
+
+function commitsPerDay() {
+    option_picked "Git commits per day:";
+    echo ""
+    git log --no-merges --date=short --format='%ad' | sort | uniq -c
+}
+
+function commitsPerAuthor()  {
+    option_picked "Git commits per author:"
+    echo ""
+    git shortlog --no-merges -n -s | sort -nr | LC_ALL=C awk '
+    { args[NR] = $0; sum += $0 }
+    END {
+      for (i = 1; i <= NR; ++i) {
+        printf "%s,%2.1f%%\n", args[i], 100 * args[i] / sum
+      }
+    }' | column -t -s,
+}
+
+function myDailyStats() {
+    option_picked "My daily status:"
+    echo ""
+    git diff --shortstat '@{0 day ago}' | sort -nr | tr ',' '\n' | LC_ALL=C awk '
+    { args[NR] = $0; }
+    END {
+      for (i = 1; i <= NR; ++i) {
+        printf "\t%s\n", args[i]
+      }
+    }'
+}
+
+function contributors() {
+    option_picked "List repository contributors by author name (sorted by name):"
+    echo ""
+    git log --no-merges --format='%aN' | sort -u | cat -n
+}
+
+function branchesByDate() {
+    option_picked "List of all the branches, ordered by most recent commits:"
+    echo ""
+    git for-each-ref --sort=committerdate refs/heads/ --format='[%(authordate:relative)] %(authorname) %(refname:short)' | cat -n
+}
+
+function changelogs() {
+    option_picked "Generate git changelogs:"
+    echo ""
+    git log --pretty=format:"- %s%n%b" --since="$(git show -s --format=%ad `git rev-list --all --max-count=1`)" | sort -nr
+}
+
+if [ $# -eq 1 ]
+  then
+     case $1 in
+        "suggestReviewers")
+           suggestReviewers
+           ;;
+
+        "detailedGitStats")
+           detailedGitStats
+           ;;
+        "commitsPerDay")
+           commitsPerDay
+           ;;
+        "commitsPerAuthor")
+           commitsPerAuthor
+           ;;
+        "myDailyStats")
+           myDailyStats
+           ;;
+        "contributors")
+           contributors
+           ;;
+        "branchesByDate")
+           branchesByDate
+           ;;
+        "changelogs")
+           changelogs
+           ;;
+        *)
+           echo "Invalid argument. Possible arguments: suggestReviewers, detailedGitStats, commitsPerDay, commitsPerAuthor, myDailyStats, contributors, branchesByDate, changelogs"
+           ;;
+     esac
+     exit 0;
+fi
+
+if [ $# -gt 1 ]
+    then
+    echo "Usage: git quick-stats <optional-command-to-execute-directly>";
+    exit 1;
+fi
+
+clear
+show_menu
+
+while [ opt != '' ]
+    do
+    if [[ $opt = "" ]]; then
+        exit;
+    else
+        clear
+        case $opt in
+        1)
+           suggestReviewers
+           show_menu
+           ;;
+
+        2)
+           detailedGitStats
+           show_menu
+           ;;
+
+        3)
+           commitsPerDay
+           show_menu
+           ;;
+
+        4)
+           commitsPerAuthor
+	       show_menu
+           ;;
+
+        5)
+           myDailyStats
+           show_menu
+           ;;
+
+        6)
+           contributors
+           show_menu
+           ;;
+
+        7)
+           branchesByDate
+           show_menu
+           ;;
+
+        8)
+           changelogs
+           show_menu
+           ;;
+
+        x)
+	       exit
+           ;;
+
+        \n)
+	       exit
+           ;;
+
+        *)
+	       clear
+           option_picked "Pick an option from the menu"
+           show_menu
+           ;;
+
+    esac
+fi
+done
