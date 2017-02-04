@@ -197,3 +197,6 @@
 [submodule ".config/nvim/vundle/Vundle.vim"]
 	path = .config/nvim/vundle/Vundle.vim
 	url = https://github.com/VundleVim/Vundle.vim.git
+[submodule ".config/nvim/bundle/pgsql.vim"]
+	path = .config/nvim/bundle/pgsql.vim
+	url = https://github.com/exu/pgsql.vim
