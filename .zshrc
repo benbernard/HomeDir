@@ -19,3 +19,5 @@ PATH=$PATH:$HOME/.rvm/bin # Add RVM to PATH for scripting
 if [[ -e ~/.zproifle ]]; then
     source ~/.zprofile
 fi
+
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh

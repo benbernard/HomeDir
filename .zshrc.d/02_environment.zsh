@@ -58,3 +58,10 @@ export PATH="/Users/bernard/perl5/bin:$PATH";
 ### Added by the Heroku Toolbelt
 export PATH="/usr/local/heroku/bin:$PATH"
 
+# Setup fzf
+# Use ag for searching (uses .agignore)
+export FZF_DEFAULT_COMMAND='ag -g ""'
+export FZF_CTRL_T_COMMAND='ag -g ""'
+
+# Default display options (taken from readme)
+export FZF_DEFAULT_OPTS='--height 40% --reverse --border -i'
