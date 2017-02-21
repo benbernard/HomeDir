@@ -55,8 +55,8 @@ nnoremap <leader>ur :<C-u>Unite -start-insert -prompt-direction=above -buffer-na
 " For some reason <C-a> was getting mapped away, using autocmd to bypass
 " that
 " Search files with Ctrl-a
-nnoremap <C-a> :<C-u>Unite -buffer-name=files -prompt-direction=above -start-insert file_rec/async:!<cr>
-autocmd VimEnter * nnoremap <C-a> :<C-u>Unite -buffer-name=files -prompt-direction=above -start-insert file_rec/async:!<cr>
+"nnoremap <C-a> :<C-u>Unite -buffer-name=files -prompt-direction=above -start-insert file_rec/async:!<cr>
+"autocmd VimEnter * nnoremap <C-a> :<C-u>Unite -buffer-name=files -prompt-direction=above -start-insert file_rec/async:!<cr>
 
 " Start in insert mode
 let g:unite_enable_start_insert = 1

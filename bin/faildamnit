@@ -1,6 +1,0 @@
-#!/bin/zsh
-
-source ~/.zshrc
-setopt aliases
-
-while fm $@; do :; done

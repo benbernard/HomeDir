@@ -208,7 +208,7 @@ nmap <Leader>rA mb[{?function<CR>elxx/{<CR>%lxxxxxxxx`b
 
 "rcsvers.vim settings
   let g:rvSaveDirectoryType = 1 "Use single directory for all files
-  let g:rvSaveDirectoryName = "$HOME/.vim/RCSFiles/" "Place to save RCS files
+  let g:rvSaveDirectoryName = "$HOME/.config/nvim/tmp/RCSFiles/" "Place to save RCS files
 
   "Setup exlcude expressions for rcs
   "1. Mutt mail files
@@ -383,6 +383,14 @@ let g:vim_markdown_folding_disabled=1
 " Unite
   " Got annoying having it all in this file, I've moved it to .vimrc.unite
   source $HOME/.vimrc.unite
+
+" FZF Stuff
+  nnoremap <C-a> :Files<cr>
+  "autocmd VimEnter * nnoremap <C-a> :<C-u>Unite -buffer-name=files -prompt-direction=above -start-insert file_rec/async:!<cr>
+
+  nnoremap <leader>ag :Ag <C-r><C-w><CR>
+
+  let g:fzf_history_dir = $HOME . "/.config/nvim/tmp"
 
 " Insert test data
  " let @t = 'O"*Pvi]:s/^ *- *"/"/gvi]='
@@ -589,7 +597,7 @@ endif
 
 if ( v:version >= 703 )
   set undofile                   " Keep undo history around, across vim reboots
-  set undodir=$HOME/.vim/tmp     " set directory for undo files
+  set undodir=$HOME/.config/nvim/tmp     " set directory for undo files
 endif
 
 """"""""""""""" Filetype Settings """"""""""""""""""""

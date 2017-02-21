@@ -94,3 +94,13 @@ nt() {
 sslinfo () {
   echo | openssl s_client -showcerts -servername $1 -connect $1:443 2>/dev/null | openssl x509 -inform pem -noout -text
 }
+
+faildammitfn () {
+  $@
+  while [ $? -eq 0 ]; do
+    $@
+  done
+}
+
+# Trailing space makes the next word get checked for alias substitution
+alias faildammit='faildammitfn '

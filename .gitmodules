@@ -200,3 +200,6 @@
 [submodule ".config/nvim/bundle/pgsql.vim"]
 	path = .config/nvim/bundle/pgsql.vim
 	url = https://github.com/exu/pgsql.vim
+[submodule ".config/nvim/bundle/fzf.vim"]
+	path = .config/nvim/bundle/fzf.vim
+	url = git@github.com:junegunn/fzf.vim.git
