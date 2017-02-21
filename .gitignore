@@ -190,3 +190,4 @@ Dropbox*
 .rustup/
 gocode/
 .pgadmin/
+.config/nvim/bundle/fzf
