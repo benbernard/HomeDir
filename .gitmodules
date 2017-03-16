@@ -203,3 +203,6 @@
 [submodule ".config/nvim/bundle/fzf.vim"]
 	path = .config/nvim/bundle/fzf.vim
 	url = git@github.com:junegunn/fzf.vim.git
+[submodule ".config/nvim/bundle/AnsiEsc.vim"]
+	path = .config/nvim/bundle/AnsiEsc.vim
+	url = git@github.com:vim-scripts/AnsiEsc.vim.git
