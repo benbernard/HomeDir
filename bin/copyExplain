@@ -1,0 +1,3 @@
+#!/bin/sh
+
+psql postgres://localhost/fieldbook -qAt -f ~/explain.sql | pbcopy

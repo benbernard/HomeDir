@@ -191,3 +191,4 @@ Dropbox*
 gocode/
 .pgadmin/
 .config/nvim/bundle/fzf
+explain.sql
