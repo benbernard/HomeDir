@@ -1,0 +1,13 @@
+hs.hotkey.bind({"cmd", "ctrl"}, "A", function ()
+  local music = hs.appfinder.appFromName("Amazon Music")
+  music:activate()
+  hs.eventtap.keyStroke({}, 'left')
+  music:hide()
+end)
+
+hs.hotkey.bind({"cmd", "ctrl"}, "B", function ()
+  local music = hs.appfinder.appFromName("Amazon Music")
+  music:activate()
+  hs.eventtap.keyStroke({}, 'right')
+  music:hide()
+end)
