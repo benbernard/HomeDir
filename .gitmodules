@@ -209,6 +209,3 @@
 [submodule "/Users/bernard/.tmux/plugins/tpm"]
 	path = /Users/bernard/.tmux/plugins/tpm
 	url = https://github.com/tmux-plugins/tpm
-[submodule ".config/nvim/bundle/vim-tmux"]
-	path = .config/nvim/bundle/vim-tmux
-	url = git://github.com/tmux-plugins/vim-tmux.git
