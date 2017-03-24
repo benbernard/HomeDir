@@ -212,6 +212,3 @@
 [submodule ".config/nvim/bundle/vim-tmux"]
 	path = .config/nvim/bundle/vim-tmux
 	url = git://github.com/tmux-plugins/vim-tmux.git
-[submodule ".config/nvim/bundle/vim-tmux-focus-events"]
-	path = .config/nvim/bundle/vim-tmux-focus-events
-	url = git://github.com/tmux-plugins/vim-tmux-focus-events.git
