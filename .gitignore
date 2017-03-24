@@ -192,3 +192,6 @@ gocode/
 .pgadmin/
 .config/nvim/bundle/fzf
 explain.sql
+.tmux/plugins/tmux-copycat/
+.tmux/plugins/tmux-pain-control/
+.tmux/plugins/tmux-yank/
