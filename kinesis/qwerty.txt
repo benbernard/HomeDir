@@ -1,4 +1,4 @@
-[lp-tab]>[rwin]
+[lp-tab]>[mp-kpshf]
 [rp-kpent]>[escape]
 [F4]>[play]
 [escape]>[intl-\]
@@ -27,3 +27,5 @@
 [kp-rwin]>[kp-rctrl]
 {F3}>{-lwin}{-lalt}{a}{+lalt}{+lwin}
 {F5}>{-lwin}{-lalt}{b}{+lalt}{+lwin}
+{f5}>{-rwin}{-lalt}{b}{+rwin}{+lalt}
+{f3}>{-rwin}{-lalt}{a}{+lalt}{+rwin}
