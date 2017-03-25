@@ -30,5 +30,9 @@ zstyle :compinstall filename "$HOME/.zshrc"
 #zstyle -e ':completion:*:*' hosts 'reply=($(cat $HOME/.hosts))'
 ##zstyle -e ':completion:*:*:*' hosts 'reply=($(cat $HOME/.hosts))'
 
-autoload -U compinit
-compinit
+autoload -Uz compinit
+if [ $(date +'%j') != $(stat -f '%Sm' -t '%j' ~/.zcompdump) ]; then
+  compinit
+else
+  compinit -C
+fi

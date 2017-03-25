@@ -149,6 +149,7 @@ zstyle ':completion:*' menu select=long
 zstyle ':completion:*' select-prompt '%SScrolling active: current selection at %p%s'
 zstyle ':completion:*' use-compctl true
 
-autoload -U compinit
-compinit
+# Commented out because I do it elsewhere, and it take ~ .7s to run
+# autoload -U compinit
+# compinit
 # End of lines added by compinstall

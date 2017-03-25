@@ -19,7 +19,7 @@ if [[ -e $HOME/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]]; then
   source $HOME/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 fi
 
-if [[ -e $HOME/zaw ]]; then
-  source $HOME/zaw/zaw.zsh
-  bindkey '^O' zaw
-fi
+# if [[ -e $HOME/zaw ]]; then
+#   source $HOME/zaw/zaw.zsh
+#   bindkey '^O' zaw
+# fi
