@@ -28,3 +28,6 @@
 [submodule "programming/devtools-snippets"]
 	path = programming/devtools-snippets
 	url = git@github.com:bgrins/devtools-snippets.git
+[submodule ".tmux/plugins/tpm"]
+	path = .tmux/plugins/tpm
+	url = https://github.com/tmux-plugins/tpm
