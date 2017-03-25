@@ -1,20 +1,62 @@
-" Initialize pathogen, a plugin management system that lets plugins live in
-" their own directories
-
-set runtimepath^=$HOME/.config/nvim/dein-plugins/repos/github.com/Shougo/dein.vim
-
-call pathogen#infect()
-
 " First setup variable for other variables
 "let g:useNinjaTagList=1
 
-" Vundle Setup
-filetype off
-set rtp+=~/.config/nvim/vundle/Vundle.vim
-call vundle#begin('~/.config/nvim/vundle')
-Plugin 'VundleVim/Vundle.vim'
-Plugin 'floobits/floobits-neovim'
-call vundle#end()
+""""""""""""""""" Plugins Setup """"""""""""""""""""""""""""""""
+
+call plug#begin('~/.local/share/nvim/plugged')
+
+Plug 'Shougo/vimproc.vim', { 'do': 'make' }
+Plug 'Shougo/unite.vim'
+Plug 'vim-scripts/AnsiEsc.vim'
+Plug 'bkad/CamelCaseMotion'
+Plug 'vim-scripts/UnconditionalPaste'
+Plug 'jiangmiao/auto-pairs'
+Plug 'junegunn/fzf', { 'do': 'yes \| ./install' }
+Plug 'sjl/gundo.vim'
+Plug 'othree/javascript-libraries-syntax.vim'
+Plug 'bruschill/madeofcode'
+Plug 'Shougo/neomru.vim'
+Plug 'Shougo/neoyank.vim'
+Plug 'exu/pgsql.vim'
+Plug 'AndrewRadev/splitjoin.vim'
+Plug 'scrooloose/syntastic'
+Plug 'godlygeek/tabular'
+Plug 'SirVer/ultisnips'
+Plug 'tsukkee/unite-help'
+Plug 'Shougo/unite-outline'
+Plug 'Shougo/unite.vim'
+Plug 'vim-airline/vim-airline'
+Plug 'vim-airline/vim-airline-themes'
+Plug 'ntpeters/vim-better-whitespace'
+Plug 'altercation/vim-colors-solarized'
+Plug 'tpope/vim-commentary'
+Plug 'Lokaltog/vim-easymotion'
+Plug 'tommcdo/vim-exchange'
+Plug 'terryma/vim-expand-region'
+Plug 'tpope/vim-fugitive'
+Plug 'airblade/vim-gitgutter'
+Plug 'nathanaelkane/vim-indent-guides'
+Plug 'jelera/vim-javascript-syntax'
+Plug 'wizicer/vim-jison'
+Plug 'elzr/vim-json'
+Plug 'plasticboy/vim-markdown'
+Plug 'xolox/vim-misc'
+Plug 'terryma/vim-multiple-cursors'
+Plug 'mustache/vim-mustache-handlebars'
+Plug 'tpope/vim-repeat'
+Plug 'honza/vim-snippets'
+Plug 'benbernard/vim-stylus'
+Plug 'wavded/vim-stylus'
+Plug 'tpope/vim-surround'
+Plug 'tmux-plugins/vim-tmux'
+Plug 'tpope/vim-unimpaired'
+Plug 'thinca/vim-unite-history'
+Plug 'triglav/vim-visual-increment'
+Plug 'jlanzarotta/bufexplorer'
+Plug '~/.config/nvim/bundle/custom-colors'
+Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
+
+call plug#end()
 
 syntax on
 
@@ -396,9 +438,6 @@ let g:vim_markdown_folding_disabled=1
  " let @t = 'O"*Pvi]:s/^ *- *"/"/gvi]='
  let @t = '"*pvi]:s/^ *- */<80>kb"<80>kb//^Mvi]=vi]:s/([^,])$/\1,/^Mu^Rvi]:s/$/,/^M:nohl^M'
  nmap <Leader>ti @t
-
- " Setup dein
- source $HOME/.config/nvim/init.dein.vim
 
 " Deoplete config
   let g:deoplete#enable_at_startup = 1
