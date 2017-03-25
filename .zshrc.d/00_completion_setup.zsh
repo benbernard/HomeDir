@@ -2,10 +2,6 @@ if [[ -e $HOME/zsh-completions/src ]]; then
   fpath=($HOME/zsh-completions/src $fpath);
 fi
 
-# Must have this for custom completions
-autoload -U compinit
-compinit
-
 #Setup completion functions
 #FPATH=/usr/local/share/zsh/4.2.0/functions
 if [[ -d ~/.zshfuncs ]]; then
