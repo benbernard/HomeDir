@@ -55,6 +55,10 @@ Plug 'triglav/vim-visual-increment'
 Plug 'jlanzarotta/bufexplorer'
 Plug '~/.config/nvim/bundle/custom-colors'
 Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
+Plug 'junegunn/fzf.vim'
+
+" Disabled plugins:
+" Plug 'ternjs/tern_for_vim', {'do': 'npm install'} " Doesn't seem to work well
 
 call plug#end()
 
