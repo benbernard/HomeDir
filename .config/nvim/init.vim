@@ -457,6 +457,8 @@ let g:vim_markdown_folding_disabled=1
     autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
   augroup end
 
+    let g:deoplete#auto_complete_delay=150
+
   " tern
   " if exists('g:plugs["tern_for_vim"]')
   "   let g:tern_show_argument_hints = 'on_hold'
