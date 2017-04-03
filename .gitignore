@@ -195,3 +195,7 @@ explain.sql
 .tmux/plugins/tmux-copycat/
 .tmux/plugins/tmux-pain-control/
 .tmux/plugins/tmux-yank/
+.torus/
+.torusrc
+.circleci/
+.config/nvim/.netrwhist
