@@ -1,0 +1,12 @@
+#!/bin/zsh
+
+echo $1
+
+osascript -e '
+on run argv
+  tell application "Google Chrome"
+    activate
+    open location (item 1 of argv)
+  end tell
+end run
+' $1
