@@ -199,3 +199,4 @@ explain.sql
 .torusrc
 .circleci/
 .config/nvim/.netrwhist
+.vnc/
