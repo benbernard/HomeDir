@@ -102,6 +102,8 @@ set omnifunc=syntaxcomplete#Complete " Turn on omni completion
 set updatetime=250                   " In ms, how often to update gitgutter and swap file
 set mouse=                           " Turn off mouse support, don't want it in terminal
 set lazyredraw                       " Turn on lazy redraw, don't redraw during macros
+set splitright                       " When splitting windows vertically, new window is on right instead of left
+set splitbelow                       " When splitting horiztonally, new file is on bottom
 scriptencoding utf-8                 " Use utf-8 to encode vimscript (so that options key maps can work)
 
 "set foldmethod=indent   " use indent unless overridden
@@ -431,12 +433,7 @@ let g:vim_markdown_folding_disabled=1
   source $HOME/.vimrc.unite
 
 " FZF Stuff
-  nnoremap <C-a> :Files<cr>
-  "autocmd VimEnter * nnoremap <C-a> :<C-u>Unite -buffer-name=files -prompt-direction=above -start-insert file_rec/async:!<cr>
-
-  nnoremap <leader>ag :Ag <C-r><C-w><CR>
-
-  let g:fzf_history_dir = $HOME . "/.config/nvim/tmp"
+  source $HOME/.vimrc.fzf
 
 " Insert test data
  " let @t = 'O"*Pvi]:s/^ *- *"/"/gvi]='

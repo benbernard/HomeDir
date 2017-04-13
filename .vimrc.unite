@@ -8,34 +8,34 @@ call unite#filters#sorter_default#use(['sorter_rank'])
 " Unite mappers, the final word is the type of thing that will be serached, otherwise is fairly self-explanatory
 
 " Search all files from current dir
-nnoremap <leader>ut :<C-u>Unite -buffer-name=files -prompt-direction=above  -start-insert file_rec/async:!<cr>
+" nnoremap <leader>ut :<C-u>Unite -buffer-name=files -prompt-direction=above  -start-insert file_rec/async:!<cr>
 
 " Search files in current dir
 "nnoremap <leader>uf :<C-u>Unite -buffer-name=files   -start-insert file<cr>
 
 " Search files in mru order
-nnoremap <leader>um :<C-u>Unite -buffer-name=mru  -prompt-direction=above   -start-insert file_mru<cr>
+" nnoremap <leader>um :<C-u>Unite -buffer-name=mru  -prompt-direction=above   -start-insert file_mru<cr>
 
 " Search buffer names
 nnoremap <leader>ub :<C-u>Unite -buffer-name=buffer -prompt-direction=above buffer<cr>
 
 " Start unite with a grep
-nnoremap <leader>ug :Unite -buffer-name=grep -prompt-direction=above grep:.<cr>
+" nnoremap <leader>ug :Unite -buffer-name=grep -prompt-direction=above grep:.<cr>
 
 " Start unite with a grep, prompt for files
-nnoremap <leader>uG :Unite -buffer-name=grep  -prompt-direction=above grep<cr>
+" nnoremap <leader>uG :Unite -buffer-name=grep  -prompt-direction=above grep<cr>
 
 " Unite grep the word under the cursor
-nnoremap <leader>ul :UniteWithCursorWord -buffer-name=grep  -prompt-direction=above grep:.<cr>
+" nnoremap <leader>ul :UniteWithCursorWord -buffer-name=grep  -prompt-direction=above grep:.<cr>
 
 " Unite grep the word under the cursor
-nnoremap <leader>uL :UniteWithCursorWord -buffer-name=grep  -prompt-direction=above grep<cr>
+" nnoremap <leader>uL :UniteWithCursorWord -buffer-name=grep  -prompt-direction=above grep<cr>
 
 " Search yank history
 nnoremap <leader>uy :<C-u>Unite -buffer-name=yank  -prompt-direction=above    history/yank<cr>
 
 " Search Help docs !! (yay!)
-nnoremap <leader>uh :<C-u>Unite -start-insert -prompt-direction=above  -buffer-name=help help<CR>
+" nnoremap <leader>uh :<C-u>Unite -start-insert -prompt-direction=above  -buffer-name=help help<CR>
 
 " search command history
 nnoremap <leader>uc :<C-u>Unite -buffer-name=commands  -prompt-direction=above history/command<CR>
@@ -50,7 +50,7 @@ nnoremap <leader>uo :<C-u>Unite -buffer-name=outline -prompt-direction=above  -s
 nnoremap <leader>uu :<C-u>UniteResume<cr>
 
 " Search files with default action of require
-nnoremap <leader>ur :<C-u>Unite -start-insert -prompt-direction=above -buffer-name=require -default-action=require file_rec/async:!<CR>
+" nnoremap <leader>ur :<C-u>Unite -start-insert -prompt-direction=above -buffer-name=require -default-action=require file_rec/async:!<CR>
 
 " For some reason <C-a> was getting mapped away, using autocmd to bypass
 " that

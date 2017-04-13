@@ -26,8 +26,8 @@ my $LOWER_CASE_NAMES = {map {$_ => 1} (qw(
 
 my $PROJECT_ROOT = '/Users/bernard/fieldbook';
 
-my $includedFile = $ARGV[0];
-my $sourceFile = $ARGV[1];
+my $includedFile = `realpath $ARGV[0]`;
+chomp $includedFile;
 
 if ($includedFile =~ m/index.js$/) {
   $includedFile = dirname($includedFile);
@@ -42,19 +42,3 @@ if ($LOWER_CASE_NAMES->{$className}) {
 
 my ($path) = $includedFile =~ m/^$PROJECT_ROOT\/(.*)$/;
 print "const $className = prequire('$path');";
-
-# if ($sourceFile =~ m/^$PROJECT_ROOT\/(server|test|scripts)/ ) {
-#   my ($path) = $includedFile =~ m/^$PROJECT_ROOT\/(.*)$/;
-#   print "var $className = prequire('$path');";
-#   exit 0;
-# }
-
-# my $base = dirname($sourceFile);
-
-# my $path = File::Spec->abs2rel($includedFile, $base);
-
-# if (!($path =~ m/^\./)) {
-#   $path = "./$path";
-# }
-
-# print "var $className = require('$path');"
