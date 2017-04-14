@@ -520,10 +520,12 @@ let g:vim_markdown_folding_disabled=1
 " Multiple Cursors config
   let g:multi_cursor_use_default_mapping=0 " Turn off default maps
 
-  let g:multi_cursor_next_key='<C-i>'
+  let g:multi_cursor_next_key='<C-n>'
   let g:multi_cursor_prev_key='<C-p>'
   let g:multi_cursor_skip_key='<C-x>'
   let g:multi_cursor_quit_key='<Esc>'
+
+  let g:multi_cursor_start_key='<Leader>m'
 
   " Called once right before you start selecting multiple cursors
   function! Multiple_cursors_before()
@@ -538,11 +540,9 @@ let g:vim_markdown_folding_disabled=1
   let g:multi_cursor_exit_from_visual_mode=0 " Do not exist multi cursors with esc from visual mode
   let g:multi_cursor_exit_from_insert_mode=0 " Do not exist multi cursors with esc from insert mode
 
-  let g:multi_cursor_normal_maps = {'d': 1, 'c': 1, 't': 1} " Map dw and cw work with multiple cursors
-
 " Indent guides
   let g:indent_guides_enable_on_vim_startup = 1 " Use guides
-  let g:indent_guides_exclude_filetypes = ['help', 'unite'] " No guildes in help or unite windows
+  let g:indent_guides_exclude_filetypes = ['help', 'unite', 'fzf'] " No guildes in help or unite windows
   let g:indent_guides_guide_size = 1 " Only use 1 character for indent guides
 
   " Define custom colors, better greys for terminal, need to be autocmd,
