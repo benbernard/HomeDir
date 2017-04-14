@@ -20,16 +20,16 @@ call unite#filters#sorter_default#use(['sorter_rank'])
 nnoremap <leader>ub :<C-u>Unite -buffer-name=buffer -prompt-direction=above buffer<cr>
 
 " Start unite with a grep
-" nnoremap <leader>ug :Unite -buffer-name=grep -prompt-direction=above grep:.<cr>
+nnoremap <leader>uug :Unite -buffer-name=grep -prompt-direction=above grep:.<cr>
 
 " Start unite with a grep, prompt for files
-" nnoremap <leader>uG :Unite -buffer-name=grep  -prompt-direction=above grep<cr>
+nnoremap <leader>uuG :Unite -buffer-name=grep  -prompt-direction=above grep<cr>
 
 " Unite grep the word under the cursor
-" nnoremap <leader>ul :UniteWithCursorWord -buffer-name=grep  -prompt-direction=above grep:.<cr>
+nnoremap <leader>uul :UniteWithCursorWord -buffer-name=grep  -prompt-direction=above grep:.<cr>
 
 " Unite grep the word under the cursor
-" nnoremap <leader>uL :UniteWithCursorWord -buffer-name=grep  -prompt-direction=above grep<cr>
+nnoremap <leader>uuL :UniteWithCursorWord -buffer-name=grep  -prompt-direction=above grep<cr>
 
 " Search yank history
 nnoremap <leader>uy :<C-u>Unite -buffer-name=yank  -prompt-direction=above    history/yank<cr>
