@@ -197,8 +197,8 @@ map q: :q
 " CTRL-O sending tmux prefix
 nnoremap <C-X> <C-O>
 
-nmap <Leader>ra mb[{?function<CR>eli *<ESC>/{<CR>%li.async()<ESC>`b
-nmap <Leader>rA mb[{?function<CR>elxx/{<CR>%lxxxxxxxx`b
+nmap <Leader>ra mb[{?function<CR>eli *<ESC>/(<CR>%/{<CR>%s}.async()<ESC>`b
+nmap <Leader>rA mb[{?function<CR>el2x/(<CR>%/{<CR>%l8x`b
 
 """"""""""""""" Plugin Settings """"""""""""""""
 " Mustache settings
