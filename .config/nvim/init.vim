@@ -1,6 +1,8 @@
 " First setup variable for other variables
 "let g:useNinjaTagList=1
 
+" Disable ALE conflict warnings, must be before ALE load
+let g:ale_emit_conflict_warnings = 0
 """"""""""""""""" Plugins Setup """"""""""""""""""""""""""""""""
 
 call plug#begin('~/.local/share/nvim/plugged')
@@ -20,6 +22,7 @@ Plug 'Shougo/neoyank.vim'
 Plug 'exu/pgsql.vim'
 Plug 'AndrewRadev/splitjoin.vim'
 Plug 'scrooloose/syntastic'
+Plug 'w0rp/ale'
 Plug 'godlygeek/tabular'
 Plug 'SirVer/ultisnips'
 Plug 'tsukkee/unite-help'
@@ -336,12 +339,12 @@ nmap <Leader>rA mb[{?function<CR>elxx/{<CR>%lxxxxxxxx`b
   " Use my jshintrc file rather than default
   " let g:syntastic_javascript_jshint_args="-c ~/.jshintrc"
 
-  let g:syntastic_ignore_files = [
-          \ '\m^/Users/bernard/fieldbook/node_modules',
-          \ '\m^/Users/bernard/fieldbook/lib/js',
-          \ '\m^/Users/bernard/jquery-handsontable',
-          \ '\m^/Users/bernard/test-destributer',
-          \ '.*\.user\.js$' ]
+  " let g:syntastic_ignore_files = [
+  "         \ '\m^/Users/bernard/fieldbook/node_modules',
+  "         \ '\m^/Users/bernard/fieldbook/lib/js',
+  "         \ '\m^/Users/bernard/jquery-handsontable',
+  "         \ '\m^/Users/bernard/test-destributer',
+  "         \ '.*\.user\.js$' ]
 
   " Map <leader>st to SyntasticToggleMode
   map <Leader>st :SyntasticReset<CR>
@@ -351,10 +354,56 @@ nmap <Leader>rA mb[{?function<CR>elxx/{<CR>%lxxxxxxxx`b
 
   " Setup javascript as the only active syntax
   let g:syntastic_mode_map = { 'mode': 'passive',
-                             \ 'active_filetypes': ['javascript', 'stylus'],
+                             \ 'active_filetypes': [],
                              \ 'passive_filetypes': [] }
+                             "\ 'active_filetypes': ['javascript', 'stylus'],
 
   let g:syntastic_quiet_messages = { "regex": 'File ignored by default' }
+
+" ALE settings (on the fly linter)
+  let g:ale_echo_msg_format='%severity%[%linter%] %s'
+
+  " Map [s, s] to location jumps
+  nmap [s :ALEPreviousWrap<CR>
+  nmap ]s :ALENextWrap<CR>
+
+  function! HandleStylintFormat(buffer, lines) abort
+    " Matches patterns line the following:
+    "
+    " /var/folders/sh/g5y55d5j77g9b2_6lckp6lgw0000gn/T/nvimIjLLlP/9/app.styl
+    " 306:9 colons warning unnecessary colon found
+    let l:pattern = '^\(\d\+\):\?\(\d\+\)\?\s\+\(\S\+\)\s\+\(\S\+\)\s\+\(.\+\)$'
+    let l:output = []
+
+    for l:line in a:lines
+        let l:match = matchlist(l:line, l:pattern)
+
+        if len(l:match) == 0
+            continue
+        endif
+
+        " vcol is Needed to indicate that the column is a character.
+        call add(l:output, {
+        \   'bufnr': a:buffer,
+        \   'lnum': l:match[1] + 0,
+        \   'vcol': 0,
+        \   'col': l:match[2] + 1,
+        \   'text': l:match[3] . ': ' . l:match[5],
+        \   'type': 'E',
+        \   'nr': -1,
+        \})
+    endfor
+
+    return l:output
+  endfunction
+
+  " Add stylint linker
+  call ale#linter#Define('stylus', {
+        \   'name': 'stylint',
+        \   'executable': 'stylint',
+        \   'command': 'stylint %t',
+        \   'callback': 'HandleStylintFormat',
+        \})
 
 " Gundo Settings
   nmap <Leader>gu :GundoToggle<CR>
