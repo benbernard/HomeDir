@@ -11,7 +11,7 @@ endsnippet
 snippet meth "method" b
 ${1:<++>}: function ($2) {
 	${3:${VISUAL:<++>}}
-}${4:,}
+},
 endsnippet
 
 snippet tdf "test describe with before and test.it" b
@@ -110,6 +110,10 @@ snippet before "mocha before" b
 before(function () {
 	${1:${VISUAL:<++>}}
 })
+endsnippet
+
+snippet ll "LLOG"
+LLOG(${1:${VISUAL:<++>}})
 endsnippet
 
 snippet after "mocha after" b
