@@ -63,3 +63,5 @@ alias realpath=grealpath
 
 # Use neovim... really?
 alias vim=nvim
+
+alias 'longtail=tail -n 1000 -f'
