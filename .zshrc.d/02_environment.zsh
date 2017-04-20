@@ -67,4 +67,4 @@ export FZF_DEFAULT_COMMAND='ag -g ""'
 export FZF_CTRL_T_COMMAND='ag -g ""'
 
 # Default display options (taken from readme)
-export FZF_DEFAULT_OPTS='--height 40% --reverse --border -i'
+export FZF_DEFAULT_OPTS='--height 40% --reverse --border -i -m --bind ctrl-A:select-all,ctrl-d:deselect-all'
