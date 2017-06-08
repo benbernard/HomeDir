@@ -367,6 +367,11 @@ nmap <Leader>rA mb[{?function<CR>el2x/(<CR>%/{<CR>%l8x`b
   nmap [s :ALEPreviousWrap<CR>
   nmap ]s :ALENextWrap<CR>
 
+  " Turn off html linters
+  let g:ale_linters = {
+  \   'html': [],
+  \}
+
   function! HandleStylintFormat(buffer, lines) abort
     " Matches patterns line the following:
     "
@@ -421,10 +426,6 @@ nmap <Leader>rA mb[{?function<CR>el2x/(<CR>%/{<CR>%l8x`b
   "map the buff explorer open key
   map <F8> \be
 
-  "Map for YRShow
-  map <F4> :YRShow<CR>
-  map <Leader>yr :YRShow<CR>
-
   " Make enter and Sift-Enter insert lines without going to insert mode
   " Next Line Doesn't work, why not?
   "noremap <Shift-Enter> O<ESC>j
@@ -469,6 +470,11 @@ nmap <Leader>rA mb[{?function<CR>el2x/(<CR>%/{<CR>%l8x`b
 
   " map \uo to open the first url on the line
   map <Leader>ou :call OpenUrl()<CR>
+
+  " Mapping for quick fix window controls
+  map <Leader>cn :cnext<CR>
+  map <Leader>cp :cprev<CR>
+  map <Leader>cc :cclose<CR>
 
 "Visual Mode Maps
 
