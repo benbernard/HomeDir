@@ -26,7 +26,15 @@ my $LOWER_CASE_NAMES = {map {$_ => 1} (qw(
 
 my $PROJECT_ROOT = '/Users/bernard/fieldbook';
 
-my $includedFile = `realpath $ARGV[0]`;
+my $isDynamic = $ARGV[0] eq '--dynamic';
+my $file = '';
+if ($isDynamic) {
+  $file = $ARGV[1];
+} else {
+  $file = $ARGV[0];
+}
+
+my $includedFile = `realpath $file`;
 chomp $includedFile;
 
 if ($includedFile =~ m/index.js$/) {
@@ -41,4 +49,9 @@ if ($LOWER_CASE_NAMES->{$className}) {
 }
 
 my ($path) = $includedFile =~ m/^$PROJECT_ROOT\/(.*)$/;
-print "const $className = prequire('$path');";
+
+if ($isDynamic) {
+  print "const $className = drequire('$path');";
+} else {
+  print "const $className = prequire('$path');";
+}

@@ -17,6 +17,15 @@ endfunction
 command InsertRequire call fzf#run(fzf#wrap('requires', {'sink': function('Insert_require'), 'options': '-q ".js "'}))
 map <Leader>ur :InsertRequire<CR>
 
+" \ud to insert drequire statements
+function! Insert_require_dynamic(path)
+  let line = system('relativePath.pl --dynamic ' . a:path . ' 2>/dev/null')
+  echom 'relativePath.pl --dynamic ' . a:path . ' ' . expand('%:p') . ' 2>/dev/null'
+  execute "normal! mqgg}O" . line . "\<esc>`q"
+endfunction
+command InsertRequireDynamic call fzf#run(fzf#wrap('requires', {'sink': function('Insert_require_dynamic'), 'options': '-q ".js "'}))
+map <Leader>ud :InsertRequireDynamic<CR>
+
 " \ul to search for the word under the cursor
 map <Leader>ul :Ag <C-R><C-W><CR>
 
