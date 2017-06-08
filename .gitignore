@@ -205,3 +205,4 @@ explain.sql
 .fzf/
 .zsh_history
 .sudo_as_admin_successful
+.python_history
