@@ -143,11 +143,13 @@
 	<key>NSWindow Frame SessionsPreferences</key>
 	<string>894 673 599 519 0 0 3840 2137 </string>
 	<key>NSWindow Frame SharedPreferences</key>
-	<string>436 1470 796 473 0 0 3840 2137 </string>
+	<string>387 790 796 473 0 0 3840 2137 </string>
+	<key>NSWindow Frame UKCrashReporter</key>
+	<string>379 1553 592 584 0 0 3840 2137 </string>
 	<key>NSWindow Frame iTerm Window 0</key>
-	<string>0 223 3840 1914 0 0 3840 2137 </string>
+	<string>0 223 3825 1914 0 0 3840 2137 </string>
 	<key>NSWindow Frame iTerm Window 1</key>
-	<string>-1440 225 1439 894 -1440 219 1440 900 </string>
+	<string>0 1269 1691 860 0 0 3840 2137 </string>
 	<key>NSWindow Frame iTerm Window 2</key>
 	<string>2232 -387 1011 707 0 0 3840 2137 </string>
 	<key>NSWindow Frame iTerm Window 3</key>
@@ -843,7 +845,7 @@
 					<key>precision</key>
 					<string>very_high</string>
 					<key>regex</key>
-					<string>https?://([a-z0-9A-Z]+(:[a-zA-Z0-9]+)?@)?[a-z0-9A-Z]+(\.[a-z0-9A-Z]+)*((:[0-9]+)?)(/[a-zA-Z0-9;/\.\-_+%~?&amp;@=#\(\)]*)?</string>
+					<string>https?://([a-z0-9A-Z]+(:[-a-zA-Z0-9]+)?@)?[-a-z0-9A-Z]+(\.[-a-z0-9A-Z]+)*((:[0-9]+)?)(/[-a-zA-Z0-9;/\.\-_+%~?&amp;@=#\(\)]*)?</string>
 				</dict>
 				<dict>
 					<key>notes</key>
@@ -1151,7 +1153,7 @@
 	<key>SUHasLaunchedBefore</key>
 	<true/>
 	<key>SULastCheckTime</key>
-	<date>2017-04-19T23:10:23Z</date>
+	<date>2017-06-05T17:17:12Z</date>
 	<key>SavePasteHistory</key>
 	<false/>
 	<key>ShowBookmarkName</key>
@@ -1174,6 +1176,8 @@
 	<integer>10</integer>
 	<key>TripleClickSelectsFullWrappedLines</key>
 	<false/>
+	<key>UKCrashReporterLastCrashReportDate</key>
+	<real>1493756928</real>
 	<key>URLHandlersByGuid</key>
 	<dict/>
 	<key>UseBorder</key>
