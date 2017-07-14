@@ -97,7 +97,6 @@ set visualbell                       " Use a flash instead of a sound for bells
 set wildmode=longest:full            " Matches only to longest filename, displays to menu possible matches
 set complete=.,w,b,u                 " complete from current file, and current buffers default: .,w,b,u,t,i  trying to keep down completion time
 set directory=$HOME/.config/nvim/tmp " set directory for tmp files to be in .vim, so that .swp files are not littered
-set clipboard=unnamed                " Use the * register when a register is not specified - unifies with system clipboard!
 set omnifunc=syntaxcomplete#Complete " Turn on omni completion
 set updatetime=250                   " In ms, how often to update gitgutter and swap file
 set mouse=                           " Turn off mouse support, don't want it in terminal
@@ -105,6 +104,10 @@ set lazyredraw                       " Turn on lazy redraw, don't redraw during 
 set splitright                       " When splitting windows vertically, new window is on right instead of left
 set splitbelow                       " When splitting horiztonally, new file is on bottom
 scriptencoding utf-8                 " Use utf-8 to encode vimscript (so that options key maps can work)
+
+if (has('macunix'))
+  set clipboard=unnamed                " Use the * register when a register is not specified - unifies with system clipboard!
+endif
 
 "set foldmethod=indent   " use indent unless overridden
 "set foldlevel=0         " show contents of all folds

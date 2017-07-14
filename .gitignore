@@ -200,3 +200,8 @@ explain.sql
 .circleci/
 .config/nvim/.netrwhist
 .vnc/
+.fzf.bash
+.fzf.zsh
+.fzf/
+.zsh_history
+.sudo_as_admin_successful
