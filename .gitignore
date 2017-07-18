@@ -206,3 +206,5 @@ explain.sql
 .zsh_history
 .sudo_as_admin_successful
 .python_history
+.iterm2/
+.psqlrc
