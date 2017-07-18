@@ -104,3 +104,8 @@ faildammitfn () {
 
 # Trailing space makes the next word get checked for alias substitution
 alias faildammit='faildammitfn '
+
+
+prettyjson () {
+  node -e "console.log(JSON.stringify(JSON.parse(process.argv[1]), null, 2));" $1
+}
