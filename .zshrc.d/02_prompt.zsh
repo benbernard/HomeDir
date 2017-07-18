@@ -7,7 +7,7 @@ bindkey "^S" history-incremental-search-forward
 #pushes current command on command stack
 #and gives blank line, after that line runes
 #command stack is popped
-bindkey "^t" push-line-or-edit
+bindkey "^Q" push-line-or-edit
 
 #Map ctrl-u and ctrl-k to be like emacs mode
 bindkey "^U" kill-whole-line
