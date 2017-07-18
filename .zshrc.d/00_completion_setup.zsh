@@ -11,7 +11,7 @@ fi
 
 if [[ -d /usr/local/share/zsh/site-functions ]]; then
   fpath=(/usr/local/share/zsh/site-functions $fpath)
-  if ls /usr/local/share/zsh/site-functions/ | grep '.' ; then
+  if ls /usr/local/share/zsh/site-functions/ | grep '.' 1>/dev/null 2>/dev/null; then
     autoload -U /usr/local/share/zsh/site-functions/*(:t)
   fi
 fi

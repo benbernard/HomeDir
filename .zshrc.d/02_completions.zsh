@@ -31,7 +31,7 @@ zstyle :compinstall filename "$HOME/.zshrc"
 ##zstyle -e ':completion:*:*:*' hosts 'reply=($(cat $HOME/.hosts))'
 
 autoload -Uz compinit
-if uname -a | grep Darwin; then
+if uname -a | grep Darwin 1>/dev/null 2>/dev/null; then
   if [ $(date +'%j') != $(stat -f '%Sm' -t '%j' ~/.zcompdump) ]; then
     compinit
   else
