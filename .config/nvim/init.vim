@@ -106,6 +106,7 @@ set mouse=                           " Turn off mouse support, don't want it in 
 set lazyredraw                       " Turn on lazy redraw, don't redraw during macros
 set splitright                       " When splitting windows vertically, new window is on right instead of left
 set splitbelow                       " When splitting horiztonally, new file is on bottom
+set ttimeoutlen=30                   " timeout on key-codes after 30ms (shorter than ei)
 scriptencoding utf-8                 " Use utf-8 to encode vimscript (so that options key maps can work)
 
 if (has('macunix'))
