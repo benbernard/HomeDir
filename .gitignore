@@ -207,3 +207,4 @@ explain.sql
 .sudo_as_admin_successful
 .python_history
 .psqlrc
+.config/configstore/update-notifier-npm.json
