@@ -201,6 +201,20 @@ nnoremap <C-X> <C-O>
 nmap <Leader>ra mb[{?function<CR>eli *<ESC>/(<CR>%/{<CR>%s}.async()<ESC>`b
 nmap <Leader>rA mb[{?function<CR>el2x/(<CR>%/{<CR>%l8x`b
 
+" Add commands for copying current buffer's location
+if has("mac")
+  command CopyPath let @* = expand("%")
+  command CopyFullPath let @* = expand("%:p")
+  command CopyFilename let @* = expand("%:t")
+  command CopyFile CopyFilename
+else
+  " Same as above with + buffer instead of *
+  command CopyPath let @+ = expand("%")
+  command CopyFullPath let @+ = expand("%:p")
+  command CopyFilename let @+ = expand("%:t")
+  command CopyFile CopyFilename
+endif
+
 """"""""""""""" Plugin Settings """"""""""""""""
 " Mustache settings
   autocmd BufNewFile,BufRead *.hbs set noai " Turn off autoindent, it gets in the way
