@@ -54,7 +54,7 @@
   agrep = grep-of-doom
   cp = cherry-pick
   mt = mergetool
-  grep=use-agrep
+  # grep=use-agrep
 
 [difftool]
     prompt = no
