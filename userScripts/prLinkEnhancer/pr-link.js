@@ -31,7 +31,8 @@ var main = function () {
 
   $('.commit-ref').each(function () {
     var user = $('.user', this).text();
-    var repo = $('.js-current-repository').text();
+    let repo = window.location.pathname.split('/')[1];
+
     $('.user', this).html('<a href="/' + user + '/' + repo + '">' + user + '</a>');
 
     var target = $('span:last-child', this).text();
