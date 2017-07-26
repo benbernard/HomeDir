@@ -64,13 +64,23 @@ var fixLinks = function () {
   var finalCommit = commits[commits.length-1];
   var finalCommitId = $(finalCommit).text();
 
+  var lastCommitId = '';
   $('.discussion-timeline a.commit-id').each(function () {
     var $this = $(this);
-    var baseUrl = this.href.replace(/\/pull\/\d+\/commits\/[0-9a-f]+/, '');
+    var baseUrl = this.href.replace(/(\/pull\/\d+)\/commits\/[0-9a-f]+/, '$1');
+
+    var link = ''
+    if (lastCommitId) {
+      link = `${baseUrl}/files/${lastCommitId}..${finalCommitId}`
+    } else {
+      link = '/files';
+    }
+
+    var html = `<a class="link-enhancer-link" href="${link}"><div class="compareLink"><hr/></div></a>`;
+    $this.parents('.commit-meta').prepend(html);
 
     var commitId = $this.text();
-    var html = `<a class="link-enhancer-link" href="${baseUrl}/compare/${commitId}^...${finalCommitId}"><div class="compareLink"><hr/></div></a>`;
-    $this.parents('.commit-meta').prepend(html);
+    lastCommitId = commitId;
   });
 }
 
