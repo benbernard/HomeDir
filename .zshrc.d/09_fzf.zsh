@@ -36,7 +36,13 @@ fzf_get_ref() {
 
 fco() {
   local target=$(fzf_get_ref)
+
+  if [[ -z "$target" ]]; then
+    return 0;
+  fi
+
   echo git checkout "${target}"
+  git checkout "${target}"
 }
 
 fzf_ref_widget() {
