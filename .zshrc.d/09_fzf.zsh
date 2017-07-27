@@ -26,7 +26,6 @@ fzf_get_ref() {
   target=$(
     (echo "$localBranches"; echo "$remoteBranches"; echo "$tags") |
     fzf -m --ansi \
-      --preview-window=left \
       --preview 'git log --pretty=oneline --abbrev-commit --color=always `echo {} | cut -f2` | head -'$LINES |
     awk '{print $2}' |
     xargs echo
