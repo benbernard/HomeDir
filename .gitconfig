@@ -28,7 +28,7 @@
   # These I acutally use
   br = branch
   co = checkout
-  l = log --oneline --no-merges
+  l = log --oneline
   s = ! git status -s | awk '{print $2}'
 
   # These I generally don't
