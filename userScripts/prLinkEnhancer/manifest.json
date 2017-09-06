@@ -3,7 +3,7 @@
 
   "name": "Github PR Link Enhancer",
   "description": "Adds diff after links to commits in PRs",
-  "version": "1.0.2",
+  "version": "1.0.3",
 
   "permissions": [
     "https://github.com/"

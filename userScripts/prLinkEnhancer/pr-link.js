@@ -73,7 +73,7 @@ var fixLinks = function () {
     if (lastCommitId) {
       link = `${baseUrl}/files/${lastCommitId}..${finalCommitId}`
     } else {
-      link = '/files';
+      link = `${baseUrl}/files`;
     }
 
     var html = `<a class="link-enhancer-link" href="${link}"><div class="compareLink"><hr/></div></a>`;
