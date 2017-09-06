@@ -208,3 +208,5 @@ explain.sql
 .python_history
 .psqlrc
 .config/configstore/update-notifier-npm.json
+.bundle
+.rubocop.yml
