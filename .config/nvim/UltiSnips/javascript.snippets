@@ -57,7 +57,7 @@ it('${1:<++>}', function () {
 endsnippet
 
 snippet tbi "test.before inline" b
-test.before(() => { ${1:${VISUAL:<++>}} });
+test.before(() => ${1:${VISUAL:<++>}});
 endsnippet
 
 snippet tb "test.before" b
@@ -124,6 +124,10 @@ endsnippet
 
 snippet p "Description" b
 helpers.PAUSE();
+endsnippet
+
+snippet flb "Fixture loadForBrowser" b
+let f = fixtures.loadForBrowser('${1:<++>}', '${2:<++>}')
 endsnippet
 
 snippet query "Query Analysis Comment"
