@@ -109,3 +109,14 @@ alias faildammit='faildammitfn '
 prettyjson () {
   node -e "console.log(JSON.stringify(JSON.parse(process.argv[1]), null, 2));" $1
 }
+
+forceRestartPg () {
+  runCommand brew services stop postgresql
+  runCommand pg_ctl -D /usr/local/var/postgres stop
+  runCommand brew services start postgresql
+}
+
+runCommand  () {
+  echo 'Running: ' "$@"
+  "$@"
+}
