@@ -50,6 +50,14 @@ test.it('${1:<++>}', function () {
 })
 endsnippet
 
+snippet tii "test.it inline" b
+test.it('${1:<++>}', () => expect(${2:${VISUAL:<++>}}).eventually.${3:<++>})
+endsnippet
+
+snippet iti "it inline" b
+it('${1:<++>}', () => expect(${2:${VISUAL:<++>}}).eventually.${3:<++>})
+endsnippet
+
 snippet it "it" b
 it('${1:<++>}', function () {
 	${2:${VISUAL:<++>}}
