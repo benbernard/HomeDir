@@ -59,6 +59,8 @@ Plug 'jlanzarotta/bufexplorer'
 Plug '~/.config/nvim/bundle/custom-colors'
 Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
 Plug 'junegunn/fzf.vim'
+Plug 'justinmk/vim-sneak'
+Plug 'sheerun/vim-polyglot'
 
 " Disabled plugins:
 " Plug 'ternjs/tern_for_vim', {'do': 'npm install'} " Doesn't seem to work well
@@ -107,6 +109,7 @@ set lazyredraw                       " Turn on lazy redraw, don't redraw during 
 set splitright                       " When splitting windows vertically, new window is on right instead of left
 set splitbelow                       " When splitting horiztonally, new file is on bottom
 set ttimeoutlen=30                   " timeout on key-codes after 30ms (shorter than ei)
+set signcolumn="yes"                 " always draw the sign column so ALE / gitgutter don't jump
 scriptencoding utf-8                 " Use utf-8 to encode vimscript (so that options key maps can work)
 
 if (has('macunix'))
@@ -219,6 +222,16 @@ endif
 " Mustache settings
   autocmd BufNewFile,BufRead *.hbs set noai " Turn off autoindent, it gets in the way
 
+" Vim-sneak settings
+  " 2-character Sneak (default)
+  nmap z <Plug>Sneak_s
+  nmap Z <Plug>Sneak_S
+  " visual-mode
+  xmap z <Plug>Sneak_s
+  xmap Z <Plug>Sneak_S
+
+  " Let repeated 'z' or 'Z' re-invoke sneak with same args
+  let g:sneak#s_next = 1
 
 " Setup for vim-expand-region
   vmap v <Plug>(expand_region_expand)
