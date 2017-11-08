@@ -109,7 +109,7 @@ set lazyredraw                       " Turn on lazy redraw, don't redraw during 
 set splitright                       " When splitting windows vertically, new window is on right instead of left
 set splitbelow                       " When splitting horiztonally, new file is on bottom
 set ttimeoutlen=30                   " timeout on key-codes after 30ms (shorter than ei)
-set signcolumn="yes"                 " always draw the sign column so ALE / gitgutter don't jump
+set signcolumn=yes                   " Always display the notes column for ALE/gitgutter
 scriptencoding utf-8                 " Use utf-8 to encode vimscript (so that options key maps can work)
 
 if (has('macunix'))
@@ -350,9 +350,6 @@ endif
 
 " Setup CamelCaseMotion
   call camelcasemotion#CreateMotionMappings(',')
-
-" Git Gutter
-  let g:gitgutter_sign_column_always = 1 " Always show git gutter (avoid re-indent on save)
 
 " Airline
   let g:airline_powerline_fonts = 1 " Use special fonts
