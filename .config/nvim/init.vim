@@ -61,6 +61,7 @@ Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
 Plug 'junegunn/fzf.vim'
 Plug 'justinmk/vim-sneak'
 Plug 'sheerun/vim-polyglot'
+Plug 'machakann/vim-highlightedyank'
 
 " Disabled plugins:
 " Plug 'ternjs/tern_for_vim', {'do': 'npm install'} " Doesn't seem to work well
@@ -110,6 +111,7 @@ set splitright                       " When splitting windows vertically, new wi
 set splitbelow                       " When splitting horiztonally, new file is on bottom
 set ttimeoutlen=30                   " timeout on key-codes after 30ms (shorter than ei)
 set signcolumn=yes                   " Always display the notes column for ALE/gitgutter
+set inccommand=nosplit               " Increment display of s commands (maybe others in future)
 scriptencoding utf-8                 " Use utf-8 to encode vimscript (so that options key maps can work)
 
 if (has('macunix'))

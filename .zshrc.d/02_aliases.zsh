@@ -65,3 +65,5 @@ alias realpath=grealpath
 alias vim=nvim
 
 alias 'longtail=tail -n 1000 -f'
+
+alias 'viminit=vim ~/.config/nvim/init.vim'

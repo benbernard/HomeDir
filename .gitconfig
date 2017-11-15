@@ -81,8 +81,8 @@
 [hub]
 
 [user]
-  name = Ben Bernard
-  email = github@benjaminbernard.com
+	name = Ben Bernard
+	email = github@benjaminbernard.com
 
 [push]
   default = current
