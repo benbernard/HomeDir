@@ -210,3 +210,4 @@ explain.sql
 .config/configstore/update-notifier-npm.json
 .bundle
 .rubocop.yml
+.3T/
