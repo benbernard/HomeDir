@@ -1,24 +1,18 @@
 #Aliases
 alias 'xclock=xclock -update 5 -strftime '%a %b %e %l:%M:%S %P' -d -norender'
-alias 'rpp=recs-toprettyprint --one'
-alias 'rtt=recs-totable'
+alias 'rpp=recs toprettyprint --one'
+alias 'rtt=recs totable'
 alias 'ns=ninjaWarpSearch'
 
 #ls alias, mainly add --color
 alias 'ls=/bin/ls -G'
-alias 'la=/bin/ls -G -A'
 alias 'lt=/bin/ls -G -latr'
-alias 'lc=/bin/ls --color=never'
 
 #zmv stuff
 autoload zmv
 alias 'zcp=noglob zmv -C -W'
 alias 'zln=noglob zmv -L -W'
 alias 'zmv=noglob zmv -M -W'
-
-#A couple of u alias... but please remember u NUM
-alias 'uu=cd ../..'
-alias 'uuu=cd ../../..'
 
 #Set screen to content to already running session autmatically
 alias 'screen=screen -x -RR'
@@ -38,7 +32,7 @@ alias 'p=popd'
 # Add --prompt to s3_upload.pl
 alias 's3_upload.pl=s3_upload.pl --prompt'
 
-# Prompt when about to overwrite a file iwht mv (use -f to force)
+# Prompt when about to overwrite a file with mv (use -f to force)
 alias 'mv=mv -i'
 
 # If hub is installed alias git to it
@@ -47,13 +41,6 @@ then
   alias 'git=hub'
 fi
 
-# Add an alias for mocha
-alias 'fm=foreman run -e server/config/environments/test.env,.env.local mocha --recursive'
-
-# Update browserify
-alias 'gb=grunt browserify:app'
-alias 'vnc=cd ~/fieldbook;circleci/setupVnc.sh'
-
 # Use gcal instead of useless cal
 alias cal=gcal
 alias cal3='gcal .'
@@ -61,9 +48,13 @@ alias cal3='gcal .'
 # Fucking coreutils getting mapped as gutil...
 alias realpath=grealpath
 
+# Vim aliases
 # Use neovim... really?
 alias vim=nvim
+alias 'viminit=vim ~/.config/nvim/init.vim'
+alias 'cleanvim=vim -u NONE'
+alias 'sudovim=sudo vim -u NONE'
+alias 'vimchanged=vim `git s`'
 
 alias 'longtail=tail -n 1000 -f'
 
-alias 'viminit=vim ~/.config/nvim/init.vim'
