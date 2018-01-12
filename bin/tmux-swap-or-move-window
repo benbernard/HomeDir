@@ -1,0 +1,3 @@
+#!/bin/sh
+
+tmux move-window -t "$1" || tmux swap-window -t "$1" || tmux move-window -t "$1"
