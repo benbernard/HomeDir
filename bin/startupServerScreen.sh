@@ -33,7 +33,7 @@ tmux set-window-option -t autossh allow-rename off
 # Startup server commands.  Use send-keys so I can flip to windows and
 # control-c from programs and get into a shell
 tmux send-keys -t web "cdcl; nodemon --watch .env --config <(echo '{\"signal\": \"SIGKILL\"}') -x foreman start web" Enter
-tmux send-keys -t worker "cdcl; nodemon --watch .env --config <(echo '{\"signal\": \"SIGKILL\"}') -x foreman start worker" Enter
+tmux send-keys -t worker "cdcl; nodemon --watch .env --config <(echo '{\"signal\": \"SIGKILL\"}') -x foreman start -m worker=1,offlineWorker=1" Enter
 tmux send-keys -t valueCleaner "cdcl; nodemon --watch .env --config <(echo '{\"signal\": \"SIGKILL\"}') -x foreman start -m pgBridge=1,valueCleaner=1" Enter
 tmux send-keys -t watch "cdcl; while (1) { grunt min-watch }" Enter
 tmux send-keys -t paste-tracker "cd; cd bin/mac; ./paste-tracker.pl" Enter
