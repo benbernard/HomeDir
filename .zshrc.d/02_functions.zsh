@@ -120,3 +120,10 @@ runCommand  () {
   echo 'Running: ' "$@"
   "$@"
 }
+
+resetSwap () {
+  pushd ~/.config/nvim/tmp
+  # (N) Expansion means don't error if there are no matches
+  mv -f *.{swo,swp}(N) .*.{swo,swp}(N) gaol
+  popd
+}
