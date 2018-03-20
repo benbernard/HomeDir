@@ -127,3 +127,12 @@ resetSwap () {
   mv -f *.{swo,swp}(N) .*.{swo,swp}(N) gaol
   popd
 }
+
+setNodeVersion () {
+  VERSION=$1
+
+  pushd /usr/local/bin
+  ln -sf /Users/bernard/.nvm/versions/node/v${VERSION}/bin/node
+  ln -sf /Users/bernard/.nvm/versions/node/v${VERSION}/bin/npm
+  popd
+}
