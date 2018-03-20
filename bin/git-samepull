@@ -1,0 +1,11 @@
+#!/usr/local/bin/zsh
+
+if [ -z $1 ]; then
+  1=origin
+fi
+
+if [ -z $2 ]; then
+  2=`git rev-parse --abbrev-ref HEAD`
+fi
+
+git pull --rebase "$@"
