@@ -55,18 +55,10 @@
                     "simple_modifications": [
                         {
                             "from": {
-                                "key_code": "tab"
-                            },
-                            "to": {
-                                "key_code": "escape"
-                            }
-                        },
-                        {
-                            "from": {
                                 "key_code": "left_command"
                             },
                             "to": {
-                                "key_code": "tab"
+                                "key_code": "escape"
                             }
                         }
                     ]
