@@ -46,6 +46,8 @@
   log-file = log --no-merges --
   alog = log --date-order --all --graph --format=\"%C(green)%H%Creset %C(yellow)%an%Creset %C(blue bold)%ad%Creset %C(red bold)%d%Creset%s\"
   lfp = log --oneline --first-parent
+  agrep = grep-of-doom
+  mergeff = merge --ff-only --no-stat
 
   # Assume-unchanged aliases
   au = update-index --assume-unchanged
@@ -53,8 +55,8 @@
   lsau = !git ls-files -v | grep "^[[:lower:]]"
 
   # Testing these
-  agrep = grep-of-doom
-  mergeff = merge --ff-only --no-stat
+  pull = pull --rebase
+  sp = samepull
 
   # grep=use-agrep
 
@@ -106,3 +108,5 @@
 
 [man "run-help"]
   cmd = run-githelp
+[branch]
+	autosetuprebase = always
