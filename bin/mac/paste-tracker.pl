@@ -2,7 +2,7 @@
 
 use strict;
 
-$ENV{'SCREENDIR'} = '/Users/bernard/.screen';
+$ENV{'SCREENDIR'} = $ENV{'HOME'} . '/.screen';
 my $temp_file = '/tmp/buffer-exchange';
 my $screen_file = '/tmp/screen-exchange';
 
