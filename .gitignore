@@ -212,3 +212,12 @@ explain.sql
 .rubocop.yml
 .3T/
 .v8flags.5.1.281.89.78d6810e1299959f3a8db157045aa926.json
+.openvpn-connect.json
+.rvm/
+.bash_profile
+.gnupg/
+.zoomus/
+flexport/
+.zlogin
+.yarnrc
+bin/startupServerScreenWork.sh
