@@ -19,43 +19,45 @@ colors
 #PS1="%{${fg[$PROMPT_COLOR]}%}%B%n@%m] %b%{${fg[default]}%}"   # a nice colored prompt
 RPROMPT="%{${fg[$PROMPT_COLOR]}%}%B%(7~,.../,)%6~%b%{${fg[default]}%}"
 
-# Setup auto-titling screen windows
-if [[ $AUTO_TITLE_SCREENS != "NO" && $EMACS != "t" ]]
-then
-  # if you are at a zsh prompt, make your screen title your current directory
-  precmd ()
-  {
-    local TITLE=${PWD:t}
-    if [[ $LONG_TITLE == "YES" ]]; then
-      TITLE=${HOST/.mydomain.com/}:${(S)PWD/src\/appgroup\/*\/*\//.../}
-    fi
-    # 'screen' sets STY as well, so for users who override the TERM
-    # environment variable, checking STY is nice
-    setopt UNSET # Avoid errors from undefined STY for users with 'NOUNSET'
-    echo -ne "\ek$TITLE\e\\"
-    setopt LOCAL_OPTIONS # restore value of UNSET
-  }
+## Setup auto-titling screen windows
+#if [[ $AUTO_TITLE_SCREENS != "NO" && $EMACS != "t" ]]
+#then
+#  # if you are at a zsh prompt, make your screen title your current directory
+#  precmd ()
+#  {
+#    local TITLE=${PWD:t}
+#    if [[ $LONG_TITLE == "YES" ]]; then
+#      TITLE=${HOST/.mydomain.com/}:${(S)PWD/src\/appgroup\/*\/*\//.../}
+#    fi
+#    # 'screen' sets STY as well, so for users who override the TERM
+#    # environment variable, checking STY is nice
+#    setopt UNSET # Avoid errors from undefined STY for users with 'NOUNSET'
+#    echo Setting $TITLE
+#    echo -ne "\ek$TITLE\e\\"
+#    setopt LOCAL_OPTIONS # restore value of UNSET
+#  }
 
-  # if you are running a command, make your screen title the command you're
-  # running
-  preexec ()
-  {
-    local CMDS
-    local CMD
-    set -A CMDS $(echo $1)
-    #Use first word from command line, but treat "sudo" specially
-    if [[ $CMDS[1] == "sudo" ]]; then
-      CMD="sudo $CMDS[2]"
-    else
-      CMD=$CMDS[1]
-    fi
-    setopt UNSET # Avoid errors from undefined STY for users with 'NOUNSET'
+#  # if you are running a command, make your screen title the command you're
+#  # running
+#  preexec ()
+#  {
+#    local CMDS
+#    local CMD
+#    set -A CMDS $(echo $1)
+#    #Use first word from command line, but treat "sudo" specially
+#    if [[ $CMDS[1] == "sudo" ]]; then
+#      CMD="sudo $CMDS[2]"
+#    else
+#      CMD=$CMDS[1]
+#    fi
+#    setopt UNSET # Avoid errors from undefined STY for users with 'NOUNSET'
 
-    echo -ne "\ek$CMD\e\\"
-    setopt LOCAL_OPTIONS # restore value of UNSET
-  }
+#    echo Setting $CMD
+#    echo -ne "\ek$CMD\e\\"
+#    setopt LOCAL_OPTIONS # restore value of UNSET
+#  }
 
-fi
+#fi
 
 DIRSTACKSIZE=20   # number of directories in your pushd/popd stack
 
