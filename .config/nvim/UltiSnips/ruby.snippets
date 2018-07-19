@@ -1,0 +1,37 @@
+snippet def "simple function" w
+def ${1:<++>} do
+  ${2:${VISUAL:<++>}}
+end
+endsnippet
+
+snippet it "it block" w
+it '${1:<++>}' do
+  ${2:${VISUAL:<++>}}
+end
+endsnippet
+
+snippet desc "describe block" w
+describe ${1:<++>} do
+  ${2:${VISUAL:<++>}}
+end
+endsnippet
+
+snippet context "describe block" w
+context '${1:<++>}' do
+  ${2:${VISUAL:<++>}}
+end
+endsnippet
+
+snippet before "before block" w
+before do
+  ${1:${VISUAL:<++>}}
+end
+endsnippet
+
+snippet let "let declaration" w
+let(:${1:<++>}) { ${2:${VISUAL:<++>}} }
+endsnippet
+
+snippet flb "Fixture loadForBrowser" b
+let f = fixtures.loadForBrowser('${1:<++>}', '${2:<++>}')
+endsnippet

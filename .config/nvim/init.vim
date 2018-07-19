@@ -7,6 +7,8 @@ let g:ale_emit_conflict_warnings = 0
 
 call plug#begin('~/.local/share/nvim/plugged')
 
+Plug 'tpope/vim-endwise'
+Plug 'vim-ruby/vim-ruby'
 Plug 'Shougo/vimproc.vim', { 'do': 'make' }
 Plug 'Shougo/unite.vim'
 Plug 'vim-scripts/AnsiEsc.vim'
