@@ -5,7 +5,7 @@
 	<key>AdjustWindowForFontSizeChange</key>
 	<true/>
 	<key>AllowClipboardAccess</key>
-	<false/>
+	<true/>
 	<key>AnimateDimming</key>
 	<false/>
 	<key>AppleAntiAliasingThreshold</key>
@@ -142,11 +142,11 @@
 	<key>NSWindow Frame SUUpdateAlert</key>
 	<string>530 476 620 392 0 0 1680 1027 </string>
 	<key>NSWindow Frame SharedPreferences</key>
-	<string>-1529 1890 937 464 -2206 1200 3008 1669 </string>
+	<string>-1416 1649 796 486 -2206 1200 3008 1669 </string>
 	<key>NSWindow Frame iTerm Window 0</key>
-	<string>-2206 1200 3008 1669 -2206 1200 3008 1669 </string>
+	<string>0 11 1340 1166 0 0 1920 1177 </string>
 	<key>NSWindow Frame iTerm Window 1</key>
-	<string>0 0 1920 1177 0 0 1920 1177 </string>
+	<string>-2206 1200 3008 1669 -2206 1200 3008 1669 </string>
 	<key>NSWindow Frame iTerm Window 2</key>
 	<string>0 11 1914 1166 0 0 1920 1177 </string>
 	<key>NeverWarnAboutShortLivedSessions_3978BA6E-63B6-4986-9112-9F4F0647C751</key>
