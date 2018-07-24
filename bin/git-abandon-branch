@@ -1,0 +1,29 @@
+#!/usr/bin/perl
+
+$ENV{'OVERCOMMIT_DISABLE'} = 1;
+
+sub run_command {
+  print "Running: " . join(' ', @_) . "\n";
+  system(@_);
+
+  if ($?) {
+    warn "Error running " . join(' ', @_) . "\n";
+    exit 1;
+  }
+}
+
+my $current_branch = `git branch | sed -n '/\* /s///p'`;
+
+if ($current_branch =~ m/^\(detached from (\S+)\)$/) {
+  $current_branch = $1;
+}
+
+chomp $current_branch;
+
+if ($current_branch eq "master") {
+  warn "Cannot abandon master!\n";
+  exit 1;
+}
+
+run_command(qw'git checkout master');
+run_command(qw'git branch -D', $current_branch);
