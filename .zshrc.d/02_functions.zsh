@@ -132,7 +132,34 @@ setNodeVersion () {
   VERSION=$1
 
   pushd /usr/local/bin
-  ln -sf /Users/bernard/.nvm/versions/node/v${VERSION}/bin/node
-  ln -sf /Users/bernard/.nvm/versions/node/v${VERSION}/bin/npm
+  ln -sf ${HOME}/.nvm/versions/node/v${VERSION}/bin/node
+  ln -sf ${HOME}/.nvm/versions/node/v${VERSION}/bin/npm
   popd
+}
+
+CDCL_OVERIDE_FILE=~/.cdcl-override
+cdcl () {
+  local dir
+  if [[ -e  $CDCL_OVERIDE_FILE ]]; then
+    dir=`cat $CDCL_OVERIDE_FILE`
+  else
+    # Use the default
+    dir=${DEFAULT_CDCL:-~/repos}
+  fi
+
+  cd $dir
+}
+
+cdclOverride () {
+  local override
+  override=$1
+  if [[ -z $override ]]; then
+    override=`pwd`
+  fi
+
+  echo $override > $CDCL_OVERIDE_FILE
+}
+
+cdclUnset () {
+  rm $CDCL_OVERIDE_FILE
 }

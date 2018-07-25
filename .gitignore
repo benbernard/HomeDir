@@ -222,3 +222,4 @@ flexport/
 .yarnrc
 bin/startupServerScreenWork.sh
 site/
+.cdcl-override
