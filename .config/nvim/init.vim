@@ -11,20 +11,16 @@ Plug 'tpope/vim-endwise'
 Plug 'vim-ruby/vim-ruby'
 Plug 'Shougo/vimproc.vim', { 'do': 'make' }
 Plug 'Shougo/unite.vim'
-Plug 'vim-scripts/AnsiEsc.vim'
 Plug 'bkad/CamelCaseMotion'
 Plug 'vim-scripts/UnconditionalPaste'
 Plug 'jiangmiao/auto-pairs'
 Plug 'junegunn/fzf', { 'do': 'yes \| ./install' }
 Plug 'sjl/gundo.vim'
-Plug 'othree/javascript-libraries-syntax.vim'
 Plug 'bruschill/madeofcode'
 Plug 'Shougo/neomru.vim'
 Plug 'Shougo/neoyank.vim'
 Plug 'exu/pgsql.vim'
 Plug 'AndrewRadev/splitjoin.vim'
-Plug 'scrooloose/syntastic'
-Plug 'w0rp/ale'
 Plug 'godlygeek/tabular'
 Plug 'SirVer/ultisnips'
 Plug 'tsukkee/unite-help'
@@ -41,7 +37,6 @@ Plug 'terryma/vim-expand-region'
 Plug 'tpope/vim-fugitive'
 Plug 'airblade/vim-gitgutter'
 Plug 'nathanaelkane/vim-indent-guides'
-Plug 'jelera/vim-javascript-syntax'
 Plug 'wizicer/vim-jison'
 Plug 'elzr/vim-json'
 Plug 'plasticboy/vim-markdown'
@@ -64,6 +59,14 @@ Plug 'junegunn/fzf.vim'
 Plug 'justinmk/vim-sneak'
 Plug 'machakann/vim-highlightedyank'
 Plug 'tpope/vim-rhubarb'
+Plug 'sheerun/vim-polyglot'
+Plug 'AndrewRadev/splitjoin.vim'
+Plug 'tomtom/tcomment_vim'
+Plug 'pangloss/vim-javascript'
+Plug 'mxw/vim-jsx'
+Plug 'othree/javascript-libraries-syntax.vim'
+Plug 'vim-scripts/JavaScript-Indent'
+Plug 'w0rp/ale'
 
 " Disabled plugins:
 " Plug 'ternjs/tern_for_vim', {'do': 'npm install'} " Doesn't seem to work well
@@ -97,9 +100,9 @@ set listchars=tab:>-                 " Use >--- for tabs
 set nolinebreak                      " don't wrap at words, messes up copying
 set smartcase                        " if any capitol in search, turns search case sensitive
 set shiftwidth=2                     " use 2 space indenting
-set softtabstop=2                    " use 4 space indenting
+set softtabstop=2                    " really use 2 space indenting
 set ts=2                             " Default to 4 spaces for tabs
-set tags=./tags,~/fieldbook/tags     " Setup the standard tags files
+set tags=./tags                      " Setup the standard tags files
 set textwidth=0                      " turn wrapping off
 set visualbell                       " Use a flash instead of a sound for bells
 set wildmode=longest:full            " Matches only to longest filename, displays to menu possible matches
@@ -156,7 +159,6 @@ function! GetStatusEx()
   let str = str . '] '
   return str
 endfunction
-
 
 " Setup the status line to display the tagname, if the taglist plugin has been
 " loaded
@@ -228,11 +230,11 @@ endif
 
 " Vim-sneak settings
   " 2-character Sneak (default)
-  nmap z <Plug>Sneak_s
-  nmap Z <Plug>Sneak_S
+  nmap <Leader>z <Plug>Sneak_s
+  nmap <Leader>Z <Plug>Sneak_S
   " visual-mode
-  xmap z <Plug>Sneak_s
-  xmap Z <Plug>Sneak_S
+  xmap <Leader>z <Plug>Sneak_s
+  xmap <Leader>Z <Plug>Sneak_S
 
   " Let repeated 'z' or 'Z' re-invoke sneak with same args
   let g:sneak#s_next = 1
@@ -244,6 +246,12 @@ endif
 " javascript-libraries-syntax settings
   let g:used_javascript_libs = 'underscore,backbone,jquery'
 
+" splitjoin settings
+  let g:splitjoin_split_mapping = ''
+  let g:splitjoin_join_mapping = ''
+
+  nmap <Leader>j :SplitjoinJoin<cr>
+  nmap <Leader>s :SplitjoinSplit<cr>
 
 " vim todo settings
   autocmd BufNewFile,BufRead *.todo set foldlevelstart=0 "todo files have a fold level..
@@ -291,7 +299,6 @@ endif
   nmap <unique> <Leader>cal <Plug>CalendarH
   nmap <unique> <Leader>caL <Plug>CalendarV
 
-
 "rcsvers.vim settings
   let g:rvSaveDirectoryType = 1 "Use single directory for all files
   let g:rvSaveDirectoryName = "$HOME/.config/nvim/tmp/RCSFiles/" "Place to save RCS files
@@ -303,13 +310,6 @@ endif
   let g:rvExcludeExpression = 'muttng-bernard-\d\+\|p4submitdesc\.txt\|\/tmp\.\d\+\.\d\+'
 
   let g:rvRlogOptions = '-zLT' "Display log in local timezone
-
-"YankRing settings...
-  "Don't remap <C-N> and <C-P>
-  let g:yankring_replace_n_pkey = '<F3>'
-  let g:yankring_replace_n_nkey = '<F2>'
-
-  nnoremap <silent> <Leader>yr :YRShow<CR>
 
 "AddressComplete Settings
   "automatically address complete on exit
@@ -358,36 +358,8 @@ endif
 " Airline
   let g:airline_powerline_fonts = 1 " Use special fonts
 
-"Syntastic Settings
-  " Automatically open the location list when there are errors
-  let g:syntastic_auto_loc_list = 1
-  let g:syntastic_always_populate_loc_list = 1
-  let g:syntastic_check_on_open = 0
-  let g:syntastic_check_on_wq = 0
-
-  " Use my jshintrc file rather than default
-  " let g:syntastic_javascript_jshint_args="-c ~/.jshintrc"
-
-  " let g:syntastic_ignore_files = [
-  "         \ '\m^/Users/bernard/fieldbook/node_modules',
-  "         \ '\m^/Users/bernard/fieldbook/lib/js',
-  "         \ '\m^/Users/bernard/jquery-handsontable',
-  "         \ '\m^/Users/bernard/test-destributer',
-  "         \ '.*\.user\.js$' ]
-
-  " Map <leader>st to SyntasticToggleMode
-  map <Leader>st :SyntasticReset<CR>
-
-  " Set js checkers to include jscs
-  let g:syntastic_javascript_checkers = ['eslint']
-
-  " Setup javascript as the only active syntax
-  let g:syntastic_mode_map = { 'mode': 'passive',
-                             \ 'active_filetypes': [],
-                             \ 'passive_filetypes': [] }
-                             "\ 'active_filetypes': ['javascript', 'stylus'],
-
-  let g:syntastic_quiet_messages = { "regex": 'File ignored by default' }
+" Disable javascript/jsx from polyglot
+  let g:polyglot_disabled = ['jsx', 'javascript']
 
 " ALE settings (on the fly linter)
   let g:ale_echo_msg_format='%severity%[%linter%] %s'
@@ -400,6 +372,14 @@ endif
   let g:ale_linters = {
   \   'html': [],
   \}
+
+  " Turn on prettier and eslint fixers for javascript
+  let b:ale_fixers = {'javascript': ['prettier', 'eslint']}
+
+  let g:ale_javascript_prettier_options = '--no-bracket-spacing --trailing-comma es5'
+
+  " Let ALE fixers run on save
+  let g:ale_fix_on_save = 1
 
   function! HandleStylintFormat(buffer, lines) abort
     " Matches patterns line the following:
@@ -528,7 +508,7 @@ let g:vim_markdown_folding_disabled=1
  nmap <Leader>ti @t
 
 " Deoplete config
-  let g:deoplete#enable_at_startup = 1
+  let g:deoplete#enable_at_startup = 0
 
   " omni complete functions
   if !exists('g:deoplete#omni#input_patterns')

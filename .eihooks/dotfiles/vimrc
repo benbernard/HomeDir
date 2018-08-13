@@ -1,5 +1,4 @@
-" Configuration file for vim
-" initial author: John Carrino (carrino@)
+"Configuration file for vim
 
 " Standard vim options
   set autoindent            " always set autoindenting on
