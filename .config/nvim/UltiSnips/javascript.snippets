@@ -23,7 +23,7 @@ test.describe('${1:<++>}', function () {
 	test.it('${3:<++>}', function () {
 		${4:<++>}
 	});
-})
+});
 endsnippet
 
 snippet td "test describe with before" b
@@ -33,11 +33,11 @@ test.describe('${1:<++>}', function () {
 endsnippet
 
 snippet exp "expect" b
-return expect(${1:${VISUAL:<++>}}).eventually.${2:<++>}
+return expect(${1:${VISUAL:<++>}}).eventually.${2:<++>};
 endsnippet
 
 snippet ex "expect no eventually" b
-return expect(${1:${VISUAL:<++>}}).${2:<++>}
+return expect(${1:${VISUAL:<++>}}).${2:<++>};
 endsnippet
 
 snippet ta "test.after" b
@@ -51,21 +51,21 @@ endsnippet
 snippet ti "test.it" b
 test.it('${1:<++>}', function () {
 	${2:${VISUAL:<++>}}
-})
+});
 endsnippet
 
 snippet tii "test.it inline" b
-test.it('${1:<++>}', () => expect(${2:${VISUAL:<++>}}).eventually.${3:<++>})
+test.it('${1:<++>}', () => expect(${2:${VISUAL:<++>}}).eventually.${3:<++>});
 endsnippet
 
 snippet iti "it inline" b
-it('${1:<++>}', () => expect(${2:${VISUAL:<++>}}).eventually.${3:<++>})
+it('${1:<++>}', () => expect(${2:${VISUAL:<++>}}).eventually.${3:<++>});
 endsnippet
 
 snippet it "it" b
-it('${1:<++>}', function () {
+it('${1:<++>}', () => {
 	${2:${VISUAL:<++>}}
-})
+});
 endsnippet
 
 snippet tbi "test.before inline" b
@@ -73,9 +73,9 @@ test.before(() => ${1:${VISUAL:<++>}});
 endsnippet
 
 snippet tb "test.before" b
-test.before(function () {
+test.before(() => {
 	${1:${VISUAL:<++>}}
-})
+});
 endsnippet
 
 snippet wfn "waitForNetworkAndView" b
@@ -103,9 +103,9 @@ var self = this;
 endsnippet
 
 snippet desc "Bare describe" b
-describe('${1:<++>}', function () {
-	${2:${VISUAL:<++>}}
-})
+describe('${1:<++>}', () => {
+	${2:${VISUAL:<++>}};
+});
 endsnippet
 
 snippet rb "resolve before function" b
@@ -119,9 +119,9 @@ helpers.resolveBefore('${1:<++>}', function () {
 endsnippet
 
 snippet before "mocha before" b
-before(function () {
+beforeAll(() => {
 	${1:${VISUAL:<++>}}
-})
+});
 endsnippet
 
 snippet ll "LLOG"
@@ -129,9 +129,9 @@ LLOG(${1:${VISUAL:<++>}})
 endsnippet
 
 snippet after "mocha after" b
-after(function () {
+afterAll(() => {
 	${1:${VISUAL:<++>}}
-})
+});
 endsnippet
 
 snippet p "Description" b
