@@ -48,6 +48,7 @@
   lfp = log --oneline --first-parent
   agrep = grep-of-doom
   mergeff = merge --ff-only --no-stat
+  update-master = updatemaster
 
   # Assume-unchanged aliases
   au = update-index --assume-unchanged
@@ -83,8 +84,9 @@
 [hub]
 
 [user]
-	name = Ben Bernard
-	email = github@benjaminbernard.com
+  name = Ben Bernard
+  email = github@benjaminbernard.com
+  username = benbernard
 
 [push]
   default = current
