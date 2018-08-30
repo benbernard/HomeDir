@@ -102,7 +102,7 @@ set smartcase                        " if any capitol in search, turns search ca
 set shiftwidth=2                     " use 2 space indenting
 set softtabstop=2                    " really use 2 space indenting
 set ts=2                             " Default to 4 spaces for tabs
-set tags=./tags                      " Setup the standard tags files
+set tags=./.tags,~/flexport/.tags                      " Setup the standard tags files
 set textwidth=0                      " turn wrapping off
 set visualbell                       " Use a flash instead of a sound for bells
 set wildmode=longest:full            " Matches only to longest filename, displays to menu possible matches
