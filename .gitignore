@@ -77,7 +77,6 @@ RecordStream/
 .viminfo
 .zcompdump*
 .zsh-update
-.zshrc.d/99_site.zsh
 Applications/
 Desktop/
 Documents/
