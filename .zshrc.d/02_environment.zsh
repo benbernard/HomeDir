@@ -40,7 +40,7 @@ if [[ ! -d $VIM_TEMP ]]; then
   mkdir -p $VIM_TEMP
 fi
 
-ulimit -n 10240 # More file descriptors for the stingy mac, helps with grunt watch
+ulimit -n 10240 1>/dev/null 2>/dev/null # More file descriptors for the stingy mac, helps with grunt watch
 
 # Add setup for Recs and GitScripts
 export PERL5LIB=~/RecordStream/lib
