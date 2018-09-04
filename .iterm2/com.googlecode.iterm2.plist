@@ -139,14 +139,16 @@
 		<key>TB Is Shown</key>
 		<integer>1</integer>
 	</dict>
+	<key>NSWindow Frame NSFontPanel</key>
+	<string>-339 1760 445 103 -2206 1200 3008 1669 </string>
 	<key>NSWindow Frame SUUpdateAlert</key>
-	<string>530 476 620 392 0 0 1680 1027 </string>
+	<string>650 588 620 392 0 0 1920 1177 </string>
 	<key>NSWindow Frame SharedPreferences</key>
-	<string>-1416 1649 796 486 -2206 1200 3008 1669 </string>
+	<string>-1416 1688 1018 447 -2206 1200 3008 1669 </string>
 	<key>NSWindow Frame iTerm Window 0</key>
-	<string>0 11 1340 1166 0 0 1920 1177 </string>
+	<string>0 28 1340 1149 0 0 1920 1177 </string>
 	<key>NSWindow Frame iTerm Window 1</key>
-	<string>-2206 1200 3008 1669 -2206 1200 3008 1669 </string>
+	<string>-2206 2417 570 452 -2206 1200 3008 1669 </string>
 	<key>NSWindow Frame iTerm Window 2</key>
 	<string>0 11 1914 1166 0 0 1920 1177 </string>
 	<key>NeverWarnAboutShortLivedSessions_3978BA6E-63B6-4986-9112-9F4F0647C751</key>
@@ -1096,7 +1098,7 @@
 	<key>SUHasLaunchedBefore</key>
 	<true/>
 	<key>SULastCheckTime</key>
-	<date>2018-07-16T17:11:45Z</date>
+	<date>2018-09-04T02:01:52Z</date>
 	<key>SUSendProfileInfo</key>
 	<false/>
 	<key>SavePasteHistory</key>
@@ -1105,6 +1107,8 @@
 	<false/>
 	<key>ShowFullScreenTabBar</key>
 	<true/>
+	<key>ShowMetalFPSmeter</key>
+	<false/>
 	<key>ShowPaneTitles</key>
 	<true/>
 	<key>SmartPlacement</key>
@@ -6137,7 +6141,7 @@
 	<key>findRegex_iTerm</key>
 	<false/>
 	<key>iTerm Version</key>
-	<string>3.2.0beta7</string>
+	<string>3.2.0beta9</string>
 	<key>kCPKSelectionViewPreferredModeKey</key>
 	<integer>1</integer>
 	<key>kCPKSelectionViewShowHSBTextFieldsKey</key>
