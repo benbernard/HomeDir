@@ -223,3 +223,5 @@ bin/startupServerScreenWork.sh
 site/
 .cdcl-override
 .irb-history
+devbox-*
+.config/htop

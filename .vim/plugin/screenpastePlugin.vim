@@ -21,7 +21,7 @@ set cpo&vim
 " Run Checks: for Vim version, system() and Screen executable {{{1
 function! s:Screen_CleanUp(msg) " {{{2
   echohl WarningMsg
-  echomsg "screenpaste:" a:msg "Plugin not loaded"
+  " echomsg "screenpaste:" a:msg "Plugin not loaded"
   echohl None
   let g:loaded_screenpaste = "no"
   let &cpo = s:save_cpo
