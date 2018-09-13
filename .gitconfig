@@ -112,3 +112,4 @@
   cmd = run-githelp
 [branch]
 	autosetuprebase = always
+	sort = authordate

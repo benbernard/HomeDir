@@ -163,3 +163,7 @@ cdclOverride () {
 cdclUnset () {
   rm $CDCL_OVERIDE_FILE
 }
+
+ppgrep() {
+  pgrep "$@" | xargs ps -fp 2>/dev/null;
+}

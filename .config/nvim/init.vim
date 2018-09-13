@@ -67,6 +67,7 @@ Plug 'mxw/vim-jsx'
 Plug 'othree/javascript-libraries-syntax.vim'
 Plug 'vim-scripts/JavaScript-Indent'
 Plug 'w0rp/ale'
+Plug 'prettier/vim-prettier', { 'do': 'yarn install' }
 
 " Disabled plugins:
 " Plug 'ternjs/tern_for_vim', {'do': 'npm install'} " Doesn't seem to work well
@@ -361,6 +362,12 @@ endif
 " Disable javascript/jsx from polyglot
   let g:polyglot_disabled = ['jsx', 'javascript']
 
+" VimPrettier settings
+  let g:prettier#config#single_quote = 'false'
+  let g:prettier#config#jsx_bracket_same_line = 'false'
+  let g:prettier#config#arrow_parens = 'avoid'
+  let g:prettier#config#trailing_comma = 'es5'
+
 " ALE settings (on the fly linter)
   let g:ale_echo_msg_format='%severity%[%linter%] %s'
 
@@ -371,6 +378,8 @@ endif
   " Turn off html linters
   let g:ale_linters = {
   \   'html': [],
+  \   'javascript': ['eslint'],
+  \   'ruby': ['rubocop'],
   \}
 
   " Turn on prettier and eslint fixers for javascript

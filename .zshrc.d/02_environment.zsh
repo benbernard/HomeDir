@@ -68,3 +68,11 @@ export FZF_CTRL_T_COMMAND='ag -g ""'
 
 # Default display options (taken from readme)
 export FZF_DEFAULT_OPTS='--height 40% --reverse --border -i -m --bind ctrl-A:select-all,ctrl-d:deselect-all'
+
+# Setup set -x "prompt" for logging commands
+#   %1N - Script name (with only last path component)
+#   %i - The current line number
+#   %* - The time with seconds
+# Example:
+#   title:2+11:22:04 > setopt prompt_subst
+export PS4='%1N:%i+%* > '
