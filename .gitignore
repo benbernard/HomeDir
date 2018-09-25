@@ -225,3 +225,4 @@ site/
 .irb-history
 devbox-*
 .config/htop
+.pry_history

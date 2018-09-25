@@ -58,3 +58,4 @@ alias 'vimchanged=vim `git s`'
 
 alias 'longtail=tail -n 1000 -f'
 
+alias 'gcm=git commit -m '
