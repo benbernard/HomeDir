@@ -1,0 +1,29 @@
+#!/usr/local/bin/node
+
+const fs = require('fs');
+const JSON5 = require('json5');
+
+let fileOrJson = process.argv[2];
+
+let jsonString = getContent(fileOrJson);
+console.log(JSON.stringify(JSON5.parse(jsonString), null, 2));
+
+function getContent(fileOrJson) {
+  let jsonStartCharacters = ['{', '['];
+  if (!fileOrJson) {
+    return readFromStream(process.stdin);
+  } else if (fs.existsSync(fileOrJson)){
+    return readFromFile(fileOrJson);
+  } else {
+    return fileOrJson;
+  }
+}
+
+function readFromStream () {
+  return readFromFile(0);
+}
+
+function readFromFile (file) {
+  let buffer = fs.readFileSync(file);
+  return buffer.toString();
+}

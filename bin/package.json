@@ -8,7 +8,8 @@
   },
   "author": "",
   "dependencies": {
-    "recast": "*"
+    "recast": "*",
+    "json5": "*"
   },
   "license": "MIT"
 }

@@ -59,3 +59,6 @@ alias 'vimchanged=vim `git s`'
 alias 'longtail=tail -n 1000 -f'
 
 alias 'gcm=git commit -m '
+
+# Add alias for sublime merge
+alias smerge="/Applications/Sublime\ Merge.app/Contents/MacOS/sublime_merge &!"
