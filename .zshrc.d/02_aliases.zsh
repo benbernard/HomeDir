@@ -53,7 +53,7 @@ alias realpath=grealpath
 alias vim=nvim
 alias 'viminit=vim ~/.config/nvim/init.vim'
 alias 'cleanvim=vim -u NONE'
-alias 'sudovim=sudo vim -u NONE'
+alias 'sudovim=sudo vim -u NONE --noplugin'
 alias 'vimchanged=vim `git s`'
 
 alias 'longtail=tail -n 1000 -f'
