@@ -1,0 +1,15 @@
+#!/usr/local/bin/zsh -i
+
+function TRAPINT() {
+  echo "** Trapped CTRL-C"
+  exit 1
+}
+
+while :; do
+  eval "$@"
+  test $? -gt 128 && break
+
+  echo Looping…
+  sleep 1
+  test $? -gt 128 && break
+done

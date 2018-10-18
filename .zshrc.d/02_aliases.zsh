@@ -62,3 +62,11 @@ alias 'gcm=git commit -m '
 
 # Add alias for sublime merge
 alias smerge="/Applications/Sublime\ Merge.app/Contents/MacOS/sublime_merge &!"
+
+# Make run-help / help work
+autoload -Uz run-help
+autoload -Uz run-help-git
+autoload -Uz run-help-svn
+autoload -Uz run-help-svk
+unalias run-help
+alias help=run-help

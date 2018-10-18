@@ -42,7 +42,8 @@ fzf_get_ref() {
     fzf --tiebreak=index -m --ansi \
       --preview 'git log -$LINES --pretty=oneline --abbrev-commit --color=always {}'
   )
-  echo $target
+
+  echo $result
 }
 
 fco() {
