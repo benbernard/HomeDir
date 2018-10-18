@@ -111,3 +111,9 @@ MODE_INDICATOR="%{$fg_bold[red]%}"
 function git_prompt_info_site() {
   echo "$ZSH_THEME_GIT_PROMPT_PREFIX$(gitbranch)$ZSH_THEME_GIT_PROMPT_SUFFIX"
 }
+
+# zsh-autosuggestions setup
+export ZSH_AUTOSUGGEST_BUFFER_MAX_SIZE=20
+export ZSH_AUTOSUGGEST_USE_ASYNC=1
+source ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
+bindkey '^^' autosuggest-accept # Binds Ctrl-6 to accept suggestion, iterm maps Ctrl-Enter to Ctrl-6
