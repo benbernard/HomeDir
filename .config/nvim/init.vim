@@ -9,6 +9,10 @@ call plug#begin('~/.local/share/nvim/plugged')
 
 Plug 'tpope/vim-endwise'
 Plug 'vim-ruby/vim-ruby'
+Plug 'kana/vim-textobj-user'
+Plug 'kana/vim-textobj-function'
+Plug 'nelstrom/vim-textobj-rubyblock'
+Plug 'haya14busa/vim-textobj-function-syntax'
 Plug 'Shougo/vimproc.vim', { 'do': 'make' }
 Plug 'Shougo/unite.vim'
 Plug 'bkad/CamelCaseMotion'
@@ -68,6 +72,7 @@ Plug 'othree/javascript-libraries-syntax.vim'
 Plug 'vim-scripts/JavaScript-Indent'
 Plug 'w0rp/ale'
 Plug 'prettier/vim-prettier', { 'do': 'yarn install' }
+Plug 'andymass/vim-matchup'
 
 " Disabled plugins:
 " Plug 'ternjs/tern_for_vim', {'do': 'npm install'} " Doesn't seem to work well
@@ -596,9 +601,9 @@ let g:vim_markdown_folding_disabled=1
 " Multiple Cursors config
   let g:multi_cursor_use_default_mapping=0 " Turn off default maps
 
-  let g:multi_cursor_next_key='<C-n>'
-  let g:multi_cursor_prev_key='<C-p>'
-  let g:multi_cursor_skip_key='<C-x>'
+  let g:multi_cursor_next_key='<M-n>'
+  let g:multi_cursor_prev_key='<M-p>'
+  let g:multi_cursor_skip_key='<M-x>'
   let g:multi_cursor_quit_key='<Esc>'
 
   let g:multi_cursor_start_key='<Leader>m'
