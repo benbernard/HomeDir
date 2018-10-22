@@ -82,7 +82,6 @@ Desktop/
 Documents/
 Downloads/
 Dropbox/
-Library/
 Movies/
 Music/
 Pictures/
@@ -226,3 +225,10 @@ site/
 devbox-*
 .config/htop
 .pry_history
+.config/alacritty/
+
+# Be sure to allow iterm Dyanmic profiles source controlled
+/Library/*
+!/Library/Application Support
+/Library/Application Support/*
+!/Library/Application Support/iTerm2/
