@@ -46,7 +46,7 @@
 "                               necessary when you have the script set to
 "                               save only when a previous RCS file exists.
 "
-"               <Leader>older, or \older   
+"               <Leader>older, or \older
 "                               does a diff with the previous version
 "
 "               <Leader>newer, or \newer
@@ -64,19 +64,19 @@
 "
 " User name:
 "        LOGNAME=myusername
-" 
-" Windows note: usually RCS will pick up the USERNAME variable, but usernames with 
+"
+" Windows note: usually RCS will pick up the USERNAME variable, but usernames with
 " spaces will cause a weird RCS error, so set LOGNAME to something without
-" spaces to override it  
+" spaces to override it
 " e.g.
 " (in .vimrc)
 " let $LOGNAME = 'MyNameAllStrungTogether'
 "
-" Time zone:  
+" Time zone:
 "        TZ=EST5EDT
 " or (in .vimrc)
 " let $TZ = 'EST5EDT'
-" 
+"
 "
 "------------------------------------------------------------------------------
 " Please send me any bugs you find, so I can keep the script up to date.
@@ -110,16 +110,16 @@
 " 1.25  Fix for Windows if you don't have the TZ variable set, and fix how it
 "       works when saving a file to another name.
 "
-" 1.24  RCS sets the executable bit on the checked-out file to be the same as 
-"       the rcs archive file.  So if that property changes after you did your 
+" 1.24  RCS sets the executable bit on the checked-out file to be the same as
+"       the rcs archive file.  So if that property changes after you did your
 "       first checkin, your checked-out file will maintain the original setting.
 "       So now we change the executable mode of the rcs archive file to align
 "       with the current setting of the checked-out copy.
 "       Thanks to Ben Bernard.
 "
-" 1.23  Added an option to fix the path on Cygwin systems.  
-"       See g:rvUseCygPathFiltering  
-"       Thanks to Simon Johann-Günter 
+" 1.23  Added an option to fix the path on Cygwin systems.
+"       See g:rvUseCygPathFiltering
+"       Thanks to Simon Johann-Günter
 "
 " 1.22  some re-factoring, and add the option to leave RCS files unlocked when
 "       saving, which is handy for multiple users of the same RCS file.
@@ -461,8 +461,8 @@ if !exists('g:rvCiOptions')
     let g:rvCiOptions = ""
 endif
 
-" RCS tries to use the LOGNAME, then USERNAME environment variables as the 'author' 
-" string, but it doesn't handle it when they have spaces, so strip them out. 
+" RCS tries to use the LOGNAME, then USERNAME environment variables as the 'author'
+" string, but it doesn't handle it when they have spaces, so strip them out.
 " You can set LOGNAME to something else in your _vimrc file if you like like
 " this:
 " let $LOGNAME = 'MyFunkyUserName'
@@ -619,9 +619,7 @@ if !exists('g:rvExcludeExpression')
     " this was changed from a default of
     "    let g:rvExcludeExpression = ""
     " to the line below.  This is to disable RCSVers by default, rather than
-    " enable it by default.  Send mail to env-improvement-ninjas@ about this
-    " if you need an explanation, or visit http://w.amazon.com/?VimRCSVersPlugin
-    " [goodell@, 7/13/2006]
+    " enable it by default.
     let g:rvExcludeExpression = "."
 endif
 
@@ -726,7 +724,7 @@ function! s:GetSaveDirectoryName(filename)
            " 1 = Single directory for all files
             let l:SaveDirectoryName = $VIM.g:rvDirSeparator."RCSFiles".g:rvDirSeparator
 
-        else 
+        else
             " Type 2, save right here in the same directory (make sure you set
             "g:rvSaveSuffixType, or you will overwrite your file!)
             let l:SaveDirectoryName = expand(fnamemodify(a:filename, ":p:h")).g:rvDirSeparator
@@ -1229,7 +1227,7 @@ endfunction
 function! s:GetCommonCmdOpts(filename)
     " Build the command options
     let l:suffix = s:CreateSuffix(expand(a:filename))
-    
+
     let l:rcsfile = s:GetSaveDirectoryName(fnamemodify(a:filename, ":p")).fnamemodify(a:filename, ":t").l:suffix
 
     " Check for an RCS file

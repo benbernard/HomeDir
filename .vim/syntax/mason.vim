@@ -1,8 +1,5 @@
 " Vim syntax file
 " Language:    Mason (Perl embedded in HTML)
-" Maintainer:  Jesse Kinkead (jessek@amazon.com)
-" Last change: $Id:$
-" URL:	       http://www.masonhq.com/editors/mason.vim
 "
 " This seems to work satisfactorily with html.vim and perl.vim for version 5.5.
 " Please mail any fixes or improvements to the above address. Things that need
@@ -51,7 +48,7 @@ endif
 " of these cases so I've taken the safe option of just using perlTop in all of
 " them. If you have any suggestions, please let me know.
 "
-syn region masonLine matchgroup=Delimiter start="^%" end="$" contains=@perlTop 
+syn region masonLine matchgroup=Delimiter start="^%" end="$" contains=@perlTop
 syn region masonExpr matchgroup=Delimiter start="<%" end="%>" contains=@perlTop keepend
 syn region masonPerl matchgroup=Delimiter start="<%perl>" end="</%perl>" contains=@perlTop keepend
 syn region masonComp keepend matchgroup=Delimiter start="<&" end="&>" contains=@perlTop keepend

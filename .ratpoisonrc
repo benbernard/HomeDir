@@ -71,11 +71,6 @@ bind C-l exchangeright
 alias screenlock exec xscreensaver-command -lock
 bind L screenlock
 
-# start windows and vnc
-alias remote exec /usr/bin/rdesktop -d ANT -r sound -a 24 -u benbernard-g 1270x1000+0+0 -K term-sea.ant.amazon.com
-alias vnc exec /usr/local/bin/vncviewer :2
-bind v vnc
-
 # change K to be nicely close rather than kill the X connection, since we've bount k and C-k
 # C-K still hard kills the connection
 bind K delete

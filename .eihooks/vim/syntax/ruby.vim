@@ -1,6 +1,5 @@
 " Vim syntax file
 " Language:	Ruby
-" Maintainer:	Jesse Kinkead <jessek@amazon.com>
 " Licence:	GPL (http://www.gnu.org)
 " Disclaimer:
 "    This program is distributed in the hope that it will be useful,

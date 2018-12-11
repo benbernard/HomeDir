@@ -369,10 +369,6 @@ sub sig_url
 
         do_head($url);
 
-    } elsif ( $action eq "ninja" ) {
-        my $search_term = join(' ', @args);
-        $search_term = uri_escape($search_term);
-        open_url("self status http://improvement-ninjas.amazon.com/ninja-search/?q=$search_term");
     } else {
         print_msg "Unknown action";
     }

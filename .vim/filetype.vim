@@ -7,13 +7,6 @@ endif
 augroup filetypedetect
   autocmd BufNewFile,BufRead *.o,*.so,*.ko setfiletype object " Object files
 
-  " see: https://w.amazon.com/?VimFLLogSyntax
-  autocmd BufReadPost * if ! (exists('g:disableFLLogSyntax') && g:disableFLLogSyntax)
-  autocmd BufReadPost *   if (getline(1) =~ "^\\w\\{3\\} \\w\\{3\\} \\d\\{2\\} \\d\\{2\\}:\\d\\{2\\}:\\d\\{2\\} \\d\\{4\\}")
-  autocmd BufReadPost *     setfiletype FLLog
-  autocmd BufReadPost *   endif
-  autocmd BufReadPost * endif
-
   autocmd BufReadPost .tags        setfiletype tags     " .tag files need love too
   autocmd BufReadPost .z*          setfiletype zsh      " obscure zsh files need love too
 

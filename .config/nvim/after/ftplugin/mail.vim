@@ -12,9 +12,6 @@
 " CreateMailFields
 " AddressComplete
 "
-" Author: Ben Bernard <bernard@amazon.com>
-"         moved to after/ and modified by goodell@
-"
 " TODO:
 " - convert addressComplete to be a filter, such that the temp file is
 "   unnecessary
