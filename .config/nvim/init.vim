@@ -71,7 +71,7 @@ Plug 'mxw/vim-jsx'
 Plug 'othree/javascript-libraries-syntax.vim'
 Plug 'vim-scripts/JavaScript-Indent'
 Plug 'w0rp/ale'
-Plug 'prettier/vim-prettier', { 'do': 'yarn install' }
+" Plug 'prettier/vim-prettier', { 'do': 'yarn install' }
 Plug 'andymass/vim-matchup'
 
 " Disabled plugins:
@@ -81,8 +81,8 @@ call plug#end()
 
 syntax on
 
-if ( filereadable($HOME . "/.vimrc.site") )
-  source $HOME/.vimrc.site
+if ( filereadable($HOME . "/site/site.vim") )
+  source $HOME/site/site.vim
 endif
 
 """"""""""""""" Global Setup """"""""""""""""""""
@@ -384,11 +384,14 @@ endif
   let g:ale_linters = {
   \   'html': [],
   \   'javascript': ['eslint'],
-  \   'ruby': ['rubocop'],
+  \   'ruby': ['rubocop']
   \}
 
   " Turn on prettier and eslint fixers for javascript
-  let b:ale_fixers = {'javascript': ['prettier', 'eslint']}
+  let g:ale_fixers = {
+  \  'javascript': ['prettier', 'eslint'],
+  \  'ruby': ['rubocop']
+  \}
 
   let g:ale_javascript_prettier_options = '--no-bracket-spacing --trailing-comma es5'
 

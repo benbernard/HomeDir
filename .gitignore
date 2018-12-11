@@ -232,3 +232,9 @@ devbox-*
 !/Library/Application Support
 /Library/Application Support/*
 !/Library/Application Support/iTerm2/
+
+# Ignore temp files
+*.tmp
+*.temp
+
+.tldrc/
