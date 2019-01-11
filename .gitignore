@@ -226,6 +226,7 @@ devbox-*
 .config/htop
 .pry_history
 .config/alacritty/
+.config/pgcli/
 
 # Be sure to allow iterm Dyanmic profiles source controlled
 /Library/*
@@ -238,3 +239,4 @@ devbox-*
 *.temp
 
 .tldrc/
+videos/

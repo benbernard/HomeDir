@@ -49,8 +49,6 @@ Plug 'terryma/vim-multiple-cursors'
 Plug 'mustache/vim-mustache-handlebars'
 Plug 'tpope/vim-repeat'
 Plug 'honza/vim-snippets'
-Plug 'benbernard/vim-stylus'
-Plug 'wavded/vim-stylus'
 Plug 'tpope/vim-surround'
 Plug 'tmux-plugins/vim-tmux'
 Plug 'tpope/vim-unimpaired'
@@ -71,11 +69,11 @@ Plug 'mxw/vim-jsx'
 Plug 'othree/javascript-libraries-syntax.vim'
 Plug 'vim-scripts/JavaScript-Indent'
 Plug 'w0rp/ale'
-" Plug 'prettier/vim-prettier', { 'do': 'yarn install' }
 Plug 'andymass/vim-matchup'
 
 " Disabled plugins:
 " Plug 'ternjs/tern_for_vim', {'do': 'npm install'} " Doesn't seem to work well
+" Plug 'prettier/vim-prettier', { 'do': 'yarn install' } " Doing this with ALE instead
 
 call plug#end()
 
@@ -390,7 +388,6 @@ endif
   " Turn on prettier and eslint fixers for javascript
   let g:ale_fixers = {
   \  'javascript': ['prettier', 'eslint'],
-  \  'ruby': ['rubocop']
   \}
 
   let g:ale_javascript_prettier_options = '--no-bracket-spacing --trailing-comma es5'
