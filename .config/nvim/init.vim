@@ -79,10 +79,6 @@ call plug#end()
 
 syntax on
 
-if ( filereadable($HOME . "/site/site.vim") )
-  source $HOME/site/site.vim
-endif
-
 """"""""""""""" Global Setup """"""""""""""""""""
 "First source the environment location
 source $HOME/.eihooks/dotfiles/vimrc
@@ -227,6 +223,9 @@ else
   command CopyFilename let @+ = expand("%:t")
   command CopyFile CopyFilename
 endif
+
+nmap <Leader>fn :CopyFilename<cr>
+nmap <Leader>fp :CopyPath<cr>
 
 """"""""""""""" Plugin Settings """"""""""""""""
 " Mustache settings
@@ -751,3 +750,9 @@ hi SpellCap cterm=underline
 " Change search hilights
 hi IncSearch guifg=NONE guibg=#233466 guisp=#233466 gui=NONE ctermfg=blue ctermbg=yellow cterm=NONE
 hi Search ctermfg=17 ctermbg=45 guifg=#00005f guibg=#00dfff guisp=#233466 gui=NONE
+
+" If site.vim is present, include it now
+if ( filereadable($HOME . "/site/site.vim") )
+  source $HOME/site/site.vim
+endif
+
