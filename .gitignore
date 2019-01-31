@@ -226,7 +226,8 @@ devbox-*
 .config/htop
 .pry_history
 .config/alacritty/
-.config/pgcli/
+.config/pgcli/*
+!.config/pgcli/config
 
 # Be sure to allow iterm Dyanmic profiles source controlled
 /Library/*
