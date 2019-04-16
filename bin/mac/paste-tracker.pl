@@ -17,6 +17,8 @@ print "Startup:\n";
 print "   Screen:    $screen_contents\n";
 print "   Clipboard: $current_contents\n";
 
+my $last_screen_write = "";
+
 while(1) {
   my $new = get_clip();
   my $new_screen = get_screen_contents();
@@ -33,8 +35,16 @@ while(1) {
     print $fh $new;
     close $fh;
 
+    $last_screen_write = $new;
+
     system(qw(tmux loadb), $temp_file)
   } elsif ($screen_contents ne $new_screen) {
+    $screen_contents = $new_screen;
+
+    if ($new_screen eq $last_screen_write) {
+      next;
+    }
+
     print "Found change in screen buffer\n";
     $screen_contents = $new_screen;
     open(my $cmd, '|-', 'pbcopy') or die "could not open pbpaste: $!";
