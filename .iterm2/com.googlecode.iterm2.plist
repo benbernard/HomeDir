@@ -258,7 +258,7 @@
 	<key>NSWindow Frame SharedPreferences</key>
 	<string>-577 1712 918 512 -2206 1200 3008 1669 </string>
 	<key>NSWindow Frame iTerm Window 0</key>
-	<string>0 11 1340 1166 0 0 1920 1177 </string>
+	<string>0 0 1340 1177 0 0 1920 1177 </string>
 	<key>NSWindow Frame iTerm Window 1</key>
 	<string>0 0 1340 1177 0 0 1920 1177 </string>
 	<key>NSWindow Frame iTerm Window 2</key>
@@ -6314,6 +6314,8 @@
 	</array>
 	<key>NoSyncCommandHistoryHasEverBeenUsed</key>
 	<true/>
+	<key>NoSyncHaveRequestedFullDiskAccess</key>
+	<true/>
 	<key>NoSyncHaveWarnedAboutPasteConfirmationChange</key>
 	<true/>
 	<key>NoSyncInstallationId</key>
@@ -6396,7 +6398,7 @@
 	<key>SUHasLaunchedBefore</key>
 	<true/>
 	<key>SULastCheckTime</key>
-	<date>2018-11-15T22:52:46Z</date>
+	<date>2019-02-19T18:33:02Z</date>
 	<key>SUSendProfileInfo</key>
 	<false/>
 	<key>SavePasteHistory</key>
@@ -6453,7 +6455,7 @@
 				<key>Has Toolbelt</key>
 				<false/>
 				<key>Height</key>
-				<real>1664</real>
+				<real>1669</real>
 				<key>Hide After Opening</key>
 				<false/>
 				<key>Hiding Toolbelt Should Resize Window</key>
@@ -6740,7 +6742,7 @@
 												<real>0.73333334922790527</real>
 											</dict>
 											<key>Guid</key>
-											<string>FAA39803-0036-4309-B034-009D40A7C631</string>
+											<string>4F0C96A7-6063-4A08-94B2-0C5AD6FCCCD4</string>
 											<key>Hide After Opening</key>
 											<false/>
 											<key>Horizontal Spacing</key>
@@ -7366,6 +7368,8 @@
 											<string>/Users/benjaminbernard</string>
 											<string>/Users/benjaminbernard</string>
 											<string>/Users/benjaminbernard</string>
+											<string>/Users/benjaminbernard</string>
+											<string>/Users/benjaminbernard</string>
 										</array>
 										<key>Environment</key>
 										<dict>
@@ -7434,6 +7438,18 @@
 												<key>User name</key>
 												<string>benjaminbernard</string>
 											</dict>
+											<dict>
+												<key>Host name</key>
+												<string>benjaminbernard-mbp</string>
+												<key>User name</key>
+												<string>benjaminbernard</string>
+											</dict>
+											<dict>
+												<key>Host name</key>
+												<string>benjaminbernard-mbp</string>
+												<key>User name</key>
+												<string>benjaminbernard</string>
+											</dict>
 										</array>
 										<key>Is UTF-8</key>
 										<true/>
@@ -7445,15 +7461,15 @@
 											<string>Command</string>
 										</dict>
 										<key>Rows</key>
-										<integer>78</integer>
+										<integer>79</integer>
 										<key>Session Default Name</key>
 										<string>Main Pane</string>
 										<key>Session GUID</key>
 										<string>8E1E6576-6623-4DFE-8902-03206669F565</string>
 										<key>Session Name</key>
-										<string>nt</string>
+										<string>~</string>
 										<key>Session Window Title</key>
-										<string>nt default</string>
+										<string>benjaminbernard@benjaminbernard-mbp: ~</string>
 										<key>Shell Integration Ever Used</key>
 										<true/>
 										<key>Substitutions</key>
@@ -7469,9 +7485,9 @@
 									<key>frame</key>
 									<dict>
 										<key>height</key>
-										<real>1346</real>
+										<real>1350</real>
 										<key>width</key>
-										<real>3006</real>
+										<real>3008</real>
 										<key>x</key>
 										<real>0.0</real>
 										<key>y</key>
@@ -7748,7 +7764,7 @@
 														<real>0.73333334922790527</real>
 													</dict>
 													<key>Guid</key>
-													<string>CC20D9E2-2735-4003-8BA1-38621CC09389</string>
+													<string>287A5851-7231-432E-BA9B-55DBB8555F14</string>
 													<key>Hide After Opening</key>
 													<false/>
 													<key>Horizontal Spacing</key>
@@ -8364,9 +8380,12 @@
 													<string>tmux-sub-session-window.sh server yarn</string>
 													<string>tmux-sub-session-window.sh server yarn</string>
 													<string>tmux-sub-session-window.sh server yarn</string>
+													<string>tmux-sub-session-window.sh server yarn</string>
 												</array>
 												<key>Directories</key>
 												<array>
+													<string>/Users/benjaminbernard</string>
+													<string>/Users/benjaminbernard</string>
 													<string>/Users/benjaminbernard</string>
 													<string>/Users/benjaminbernard</string>
 													<string>/Users/benjaminbernard</string>
@@ -8445,6 +8464,18 @@
 														<key>User name</key>
 														<string>benjaminbernard</string>
 													</dict>
+													<dict>
+														<key>Host name</key>
+														<string>benjaminbernard-mbp</string>
+														<key>User name</key>
+														<string>benjaminbernard</string>
+													</dict>
+													<dict>
+														<key>Host name</key>
+														<string>benjaminbernard-mbp</string>
+														<key>User name</key>
+														<string>benjaminbernard</string>
+													</dict>
 												</array>
 												<key>Is UTF-8</key>
 												<true/>
@@ -8462,7 +8493,7 @@
 												<key>Session GUID</key>
 												<string>BA4FAE4F-9D80-4E47-9C34-F42540F83CAD</string>
 												<key>Session Name</key>
-												<string>Yarn</string>
+												<string>tmux-sub-session-window.sh</string>
 												<key>Session Window Title</key>
 												<string>tmux-sub-session-window.sh server yarn</string>
 												<key>Shell Integration Ever Used</key>
@@ -8477,9 +8508,9 @@
 											<key>frame</key>
 											<dict>
 												<key>height</key>
-												<real>294</real>
+												<real>295</real>
 												<key>width</key>
-												<real>372</real>
+												<real>368</real>
 												<key>x</key>
 												<real>0.0</real>
 												<key>y</key>
@@ -8753,7 +8784,7 @@
 														<real>0.73333334922790527</real>
 													</dict>
 													<key>Guid</key>
-													<string>B1D9B5DF-3AF2-4355-84FA-A213EE935E3A</string>
+													<string>4ECE5CE3-4F8A-44E9-BF15-A15D95870379</string>
 													<key>Hide After Opening</key>
 													<false/>
 													<key>Horizontal Spacing</key>
@@ -9361,7 +9392,7 @@
 												<key>Bookmark Name</key>
 												<string>sync</string>
 												<key>Columns</key>
-												<integer>48</integer>
+												<integer>49</integer>
 												<key>Commands</key>
 												<array>
 													<string>nt server</string>
@@ -9369,9 +9400,12 @@
 													<string>tmux-sub-session-window.sh server devbox</string>
 													<string>mux-sub-session-window.shh serve devbox</string>
 													<string>tmux-sub-session-window.sh server devbox</string>
+													<string>tmux-sub-session-window.sh server devbox</string>
 												</array>
 												<key>Directories</key>
 												<array>
+													<string>/Users/benjaminbernard</string>
+													<string>/Users/benjaminbernard</string>
 													<string>/Users/benjaminbernard</string>
 													<string>/Users/benjaminbernard</string>
 													<string>/Users/benjaminbernard</string>
@@ -9450,6 +9484,18 @@
 														<key>User name</key>
 														<string>benjaminbernard</string>
 													</dict>
+													<dict>
+														<key>Host name</key>
+														<string>benjaminbernard-mbp</string>
+														<key>User name</key>
+														<string>benjaminbernard</string>
+													</dict>
+													<dict>
+														<key>Host name</key>
+														<string>benjaminbernard-mbp</string>
+														<key>User name</key>
+														<string>benjaminbernard</string>
+													</dict>
 												</array>
 												<key>Is UTF-8</key>
 												<true/>
@@ -9467,7 +9513,7 @@
 												<key>Session GUID</key>
 												<string>D36DB134-0913-4D67-9D45-57E941A47EA6</string>
 												<key>Session Name</key>
-												<string>DevBox</string>
+												<string>tmux-sub-session-window.sh</string>
 												<key>Session Window Title</key>
 												<string>tmux-sub-session-window.sh server devbox</string>
 												<key>Shell Integration Ever Used</key>
@@ -9482,11 +9528,11 @@
 											<key>frame</key>
 											<dict>
 												<key>height</key>
-												<real>294</real>
+												<real>295</real>
 												<key>width</key>
-												<real>352</real>
+												<real>356</real>
 												<key>x</key>
-												<real>373</real>
+												<real>369</real>
 												<key>y</key>
 												<real>0.0</real>
 											</dict>
@@ -9758,7 +9804,7 @@
 														<real>0.73333334922790527</real>
 													</dict>
 													<key>Guid</key>
-													<string>BD45109E-0C6D-458E-A8BC-95D14D368A49</string>
+													<string>EE527642-F797-4A04-A427-C5A3791F002F</string>
 													<key>Hide After Opening</key>
 													<false/>
 													<key>Horizontal Spacing</key>
@@ -10366,9 +10412,10 @@
 												<key>Bookmark Name</key>
 												<string>devbox webpack</string>
 												<key>Columns</key>
-												<integer>72</integer>
+												<integer>71</integer>
 												<key>Commands</key>
 												<array>
+													<string>tmux-sub-session-window.sh server dwp</string>
 													<string>tmux-sub-session-window.sh server dwp</string>
 													<string>tmux-sub-session-window.sh server dwp</string>
 													<string>tmux-sub-session-window.sh server dwp</string>
@@ -10376,6 +10423,8 @@
 												</array>
 												<key>Directories</key>
 												<array>
+													<string>/Users/benjaminbernard</string>
+													<string>/Users/benjaminbernard</string>
 													<string>/Users/benjaminbernard</string>
 													<string>/Users/benjaminbernard</string>
 													<string>/Users/benjaminbernard</string>
@@ -10440,6 +10489,18 @@
 														<key>User name</key>
 														<string>benjaminbernard</string>
 													</dict>
+													<dict>
+														<key>Host name</key>
+														<string>benjaminbernard-mbp</string>
+														<key>User name</key>
+														<string>benjaminbernard</string>
+													</dict>
+													<dict>
+														<key>Host name</key>
+														<string>benjaminbernard-mbp</string>
+														<key>User name</key>
+														<string>benjaminbernard</string>
+													</dict>
 												</array>
 												<key>Is UTF-8</key>
 												<true/>
@@ -10457,7 +10518,7 @@
 												<key>Session GUID</key>
 												<string>03D19AE2-B010-47E9-A9E2-A64377F05793</string>
 												<key>Session Name</key>
-												<string>Webpack</string>
+												<string>tmux-sub-session-window.sh</string>
 												<key>Session Window Title</key>
 												<string>tmux-sub-session-window.sh server dwp</string>
 												<key>Shell Integration Ever Used</key>
@@ -10472,9 +10533,9 @@
 											<key>frame</key>
 											<dict>
 												<key>height</key>
-												<real>294</real>
+												<real>295</real>
 												<key>width</key>
-												<real>514</real>
+												<real>507</real>
 												<key>x</key>
 												<real>726</real>
 												<key>y</key>
@@ -10748,7 +10809,7 @@
 														<real>0.73333334922790527</real>
 													</dict>
 													<key>Guid</key>
-													<string>BCC42F3B-5E96-4073-B1B9-F10D3EA2ED25</string>
+													<string>9E686C64-3BB7-4D33-851F-708E41215F2C</string>
 													<key>Hide After Opening</key>
 													<false/>
 													<key>Horizontal Spacing</key>
@@ -11356,15 +11417,18 @@
 												<key>Bookmark Name</key>
 												<string>logs</string>
 												<key>Columns</key>
-												<integer>250</integer>
+												<integer>252</integer>
 												<key>Commands</key>
 												<array>
+													<string>tmux-sub-session-window.sh server logs</string>
 													<string>tmux-sub-session-window.sh server logs</string>
 													<string>tmux-sub-session-window.sh server logs</string>
 													<string>tmux-sub-session-window.sh server logs</string>
 												</array>
 												<key>Directories</key>
 												<array>
+													<string>/Users/benjaminbernard</string>
+													<string>/Users/benjaminbernard</string>
 													<string>/Users/benjaminbernard</string>
 													<string>/Users/benjaminbernard</string>
 													<string>/Users/benjaminbernard</string>
@@ -11415,6 +11479,18 @@
 														<key>User name</key>
 														<string>benjaminbernard</string>
 													</dict>
+													<dict>
+														<key>Host name</key>
+														<string>benjaminbernard-mbp</string>
+														<key>User name</key>
+														<string>benjaminbernard</string>
+													</dict>
+													<dict>
+														<key>Host name</key>
+														<string>benjaminbernard-mbp</string>
+														<key>User name</key>
+														<string>benjaminbernard</string>
+													</dict>
 												</array>
 												<key>Is UTF-8</key>
 												<true/>
@@ -11432,7 +11508,7 @@
 												<key>Session GUID</key>
 												<string>DE8AECE2-2EA0-40DB-AE8A-835AFB4C3E42</string>
 												<key>Session Name</key>
-												<string>Logs</string>
+												<string>tmux-sub-session-window.sh</string>
 												<key>Session Window Title</key>
 												<string>tmux-sub-session-window.sh server logs</string>
 												<key>Shell Integration Ever Used</key>
@@ -11447,11 +11523,11 @@
 											<key>frame</key>
 											<dict>
 												<key>height</key>
-												<real>294</real>
+												<real>295</real>
 												<key>width</key>
-												<real>1765</real>
+												<real>1774</real>
 												<key>x</key>
-												<real>1241</real>
+												<real>1234</real>
 												<key>y</key>
 												<real>0.0</real>
 											</dict>
@@ -11462,13 +11538,13 @@
 									<key>frame</key>
 									<dict>
 										<key>height</key>
-										<real>294</real>
+										<real>295</real>
 										<key>width</key>
-										<real>3006</real>
+										<real>3008</real>
 										<key>x</key>
 										<real>0.0</real>
 										<key>y</key>
-										<real>1347</real>
+										<real>1351</real>
 									</dict>
 									<key>isVertical</key>
 									<true/>
@@ -11479,9 +11555,9 @@
 							<key>frame</key>
 							<dict>
 								<key>height</key>
-								<real>1641</real>
+								<real>1646</real>
 								<key>width</key>
-								<real>3006</real>
+								<real>3008</real>
 								<key>x</key>
 								<real>0.0</real>
 								<key>y</key>
@@ -11494,14 +11570,16 @@
 				</array>
 				<key>TerminalGuid</key>
 				<string>pty-3E3F5451-D442-4E7E-A0DD-1D5456CF0864</string>
+				<key>Use Transparency</key>
+				<true/>
 				<key>Width</key>
-				<real>3006</real>
+				<real>3008</real>
 				<key>Window Type</key>
 				<integer>0</integer>
 				<key>X Origin</key>
-				<real>-2206</real>
+				<real>-1725</real>
 				<key>Y Origin</key>
-				<real>1205</real>
+				<real>1200</real>
 			</dict>
 			<dict>
 				<key>Desired Columns</key>
@@ -11511,7 +11589,7 @@
 				<key>Has Toolbelt</key>
 				<false/>
 				<key>Height</key>
-				<real>1149</real>
+				<real>1177</real>
 				<key>Hide After Opening</key>
 				<false/>
 				<key>Hiding Toolbelt Should Resize Window</key>
@@ -11798,7 +11876,7 @@
 												<real>0.73333334922790527</real>
 											</dict>
 											<key>Guid</key>
-											<string>4EFAD57E-776C-42EA-A9DA-DAA03FDF32C5</string>
+											<string>DAD277E2-E7E5-4D7C-AE4A-ABDA305D8FC7</string>
 											<key>Hide After Opening</key>
 											<false/>
 											<key>Horizontal Spacing</key>
@@ -12412,9 +12490,12 @@
 											<string>nt irc</string>
 											<string>nt irc</string>
 											<string>nt irc</string>
+											<string>nt irc</string>
 										</array>
 										<key>Directories</key>
 										<array>
+											<string>/Users/benjaminbernard</string>
+											<string>/Users/benjaminbernard</string>
 											<string>/Users/benjaminbernard</string>
 											<string>/Users/benjaminbernard</string>
 											<string>/Users/benjaminbernard</string>
@@ -12493,6 +12574,18 @@
 												<key>User name</key>
 												<string>benjaminbernard</string>
 											</dict>
+											<dict>
+												<key>Host name</key>
+												<string>benjaminbernard-mbp</string>
+												<key>User name</key>
+												<string>benjaminbernard</string>
+											</dict>
+											<dict>
+												<key>Host name</key>
+												<string>benjaminbernard-mbp</string>
+												<key>User name</key>
+												<string>benjaminbernard</string>
+											</dict>
 										</array>
 										<key>Is UTF-8</key>
 										<true/>
@@ -12504,13 +12597,13 @@
 											<string>Command</string>
 										</dict>
 										<key>Rows</key>
-										<integer>66</integer>
+										<integer>67</integer>
 										<key>Session Default Name</key>
 										<string>IRC</string>
 										<key>Session GUID</key>
 										<string>DC38C753-CA82-428E-A6F7-C4A7EF636686</string>
 										<key>Session Name</key>
-										<string>IRC</string>
+										<string>nt</string>
 										<key>Session Window Title</key>
 										<string>nt irc</string>
 										<key>Shell Integration Ever Used</key>
@@ -12528,7 +12621,7 @@
 									<key>frame</key>
 									<dict>
 										<key>height</key>
-										<real>1126</real>
+										<real>1154</real>
 										<key>width</key>
 										<real>1340</real>
 										<key>x</key>
@@ -12543,7 +12636,7 @@
 							<key>frame</key>
 							<dict>
 								<key>height</key>
-								<real>1126</real>
+								<real>1154</real>
 								<key>width</key>
 								<real>1340</real>
 								<key>x</key>
@@ -12558,6 +12651,8 @@
 				</array>
 				<key>TerminalGuid</key>
 				<string>pty-B8DEF4A0-297A-42F9-9ADB-CDAA217DD8FD</string>
+				<key>Use Transparency</key>
+				<true/>
 				<key>Width</key>
 				<real>1340</real>
 				<key>Window Type</key>
@@ -12565,7 +12660,7 @@
 				<key>X Origin</key>
 				<real>0.0</real>
 				<key>Y Origin</key>
-				<real>28</real>
+				<real>0.0</real>
 			</dict>
 		</array>
 	</dict>
@@ -12582,7 +12677,7 @@
 	<key>findRegex_iTerm</key>
 	<false/>
 	<key>iTerm Version</key>
-	<string>3.2.4beta4</string>
+	<string>3.2.7beta4</string>
 	<key>kCPKSelectionViewPreferredModeKey</key>
 	<integer>1</integer>
 	<key>kCPKSelectionViewShowHSBTextFieldsKey</key>
