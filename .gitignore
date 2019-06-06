@@ -190,9 +190,7 @@ gocode/
 .pgadmin/
 .config/nvim/bundle/fzf
 explain.sql
-.tmux/plugins/tmux-copycat/
-.tmux/plugins/tmux-pain-control/
-.tmux/plugins/tmux-yank/
+.tmux/plugins/
 .torus/
 .torusrc
 .circleci/
@@ -244,3 +242,10 @@ videos/
 
 fieldbook-s3/
 private/
+
+.eclipse/
+.m2/
+.p2/
+.tooling/
+eclipse-workspace/
+eclipse/

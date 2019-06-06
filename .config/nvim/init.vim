@@ -70,6 +70,7 @@ Plug 'othree/javascript-libraries-syntax.vim'
 Plug 'vim-scripts/JavaScript-Indent'
 Plug 'w0rp/ale'
 Plug 'andymass/vim-matchup'
+Plug 'christoomey/vim-tmux-navigator'
 
 " Disabled plugins:
 " Plug 'ternjs/tern_for_vim', {'do': 'npm install'} " Doesn't seem to work well
