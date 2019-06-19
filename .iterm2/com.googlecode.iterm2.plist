@@ -260,9 +260,9 @@
 	<key>NSWindow Frame SharedPreferences</key>
 	<string>1743 1762 796 486 1283 1200 3008 1669 </string>
 	<key>NSWindow Frame iTerm Window 0</key>
-	<string>-875 1830 1291 871 -1725 1200 3008 1669 </string>
+	<string>0 0 955 1177 0 0 1920 1177 </string>
 	<key>NSWindow Frame iTerm Window 1</key>
-	<string>-255 1260 948 654 -1725 1200 3008 1669 </string>
+	<string>694 252 570 429 0 0 1920 1177 </string>
 	<key>NSWindow Frame iTerm Window 2</key>
 	<string>0 11 1914 1166 0 0 1920 1177 </string>
 	<key>NeverWarnAboutShortLivedSessions_3978BA6E-63B6-4986-9112-9F4F0647C751</key>
@@ -6334,7 +6334,7 @@
 	<key>NoSyncInstallationId</key>
 	<string>E767AC05-F86F-4A3D-A03F-2382D8ED8348</string>
 	<key>NoSyncLaunchExperienceControllerRunCount</key>
-	<integer>3</integer>
+	<integer>19</integer>
 	<key>NoSyncNeverRemindPrefsChangesLostForFile</key>
 	<true/>
 	<key>NoSyncNeverRemindPrefsChangesLostForFile_selection</key>
@@ -6347,13 +6347,24 @@
 	<false/>
 	<key>NoSyncRecordedVariables</key>
 	<dict>
+		<key>0</key>
+		<array>
+			<dict>
+				<key>isTerminal</key>
+				<true/>
+				<key>name</key>
+				<string></string>
+				<key>nonterminalContext</key>
+				<integer>0</integer>
+			</dict>
+		</array>
 		<key>1</key>
 		<array>
 			<dict>
 				<key>isTerminal</key>
 				<true/>
 				<key>name</key>
-				<string>columns</string>
+				<string>presentationName</string>
 				<key>nonterminalContext</key>
 				<integer>0</integer>
 			</dict>
@@ -6361,7 +6372,31 @@
 				<key>isTerminal</key>
 				<true/>
 				<key>name</key>
-				<string>creationTimeString</string>
+				<string>tmuxRole</string>
+				<key>nonterminalContext</key>
+				<integer>0</integer>
+			</dict>
+			<dict>
+				<key>isTerminal</key>
+				<true/>
+				<key>name</key>
+				<string>lastCommand</string>
+				<key>nonterminalContext</key>
+				<integer>0</integer>
+			</dict>
+			<dict>
+				<key>isTerminal</key>
+				<true/>
+				<key>name</key>
+				<string>profileName</string>
+				<key>nonterminalContext</key>
+				<integer>0</integer>
+			</dict>
+			<dict>
+				<key>isTerminal</key>
+				<true/>
+				<key>name</key>
+				<string>termid</string>
 				<key>nonterminalContext</key>
 				<integer>0</integer>
 			</dict>
@@ -6377,7 +6412,31 @@
 				<key>isTerminal</key>
 				<true/>
 				<key>name</key>
-				<string>tmuxStatusRight</string>
+				<string>id</string>
+				<key>nonterminalContext</key>
+				<integer>0</integer>
+			</dict>
+			<dict>
+				<key>isTerminal</key>
+				<true/>
+				<key>name</key>
+				<string>jobName</string>
+				<key>nonterminalContext</key>
+				<integer>0</integer>
+			</dict>
+			<dict>
+				<key>isTerminal</key>
+				<true/>
+				<key>name</key>
+				<string>columns</string>
+				<key>nonterminalContext</key>
+				<integer>0</integer>
+			</dict>
+			<dict>
+				<key>isTerminal</key>
+				<true/>
+				<key>name</key>
+				<string>hostname</string>
 				<key>nonterminalContext</key>
 				<integer>0</integer>
 			</dict>
@@ -6393,7 +6452,47 @@
 				<key>isTerminal</key>
 				<true/>
 				<key>name</key>
-				<string>tty</string>
+				<string>path</string>
+				<key>nonterminalContext</key>
+				<integer>0</integer>
+			</dict>
+			<dict>
+				<key>isTerminal</key>
+				<true/>
+				<key>name</key>
+				<string>tmuxWindowTitleEval</string>
+				<key>nonterminalContext</key>
+				<integer>0</integer>
+			</dict>
+			<dict>
+				<key>isTerminal</key>
+				<true/>
+				<key>name</key>
+				<string>triggerName</string>
+				<key>nonterminalContext</key>
+				<integer>0</integer>
+			</dict>
+			<dict>
+				<key>isTerminal</key>
+				<true/>
+				<key>name</key>
+				<string>terminalIconName</string>
+				<key>nonterminalContext</key>
+				<integer>0</integer>
+			</dict>
+			<dict>
+				<key>isTerminal</key>
+				<true/>
+				<key>name</key>
+				<string>tmuxWindowPane</string>
+				<key>nonterminalContext</key>
+				<integer>0</integer>
+			</dict>
+			<dict>
+				<key>isTerminal</key>
+				<true/>
+				<key>name</key>
+				<string>tmuxStatusRight</string>
 				<key>nonterminalContext</key>
 				<integer>0</integer>
 			</dict>
@@ -6402,6 +6501,54 @@
 				<true/>
 				<key>name</key>
 				<string>mouseReportingMode</string>
+				<key>nonterminalContext</key>
+				<integer>0</integer>
+			</dict>
+			<dict>
+				<key>isTerminal</key>
+				<true/>
+				<key>name</key>
+				<string>name</string>
+				<key>nonterminalContext</key>
+				<integer>0</integer>
+			</dict>
+			<dict>
+				<key>isTerminal</key>
+				<false/>
+				<key>name</key>
+				<string>iterm2</string>
+				<key>nonterminalContext</key>
+				<integer>4</integer>
+			</dict>
+			<dict>
+				<key>isTerminal</key>
+				<true/>
+				<key>name</key>
+				<string>rows</string>
+				<key>nonterminalContext</key>
+				<integer>0</integer>
+			</dict>
+			<dict>
+				<key>isTerminal</key>
+				<true/>
+				<key>name</key>
+				<string>username</string>
+				<key>nonterminalContext</key>
+				<integer>0</integer>
+			</dict>
+			<dict>
+				<key>isTerminal</key>
+				<true/>
+				<key>name</key>
+				<string>tty</string>
+				<key>nonterminalContext</key>
+				<integer>0</integer>
+			</dict>
+			<dict>
+				<key>isTerminal</key>
+				<true/>
+				<key>name</key>
+				<string>autoLogId</string>
 				<key>nonterminalContext</key>
 				<integer>0</integer>
 			</dict>
@@ -6425,111 +6572,7 @@
 				<key>isTerminal</key>
 				<true/>
 				<key>name</key>
-				<string>presentationName</string>
-				<key>nonterminalContext</key>
-				<integer>0</integer>
-			</dict>
-			<dict>
-				<key>isTerminal</key>
-				<true/>
-				<key>name</key>
-				<string>tmuxRole</string>
-				<key>nonterminalContext</key>
-				<integer>0</integer>
-			</dict>
-			<dict>
-				<key>isTerminal</key>
-				<true/>
-				<key>name</key>
-				<string>path</string>
-				<key>nonterminalContext</key>
-				<integer>0</integer>
-			</dict>
-			<dict>
-				<key>isTerminal</key>
-				<true/>
-				<key>name</key>
-				<string>jobName</string>
-				<key>nonterminalContext</key>
-				<integer>0</integer>
-			</dict>
-			<dict>
-				<key>isTerminal</key>
-				<true/>
-				<key>name</key>
-				<string>name</string>
-				<key>nonterminalContext</key>
-				<integer>0</integer>
-			</dict>
-			<dict>
-				<key>isTerminal</key>
-				<true/>
-				<key>name</key>
-				<string>lastCommand</string>
-				<key>nonterminalContext</key>
-				<integer>0</integer>
-			</dict>
-			<dict>
-				<key>isTerminal</key>
-				<true/>
-				<key>name</key>
-				<string>autoName</string>
-				<key>nonterminalContext</key>
-				<integer>0</integer>
-			</dict>
-			<dict>
-				<key>isTerminal</key>
-				<true/>
-				<key>name</key>
-				<string>tmuxWindowPane</string>
-				<key>nonterminalContext</key>
-				<integer>0</integer>
-			</dict>
-			<dict>
-				<key>isTerminal</key>
-				<true/>
-				<key>name</key>
-				<string>id</string>
-				<key>nonterminalContext</key>
-				<integer>0</integer>
-			</dict>
-			<dict>
-				<key>isTerminal</key>
-				<true/>
-				<key>name</key>
-				<string>terminalIconName</string>
-				<key>nonterminalContext</key>
-				<integer>0</integer>
-			</dict>
-			<dict>
-				<key>isTerminal</key>
-				<true/>
-				<key>name</key>
 				<string>tmuxStatusLeft</string>
-				<key>nonterminalContext</key>
-				<integer>0</integer>
-			</dict>
-			<dict>
-				<key>isTerminal</key>
-				<true/>
-				<key>name</key>
-				<string>autoLogId</string>
-				<key>nonterminalContext</key>
-				<integer>0</integer>
-			</dict>
-			<dict>
-				<key>isTerminal</key>
-				<true/>
-				<key>name</key>
-				<string>terminalWindowName</string>
-				<key>nonterminalContext</key>
-				<integer>0</integer>
-			</dict>
-			<dict>
-				<key>isTerminal</key>
-				<true/>
-				<key>name</key>
-				<string>rows</string>
 				<key>nonterminalContext</key>
 				<integer>0</integer>
 			</dict>
@@ -6545,7 +6588,7 @@
 				<key>isTerminal</key>
 				<true/>
 				<key>name</key>
-				<string>triggerName</string>
+				<string>autoName</string>
 				<key>nonterminalContext</key>
 				<integer>0</integer>
 			</dict>
@@ -6553,7 +6596,23 @@
 				<key>isTerminal</key>
 				<true/>
 				<key>name</key>
-				<string>hostname</string>
+				<string>commandLine</string>
+				<key>nonterminalContext</key>
+				<integer>0</integer>
+			</dict>
+			<dict>
+				<key>isTerminal</key>
+				<true/>
+				<key>name</key>
+				<string>creationTimeString</string>
+				<key>nonterminalContext</key>
+				<integer>0</integer>
+			</dict>
+			<dict>
+				<key>isTerminal</key>
+				<true/>
+				<key>name</key>
+				<string>terminalWindowName</string>
 				<key>nonterminalContext</key>
 				<integer>0</integer>
 			</dict>
@@ -6570,38 +6629,6 @@
 				<true/>
 				<key>name</key>
 				<string>pid</string>
-				<key>nonterminalContext</key>
-				<integer>0</integer>
-			</dict>
-			<dict>
-				<key>isTerminal</key>
-				<true/>
-				<key>name</key>
-				<string>profileName</string>
-				<key>nonterminalContext</key>
-				<integer>0</integer>
-			</dict>
-			<dict>
-				<key>isTerminal</key>
-				<true/>
-				<key>name</key>
-				<string>termid</string>
-				<key>nonterminalContext</key>
-				<integer>0</integer>
-			</dict>
-			<dict>
-				<key>isTerminal</key>
-				<false/>
-				<key>name</key>
-				<string>iterm2</string>
-				<key>nonterminalContext</key>
-				<integer>4</integer>
-			</dict>
-			<dict>
-				<key>isTerminal</key>
-				<true/>
-				<key>name</key>
-				<string>username</string>
 				<key>nonterminalContext</key>
 				<integer>0</integer>
 			</dict>
@@ -6684,6 +6711,22 @@
 				<key>isTerminal</key>
 				<true/>
 				<key>name</key>
+				<string>currentTab.currentSession.username</string>
+				<key>nonterminalContext</key>
+				<integer>0</integer>
+			</dict>
+			<dict>
+				<key>isTerminal</key>
+				<true/>
+				<key>name</key>
+				<string>currentTab.currentSession.pid</string>
+				<key>nonterminalContext</key>
+				<integer>0</integer>
+			</dict>
+			<dict>
+				<key>isTerminal</key>
+				<true/>
+				<key>name</key>
 				<string>currentTab.currentSession.terminalWindowName</string>
 				<key>nonterminalContext</key>
 				<integer>0</integer>
@@ -6693,6 +6736,14 @@
 				<true/>
 				<key>name</key>
 				<string>currentTab.currentSession.lastCommand</string>
+				<key>nonterminalContext</key>
+				<integer>0</integer>
+			</dict>
+			<dict>
+				<key>isTerminal</key>
+				<true/>
+				<key>name</key>
+				<string>id</string>
 				<key>nonterminalContext</key>
 				<integer>0</integer>
 			</dict>
@@ -6717,6 +6768,30 @@
 				<true/>
 				<key>name</key>
 				<string>currentTab.iterm2.localhostName</string>
+				<key>nonterminalContext</key>
+				<integer>0</integer>
+			</dict>
+			<dict>
+				<key>isTerminal</key>
+				<true/>
+				<key>name</key>
+				<string>currentTab.currentSession.tty</string>
+				<key>nonterminalContext</key>
+				<integer>0</integer>
+			</dict>
+			<dict>
+				<key>isTerminal</key>
+				<true/>
+				<key>name</key>
+				<string>currentTab.currentSession.commandLine</string>
+				<key>nonterminalContext</key>
+				<integer>0</integer>
+			</dict>
+			<dict>
+				<key>isTerminal</key>
+				<true/>
+				<key>name</key>
+				<string>currentTab.currentSession.hostname</string>
 				<key>nonterminalContext</key>
 				<integer>0</integer>
 			</dict>
@@ -6818,6 +6893,14 @@
 				<string>window</string>
 				<key>nonterminalContext</key>
 				<integer>0</integer>
+			</dict>
+			<dict>
+				<key>isTerminal</key>
+				<false/>
+				<key>name</key>
+				<string>window</string>
+				<key>nonterminalContext</key>
+				<integer>16</integer>
 			</dict>
 			<dict>
 				<key>isTerminal</key>
@@ -6960,7 +7043,7 @@
 	<key>SUHasLaunchedBefore</key>
 	<true/>
 	<key>SULastCheckTime</key>
-	<date>2019-04-17T20:39:15Z</date>
+	<date>2019-06-10T21:39:51Z</date>
 	<key>SUSendProfileInfo</key>
 	<false/>
 	<key>SUUpdateRelaunchingMarker</key>
@@ -6990,7 +7073,7 @@
 	<key>SwitchWindowModifier</key>
 	<integer>6</integer>
 	<key>TabStyleWithAutomaticOption</key>
-	<integer>5</integer>
+	<integer>6</integer>
 	<key>TabViewType</key>
 	<integer>0</integer>
 	<key>ThreeFingerEmulates</key>
@@ -7025,17 +7108,19 @@
 				<key>Has Toolbelt</key>
 				<false/>
 				<key>Height</key>
-				<real>1669</real>
+				<real>1417</real>
 				<key>Hide After Opening</key>
 				<false/>
 				<key>Hiding Toolbelt Should Resize Window</key>
 				<true/>
+				<key>Initial Profile</key>
+				<dict/>
 				<key>Is Hotkey Window</key>
 				<false/>
 				<key>Saved Window Type</key>
 				<integer>0</integer>
 				<key>Screen</key>
-				<integer>1</integer>
+				<integer>2</integer>
 				<key>Selected Tab Index</key>
 				<integer>0</integer>
 				<key>Tabs</key>
@@ -7312,7 +7397,7 @@
 												<real>0.73333334922790527</real>
 											</dict>
 											<key>Guid</key>
-											<string>4F0C96A7-6063-4A08-94B2-0C5AD6FCCCD4</string>
+											<string>0094A73A-0BFF-49C1-B16C-637B327FC35E</string>
 											<key>Hide After Opening</key>
 											<false/>
 											<key>Horizontal Spacing</key>
@@ -7917,10 +8002,8 @@
 											<key>Working Directory</key>
 											<string>/Users/benjaminbernard</string>
 										</dict>
-										<key>Bookmark Name</key>
-										<string>Main Pane</string>
 										<key>Columns</key>
-										<integer>428</integer>
+										<integer>364</integer>
 										<key>Commands</key>
 										<array>
 											<string>nt default</string>
@@ -7928,6 +8011,8 @@
 										</array>
 										<key>Directories</key>
 										<array>
+											<string>/Users/benjaminbernard</string>
+											<string>/Users/benjaminbernard</string>
 											<string>/Users/benjaminbernard</string>
 											<string>/Users/benjaminbernard</string>
 											<string>/Users/benjaminbernard</string>
@@ -8020,9 +8105,28 @@
 												<key>User name</key>
 												<string>benjaminbernard</string>
 											</dict>
+											<dict>
+												<key>Host name</key>
+												<string>benjaminbernard</string>
+												<key>User name</key>
+												<string>benjaminbernard</string>
+											</dict>
+											<dict>
+												<key>Host name</key>
+												<string>benjaminbernard</string>
+												<key>User name</key>
+												<string>benjaminbernard</string>
+											</dict>
 										</array>
 										<key>Is UTF-8</key>
 										<true/>
+										<key>Name Controller State</key>
+										<dict>
+											<key>icon title stack</key>
+											<array/>
+											<key>window title stack</key>
+											<array/>
+										</dict>
 										<key>Program</key>
 										<dict>
 											<key>Command</key>
@@ -8031,17 +8135,13 @@
 											<string>Command</string>
 										</dict>
 										<key>Rows</key>
-										<integer>79</integer>
-										<key>Session Default Name</key>
-										<string>Main Pane</string>
+										<integer>67</integer>
 										<key>Session GUID</key>
 										<string>8E1E6576-6623-4DFE-8902-03206669F565</string>
-										<key>Session Name</key>
-										<string>~</string>
-										<key>Session Window Title</key>
-										<string>benjaminbernard@benjaminbernard-mbp: ~</string>
 										<key>Shell Integration Ever Used</key>
 										<true/>
+										<key>Short Lived Single Use</key>
+										<false/>
 										<key>Substitutions</key>
 										<dict>
 											<key>$$$$</key>
@@ -8055,9 +8155,9 @@
 									<key>frame</key>
 									<dict>
 										<key>height</key>
-										<real>1350</real>
+										<real>1144</real>
 										<key>width</key>
-										<real>3008</real>
+										<real>2560</real>
 										<key>x</key>
 										<real>0.0</real>
 										<key>y</key>
@@ -8334,7 +8434,7 @@
 														<real>0.73333334922790527</real>
 													</dict>
 													<key>Guid</key>
-													<string>287A5851-7231-432E-BA9B-55DBB8555F14</string>
+													<string>F422026B-FC79-4017-876C-6C2861C1BB40</string>
 													<key>Hide After Opening</key>
 													<false/>
 													<key>Horizontal Spacing</key>
@@ -8939,10 +9039,8 @@
 													<key>Working Directory</key>
 													<string>/Users/benjaminbernard</string>
 												</dict>
-												<key>Bookmark Name</key>
-												<string>webpack</string>
 												<key>Columns</key>
-												<integer>51</integer>
+												<integer>43</integer>
 												<key>Commands</key>
 												<array>
 													<string>nt server</string>
@@ -8954,6 +9052,8 @@
 												</array>
 												<key>Directories</key>
 												<array>
+													<string>/Users/benjaminbernard</string>
+													<string>/Users/benjaminbernard</string>
 													<string>/Users/benjaminbernard</string>
 													<string>/Users/benjaminbernard</string>
 													<string>/Users/benjaminbernard</string>
@@ -9046,9 +9146,28 @@
 														<key>User name</key>
 														<string>benjaminbernard</string>
 													</dict>
+													<dict>
+														<key>Host name</key>
+														<string>benjaminbernard</string>
+														<key>User name</key>
+														<string>benjaminbernard</string>
+													</dict>
+													<dict>
+														<key>Host name</key>
+														<string>benjaminbernard</string>
+														<key>User name</key>
+														<string>benjaminbernard</string>
+													</dict>
 												</array>
 												<key>Is UTF-8</key>
 												<true/>
+												<key>Name Controller State</key>
+												<dict>
+													<key>icon title stack</key>
+													<array/>
+													<key>window title stack</key>
+													<array/>
+												</dict>
 												<key>Program</key>
 												<dict>
 													<key>Command</key>
@@ -9057,17 +9176,13 @@
 													<string>Command</string>
 												</dict>
 												<key>Rows</key>
-												<integer>17</integer>
-												<key>Session Default Name</key>
-												<string>Yarn</string>
+												<integer>14</integer>
 												<key>Session GUID</key>
 												<string>BA4FAE4F-9D80-4E47-9C34-F42540F83CAD</string>
-												<key>Session Name</key>
-												<string>tmux-sub-session-window.sh</string>
-												<key>Session Window Title</key>
-												<string>tmux-sub-session-window.sh server yarn</string>
 												<key>Shell Integration Ever Used</key>
 												<true/>
+												<key>Short Lived Single Use</key>
+												<false/>
 												<key>Substitutions</key>
 												<dict/>
 												<key>Working Directory</key>
@@ -9078,9 +9193,9 @@
 											<key>frame</key>
 											<dict>
 												<key>height</key>
-												<real>295</real>
+												<real>250</real>
 												<key>width</key>
-												<real>368</real>
+												<real>311</real>
 												<key>x</key>
 												<real>0.0</real>
 												<key>y</key>
@@ -9354,7 +9469,7 @@
 														<real>0.73333334922790527</real>
 													</dict>
 													<key>Guid</key>
-													<string>4ECE5CE3-4F8A-44E9-BF15-A15D95870379</string>
+													<string>CD7A5C52-FF82-4AF9-AAF1-EE5AC0C5C356</string>
 													<key>Hide After Opening</key>
 													<false/>
 													<key>Horizontal Spacing</key>
@@ -9959,10 +10074,8 @@
 													<key>Working Directory</key>
 													<string>/Users/benjaminbernard</string>
 												</dict>
-												<key>Bookmark Name</key>
-												<string>sync</string>
 												<key>Columns</key>
-												<integer>49</integer>
+												<integer>41</integer>
 												<key>Commands</key>
 												<array>
 													<string>nt server</string>
@@ -9971,9 +10084,12 @@
 													<string>mux-sub-session-window.shh serve devbox</string>
 													<string>tmux-sub-session-window.sh server devbox</string>
 													<string>tmux-sub-session-window.sh server devbox</string>
+													<string>tmux-sub-session-window.sh server devbox</string>
 												</array>
 												<key>Directories</key>
 												<array>
+													<string>/Users/benjaminbernard</string>
+													<string>/Users/benjaminbernard</string>
 													<string>/Users/benjaminbernard</string>
 													<string>/Users/benjaminbernard</string>
 													<string>/Users/benjaminbernard</string>
@@ -10066,9 +10182,28 @@
 														<key>User name</key>
 														<string>benjaminbernard</string>
 													</dict>
+													<dict>
+														<key>Host name</key>
+														<string>benjaminbernard</string>
+														<key>User name</key>
+														<string>benjaminbernard</string>
+													</dict>
+													<dict>
+														<key>Host name</key>
+														<string>benjaminbernard</string>
+														<key>User name</key>
+														<string>benjaminbernard</string>
+													</dict>
 												</array>
 												<key>Is UTF-8</key>
 												<true/>
+												<key>Name Controller State</key>
+												<dict>
+													<key>icon title stack</key>
+													<array/>
+													<key>window title stack</key>
+													<array/>
+												</dict>
 												<key>Program</key>
 												<dict>
 													<key>Command</key>
@@ -10077,17 +10212,13 @@
 													<string>Command</string>
 												</dict>
 												<key>Rows</key>
-												<integer>17</integer>
-												<key>Session Default Name</key>
-												<string>DevBox</string>
+												<integer>14</integer>
 												<key>Session GUID</key>
 												<string>D36DB134-0913-4D67-9D45-57E941A47EA6</string>
-												<key>Session Name</key>
-												<string>tmux-sub-session-window.sh</string>
-												<key>Session Window Title</key>
-												<string>tmux-sub-session-window.sh server devbox</string>
 												<key>Shell Integration Ever Used</key>
 												<true/>
+												<key>Short Lived Single Use</key>
+												<false/>
 												<key>Substitutions</key>
 												<dict/>
 												<key>Working Directory</key>
@@ -10098,11 +10229,11 @@
 											<key>frame</key>
 											<dict>
 												<key>height</key>
-												<real>295</real>
+												<real>250</real>
 												<key>width</key>
-												<real>356</real>
+												<real>303</real>
 												<key>x</key>
-												<real>369</real>
+												<real>312</real>
 												<key>y</key>
 												<real>0.0</real>
 											</dict>
@@ -10374,7 +10505,7 @@
 														<real>0.73333334922790527</real>
 													</dict>
 													<key>Guid</key>
-													<string>EE527642-F797-4A04-A427-C5A3791F002F</string>
+													<string>560C3941-A6D2-45A9-ABBC-80518A468774</string>
 													<key>Hide After Opening</key>
 													<false/>
 													<key>Horizontal Spacing</key>
@@ -10979,12 +11110,11 @@
 													<key>Working Directory</key>
 													<string>/Users/benjaminbernard</string>
 												</dict>
-												<key>Bookmark Name</key>
-												<string>devbox webpack</string>
 												<key>Columns</key>
-												<integer>71</integer>
+												<integer>60</integer>
 												<key>Commands</key>
 												<array>
+													<string>tmux-sub-session-window.sh server dwp</string>
 													<string>tmux-sub-session-window.sh server dwp</string>
 													<string>tmux-sub-session-window.sh server dwp</string>
 													<string>tmux-sub-session-window.sh server dwp</string>
@@ -10993,6 +11123,8 @@
 												</array>
 												<key>Directories</key>
 												<array>
+													<string>/Users/benjaminbernard</string>
+													<string>/Users/benjaminbernard</string>
 													<string>/Users/benjaminbernard</string>
 													<string>/Users/benjaminbernard</string>
 													<string>/Users/benjaminbernard</string>
@@ -11071,9 +11203,28 @@
 														<key>User name</key>
 														<string>benjaminbernard</string>
 													</dict>
+													<dict>
+														<key>Host name</key>
+														<string>benjaminbernard</string>
+														<key>User name</key>
+														<string>benjaminbernard</string>
+													</dict>
+													<dict>
+														<key>Host name</key>
+														<string>benjaminbernard</string>
+														<key>User name</key>
+														<string>benjaminbernard</string>
+													</dict>
 												</array>
 												<key>Is UTF-8</key>
 												<true/>
+												<key>Name Controller State</key>
+												<dict>
+													<key>icon title stack</key>
+													<array/>
+													<key>window title stack</key>
+													<array/>
+												</dict>
 												<key>Program</key>
 												<dict>
 													<key>Command</key>
@@ -11082,17 +11233,13 @@
 													<string>Command</string>
 												</dict>
 												<key>Rows</key>
-												<integer>17</integer>
-												<key>Session Default Name</key>
-												<string>Webpack</string>
+												<integer>14</integer>
 												<key>Session GUID</key>
 												<string>03D19AE2-B010-47E9-A9E2-A64377F05793</string>
-												<key>Session Name</key>
-												<string>tmux-sub-session-window.sh</string>
-												<key>Session Window Title</key>
-												<string>tmux-sub-session-window.sh server dwp</string>
 												<key>Shell Integration Ever Used</key>
 												<true/>
+												<key>Short Lived Single Use</key>
+												<false/>
 												<key>Substitutions</key>
 												<dict/>
 												<key>Working Directory</key>
@@ -11103,11 +11250,11 @@
 											<key>frame</key>
 											<dict>
 												<key>height</key>
-												<real>295</real>
+												<real>250</real>
 												<key>width</key>
-												<real>507</real>
+												<real>435</real>
 												<key>x</key>
-												<real>726</real>
+												<real>616</real>
 												<key>y</key>
 												<real>0.0</real>
 											</dict>
@@ -11379,7 +11526,7 @@
 														<real>0.73333334922790527</real>
 													</dict>
 													<key>Guid</key>
-													<string>9E686C64-3BB7-4D33-851F-708E41215F2C</string>
+													<string>E32F778D-E6D1-40E1-912D-4DEC01128D6B</string>
 													<key>Hide After Opening</key>
 													<false/>
 													<key>Horizontal Spacing</key>
@@ -11984,12 +12131,11 @@
 													<key>Working Directory</key>
 													<string>/Users/benjaminbernard</string>
 												</dict>
-												<key>Bookmark Name</key>
-												<string>logs</string>
 												<key>Columns</key>
-												<integer>252</integer>
+												<integer>214</integer>
 												<key>Commands</key>
 												<array>
+													<string>tmux-sub-session-window.sh server logs</string>
 													<string>tmux-sub-session-window.sh server logs</string>
 													<string>tmux-sub-session-window.sh server logs</string>
 													<string>tmux-sub-session-window.sh server logs</string>
@@ -11997,6 +12143,8 @@
 												</array>
 												<key>Directories</key>
 												<array>
+													<string>/Users/benjaminbernard</string>
+													<string>/Users/benjaminbernard</string>
 													<string>/Users/benjaminbernard</string>
 													<string>/Users/benjaminbernard</string>
 													<string>/Users/benjaminbernard</string>
@@ -12061,9 +12209,28 @@
 														<key>User name</key>
 														<string>benjaminbernard</string>
 													</dict>
+													<dict>
+														<key>Host name</key>
+														<string>benjaminbernard</string>
+														<key>User name</key>
+														<string>benjaminbernard</string>
+													</dict>
+													<dict>
+														<key>Host name</key>
+														<string>benjaminbernard</string>
+														<key>User name</key>
+														<string>benjaminbernard</string>
+													</dict>
 												</array>
 												<key>Is UTF-8</key>
 												<true/>
+												<key>Name Controller State</key>
+												<dict>
+													<key>icon title stack</key>
+													<array/>
+													<key>window title stack</key>
+													<array/>
+												</dict>
 												<key>Program</key>
 												<dict>
 													<key>Command</key>
@@ -12072,17 +12239,13 @@
 													<string>Command</string>
 												</dict>
 												<key>Rows</key>
-												<integer>17</integer>
-												<key>Session Default Name</key>
-												<string>Logs</string>
+												<integer>14</integer>
 												<key>Session GUID</key>
 												<string>DE8AECE2-2EA0-40DB-AE8A-835AFB4C3E42</string>
-												<key>Session Name</key>
-												<string>tmux-sub-session-window.sh</string>
-												<key>Session Window Title</key>
-												<string>tmux-sub-session-window.sh server logs</string>
 												<key>Shell Integration Ever Used</key>
 												<true/>
+												<key>Short Lived Single Use</key>
+												<false/>
 												<key>Substitutions</key>
 												<dict/>
 												<key>Working Directory</key>
@@ -12093,11 +12256,11 @@
 											<key>frame</key>
 											<dict>
 												<key>height</key>
-												<real>295</real>
+												<real>250</real>
 												<key>width</key>
-												<real>1774</real>
+												<real>1508</real>
 												<key>x</key>
-												<real>1234</real>
+												<real>1052</real>
 												<key>y</key>
 												<real>0.0</real>
 											</dict>
@@ -12108,13 +12271,13 @@
 									<key>frame</key>
 									<dict>
 										<key>height</key>
-										<real>295</real>
+										<real>250</real>
 										<key>width</key>
-										<real>3008</real>
+										<real>2560</real>
 										<key>x</key>
 										<real>0.0</real>
 										<key>y</key>
-										<real>1351</real>
+										<real>1145</real>
 									</dict>
 									<key>isVertical</key>
 									<true/>
@@ -12125,9 +12288,9 @@
 							<key>frame</key>
 							<dict>
 								<key>height</key>
-								<real>1646</real>
+								<real>1395</real>
 								<key>width</key>
-								<real>3008</real>
+								<real>2560</real>
 								<key>x</key>
 								<real>0.0</real>
 								<key>y</key>
@@ -12140,14 +12303,26 @@
 				</array>
 				<key>TerminalGuid</key>
 				<string>pty-3E3F5451-D442-4E7E-A0DD-1D5456CF0864</string>
+				<key>Toolbelt Proportions</key>
+				<dict>
+					<key>proportions</key>
+					<array>
+						<dict>
+							<key>heightAsFraction</key>
+							<real>1</real>
+							<key>name</key>
+							<string>Profiles</string>
+						</dict>
+					</array>
+				</dict>
 				<key>Use Transparency</key>
 				<true/>
 				<key>Width</key>
-				<real>3008</real>
+				<real>2560</real>
 				<key>Window Type</key>
 				<integer>0</integer>
 				<key>X Origin</key>
-				<real>-1725</real>
+				<real>-1850</real>
 				<key>Y Origin</key>
 				<real>1200</real>
 			</dict>
@@ -12164,6 +12339,8 @@
 				<false/>
 				<key>Hiding Toolbelt Should Resize Window</key>
 				<true/>
+				<key>Initial Profile</key>
+				<dict/>
 				<key>Is Hotkey Window</key>
 				<false/>
 				<key>Saved Window Type</key>
@@ -12446,7 +12623,7 @@
 												<real>0.73333334922790527</real>
 											</dict>
 											<key>Guid</key>
-											<string>DAD277E2-E7E5-4D7C-AE4A-ABDA305D8FC7</string>
+											<string>CE7F986E-9605-42BB-B8AE-C483FAE360BF</string>
 											<key>Hide After Opening</key>
 											<false/>
 											<key>Horizontal Spacing</key>
@@ -13051,8 +13228,6 @@
 											<key>Working Directory</key>
 											<string>/Users/benjaminbernard</string>
 										</dict>
-										<key>Bookmark Name</key>
-										<string>irc</string>
 										<key>Columns</key>
 										<integer>190</integer>
 										<key>Commands</key>
@@ -13061,9 +13236,12 @@
 											<string>nt irc</string>
 											<string>nt irc</string>
 											<string>nt irc</string>
+											<string>nt irc</string>
 										</array>
 										<key>Directories</key>
 										<array>
+											<string>/Users/benjaminbernard</string>
+											<string>/Users/benjaminbernard</string>
 											<string>/Users/benjaminbernard</string>
 											<string>/Users/benjaminbernard</string>
 											<string>/Users/benjaminbernard</string>
@@ -13156,9 +13334,28 @@
 												<key>User name</key>
 												<string>benjaminbernard</string>
 											</dict>
+											<dict>
+												<key>Host name</key>
+												<string>benjaminbernard</string>
+												<key>User name</key>
+												<string>benjaminbernard</string>
+											</dict>
+											<dict>
+												<key>Host name</key>
+												<string>benjaminbernard</string>
+												<key>User name</key>
+												<string>benjaminbernard</string>
+											</dict>
 										</array>
 										<key>Is UTF-8</key>
 										<true/>
+										<key>Name Controller State</key>
+										<dict>
+											<key>icon title stack</key>
+											<array/>
+											<key>window title stack</key>
+											<array/>
+										</dict>
 										<key>Program</key>
 										<dict>
 											<key>Command</key>
@@ -13168,16 +13365,12 @@
 										</dict>
 										<key>Rows</key>
 										<integer>67</integer>
-										<key>Session Default Name</key>
-										<string>IRC</string>
 										<key>Session GUID</key>
 										<string>DC38C753-CA82-428E-A6F7-C4A7EF636686</string>
-										<key>Session Name</key>
-										<string>nt</string>
-										<key>Session Window Title</key>
-										<string>nt irc</string>
 										<key>Shell Integration Ever Used</key>
 										<true/>
+										<key>Short Lived Single Use</key>
+										<false/>
 										<key>Substitutions</key>
 										<dict>
 											<key>$$$$</key>
@@ -13191,7 +13384,7 @@
 									<key>frame</key>
 									<dict>
 										<key>height</key>
-										<real>1154</real>
+										<real>1155</real>
 										<key>width</key>
 										<real>1340</real>
 										<key>x</key>
@@ -13206,7 +13399,7 @@
 							<key>frame</key>
 							<dict>
 								<key>height</key>
-								<real>1154</real>
+								<real>1155</real>
 								<key>width</key>
 								<real>1340</real>
 								<key>x</key>
@@ -13221,6 +13414,18 @@
 				</array>
 				<key>TerminalGuid</key>
 				<string>pty-B8DEF4A0-297A-42F9-9ADB-CDAA217DD8FD</string>
+				<key>Toolbelt Proportions</key>
+				<dict>
+					<key>proportions</key>
+					<array>
+						<dict>
+							<key>heightAsFraction</key>
+							<real>1</real>
+							<key>name</key>
+							<string>Profiles</string>
+						</dict>
+					</array>
+				</dict>
 				<key>Use Transparency</key>
 				<true/>
 				<key>Width</key>
@@ -13247,7 +13452,7 @@
 	<key>findRegex_iTerm</key>
 	<false/>
 	<key>iTerm Version</key>
-	<string>3.3.0beta3</string>
+	<string>3.3.0beta10</string>
 	<key>kCPKSelectionViewPreferredModeKey</key>
 	<integer>1</integer>
 	<key>kCPKSelectionViewShowHSBTextFieldsKey</key>

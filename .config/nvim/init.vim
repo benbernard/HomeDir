@@ -55,7 +55,6 @@ Plug 'tpope/vim-unimpaired'
 Plug 'thinca/vim-unite-history'
 Plug 'triglav/vim-visual-increment'
 Plug 'jlanzarotta/bufexplorer'
-Plug '~/.config/nvim/bundle/custom-colors'
 Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
 Plug 'junegunn/fzf.vim'
 Plug 'justinmk/vim-sneak'
@@ -71,6 +70,8 @@ Plug 'vim-scripts/JavaScript-Indent'
 Plug 'w0rp/ale'
 Plug 'andymass/vim-matchup'
 Plug 'christoomey/vim-tmux-navigator'
+Plug 'mr-ubik/vim-hackerman-syntax'
+Plug 'tpope/vim-abolish'
 
 " Disabled plugins:
 " Plug 'ternjs/tern_for_vim', {'do': 'npm install'} " Doesn't seem to work well
@@ -79,6 +80,12 @@ Plug 'christoomey/vim-tmux-navigator'
 call plug#end()
 
 syntax on
+
+" Auto Install plugins on startup
+" autocmd VimEnter *
+"   \  if len(filter(values(g:plugs), '!isdirectory(v:val.dir)'))
+"   \|   PlugInstall --sync | q
+"   \| endif
 
 """"""""""""""" Global Setup """"""""""""""""""""
 "First source the environment location
@@ -372,7 +379,7 @@ nmap <Leader>fp :CopyPath<cr>
   let g:prettier#config#trailing_comma = 'es5'
 
 " ALE settings (on the fly linter)
-  let g:ale_echo_msg_format='%severity%[%linter%] %s'
+  let g:ale_echo_msg_format='%severity%[%linter%]:%code%: %s'
 
   " Map [s, s] to location jumps
   nmap [s :ALEPreviousWrap<CR>
@@ -381,7 +388,7 @@ nmap <Leader>fp :CopyPath<cr>
   " Turn off html linters
   let g:ale_linters = {
   \   'html': [],
-  \   'javascript': ['eslint'],
+  \   'javascript': ['flow', 'eslint'],
   \   'ruby': ['rubocop']
   \}
 

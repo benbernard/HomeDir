@@ -70,3 +70,5 @@ autoload -Uz run-help-svn
 autoload -Uz run-help-svk
 unalias run-help
 alias help=run-help
+
+alias od=onedrivecmd

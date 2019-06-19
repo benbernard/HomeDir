@@ -93,3 +93,26 @@ fzf-git-widget() {
 
 zle -N fzf-git-widget
 bindkey '^G' fzf-git-widget
+
+fzf-git-status-widget() {
+  setopt localoptions pipefail 2> /dev/null
+  local files=$(
+    git status --porcelain |
+    sed 's/^...//' |
+    fzf -m --ansi --preview='git -c color.status=always status -s | grep {}; echo; git diff --color {}'
+  )
+
+  if [[ -z "$files" ]]; then
+    zle redisplay
+    return 0
+  fi
+
+  LBUFFER="${LBUFFER}${files}"
+  local ret=$?
+  zle redisplay
+  typeset -f zle-line-init >/dev/null && zle zle-line-init
+  return $ret
+}
+
+zle -N fzf-git-status-widget
+bindkey '^S' fzf-git-status-widget

@@ -26,6 +26,24 @@ endfunction
 command InsertRequireDynamic call fzf#run(fzf#wrap('requires', {'sink': function('Insert_require_dynamic'), 'options': '-q ".js "'}))
 map <Leader>ud :InsertRequireDynamic<CR>
 
+" \ut to insert import type statements
+function! Insert_type(path)
+  let line = system('createImportLine.sh ' . a:path . ' ' . expand('%p') . ' 1 2>/dev/null')
+  echom 'createImportLine.sh ' . a:path . ' ' . expand('%p') . ' 1 2>/dev/null'
+  execute "normal! mqG?import \<CR>o" . line . "\<esc>`q"
+endfunction
+command InsertTypeImport call fzf#run(fzf#wrap('requires', {'sink': function('Insert_type'), 'options': '-q "/generated__/ .graphql.js ' . expand('%:t:r') . ' "'}))
+map <Leader>ut :InsertTypeImport<CR>
+
+" \ut to insert import type statements
+function! Insert_import(path)
+  let line = system('createImportLine.sh ' . a:path . ' ' . expand('%p') . ' 2>/dev/null')
+  echom 'createImportLine.sh ' . a:path . ' ' . expand('%p') . ' 2>/dev/null'
+  execute "normal! mqG?import \<CR>o" . line . "\<esc>`q"
+endfunction
+command InsertImport call fzf#run(fzf#wrap('requires', {'sink': function('Insert_import'), 'options': '-q "webpack/assets/javascripts/core "'}))
+map <Leader>ui :InsertImport<CR>
+
 " \ul to search for the word under the cursor
 map <Leader>ul :Ag <C-R><C-W><CR>
 
