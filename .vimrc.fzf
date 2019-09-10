@@ -26,23 +26,36 @@ endfunction
 command InsertRequireDynamic call fzf#run(fzf#wrap('requires', {'sink': function('Insert_require_dynamic'), 'options': '-q ".js "'}))
 map <Leader>ud :InsertRequireDynamic<CR>
 
-" \ut to insert import type statements
+" \it to insert import type statements
 function! Insert_type(path)
   let line = system('createImportLine.sh ' . a:path . ' ' . expand('%p') . ' 1 2>/dev/null')
   echom 'createImportLine.sh ' . a:path . ' ' . expand('%p') . ' 1 2>/dev/null'
   execute "normal! mqG?import \<CR>o" . line . "\<esc>`q"
 endfunction
-command InsertTypeImport call fzf#run(fzf#wrap('requires', {'sink': function('Insert_type'), 'options': '-q "/generated__/ .graphql.js ' . expand('%:t:r') . ' "'}))
-map <Leader>ut :InsertTypeImport<CR>
+command InsertTypeImport call fzf#run(fzf#wrap('imports', {'sink': function('Insert_type'), 'options': '-q "/generated__/ .graphql.js ' . expand('%:t:r') . ' "'}))
+map <Leader>it :InsertTypeImport<CR>
 
-" \ut to insert import type statements
+" \if to insert import of files
 function! Insert_import(path)
   let line = system('createImportLine.sh ' . a:path . ' ' . expand('%p') . ' 2>/dev/null')
   echom 'createImportLine.sh ' . a:path . ' ' . expand('%p') . ' 2>/dev/null'
   execute "normal! mqG?import \<CR>o" . line . "\<esc>`q"
 endfunction
-command InsertImport call fzf#run(fzf#wrap('requires', {'sink': function('Insert_import'), 'options': '-q "webpack/assets/javascripts/core "'}))
-map <Leader>ui :InsertImport<CR>
+command InsertImport call fzf#run(fzf#wrap('imports', {'sink': function('Insert_import'), 'options': '-q "webpack/assets/javascripts/core "'}))
+map <Leader>if :InsertImport<CR>
+
+" \ig to search all import statements
+function! Insert_generic_import(path)
+  let import = substitute(a:path, '^.\{1,}:\d\+:', '', '\v')
+  execute "normal! mqG?import \<CR>o" . import . "\<esc>`q"
+endfunction
+" command InsertGenericImport call fzf#run(fzf#wrap('imports', {'sink': function('Insert_generic_import'), 'options': '-q "webpack/assets/javascripts/core "'}))
+command InsertGenericImport call fzf#run(fzf#wrap('imports', {
+      \ 'sink': function('Insert_generic_import'),
+      \ 'options': '-q "webpack/assets/javascripts/core "',
+      \ 'source': printf('ag "^import" webpack')
+      \ }))
+map <Leader>ig :InsertGenericImport<CR>
 
 " \ul to search for the word under the cursor
 map <Leader>ul :Ag <C-R><C-W><CR>
@@ -100,3 +113,19 @@ command! -bang -nargs=* Ag
   \                 <bang>0)
 
 map <Leader>ub :Buffers<CR>
+
+" Use \un to search for Neighboring files
+function! s:fzf_neighbouring_files()
+  let current_file =expand("%")
+  let cwd = fnamemodify(current_file, ':p:h')
+  let command = 'ag -g "" -f ' . cwd . ' --depth 0'
+
+  call fzf#run({
+        \ 'source': command,
+        \ 'sink':   'e',
+        \ 'options': '-m -x +s',
+        \ 'window':  'enew' })
+endfunction
+
+command! FZFNeigh call s:fzf_neighbouring_files()
+map <Leader>un :call FZFNeigh

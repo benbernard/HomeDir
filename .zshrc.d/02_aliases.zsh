@@ -72,3 +72,5 @@ unalias run-help
 alias help=run-help
 
 alias od=onedrivecmd
+
+alias 'rspecf=bin/rspec --fail-fast'

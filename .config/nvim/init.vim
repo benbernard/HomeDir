@@ -82,10 +82,10 @@ call plug#end()
 syntax on
 
 " Auto Install plugins on startup
-" autocmd VimEnter *
-"   \  if len(filter(values(g:plugs), '!isdirectory(v:val.dir)'))
-"   \|   PlugInstall --sync | q
-"   \| endif
+autocmd VimEnter *
+  \  if len(filter(values(g:plugs), '!isdirectory(v:val.dir)'))
+  \|   PlugInstall --sync | q
+  \| endif
 
 """"""""""""""" Global Setup """"""""""""""""""""
 "First source the environment location
@@ -660,6 +660,28 @@ let g:vim_markdown_folding_disabled=1
   vnoremap  :m '<-2<CR>gv=gv
 
 
+" Settings for vim-js-file-import
+
+let g:js_file_import_from_root = 1
+let g:js_file_import_root = $HOME . "/flexport/webpack/assets/javascripts"
+
+" Kill ctags on exit, otherwise takes too long
+autocmd VimLeave * :!sh -c 'sleep 1 && killall -9 ctags'&
+
+" Config for gutentags_plus
+
+" enable gtags module
+let g:gutentags_modules = ['ctags', 'gtags_cscope']
+
+" config project root markers.
+let g:gutentags_project_root = ['.git']
+
+" generate datebases in my cache directory, prevent gtags files polluting my project
+let g:gutentags_cache_dir = expand('~/.cache/tags')
+
+" change focus to quickfix window after search (optional).
+let g:gutentags_plus_switch = 1
+
 """"""""""""""" Typos """"""""""""""""""""
 " A list of iabbrev to correct common typos
 
@@ -668,6 +690,8 @@ iabbrev Colleicton Collection
 iabbrev restaurnt restaurant
 iabbrev restauarnt restaurant
 iabbrev colleciton collection
+iabbrev shoudl should
+iabbrev coudl could
 
 """"""""""""""" Syntax """"""""""""""""""""
 

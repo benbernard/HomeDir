@@ -64,8 +64,8 @@ export PATH="/usr/local/heroku/bin:$PATH"
 
 # Setup fzf
 # Use ag for searching (uses .agignore)
-export FZF_DEFAULT_COMMAND='ag -g ""'
-export FZF_CTRL_T_COMMAND='ag -g ""'
+export FZF_DEFAULT_COMMAND='ag --hidden --ignore .git -g ""'
+export FZF_CTRL_T_COMMAND='ag --hidden --ignore .git -g ""'
 
 # Default display options (taken from readme)
 export FZF_DEFAULT_OPTS='--height 40% --reverse --border -i -m --bind ctrl-A:select-all,ctrl-d:deselect-all'
