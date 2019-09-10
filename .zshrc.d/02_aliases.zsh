@@ -74,3 +74,7 @@ alias help=run-help
 alias od=onedrivecmd
 
 alias 'rspecf=bin/rspec --fail-fast'
+
+# Fix HEAD^ in shell commands
+# setopt NO_EXTENDED_GLOB
+alias 'git=noglob hub'

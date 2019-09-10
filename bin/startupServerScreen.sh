@@ -37,7 +37,7 @@ tmux send-keys -t worker "cdcl; nodemon --watch .env --config <(echo '{\"signal\
 tmux send-keys -t valueCleaner "cdcl; nodemon --watch .env --config <(echo '{\"signal\": \"SIGKILL\"}') -x foreman start -m pgBridge=1,valueCleaner=1" Enter
 tmux send-keys -t watch "cdcl; while (1) { grunt min-watch }" Enter
 tmux send-keys -t paste-tracker "cd; cd bin/mac; ./paste-tracker.pl" Enter
-tmux send-keys -t autossh "AUTOSSH_POLL=30 AUTOSSH_DEBUG=1 autossh -M2000 -L6667:localhost:6667 -N cmyers.org" Enter
+tmux send-keys -t autossh "while (true) { AUTOSSH_POLL=30 AUTOSSH_DEBUG=1 autossh -M2000 -L6667:localhost:6667 -N cmyers.org }" Enter
 
 # Turn back on global window renames
 tmux set-option -g allow-rename on
