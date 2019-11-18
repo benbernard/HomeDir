@@ -72,6 +72,7 @@ Plug 'andymass/vim-matchup'
 Plug 'christoomey/vim-tmux-navigator'
 Plug 'mr-ubik/vim-hackerman-syntax'
 Plug 'tpope/vim-abolish'
+Plug 'zxqfl/tabnine-vim'
 
 " Disabled plugins:
 " Plug 'ternjs/tern_for_vim', {'do': 'npm install'} " Doesn't seem to work well
@@ -389,12 +390,14 @@ nmap <Leader>fp :CopyPath<cr>
   let g:ale_linters = {
   \   'html': [],
   \   'javascript': ['flow', 'eslint'],
-  \   'ruby': ['rubocop']
+  \   'ruby': ['rubocop'],
+  \   'python': ['pylint'],
   \}
 
   " Turn on prettier and eslint fixers for javascript
   let g:ale_fixers = {
   \  'javascript': ['prettier', 'eslint'],
+  \  'python': ['autopep8'],
   \}
 
   let g:ale_javascript_prettier_options = '--no-bracket-spacing --trailing-comma es5'
@@ -577,7 +580,7 @@ let g:vim_markdown_folding_disabled=1
   nnoremap <leader>us :<C-u>Unite -buffer-name=snippets -start-insert -no-empty ultisnips<cr>
   let g:UltiSnipsEditSplit="vertical" " Open ultisnips editor vertically
 
-  let g:UltiSnipsExpandTrigger="<s-tab>"
+  let g:UltiSnipsExpandTrigger="<C-s>"
 
   " Use C-e / C-w to move forward / back between placeholders
 

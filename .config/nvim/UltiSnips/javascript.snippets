@@ -157,3 +157,45 @@ Possible improvements:
   <++>
 */
 endsnippet
+
+# Snippets for bitburner
+snippet ss "Start Script"
+import * as TK from "./tk.js";
+
+class ThisScript extends TK.Script {
+  async perform() {
+    ${2:${VISUAL:<++>}}
+  }
+}
+
+export let main = ThisScript.runner();
+endsnippet
+
+# Snippets for bitburner
+snippet sss "Start Script"
+import * as TK from "./tk.js";
+
+class ThisScript extends TK.ServerScript {
+  async perform() {
+    ${2:${VISUAL:<++>}}
+  }
+}
+
+export let main = ThisScript.runner();
+endsnippet
+
+snippet bs "Base Script"
+import BaseScript from "./baseScript.js";
+
+class ThisScript extends BaseScript {
+  async perform() {
+    ${2:${VISUAL:<++>}}
+  }
+}
+
+export let main = ThisScript.runner();
+endsnippet
+
+snippet tl
+this.tlog(${1:${VISUAL:<++>}});
+endsnippet
