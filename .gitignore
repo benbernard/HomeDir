@@ -251,3 +251,6 @@ eclipse-workspace/
 eclipse/
 OneDrive/
 .onedrive*
+.config/StardewValley/
+.config/configstore/nodemon.json
+.config/heroku/
