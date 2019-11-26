@@ -255,3 +255,4 @@ OneDrive/
 .config/configstore/nodemon.json
 .config/heroku/
 bin/python-install/
+.gremlin/
