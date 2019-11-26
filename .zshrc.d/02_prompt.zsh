@@ -11,7 +11,9 @@ bindkey "^Q" push-line-or-edit
 
 #Map ctrl-u and ctrl-k to be like emacs mode
 bindkey "^U" kill-whole-line
-bindkey "^K" kill-line
+# Ctrl-k destroys from cursor to front of line
+bindkey "^K" backward-kill-line
+# bindkey "^K" kill-line
 
 # helps debug completion problems, F2
 bindkey "^[OQ" _complete_debug
