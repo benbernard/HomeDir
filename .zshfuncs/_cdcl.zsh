@@ -1,3 +1,3 @@
 #compdef cdcl
 
-_files $(cdclDir)
+_files -W $(cdclDir)
