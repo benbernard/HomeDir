@@ -139,6 +139,16 @@ setNodeVersion () {
 
 CDCL_OVERIDE_FILE=~/.cdcl-override
 cdcl () {
+  local dir=$(cdclDir)
+
+  if [[ $1 != "" ]]; then
+    dir="${dir}/$1"
+  fi
+
+  cd $dir
+}
+
+cdclDir () {
   local dir
   if [[ -e  $CDCL_OVERIDE_FILE ]]; then
     dir=`cat $CDCL_OVERIDE_FILE`
@@ -147,7 +157,7 @@ cdcl () {
     dir=${DEFAULT_CDCL:-~/repos}
   fi
 
-  cd $dir
+  echo $dir
 }
 
 cdclOverride () {

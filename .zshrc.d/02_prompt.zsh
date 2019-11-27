@@ -118,4 +118,4 @@ function git_prompt_info_site() {
 export ZSH_AUTOSUGGEST_BUFFER_MAX_SIZE=20
 export ZSH_AUTOSUGGEST_USE_ASYNC=1
 source ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
-bindkey '^^' autosuggest-accept # Binds Ctrl-6 to accept suggestion, iterm maps Ctrl-Enter to Ctrl-6
+bindkey '^^' autosuggest-accept # Binds Ctrl-6 to accept suggestion, iterm maps Ctrl-Enter to Ctrl-6 (Send Hex Code -> 0x1E)
