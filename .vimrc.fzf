@@ -57,20 +57,22 @@ command InsertGenericImport call fzf#run(fzf#wrap('imports', {
       \ }))
 map <Leader>ig :InsertGenericImport<CR>
 
+command! -nargs=+ RgWithDirectory :call RgWithDirectory(<f-args>)
+
 " \ul to search for the word under the cursor
-map <Leader>ul :Ag <C-R><C-W><CR>
+map <Leader>ul :RgWithDirectory <C-R><C-W> .<CR>
 
 " \ug to search to a prompted word
 function PromptForSearch()
   call inputsave()
   let term = input('Search: ')
   call inputrestore()
-  execute "Ag " . term
+  call RgWithDirectory(term, '.')
 endfunction
 map <Leader>ug :call PromptForSearch()<CR>
 
-function! AgWithDirectory(query, dir)
-  call fzf#vim#ag(a:query, fzf#vim#with_preview({'dir': a:dir}, 'right:50%'))
+function! RgWithDirectory(query, dir)
+  call fzf#vim#grep('rg --column --line-number --no-heading --color=always --smart-case '.shellescape(a:query), 1, fzf#vim#with_preview({'dir': a:dir}, 'right:50%'), 0)
 endfunction
 
 " Next two are variants on \ug and \ul that prompt for a directory to search
@@ -84,7 +86,7 @@ function PromptForSearchAndPath()
   let dir = input('Directory: ')
   call inputrestore()
 
-  call AgWithDirectory(term, dir)
+  call RgWithDirectory(term, dir)
 endfunction
 map <Leader>uG :call PromptForSearchAndPath()<CR>
 
@@ -93,7 +95,7 @@ function PromptForPath(term)
   let dir = input('Directory: ')
   call inputrestore()
 
-  call AgWithDirectory(a:term, dir)
+  call RgWithDirectory(a:term, dir)
 endfunction
 map <Leader>uL :call PromptForPath('<C-R><C-W>')<CR>
 
