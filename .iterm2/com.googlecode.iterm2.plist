@@ -2,6 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>AllowClipboardAccess</key>
+	<true/>
 	<key>AppleAntiAliasingThreshold</key>
 	<integer>1</integer>
 	<key>AppleScrollAnimationEnabled</key>
@@ -18,6 +20,8 @@
 	<string>Work</string>
 	<key>Default Bookmark Guid</key>
 	<string>0FA5DE1B-039B-453E-A6F3-691E0A0298AF</string>
+	<key>DoubleClickPerformsSmartSelection</key>
+	<false/>
 	<key>EscapeShellCharsWithBackslash</key>
 	<false/>
 	<key>GlobalKeyMap</key>
@@ -199,7 +203,7 @@ Work:Restore Window Arrangement</string>
 	<key>NSWindow Frame NSNavPanelAutosaveName</key>
 	<string>2160 726 799 448 0 0 5120 1417 </string>
 	<key>NSWindow Frame iTerm Window 0</key>
-	<string>3413 0 1705 1417 0 0 5120 1417 </string>
+	<string>3559 763 570 452 0 0 5120 1417 </string>
 	<key>NSWindow Frame iTerm Window 1</key>
 	<string>5120 -564 1680 1027 5120 -564 1680 1027 </string>
 	<key>New Bookmarks</key>
@@ -1436,15 +1440,17 @@ Work:Restore Window Arrangement</string>
 	<key>NoSyncInstallationId</key>
 	<string>92CE7751-6FFB-439B-BD21-C47156DE0F70</string>
 	<key>NoSyncLaunchExperienceControllerRunCount</key>
-	<integer>4</integer>
+	<integer>6</integer>
 	<key>NoSyncNeverRemindPrefsChangesLostForFile</key>
 	<true/>
 	<key>NoSyncNeverRemindPrefsChangesLostForFile_selection</key>
 	<integer>0</integer>
 	<key>NoSyncNextAnnoyanceTime</key>
-	<real>595986153.12680399</real>
+	<real>597344428.16775501</real>
 	<key>NoSyncOnboardingWindowHasBeenShown</key>
 	<true/>
+	<key>NoSyncPermissionToShowTip</key>
+	<false/>
 	<key>NoSyncRecordedVariables</key>
 	<dict>
 		<key>0</key>
@@ -2251,7 +2257,7 @@ Work:Restore Window Arrangement</string>
 	<key>SUHasLaunchedBefore</key>
 	<true/>
 	<key>SULastCheckTime</key>
-	<date>2019-11-26T21:31:12Z</date>
+	<date>2019-12-05T17:00:46Z</date>
 	<key>SUSendProfileInfo</key>
 	<false/>
 	<key>SoundForEsc</key>

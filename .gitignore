@@ -256,3 +256,5 @@ OneDrive/
 .config/heroku/
 bin/python-install/
 .gremlin/
+.gradle/
+.tabnine/

@@ -28,7 +28,9 @@
   # These I acutally use
   br = branch
   co = checkout
-  l = log --oneline
+  # l = log --oneline
+  l = log --pretty='format:%C(red)%h%Creset %C(magenta)%ar%Creset %C(yellow)%an%Creset %Cgreen%s%Creset %C(cyan)%d%Creset'
+
   s = ! git status -s | awk '{print $2}'
   mt = mergetool
   cp = cherry-pick
@@ -64,6 +66,7 @@
 [difftool]
     prompt = no
 
+# Never gc and never expire reflogs
 [gc]
   auto = 0
   reflogExpire = never
