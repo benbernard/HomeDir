@@ -258,3 +258,4 @@ bin/python-install/
 .gremlin/
 .gradle/
 .tabnine/
+.vscode/
