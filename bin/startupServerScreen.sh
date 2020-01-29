@@ -20,6 +20,7 @@ tmux rename-window web
 # tmux new-window -n watch
 tmux new-window -n paste-tracker
 tmux new-window -n autossh
+tmux new-window -n d-admin
 
 # Turn off rename on windows so that when we unset the global option it will be
 # set off on the windows
@@ -29,6 +30,7 @@ tmux set-window-option -t web allow-rename off
 # tmux set-window-option -t watch allow-rename off
 tmux set-window-option -t paste-tracker allow-rename off
 tmux set-window-option -t autossh allow-rename off
+tmux set-window-option -t d-admin allow-rename off
 
 # Startup server commands.  Use send-keys so I can flip to windows and
 # control-c from programs and get into a shell
@@ -38,6 +40,7 @@ tmux set-window-option -t autossh allow-rename off
 # tmux send-keys -t watch "cdcl; while (1) { grunt min-watch }" Enter
 tmux send-keys -t paste-tracker "cd; cd bin/mac; ./paste-tracker.pl" Enter
 tmux send-keys -t autossh "while (true) { AUTOSSH_POLL=30 AUTOSSH_DEBUG=1 autossh -M2000 -L6667:localhost:6667 -N cmyers.org }" Enter
+tmux send-keys -t d-admin "DYNAMO_ENDPOINT=http://localhost:8000 ~/.nvm/versions/node/v13.1.0/bin/dynamodb-admin" Enter
 
 # Turn back on global window renames
 tmux set-option -g allow-rename on
