@@ -14,7 +14,51 @@
                     "basic.to_if_held_down_threshold_milliseconds": 500,
                     "mouse_motion_to_scroll.speed": 100
                 },
-                "rules": []
+                "rules": [
+                    {
+                        "description": "Better Shifting: Parentheses on shift keys",
+                        "manipulators": [
+                            {
+                                "from": {
+                                    "key_code": "left_shift"
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "left_shift"
+                                    }
+                                ],
+                                "to_if_alone": [
+                                    {
+                                        "key_code": "9",
+                                        "modifiers": [
+                                            "left_shift"
+                                        ]
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "from": {
+                                    "key_code": "right_shift"
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "right_shift"
+                                    }
+                                ],
+                                "to_if_alone": [
+                                    {
+                                        "key_code": "0",
+                                        "modifiers": [
+                                            "right_shift"
+                                        ]
+                                    }
+                                ],
+                                "type": "basic"
+                            }
+                        ]
+                    }
+                ]
             },
             "devices": [
                 {
@@ -29,14 +73,6 @@
                     "ignore": false,
                     "manipulate_caps_lock_led": false,
                     "simple_modifications": [
-                        {
-                            "from": {
-                                "key_code": "0"
-                            },
-                            "to": {
-                                "pointing_button": "button19"
-                            }
-                        },
                         {
                             "from": {
                                 "key_code": "1"
@@ -111,10 +147,10 @@
                         },
                         {
                             "from": {
-                                "key_code": "equal_sign"
+                                "key_code": "0"
                             },
                             "to": {
-                                "pointing_button": "button21"
+                                "pointing_button": "button19"
                             }
                         },
                         {
@@ -123,6 +159,14 @@
                             },
                             "to": {
                                 "pointing_button": "button20"
+                            }
+                        },
+                        {
+                            "from": {
+                                "key_code": "equal_sign"
+                            },
+                            "to": {
+                                "pointing_button": "button21"
                             }
                         }
                     ]
