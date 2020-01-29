@@ -28,6 +28,7 @@ path=(
   $HOME/RecordStream/bin
   $HOME/GitScripts/bin
   $GOPATH/bin
+  $HOME/.cargo/bin
   $HOME/bin/python-install/bin
 )
 
