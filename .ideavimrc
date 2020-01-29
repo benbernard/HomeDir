@@ -1,2 +1,13 @@
-source ~/.config/nvim/init.vim
 set ideajoin
+
+source ~/.config/nvim/init.vim
+
+set surround
+set commentary
+set multiple-cursors
+
+map! <C-n> gt
+map! <C-p> gT
+
+map <C-n> gt
+map <C-p> gT
