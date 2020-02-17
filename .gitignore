@@ -259,3 +259,6 @@ bin/python-install/
 .gradle/
 .tabnine/
 .vscode/
+.config/gh/
+.env-improvement
+.sonarlint/
