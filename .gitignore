@@ -262,3 +262,4 @@ bin/python-install/
 .config/gh/
 .env-improvement
 .sonarlint/
+.putty/randomseed
