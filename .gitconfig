@@ -120,5 +120,6 @@
 	prune = true
 
 # Always use ssh for github urls
-[url "git@github.com:"]
-  insteadOf = "https://github.com/"
+# This doesn't work with cargo, disabling
+# [url "git@github.com:"]
+#   insteadOf = "https://github.com/"

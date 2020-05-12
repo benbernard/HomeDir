@@ -79,5 +79,5 @@ alias 'rspecf=bin/rspec --fail-fast'
 # setopt NO_EXTENDED_GLOB
 alias 'git=noglob hub'
 
-# Docker bullshit
-alias 'da=docker attach --sig-proxy=false'
+# Docker attach without killing container
+# alias 'da=docker attach --sig-proxy=false'

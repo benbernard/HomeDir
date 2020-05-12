@@ -161,6 +161,226 @@
                             }
                         }
                     ]
+                },
+                {
+                    "disable_built_in_keyboard_if_exists": false,
+                    "fn_function_keys": [],
+                    "identifiers": {
+                        "is_keyboard": true,
+                        "is_pointing_device": false,
+                        "product_id": 64007,
+                        "vendor_id": 9639
+                    },
+                    "ignore": false,
+                    "manipulate_caps_lock_led": false,
+                    "simple_modifications": [
+                        {
+                            "from": {
+                                "key_code": "0"
+                            },
+                            "to": {
+                                "pointing_button": "button19"
+                            }
+                        },
+                        {
+                            "from": {
+                                "key_code": "1"
+                            },
+                            "to": {
+                                "pointing_button": "button10"
+                            }
+                        },
+                        {
+                            "from": {
+                                "key_code": "2"
+                            },
+                            "to": {
+                                "pointing_button": "button11"
+                            }
+                        },
+                        {
+                            "from": {
+                                "key_code": "3"
+                            },
+                            "to": {
+                                "pointing_button": "button12"
+                            }
+                        },
+                        {
+                            "from": {
+                                "key_code": "4"
+                            },
+                            "to": {
+                                "pointing_button": "button13"
+                            }
+                        },
+                        {
+                            "from": {
+                                "key_code": "5"
+                            },
+                            "to": {
+                                "pointing_button": "button14"
+                            }
+                        },
+                        {
+                            "from": {
+                                "key_code": "6"
+                            },
+                            "to": {
+                                "pointing_button": "button15"
+                            }
+                        },
+                        {
+                            "from": {
+                                "key_code": "7"
+                            },
+                            "to": {
+                                "pointing_button": "button16"
+                            }
+                        },
+                        {
+                            "from": {
+                                "key_code": "8"
+                            },
+                            "to": {
+                                "pointing_button": "button17"
+                            }
+                        },
+                        {
+                            "from": {
+                                "key_code": "9"
+                            },
+                            "to": {
+                                "pointing_button": "button18"
+                            }
+                        },
+                        {
+                            "from": {
+                                "key_code": "keypad_hyphen"
+                            },
+                            "to": {
+                                "pointing_button": "button21"
+                            }
+                        },
+                        {
+                            "from": {
+                                "key_code": "keypad_plus"
+                            },
+                            "to": {
+                                "pointing_button": "button20"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "disable_built_in_keyboard_if_exists": false,
+                    "fn_function_keys": [],
+                    "identifiers": {
+                        "is_keyboard": true,
+                        "is_pointing_device": false,
+                        "product_id": 64008,
+                        "vendor_id": 9639
+                    },
+                    "ignore": false,
+                    "manipulate_caps_lock_led": false,
+                    "simple_modifications": [
+                        {
+                            "from": {
+                                "key_code": "1"
+                            },
+                            "to": {
+                                "pointing_button": "button10"
+                            }
+                        },
+                        {
+                            "from": {
+                                "key_code": "2"
+                            },
+                            "to": {
+                                "pointing_button": "button11"
+                            }
+                        },
+                        {
+                            "from": {
+                                "key_code": "3"
+                            },
+                            "to": {
+                                "pointing_button": "button12"
+                            }
+                        },
+                        {
+                            "from": {
+                                "key_code": "4"
+                            },
+                            "to": {
+                                "pointing_button": "button13"
+                            }
+                        },
+                        {
+                            "from": {
+                                "key_code": "5"
+                            },
+                            "to": {
+                                "pointing_button": "button14"
+                            }
+                        },
+                        {
+                            "from": {
+                                "key_code": "6"
+                            },
+                            "to": {
+                                "pointing_button": "button15"
+                            }
+                        },
+                        {
+                            "from": {
+                                "key_code": "7"
+                            },
+                            "to": {
+                                "pointing_button": "button16"
+                            }
+                        },
+                        {
+                            "from": {
+                                "key_code": "8"
+                            },
+                            "to": {
+                                "pointing_button": "button17"
+                            }
+                        },
+                        {
+                            "from": {
+                                "key_code": "9"
+                            },
+                            "to": {
+                                "pointing_button": "button18"
+                            }
+                        },
+                        {
+                            "from": {
+                                "key_code": "0"
+                            },
+                            "to": {
+                                "pointing_button": "button19"
+                            }
+                        },
+                        {
+                            "from": {
+                                "key_code": "keypad_plus"
+                            },
+                            "to": {
+                                "pointing_button": "button20"
+                            }
+                        },
+                        {
+                            "from": {
+                                "key_code": "keypad_hyphen"
+                            },
+                            "to": {
+                                "pointing_button": "button21"
+                            }
+                        }
+                    ]
                 }
             ],
             "fn_function_keys": [

@@ -263,3 +263,12 @@ bin/python-install/
 .env-improvement
 .sonarlint/
 .putty/randomseed
+tmp/
+.kube/
+.minikube/
+.pmy/
+*.envs
+.terraform.d/
+.config/karabiner/automatic_backups/
+.config/crane/
+
