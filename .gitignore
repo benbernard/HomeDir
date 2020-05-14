@@ -271,10 +271,10 @@ tmp/
 .terraform.d/
 .config/karabiner/automatic_backups/
 .config/crane/
-
 .bash_logout
 .config/user-dirs.dirs
 .config/user-dirs.locale
 .xsession-errors
 .xsession-errors.old
 Bookshelf/
+.kindle/
