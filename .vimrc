@@ -71,7 +71,11 @@ autocmd QuickFixCmdPost *grep* cwindow
 """"""""""""""" Status Line """"""""""""""""""""
 
 " Set the status line
-set statusline=%f\ %y%{GetStatusEx()}[b:%n]\ %{fugitive#statusline()}\ %m%r%=(%l/%L,%c%V)\ %P
+if exists("*fugitive#statusline")
+  set statusline=%f\ %y%{GetStatusEx()}[b:%n]\ %{fugitive#statusline()}\ %m%r%=(%l/%L,%c%V)\ %P
+else
+  set statusline=%f\ %y%{GetStatusEx()}[b:%n]\ %m%r%=(%l/%L,%c%V)\ %P
+endif
 
 " Function for getting the file format and the encoding for the status line.
 function! GetStatusEx()
@@ -366,7 +370,9 @@ let g:vim_markdown_folding_disabled=1
 
 " Unite
   " Got annoying having it all in this file, I've moved it to .vimrc.unite
-  source $HOME/.vimrc.unite
+  if exists("*unite#custom#source")
+    source $HOME/.vimrc.unite
+  endif
 
 " Insert test data
  " let @t = 'O"*Pvi]:s/^ *- *"/"/gvi]='
@@ -374,7 +380,9 @@ let g:vim_markdown_folding_disabled=1
  nmap <Leader>ti @t
 
 " Neocomplete
- source $HOME/.vimrc.neocomplete
+  if exists("*neocomplete#close_popup")
+    source $HOME/.vimrc.neocomplete
+  endif
 
 " Ultisnips
   "let g:UltiSnipsJumpForwardTrigger="<c-w>"

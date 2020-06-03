@@ -35,10 +35,14 @@ alias 's3_upload.pl=s3_upload.pl --prompt'
 # Prompt when about to overwrite a file with mv (use -f to force)
 alias 'mv=mv -i'
 
+# noglob fixes HEAD^ in shell commands
+alias 'git=noglob git'
+
 # If hub is installed alias git to it
 if type hub >/dev/null;
 then
-  alias 'git=hub'
+  # noglob fixes HEAD^ in shell commands
+  alias 'git=noglob hub'
 fi
 
 # Use gcal instead of useless cal
@@ -50,7 +54,11 @@ alias realpath=grealpath
 
 # Vim aliases
 # Use neovim... really?
-alias vim=nvim
+if type nvim >/dev/null;
+then;
+  alias vim=nvim
+fi
+
 alias 'viminit=vim ~/.config/nvim/init.vim'
 alias 'cleanvim=vim -u NONE'
 alias 'sudovim=sudo vim -u NONE --noplugin'
@@ -74,10 +82,6 @@ alias help=run-help
 alias od=onedrivecmd
 
 alias 'rspecf=bin/rspec --fail-fast'
-
-# Fix HEAD^ in shell commands
-# setopt NO_EXTENDED_GLOB
-alias 'git=noglob hub'
 
 # Docker attach without killing container
 # alias 'da=docker attach --sig-proxy=false'
