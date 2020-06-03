@@ -12,6 +12,10 @@ if ( filereadable($HOME . "/.vimrc.site") )
   source $HOME/.vimrc.site
 endif
 
+if ( filereadable($HOME . "/site/use_minimal") )
+  source $HOME/.minimal/vim/vimrc
+endif
+
 """"""""""""""" Global Setup """"""""""""""""""""
 "First source the environment location
 source $HOME/.eihooks/dotfiles/vimrc

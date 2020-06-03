@@ -1,0 +1,2 @@
+" Add minimal config to runtimepath
+set rtp+=$HOME/.minimal/vim

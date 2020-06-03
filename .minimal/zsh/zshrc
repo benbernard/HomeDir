@@ -1,0 +1,6 @@
+PATH=${HOME}/.minimal/zsh/bin:${PATH}
+
+# Have to use more
+more () {
+  /usr/bin/more "$@"
+}

@@ -4,6 +4,11 @@ setenv() {
   export $1=$2
 }
 
+if [[ -e "${HOME}/site/use_minimal" ]]; then
+  source ${HOME}/.minimal/zsh/zshrc
+fi
+
+
 if [[ -z $ZSH_VERSION ]]
 then
   ZSH_VERSION=`$SHELL --version | /usr/bin/cut -d ' ' -f 2`
