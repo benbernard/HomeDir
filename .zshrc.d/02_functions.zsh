@@ -137,43 +137,6 @@ setNodeVersion () {
   popd
 }
 
-CDCL_OVERIDE_FILE=~/.cdcl-override
-cdcl () {
-  local dir=$(cdclDir)
-
-  if [[ $1 != "" ]]; then
-    dir="${dir}/$1"
-  fi
-
-  cd $dir
-}
-
-cdclDir () {
-  local dir
-  if [[ -e  $CDCL_OVERIDE_FILE ]]; then
-    dir=`cat $CDCL_OVERIDE_FILE`
-  else
-    # Use the default
-    dir=${DEFAULT_CDCL:-~/repos}
-  fi
-
-  echo $dir
-}
-
-cdclOverride () {
-  local override
-  override=$1
-  if [[ -z $override ]]; then
-    override=`pwd`
-  fi
-
-  echo $override > $CDCL_OVERIDE_FILE
-}
-
-cdclUnset () {
-  rm $CDCL_OVERIDE_FILE
-}
-
 ppgrep() {
   pgrep "$@" | xargs ps -fp 2>/dev/null;
 }

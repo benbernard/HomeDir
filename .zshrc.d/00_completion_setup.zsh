@@ -5,8 +5,10 @@ fi
 #Setup completion functions
 #FPATH=/usr/local/share/zsh/4.2.0/functions
 if [[ -d ~/.zshfuncs ]]; then
-  fpath=(~/.zshfuncs $fpath)
-  autoload -U ~/.zshfuncs/*(:t)
+  if ls -A ~/.zshfuncs | grep '.' 1>/dev/null 2>/dev/null; then
+    fpath=(~/.zshfuncs $fpath)
+    autoload -U ~/.zshfuncs/*(:t)
+  fi
 fi
 
 if [[ -d /usr/local/share/zsh/site-functions ]]; then

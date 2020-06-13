@@ -85,3 +85,6 @@ alias 'rspecf=bin/rspec --fail-fast'
 
 # Docker attach without killing container
 # alias 'da=docker attach --sig-proxy=false'
+
+# alias cdrp to cdcl
+alias cdcl=cdrp

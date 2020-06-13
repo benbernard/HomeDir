@@ -286,6 +286,14 @@
                     "simple_modifications": [
                         {
                             "from": {
+                                "key_code": "0"
+                            },
+                            "to": {
+                                "pointing_button": "button19"
+                            }
+                        },
+                        {
+                            "from": {
                                 "key_code": "1"
                             },
                             "to": {
@@ -358,10 +366,10 @@
                         },
                         {
                             "from": {
-                                "key_code": "0"
+                                "key_code": "keypad_hyphen"
                             },
                             "to": {
-                                "pointing_button": "button19"
+                                "pointing_button": "button21"
                             }
                         },
                         {
@@ -371,16 +379,34 @@
                             "to": {
                                 "pointing_button": "button20"
                             }
-                        },
-                        {
-                            "from": {
-                                "key_code": "keypad_hyphen"
-                            },
-                            "to": {
-                                "pointing_button": "button21"
-                            }
                         }
                     ]
+                },
+                {
+                    "disable_built_in_keyboard_if_exists": false,
+                    "fn_function_keys": [],
+                    "identifiers": {
+                        "is_keyboard": true,
+                        "is_pointing_device": false,
+                        "product_id": 321,
+                        "vendor_id": 9456
+                    },
+                    "ignore": false,
+                    "manipulate_caps_lock_led": false,
+                    "simple_modifications": []
+                },
+                {
+                    "disable_built_in_keyboard_if_exists": false,
+                    "fn_function_keys": [],
+                    "identifiers": {
+                        "is_keyboard": true,
+                        "is_pointing_device": false,
+                        "product_id": 636,
+                        "vendor_id": 1452
+                    },
+                    "ignore": false,
+                    "manipulate_caps_lock_led": true,
+                    "simple_modifications": []
                 }
             ],
             "fn_function_keys": [
