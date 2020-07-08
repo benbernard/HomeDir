@@ -1,0 +1,15 @@
+#!/usr/bin/zsh
+
+HOSTNAME=$1
+
+if [[ ! -e ~/site ]]; then
+  echo "Creating site dir"
+  mkdir ~/site
+fi
+
+if [[ ! -e ~/site/site.zsh ]]; then
+  echo "Creating site.zsh"
+  touch ~/site/site.zsh
+fi
+
+echo 'PROMPT="${PROMPT/ %%/}%{$fg[yellow]%}'${HOSTNAME}'%{$reset_color%} %% "' >> ~/site/site.zsh

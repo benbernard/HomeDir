@@ -278,3 +278,5 @@ tmp/
 .xsession-errors.old
 Bookshelf/
 .kindle/
+snap/
+.config/TabNine/
