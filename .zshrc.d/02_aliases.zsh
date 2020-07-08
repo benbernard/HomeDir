@@ -50,7 +50,9 @@ alias cal=gcal
 alias cal3='gcal .'
 
 # Fucking coreutils getting mapped as gutil...
-alias realpath=grealpath
+if type grealpath 2>/dev/null 1>/dev/null; then
+  alias realpath=grealpath
+fi
 
 # Vim aliases
 # Use neovim... really?

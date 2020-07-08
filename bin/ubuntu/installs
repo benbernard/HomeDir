@@ -1,0 +1,1 @@
+sudo apt install zsh fzf neovim rcs cifs-utils tmux apt-file bind9-dnsutils moreutils htop autoconf automake
