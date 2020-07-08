@@ -12,10 +12,10 @@ tmux select-layout tiled
 # select original pane
 tmux select-pane -t 0
 
-tmux send-keys -t 0 "ssh pi41"
-tmux send-keys -t 1 "ssh pi42"
-tmux send-keys -t 2 "ssh pi43"
-tmux send-keys -t 3 "ssh pi44"
-tmux send-keys -t 4 "ssh pi31"
+tmux send-keys -t 0 "ssh pi41.lan"
+tmux send-keys -t 1 "ssh pi42.lan"
+tmux send-keys -t 2 "ssh pi43.lan"
+tmux send-keys -t 3 "ssh pi44.lan"
+tmux send-keys -t 4 "ssh pi31.lan"
 
 tmux setw synchronize-panes on

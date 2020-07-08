@@ -113,6 +113,8 @@ MODE_INDICATOR="%{$fg_bold[red]%}"
 function git_prompt_info_site() {
   echo "$ZSH_THEME_GIT_PROMPT_PREFIX$(gitbranch)$ZSH_THEME_GIT_PROMPT_SUFFIX"
 }
+
+zmodload zsh/zpty 1>/dev/null 2>/dev/null
 if type zpty >/dev/null;
 then;
   # zsh-autosuggestions setup
