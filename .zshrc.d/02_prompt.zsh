@@ -66,6 +66,10 @@ fi
 # Note: using $fg_bold[color] inside a %(x.true.false) statment yields prompts
 # with lines longer than the width of the terminal
 #
+# $''
+#   Means to not interpolate environment variables, but do interpolate escape
+#   sequences, I believe
+#
 # %(0?.%{\e[1;32m%}.%{\e[3;31m%})
 #   First, lets color the first section of the prompt on the command exit of the
 #   previous command %(x.true.false) is the syntax and x=? means the exit code of
@@ -92,7 +96,7 @@ fi
 # %%
 #   Literal character: %
 # %{$reset_color%}'
-#   Not sure what this does, but it was in the example.
+#   Resets the color back to the original color
 PROMPT=$'%(0?.%{\e[1;32m%}.%{\e[3;31m%})➜ %*%{$reset_color%} %(4L.S:$SHLVL .)%{$fg_bold[blue]%}$(git_prompt_info_site)%{$reset_color%}$(vi_mode_prompt_info) %%%{$reset_color%} '
 
 setopt TRANSIENT_RPROMPT # RPROMPT disappears in terminal history great for copying
