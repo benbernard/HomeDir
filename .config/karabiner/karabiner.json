@@ -289,7 +289,7 @@
                                 "key_code": "0"
                             },
                             "to": {
-                                "pointing_button": "button19"
+                                "pointing_button": "button20"
                             }
                         },
                         {
@@ -297,7 +297,7 @@
                                 "key_code": "1"
                             },
                             "to": {
-                                "pointing_button": "button10"
+                                "pointing_button": "button11"
                             }
                         },
                         {
@@ -305,7 +305,7 @@
                                 "key_code": "2"
                             },
                             "to": {
-                                "pointing_button": "button11"
+                                "pointing_button": "button12"
                             }
                         },
                         {
@@ -313,7 +313,7 @@
                                 "key_code": "3"
                             },
                             "to": {
-                                "pointing_button": "button12"
+                                "pointing_button": "button13"
                             }
                         },
                         {
@@ -321,7 +321,7 @@
                                 "key_code": "4"
                             },
                             "to": {
-                                "pointing_button": "button13"
+                                "pointing_button": "button14"
                             }
                         },
                         {
@@ -329,7 +329,7 @@
                                 "key_code": "5"
                             },
                             "to": {
-                                "pointing_button": "button14"
+                                "pointing_button": "button15"
                             }
                         },
                         {
@@ -337,7 +337,7 @@
                                 "key_code": "6"
                             },
                             "to": {
-                                "pointing_button": "button15"
+                                "pointing_button": "button16"
                             }
                         },
                         {
@@ -345,7 +345,7 @@
                                 "key_code": "7"
                             },
                             "to": {
-                                "pointing_button": "button16"
+                                "pointing_button": "button17"
                             }
                         },
                         {
@@ -353,7 +353,7 @@
                                 "key_code": "8"
                             },
                             "to": {
-                                "pointing_button": "button17"
+                                "pointing_button": "button18"
                             }
                         },
                         {
@@ -361,7 +361,7 @@
                                 "key_code": "9"
                             },
                             "to": {
-                                "pointing_button": "button18"
+                                "pointing_button": "button19"
                             }
                         },
                         {
@@ -369,7 +369,7 @@
                                 "key_code": "keypad_hyphen"
                             },
                             "to": {
-                                "pointing_button": "button21"
+                                "pointing_button": "button22"
                             }
                         },
                         {
@@ -377,7 +377,7 @@
                                 "key_code": "keypad_plus"
                             },
                             "to": {
-                                "pointing_button": "button20"
+                                "pointing_button": "button21"
                             }
                         }
                     ]
