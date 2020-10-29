@@ -91,3 +91,5 @@ alias 'rspecf=bin/rspec --fail-fast'
 # alias cdrp to cdcl
 alias cdcl=cdrp
 
+# Enable nice repl stuff for node
+alias 'nr=node --experimental-repl-await --async-stack-traces'
