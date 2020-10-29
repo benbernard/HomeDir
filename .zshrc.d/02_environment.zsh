@@ -30,6 +30,8 @@ path=(
   $GOPATH/bin
   $HOME/.cargo/bin
   $HOME/bin/python-install/bin
+  $HOME/.yarn/bin
+  $HOME/.config/yarn/global/node_modules/.bin
 )
 
 export VIM_TEMP="/var/tmp/$USER/vim-temp"
