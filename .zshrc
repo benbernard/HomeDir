@@ -4,6 +4,9 @@ setenv() {
   export $1=$2
 }
 
+export ZSH_DISABLE_COMPFIX=true
+
+
 if [[ -e "${HOME}/site/use_minimal" ]]; then
   source ${HOME}/.minimal/zsh/zshrc
 fi
