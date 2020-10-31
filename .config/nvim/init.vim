@@ -5,6 +5,9 @@
 let g:ale_emit_conflict_warnings = 0
 """"""""""""""""" Plugins Setup """"""""""""""""""""""""""""""""
 
+" Disable javascript/jsx from polyglot, must be before polyglot loads
+  let g:polyglot_disabled = ['jsx', 'javascript']
+
 call plug#begin('~/.local/share/nvim/plugged')
 
 Plug 'tpope/vim-endwise'
@@ -370,14 +373,11 @@ nmap <Leader>fp :CopyPath<cr>
 " Airline
   let g:airline_powerline_fonts = 1 " Use special fonts
 
-" Disable javascript/jsx from polyglot
-  let g:polyglot_disabled = ['jsx', 'javascript']
-
-" VimPrettier settings
-  let g:prettier#config#single_quote = 'false'
-  let g:prettier#config#jsx_bracket_same_line = 'false'
-  let g:prettier#config#arrow_parens = 'avoid'
-  let g:prettier#config#trailing_comma = 'es5'
+" " VimPrettier settings
+"   let g:prettier#config#single_quote = 'false'
+"   let g:prettier#config#jsx_bracket_same_line = 'false'
+"   let g:prettier#config#arrow_parens = 'avoid'
+"   let g:prettier#config#trailing_comma = 'es5'
 
 " ALE settings (on the fly linter)
   let g:ale_echo_msg_format='%severity%[%linter%]:%code%: %s'
@@ -399,8 +399,6 @@ nmap <Leader>fp :CopyPath<cr>
   \  'javascript': ['prettier', 'eslint'],
   \  'python': ['autopep8'],
   \}
-
-  let g:ale_javascript_prettier_options = '--no-bracket-spacing --trailing-comma es5'
 
   " Let ALE fixers run on save
   let g:ale_fix_on_save = 1
