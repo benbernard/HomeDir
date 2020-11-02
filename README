@@ -7,6 +7,5 @@ cd ..
 sudo mv $HOME $HOME.old
 sudo mv HomeDir $HOME
 
-# Regenerate common files:
-bin/generate_config.pl .gitconfig
-bin/generate_config.pl irrsi/config
+
+... I don't really do it that way anymore
