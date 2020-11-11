@@ -75,7 +75,7 @@ Plug 'andymass/vim-matchup'
 Plug 'christoomey/vim-tmux-navigator'
 Plug 'mr-ubik/vim-hackerman-syntax'
 Plug 'tpope/vim-abolish'
-" Plug 'zxqfl/tabnine-vim'
+Plug 'zxqfl/tabnine-vim'
 
 " Disabled plugins:
 " Plug 'ternjs/tern_for_vim', {'do': 'npm install'} " Doesn't seem to work well
@@ -594,8 +594,12 @@ let g:vim_markdown_folding_disabled=1
 
 
 " Better Whitespace
-  let g:strip_whitespace_on_save = 1 " Strip whitespace on save
+  let g:strip_whitespace_on_save = 0 " don't automatically strip, let file types handle that
   let g:better_whitespace_filetypes_blacklist = ['unite'] " Do not highlight trailing spaces in unite buffers
+  let g:strip_whitespace_confirm = 0 " Don't prompt to strip
+
+  " Automatically script on save for these filetypes
+  autocmd Filetype javascript,java,cpp,ruby,python EnableStripWhitespaceOnSave
 
 " Auto pairs
   " Make meta (option/alt) key work for autopairs stuff
