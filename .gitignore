@@ -288,3 +288,4 @@ at-launcher/
 .config/yarn/
 ATLauncher/
 .mputils/
+.rename/

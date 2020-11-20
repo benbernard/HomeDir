@@ -16,6 +16,8 @@
 	<string>manual</string>
 	<key>BracketedPasteMode</key>
 	<false/>
+	<key>CGFontRenderingFontSmoothingDisabled</key>
+	<false/>
 	<key>ConvertDosNewlines</key>
 	<false/>
 	<key>Default Arrangement Name</key>
@@ -158,7 +160,7 @@ Work:Restore Window Arrangement</string>
 	<key>LoadPrefsFromCustomFolder</key>
 	<true/>
 	<key>NSNavLastRootDirectory</key>
-	<string>~</string>
+	<string>/Users/temp/bernard/Library/Caches/com.googlecode.iterm2</string>
 	<key>NSNavPanelExpandedSizeForOpenMode</key>
 	<string>{799, 448}</string>
 	<key>NSQuotedKeystrokeBinding</key>
@@ -205,11 +207,11 @@ Work:Restore Window Arrangement</string>
 	<key>NSWindow Frame NSNavPanelAutosaveName</key>
 	<string>2160 726 799 448 0 0 5120 1417 </string>
 	<key>NSWindow Frame SUUpdateAlert</key>
-	<string>2250 768 620 392 0 0 5120 1417 </string>
+	<string>5706 -108 620 392 5120 -636 1792 1097 </string>
 	<key>NSWindow Frame iTerm Window 0</key>
-	<string>5120 -667 1680 1027 5120 -667 1680 1027 </string>
+	<string>5120 -448 1691 839 5120 -636 1792 1097 </string>
 	<key>NSWindow Frame iTerm Window 1</key>
-	<string>5120 -667 1680 1027 5120 -667 1680 1027 </string>
+	<string>2952 382 1481 877 0 0 5120 1417 </string>
 	<key>New Bookmarks</key>
 	<array>
 		<dict>
@@ -425,6 +427,8 @@ Work:Restore Window Arrangement</string>
 			<string>Default</string>
 			<key>Disable Window Resizing</key>
 			<true/>
+			<key>Draw Powerline Glyphs</key>
+			<false/>
 			<key>Flashing Bell</key>
 			<false/>
 			<key>Foreground Color</key>
@@ -739,13 +743,13 @@ Work:Restore Window Arrangement</string>
 			<key>Name</key>
 			<string>Default</string>
 			<key>Non Ascii Font</key>
-			<string>InconsolataForPowerline-dz 12</string>
+			<string>MesloLGS-NF-Regular 12</string>
 			<key>Non-ASCII Anti Aliased</key>
 			<true/>
 			<key>Non-ASCII Ligatures</key>
 			<true/>
 			<key>Normal Font</key>
-			<string>InconsolataForPowerline-dz 12</string>
+			<string>MesloLGS-NF-Regular 12</string>
 			<key>Option Key Sends</key>
 			<integer>0</integer>
 			<key>Prompt Before Closing 2</key>
@@ -1150,6 +1154,8 @@ Work:Restore Window Arrangement</string>
 			<string>Default</string>
 			<key>Disable Window Resizing</key>
 			<true/>
+			<key>Draw Powerline Glyphs</key>
+			<false/>
 			<key>Flashing Bell</key>
 			<false/>
 			<key>Foreground Color</key>
@@ -1464,13 +1470,13 @@ Work:Restore Window Arrangement</string>
 			<key>Name</key>
 			<string>IRC</string>
 			<key>Non Ascii Font</key>
-			<string>InconsolataForPowerline-dz 12</string>
+			<string>MesloLGS-NF-Regular 11</string>
 			<key>Non-ASCII Anti Aliased</key>
 			<true/>
 			<key>Non-ASCII Ligatures</key>
 			<true/>
 			<key>Normal Font</key>
-			<string>InconsolataForPowerline-dz 12</string>
+			<string>MesloLGS-NF-Regular 11</string>
 			<key>Option Key Sends</key>
 			<integer>0</integer>
 			<key>Prompt Before Closing 2</key>
@@ -1548,42 +1554,38 @@ Work:Restore Window Arrangement</string>
 	</array>
 	<key>NoSyncAllAppVersions</key>
 	<array>
-		<string>3.3.7</string>
 		<string>3.3.12</string>
 	</array>
 	<key>NoSyncBFPRecents</key>
 	<array>
-		<string>Monaco</string>
-		<string>Andale Mono</string>
-		<string>Apple Braille</string>
 		<string>Inconsolata-dz for Powerline</string>
+		<string>MesloLGS NF</string>
+		<string>Meslo LG M DZ for Powerline</string>
+		<string>Meslo LG S for Powerline</string>
 	</array>
 	<key>NoSyncCommandHistoryHasEverBeenUsed</key>
 	<true/>
-	<key>NoSyncFrame_SessionsPreferences</key>
-	<dict>
-		<key>screenFrame</key>
-		<string>{{0, 0}, {5120, 1440}}</string>
-		<key>topLeft</key>
-		<string>{2268, 876}</string>
-	</dict>
+	<key>NoSyncDoNotWarnBeforeMultilinePaste</key>
+	<true/>
+	<key>NoSyncDoNotWarnBeforeMultilinePaste_selection</key>
+	<integer>0</integer>
 	<key>NoSyncFrame_SharedPreferences</key>
 	<dict>
 		<key>screenFrame</key>
 		<string>{{0, 0}, {5120, 1440}}</string>
 		<key>topLeft</key>
-		<string>{492, 1070}</string>
+		<string>{2788, 1160}</string>
 	</dict>
 	<key>NoSyncInstallationId</key>
-	<string>92CE7751-6FFB-439B-BD21-C47156DE0F70</string>
+	<string>692832AA-97DB-441A-B5C0-C20A5BD3D182</string>
 	<key>NoSyncLaunchExperienceControllerRunCount</key>
-	<integer>70</integer>
+	<integer>7</integer>
 	<key>NoSyncNeverRemindPrefsChangesLostForFile</key>
 	<true/>
 	<key>NoSyncNeverRemindPrefsChangesLostForFile_selection</key>
 	<integer>0</integer>
 	<key>NoSyncNextAnnoyanceTime</key>
-	<real>597344428.16775501</real>
+	<real>626733601.65596497</real>
 	<key>NoSyncOnboardingWindowHasBeenShown</key>
 	<true/>
 	<key>NoSyncPermissionToShowTip</key>
@@ -1914,14 +1916,6 @@ Work:Restore Window Arrangement</string>
 				<key>isTerminal</key>
 				<true/>
 				<key>name</key>
-				<string>currentTab.currentSession.jobPid</string>
-				<key>nonterminalContext</key>
-				<integer>0</integer>
-			</dict>
-			<dict>
-				<key>isTerminal</key>
-				<true/>
-				<key>name</key>
 				<string>frame</string>
 				<key>nonterminalContext</key>
 				<integer>0</integer>
@@ -2026,7 +2020,7 @@ Work:Restore Window Arrangement</string>
 				<key>isTerminal</key>
 				<true/>
 				<key>name</key>
-				<string>currentTab.currentSession.path</string>
+				<string>currentTab.currentSession.commandLine</string>
 				<key>nonterminalContext</key>
 				<integer>0</integer>
 			</dict>
@@ -2034,7 +2028,7 @@ Work:Restore Window Arrangement</string>
 				<key>isTerminal</key>
 				<true/>
 				<key>name</key>
-				<string>currentTab.currentSession.commandLine</string>
+				<string>currentTab.currentSession.path</string>
 				<key>nonterminalContext</key>
 				<integer>0</integer>
 			</dict>
@@ -2091,14 +2085,6 @@ Work:Restore Window Arrangement</string>
 		<array>
 			<dict>
 				<key>isTerminal</key>
-				<false/>
-				<key>name</key>
-				<string>currentSession</string>
-				<key>nonterminalContext</key>
-				<integer>1</integer>
-			</dict>
-			<dict>
-				<key>isTerminal</key>
 				<true/>
 				<key>name</key>
 				<string>currentSession.commandLine</string>
@@ -2133,14 +2119,6 @@ Work:Restore Window Arrangement</string>
 				<key>isTerminal</key>
 				<true/>
 				<key>name</key>
-				<string>currentSession.terminalIconName</string>
-				<key>nonterminalContext</key>
-				<integer>0</integer>
-			</dict>
-			<dict>
-				<key>isTerminal</key>
-				<true/>
-				<key>name</key>
 				<string>currentSession.presentationName</string>
 				<key>nonterminalContext</key>
 				<integer>0</integer>
@@ -2150,14 +2128,6 @@ Work:Restore Window Arrangement</string>
 				<true/>
 				<key>name</key>
 				<string>iterm2.localhostName</string>
-				<key>nonterminalContext</key>
-				<integer>0</integer>
-			</dict>
-			<dict>
-				<key>isTerminal</key>
-				<true/>
-				<key>name</key>
-				<string>currentSession.jobPid</string>
 				<key>nonterminalContext</key>
 				<integer>0</integer>
 			</dict>
@@ -2198,14 +2168,6 @@ Work:Restore Window Arrangement</string>
 				<true/>
 				<key>name</key>
 				<string>currentSession.name</string>
-				<key>nonterminalContext</key>
-				<integer>0</integer>
-			</dict>
-			<dict>
-				<key>isTerminal</key>
-				<true/>
-				<key>name</key>
-				<string>currentSession.lastCommand</string>
 				<key>nonterminalContext</key>
 				<integer>0</integer>
 			</dict>
@@ -2269,23 +2231,7 @@ Work:Restore Window Arrangement</string>
 				<key>isTerminal</key>
 				<true/>
 				<key>name</key>
-				<string>currentSession.terminalWindowName</string>
-				<key>nonterminalContext</key>
-				<integer>0</integer>
-			</dict>
-			<dict>
-				<key>isTerminal</key>
-				<true/>
-				<key>name</key>
 				<string>currentSession.hostname</string>
-				<key>nonterminalContext</key>
-				<integer>0</integer>
-			</dict>
-			<dict>
-				<key>isTerminal</key>
-				<true/>
-				<key>name</key>
-				<string>currentSession.path</string>
 				<key>nonterminalContext</key>
 				<integer>0</integer>
 			</dict>
@@ -2301,9 +2247,25 @@ Work:Restore Window Arrangement</string>
 				<key>isTerminal</key>
 				<true/>
 				<key>name</key>
+				<string>currentSession.path</string>
+				<key>nonterminalContext</key>
+				<integer>0</integer>
+			</dict>
+			<dict>
+				<key>isTerminal</key>
+				<true/>
+				<key>name</key>
 				<string>tmuxWindow</string>
 				<key>nonterminalContext</key>
 				<integer>0</integer>
+			</dict>
+			<dict>
+				<key>isTerminal</key>
+				<false/>
+				<key>name</key>
+				<string>currentSession</string>
+				<key>nonterminalContext</key>
+				<integer>1</integer>
 			</dict>
 			<dict>
 				<key>isTerminal</key>
@@ -2343,7 +2305,7 @@ Work:Restore Window Arrangement</string>
 		</array>
 	</dict>
 	<key>NoSyncTipOfTheDayEligibilityBeganTime</key>
-	<real>595813353.12662899</real>
+	<real>625817158.93572605</real>
 	<key>OpenArrangementAtStartup</key>
 	<true/>
 	<key>OpenNoWindowsAtStartup</key>
@@ -2392,20 +2354,18 @@ Work:Restore Window Arrangement</string>
 		</dict>
 	</dict>
 	<key>PrefsCustomFolder</key>
-	<string>/Users/bernard/.iterm2</string>
+	<string>~/.iterm2</string>
 	<key>SUEnableAutomaticChecks</key>
 	<true/>
 	<key>SUFeedAlternateAppNameKey</key>
 	<string>iTerm</string>
 	<key>SUFeedURL</key>
-	<string>https://iterm2.com/appcasts/final_new.xml?shard=87</string>
+	<string>https://iterm2.com/appcasts/final_new.xml?shard=34</string>
 	<key>SUHasLaunchedBefore</key>
 	<true/>
 	<key>SULastCheckTime</key>
-	<date>2020-08-16T20:13:25Z</date>
+	<date>2020-11-20T19:27:34Z</date>
 	<key>SUSendProfileInfo</key>
-	<false/>
-	<key>SUUpdateRelaunchingMarker</key>
 	<false/>
 	<key>SoundForEsc</key>
 	<false/>
