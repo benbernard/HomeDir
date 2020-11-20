@@ -599,7 +599,7 @@ let g:vim_markdown_folding_disabled=1
   let g:strip_whitespace_confirm = 0 " Don't prompt to strip
 
   " Automatically script on save for these filetypes
-  autocmd Filetype javascript,java,cpp,ruby,python EnableStripWhitespaceOnSave
+  autocmd Filetype javascript,java,cpp,ruby,python,zsh,shell,bash EnableStripWhitespaceOnSave
 
 " Auto pairs
   " Make meta (option/alt) key work for autopairs stuff
