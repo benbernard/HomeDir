@@ -29,5 +29,5 @@
 	path = .zsh/zsh-autosuggestions
 	url = https://github.com/zsh-users/zsh-autosuggestions
 [submodule "submodules/powerlevel10k.git"]
-	path = submodules/powerlevel10k.git
+	path = submodules/powerlevel10k
 	url = git@github.com:romkatv/powerlevel10k.git
