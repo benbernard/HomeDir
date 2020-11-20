@@ -4,6 +4,12 @@ setenv() {
   export $1=$2
 }
 
+# Add helper for getting submodule directories
+SUBMODULE_DIR=${HOME}/submodules
+submodule() {
+  echo ${SUBMODULE_DIR}/$1
+}
+
 if [[ -e "${HOME}/site/use_minimal" ]]; then
   source ${HOME}/.minimal/zsh/zshrc
 fi

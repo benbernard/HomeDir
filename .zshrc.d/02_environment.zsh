@@ -26,7 +26,7 @@ path=(
   /sbin
   /bin
   $HOME/RecordStream/bin
-  $HOME/GitScripts/bin
+  $(submodule GitScripts)/bin
   $GOPATH/bin
   $HOME/.cargo/bin
   $HOME/bin/python-install/bin

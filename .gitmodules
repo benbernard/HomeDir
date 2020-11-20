@@ -1,33 +1,27 @@
 [submodule "emacs_chrome"]
-	path = emacs_chrome
+	path = submodules/emacs_chrome
 	url = https://github.com/stsquad/emacs_chrome.git
 [submodule "RecordStream"]
 	path = RecordStream
 	url = https://github.com/benbernard/RecordStream.git
 [submodule "GitScripts"]
-	path = GitScripts
+	path = submodules/GitScripts
 	url = https://github.com/benbernard/GitScripts.git
 [submodule "BOWQuotes"]
-	path = BOWQuotes
+	path = submodules/BOWQuotes
 	url = git@github.com:benbernard/BOWQuotes.git
 [submodule ".oh-my-zsh"]
 	path = .oh-my-zsh
 	url = http://github.com/robbyrussell/oh-my-zsh.git
 [submodule "zsh-syntax-highlighting"]
-	path = zsh-syntax-highlighting
+	path = submodules/zsh-syntax-highlighting
 	url = git://github.com/zsh-users/zsh-syntax-highlighting.git
 [submodule "zsh-completions"]
-	path = zsh-completions
+	path = submodules/zsh-completions
 	url = git://github.com/zsh-users/zsh-completions.git
-[submodule "zaw"]
-	path = zaw
-	url = git://github.com/zsh-users/zaw.git
 [submodule "userScripts/commentTracker"]
-	path = userScripts/commentTracker
+	path = submodules/commentTracker
 	url = git@github.com:benbernard/CommentTracker.git
-[submodule "programming/devtools-snippets"]
-	path = programming/devtools-snippets
-	url = git@github.com:bgrins/devtools-snippets.git
 [submodule ".tmux/plugins/tpm"]
 	path = .tmux/plugins/tpm
 	url = https://github.com/tmux-plugins/tpm
