@@ -15,11 +15,7 @@ if [[ $? != 0 ]]; then;
 fi
 
 # This must come last, enables zsh prompt highlighting
-if [[ -e $HOME/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]]; then
-  source $HOME/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+ZSH_SYNTAX_HIGHLIGHT_PATH=$(submodule zsh-syntax-highlighting)/zsh-syntax-highlighting.zsh
+if [[ -e ${ZSH_SYNTAX_HIGHLIGHT_PATH} ]]; then
+  source ${ZSH_SYNTAX_HIGHLIGHT_PATH}
 fi
-
-# if [[ -e $HOME/zaw ]]; then
-#   source $HOME/zaw/zaw.zsh
-#   bindkey '^O' zaw
-# fi

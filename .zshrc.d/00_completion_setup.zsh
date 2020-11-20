@@ -1,5 +1,7 @@
-if [[ -e $HOME/zsh-completions/src ]]; then
-  fpath=($HOME/zsh-completions/src $fpath);
+
+ZSH_COMPLETIONS_PATH=$(submodule zsh-completions)/src
+if [[ -e ${ZSH_COMPLETIONS_PATH} ]]; then
+  fpath=(${ZSH_COMPLETIONS_PATH} $fpath);
 fi
 
 #Setup completion functions
