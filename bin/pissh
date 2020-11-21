@@ -5,6 +5,8 @@ if [[ $1 == "all" ]]; then
   ALL=1
 fi
 
+tmux new-window
+
 # Create splits
 tmux split-window
 tmux split-window
