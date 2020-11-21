@@ -14,9 +14,9 @@
 	<integer>1</integer>
 	<key>AppleWindowTabbingMode</key>
 	<string>manual</string>
-	<key>BracketedPasteMode</key>
+	<key>BootstrapDaemon</key>
 	<false/>
-	<key>CGFontRenderingFontSmoothingDisabled</key>
+	<key>BracketedPasteMode</key>
 	<false/>
 	<key>ConvertDosNewlines</key>
 	<false/>
@@ -209,7 +209,7 @@ Work:Restore Window Arrangement</string>
 	<key>NSWindow Frame SUUpdateAlert</key>
 	<string>5706 -108 620 392 5120 -636 1792 1097 </string>
 	<key>NSWindow Frame iTerm Window 0</key>
-	<string>5120 -448 1691 839 5120 -636 1792 1097 </string>
+	<string>5120 -636 1680 1027 5120 -636 1792 1097 </string>
 	<key>NSWindow Frame iTerm Window 1</key>
 	<string>2952 382 1481 877 0 0 5120 1417 </string>
 	<key>New Bookmarks</key>
@@ -428,7 +428,7 @@ Work:Restore Window Arrangement</string>
 			<key>Disable Window Resizing</key>
 			<true/>
 			<key>Draw Powerline Glyphs</key>
-			<false/>
+			<true/>
 			<key>Flashing Bell</key>
 			<false/>
 			<key>Foreground Color</key>
@@ -1579,7 +1579,7 @@ Work:Restore Window Arrangement</string>
 	<key>NoSyncInstallationId</key>
 	<string>692832AA-97DB-441A-B5C0-C20A5BD3D182</string>
 	<key>NoSyncLaunchExperienceControllerRunCount</key>
-	<integer>7</integer>
+	<integer>9</integer>
 	<key>NoSyncNeverRemindPrefsChangesLostForFile</key>
 	<true/>
 	<key>NoSyncNeverRemindPrefsChangesLostForFile_selection</key>
