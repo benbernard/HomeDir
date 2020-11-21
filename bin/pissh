@@ -1,10 +1,20 @@
 #!env zsh
 
+ALL=0
+if [[ $1 == "all" ]]; then
+  ALL=1
+fi
+
 # Create splits
 tmux split-window
 tmux split-window
 tmux split-window
 tmux split-window
+
+if [[ $ALL == 1 ]]; then
+  tmux split-window
+fi
+
 
 # Use tiled layout
 tmux select-layout tiled
@@ -17,5 +27,9 @@ tmux send-keys -t 1 "ssh pi42.lan"
 tmux send-keys -t 2 "ssh pi43.lan"
 tmux send-keys -t 3 "ssh pi44.lan"
 tmux send-keys -t 4 "ssh pi31.lan"
+
+if [[ $ALL == 1 ]]; then
+  tmux send-keys -t 5 "ssh minichonk"
+fi
 
 tmux setw synchronize-panes on
