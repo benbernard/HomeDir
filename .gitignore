@@ -232,6 +232,10 @@ devbox-*
 !/Library/Application Support
 /Library/Application Support/*
 !/Library/Application Support/iTerm2/
+/Library/Application Support/iTerm2/iterm2-daemon-1.socket.lock
+/Library/Application Support/iTerm2/iTermServer-*
+/Library/Application Support/iTerm2/parsers/
+/Library/Application Support/iTerm2/SavedState/
 
 # Ignore temp files
 *.tmp
