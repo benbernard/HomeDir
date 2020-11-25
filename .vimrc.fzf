@@ -2,74 +2,41 @@
 nnoremap <C-a> :Files<cr>
 "autocmd VimEnter * nnoremap <C-a> :<C-u>Unite -buffer-name=files -prompt-direction=above -start-insert file_rec/async:!<cr>
 
-" maiing for \ag
-nnoremap <leader>ag :Ag <C-r><C-w><CR>
-
 " set history directory into normal tmp dir
 let g:fzf_history_dir = $HOME . "/.config/nvim/tmp"
 
-" \ur to insert prequire statements
-function! Insert_require(path)
-  let line = system('relativePath.pl ' . a:path . ' 2>/dev/null')
-  echom 'relativePath.pl ' . a:path . ' ' . expand('%:p') . ' 2>/dev/null'
-  execute "normal! mqgg}O" . line . "\<esc>`q"
+function! Insert_line_match(line)
+  execute "normal!o" . join(split(a:line, ":")[3:-1],":") . "\<esc>"
 endfunction
-command InsertRequire call fzf#run(fzf#wrap('requires', {'sink': function('Insert_require'), 'options': '-q ".js "'}))
-map <Leader>ur :InsertRequire<CR>
-
-" \ud to insert drequire statements
-function! Insert_require_dynamic(path)
-  let line = system('relativePath.pl --dynamic ' . a:path . ' 2>/dev/null')
-  echom 'relativePath.pl --dynamic ' . a:path . ' ' . expand('%:p') . ' 2>/dev/null'
-  execute "normal! mqgg}O" . line . "\<esc>`q"
+function! RgForLine(query)
+  call fzf#run(fzf#wrap('lines', {
+        \ 'sink': function('Insert_line_match'),
+        \ 'options': ['--ansi', "-d:", '--preview', 'bat --color always --highlight-line {2} {1}', '--preview-window', '+{2}-/2'],
+        \ 'source': printf('rg --column --color=always --line-number --no-heading --type-add "typescript:*.ts" -t typescript ' . shellescape(a:query))
+        \ }))
+  " 'rg --column --line-number --no-heading --color=always --smart-case ' . shellescape(a:query)
 endfunction
-command InsertRequireDynamic call fzf#run(fzf#wrap('requires', {'sink': function('Insert_require_dynamic'), 'options': '-q ".js "'}))
-map <Leader>ud :InsertRequireDynamic<CR>
-
-" \it to insert import type statements
-function! Insert_type(path)
-  let line = system('createImportLine.sh ' . a:path . ' ' . expand('%p') . ' 1 2>/dev/null')
-  echom 'createImportLine.sh ' . a:path . ' ' . expand('%p') . ' 1 2>/dev/null'
-  execute "normal! mqG?import \<CR>o" . line . "\<esc>`q"
-endfunction
-command InsertTypeImport call fzf#run(fzf#wrap('imports', {'sink': function('Insert_type'), 'options': '-q "/generated__/ .graphql.js ' . expand('%:t:r') . ' "'}))
-map <Leader>it :InsertTypeImport<CR>
-
-" \if to insert import of files
-function! Insert_import(path)
-  let line = system('createImportLine.sh ' . a:path . ' ' . expand('%p') . ' 2>/dev/null')
-  echom 'createImportLine.sh ' . a:path . ' ' . expand('%p') . ' 2>/dev/null'
-  execute "normal! mqG?import \<CR>o" . line . "\<esc>`q"
-endfunction
-command InsertImport call fzf#run(fzf#wrap('imports', {'sink': function('Insert_import'), 'options': '-q "webpack/assets/javascripts/core "'}))
-map <Leader>if :InsertImport<CR>
-
-" \ig to search all import statements
-function! Insert_generic_import(path)
-  let import = substitute(a:path, '^.\{1,}:\d\+:', '', '\v')
-  execute "normal! mqG?import \<CR>o" . import . "\<esc>`q"
-endfunction
-" command InsertGenericImport call fzf#run(fzf#wrap('imports', {'sink': function('Insert_generic_import'), 'options': '-q "webpack/assets/javascripts/core "'}))
-command InsertGenericImport call fzf#run(fzf#wrap('imports', {
-      \ 'sink': function('Insert_generic_import'),
-      \ 'options': '-q "webpack/assets/javascripts/core "',
-      \ 'source': printf('ag "^import" webpack')
-      \ }))
-map <Leader>ig :InsertGenericImport<CR>
+map <Leader>fi :call RgForLine("import")<CR>
+map <Leader>fe :call RgForLine("eslint-disable")<CR>
 
 command! -nargs=+ RgWithDirectory :call RgWithDirectory(<f-args>)
 
 " \ul to search for the word under the cursor
 map <Leader>ul :RgWithDirectory <C-R><C-W> .<CR>
 
-" \ug to search to a prompted word
-function PromptForSearch()
+function! PromptForSearch()
   call inputsave()
   let term = input('Search: ')
   call inputrestore()
-  call RgWithDirectory(term, '.')
+  return term
 endfunction
-map <Leader>ug :call PromptForSearch()<CR>
+map <Leader>fg :call RgForLine(PromptForSearch())<CR>
+
+" \ug to search to a prompted word
+function PromptForSearchAndRun()
+  call RgWithDirectory(PromptForSearch(), '.')
+endfunction
+map <Leader>ug :call PromptForSearchAndRun()<CR>
 
 function! RgWithDirectory(query, dir)
   call fzf#vim#grep('rg --column --line-number --no-heading --color=always --smart-case '.shellescape(a:query), 1, fzf#vim#with_preview({'dir': a:dir}, 'right:50%'), 0)
@@ -78,9 +45,7 @@ endfunction
 " Next two are variants on \ug and \ul that prompt for a directory to search
 " inside of (\uL and \uG)
 function PromptForSearchAndPath()
-  call inputsave()
-  let term = input('Search: ')
-  call inputrestore()
+  let term = PromptForSearch()
 
   call inputsave()
   let dir = input('Directory: ')
@@ -116,18 +81,75 @@ command! -bang -nargs=* Ag
 
 map <Leader>ub :Buffers<CR>
 
-" Use \un to search for Neighboring files
-function! s:fzf_neighbouring_files()
-  let current_file =expand("%")
-  let cwd = fnamemodify(current_file, ':p:h')
-  let command = 'ag -g "" -f ' . cwd . ' --depth 0'
+" =======================================================================================================
+" This is a graveyard, preserved in order to keep examples
+" =======================================================================================================
+"
+" " \ur to insert prequire statements
+" function! Insert_require(path)
+"   let line = system('relativePath.pl ' . a:path . ' 2>/dev/null')
+"   echom 'relativePath.pl ' . a:path . ' ' . expand('%:p') . ' 2>/dev/null'
+"   execute "normal! mqgg}O" . line . "\<esc>`q"
+" endfunction
+" command InsertRequire call fzf#run(fzf#wrap('requires', {'sink': function('Insert_require'), 'options': '-q ".js "'}))
+" map <Leader>ur :InsertRequire<CR>
+"
+" " \ud to insert drequire statements
+" function! Insert_require_dynamic(path)
+"   let line = system('relativePath.pl --dynamic ' . a:path . ' 2>/dev/null')
+"   echom 'relativePath.pl --dynamic ' . a:path . ' ' . expand('%:p') . ' 2>/dev/null'
+"   execute "normal! mqgg}O" . line . "\<esc>`q"
+" endfunction
+" command InsertRequireDynamic call fzf#run(fzf#wrap('requires', {'sink': function('Insert_require_dynamic'), 'options': '-q ".js "'}))
+" map <Leader>ud :InsertRequireDynamic<CR>
+"
+" " \it to insert import type statements
+" function! Insert_type(path)
+"   let line = system('createImportLine.sh ' . a:path . ' ' . expand('%p') . ' 1 2>/dev/null')
+"   echom 'createImportLine.sh ' . a:path . ' ' . expand('%p') . ' 1 2>/dev/null'
+"   execute "normal! mqG?import \<CR>o" . line . "\<esc>`q"
+" endfunction
+" command InsertTypeImport call fzf#run(fzf#wrap('imports', {'sink': function('Insert_type'), 'options': '-q "/generated__/ .graphql.js ' . expand('%:t:r') . ' "'}))
+" map <Leader>it :InsertTypeImport<CR>
+"
+" " \if to insert import of files
+" function! Insert_import(path)
+"   let line = system('createImportLine.sh ' . a:path . ' ' . expand('%p') . ' 2>/dev/null')
+"   echom 'createImportLine.sh ' . a:path . ' ' . expand('%p') . ' 2>/dev/null'
+"   execute "normal! mqG?import \<CR>o" . line . "\<esc>`q"
+" endfunction
+" command InsertImport call fzf#run(fzf#wrap('imports', {'sink': function('Insert_import'), 'options': '-q "webpack/assets/javascripts/core "'}))
+" map <Leader>if :InsertImport<CR>
+"
+" " \ig to search all import statements
+" function! Insert_generic_import(path)
+"   let import = substitute(a:path, '^.\{1,}:\d\+:', '', '\v')
+"   execute "normal! mqG?import \<CR>o" . import . "\<esc>`q"
+" endfunction
+" " command InsertGenericImport call fzf#run(fzf#wrap('imports', {'sink': function('Insert_generic_import'), 'options': '-q "webpack/assets/javascripts/core "'}))
+" command InsertGenericImport call fzf#run(fzf#wrap('imports', {
+"       \ 'sink': function('Insert_generic_import'),
+"       \ 'options': '-q "webpack/assets/javascripts/core "',
+"       \ 'source': printf('ag "^import" webpack')
+"       \ }))
+" map <Leader>ig :InsertGenericImport<CR>
+"
+" " Use \un to search for Neighboring files
+" function! Fzf_neighbouring_files()
+"   let current_file =expand("%")
+"   let cwd = fnamemodify(current_file, ':p:h')
+"   let command = 'ag -g "" -f ' . cwd . ' --depth 0'
+"
+"   call fzf#run({
+"         \ 'source': command,
+"         \ 'sink':   'e',
+"         \ 'options': '-m -x +s',
+"         \ 'window':  'enew' })
+" endfunction
+"
+" command! FZFNeigh call s:fzf_neighbouring_files()
+" map <Leader>un :call Fzf_neighbouring_files()
+"
+" " maiing for \ag
+" nnoremap <leader>ag :Ag <C-r><C-w><CR>
 
-  call fzf#run({
-        \ 'source': command,
-        \ 'sink':   'e',
-        \ 'options': '-m -x +s',
-        \ 'window':  'enew' })
-endfunction
-
-command! FZFNeigh call s:fzf_neighbouring_files()
-map <Leader>un :call FZFNeigh

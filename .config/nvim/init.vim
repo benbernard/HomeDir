@@ -398,6 +398,7 @@ nmap <Leader>fp :CopyPath<cr>
   let g:ale_fixers = {
   \  'javascript': ['prettier', 'eslint'],
   \  'python': ['autopep8'],
+  \  'typescript': ['prettier', 'eslint', "tslint"],
   \}
 
   " Let ALE fixers run on save
