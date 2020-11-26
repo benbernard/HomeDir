@@ -76,6 +76,7 @@ Plug 'christoomey/vim-tmux-navigator'
 Plug 'mr-ubik/vim-hackerman-syntax'
 Plug 'tpope/vim-abolish'
 Plug 'zxqfl/tabnine-vim'
+Plug 'dracula/vim'
 
 " Disabled plugins:
 " Plug 'ternjs/tern_for_vim', {'do': 'npm install'} " Doesn't seem to work well
@@ -95,12 +96,9 @@ autocmd VimEnter *
 "First source the environment location
 source $HOME/.eihooks/dotfiles/vimrc
 
-" Setup 256 colors
-set t_Co=256
+set termguicolors                    " Use 'true colors' in vim
 
 """"""""""""""" Global Options """"""""""""""""""""
-
-colorscheme madeofcode         "changes color scheme to something that looks decent on the mac
 
 set background=dark                  " Tell vim that I'm using a dark background terminal
 set fo+=qr                           " q: gq foramts with comments, see :help fo-table, r: auto insert comments on new lines
@@ -130,6 +128,8 @@ set ttimeoutlen=30                   " timeout on key-codes after 30ms (shorter 
 set signcolumn=yes                   " Always display the notes column for ALE/gitgutter
 set inccommand=nosplit               " Increment display of s commands (maybe others in future)
 scriptencoding utf-8                 " Use utf-8 to encode vimscript (so that options key maps can work)
+
+colorscheme dracula " current colorscheme
 
 if (has('macunix'))
   set clipboard=unnamed                " Use the * register when a register is not specified - unifies with system clipboard!
@@ -634,17 +634,20 @@ let g:vim_markdown_folding_disabled=1
   let g:multi_cursor_exit_from_visual_mode=0 " Do not exist multi cursors with esc from visual mode
   let g:multi_cursor_exit_from_insert_mode=0 " Do not exist multi cursors with esc from insert mode
 
-" Indent guides
+" Indent guides vim-indent-guides
   let g:indent_guides_enable_on_vim_startup = 1 " Use guides
-  let g:indent_guides_exclude_filetypes = ['help', 'unite', 'fzf'] " No guildes in help or unite windows
+  let g:indent_guides_exclude_filetypes = ['help', 'unite', 'fzf'] " No guides in help or unite windows
   let g:indent_guides_guide_size = 1 " Only use 1 character for indent guides
 
   " Define custom colors, better greys for terminal, need to be autocmd,
   " because evidently the colorscheme resets them a bunch of times. (taken
   " from documentation)
   let g:indent_guides_auto_colors = 0
-  autocmd VimEnter,Colorscheme * :hi IndentGuidesOdd  guibg=red   ctermbg=236
-  autocmd VimEnter,Colorscheme * :hi IndentGuidesEven guibg=green ctermbg=240
+  autocmd VimEnter,Colorscheme * :hi IndentGuidesOdd  guibg=black ctermbg=236
+  autocmd VimEnter,Colorscheme * :hi IndentGuidesEven guibg=#555555 ctermbg=240
+
+  " Could also get more contrast with this config, but I like my own colors better
+  " let g:indent_guides_color_change_percent = 10
 
 " Add incremental move commands
   " This is adapted from this article:

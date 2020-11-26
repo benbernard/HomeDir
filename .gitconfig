@@ -3,6 +3,7 @@
 [diff]
   color = auto
   rename = copy
+  colorMoved = default
 
 [pager]
   color = true
@@ -21,7 +22,7 @@
 
 [core]
   whitespace=fix,-indent-with-non-tab,trailing-space,cr-at-eol
-  pager = less -XRMSIF
+  pager = delta
   excludesfile = ~/.gitignore_global
 
 [alias]
@@ -75,7 +76,7 @@
 [merge]
 
 [merge]
-	conflictstyle = diff3
+  conflictstyle = diff3
   keepBackup = false
   keepTemporaries = false
   tool = p4merge
@@ -114,12 +115,29 @@
 [man "run-help"]
   cmd = run-githelp
 [branch]
-	autosetuprebase = always
-	sort = authordate
+  autosetuprebase = always
+  sort = authordate
 [fetch]
-	prune = true
+  prune = true
 
 # Always use ssh for github urls
 # This doesn't work with cargo, disabling
 # [url "git@github.com:"]
 #   insteadOf = "https://github.com/"
+
+# Delta git pager configuration, see
+# https://github.com/dandavison/delta
+[interactive]
+  diffFilter = delta --color-only
+
+[delta]
+  features = side-by-side line-numbers decorations
+  syntax-theme = Dracula
+  plus-style = syntax "#003000"
+  minus-style = syntax "#3f0001"
+  whitespace-error-style = 22 reverse
+
+[delta "decorations"]
+  commit-decoration-style = bold yellow box ul
+  file-style = bold yellow ul
+  # file-decoration-style = none

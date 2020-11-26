@@ -14,8 +14,7 @@ if [[ $? != 0 ]]; then;
   }
 fi
 
-# This must come last, enables zsh prompt highlighting
-ZSH_SYNTAX_HIGHLIGHT_PATH=$(submodule zsh-syntax-highlighting)/zsh-syntax-highlighting.zsh
-if [[ -e ${ZSH_SYNTAX_HIGHLIGHT_PATH} ]]; then
-  source ${ZSH_SYNTAX_HIGHLIGHT_PATH}
+FAST_SYNTAX_PATH=$(submodule fast-syntax-highlighting)/fast-syntax-highlighting.plugin.zsh
+if [[ -e ${FAST_SYNTAX_PATH} ]]; then
+  source ${FAST_SYNTAX_PATH}
 fi
