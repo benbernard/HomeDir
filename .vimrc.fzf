@@ -1,3 +1,25 @@
+
+" This will tell fzf how to extract colors form the color scheme to use in the
+" pop up window.  Note the priview pane of the pop up window is controlled via
+" bat, and currently I believe uses 16 or 256 colors instead of true color,
+" this setting will not change that.
+"
+" Taken from: https://github.com/junegunn/fzf.vim/issues/581
+let g:fzf_colors =
+        \ { "fg":      ["fg", "Normal"],
+        \ "bg":      ["bg", "Normal"],
+        \ "hl":      ["fg", "IncSearch"],
+        \ "fg+":     ["fg", "CursorLine", "CursorColumn", "Normal"],
+        \ "bg+":     ["bg", "CursorLine", "CursorColumn"],
+        \ "hl+":     ["fg", "IncSearch"],
+        \ "info":    ["fg", "IncSearch"],
+        \ "border":  ["fg", "Ignore"],
+        \ "prompt":  ["fg", "Comment"],
+        \ "pointer": ["fg", "IncSearch"],
+        \ "marker":  ["fg", "IncSearch"],
+        \ "spinner": ["fg", "IncSearch"],
+        \ "header":  ["fg", "WildMenu"] }
+
 " Make ctrl-a search files
 nnoremap <C-a> :Files<cr>
 "autocmd VimEnter * nnoremap <C-a> :<C-u>Unite -buffer-name=files -prompt-direction=above -start-insert file_rec/async:!<cr>
