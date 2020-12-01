@@ -31,3 +31,6 @@
 [submodule "submodules/fast-syntax-highlighting"]
 	path = submodules/fast-syntax-highlighting
 	url = git@github.com:zdharma/fast-syntax-highlighting.git
+[submodule "submodules/dracula-vim"]
+	path = submodules/dracula-vim
+	url = git@github.com:benbernard/dracula-vim.git
