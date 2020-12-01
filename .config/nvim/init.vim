@@ -6,7 +6,7 @@ let g:ale_emit_conflict_warnings = 0
 """"""""""""""""" Plugins Setup """"""""""""""""""""""""""""""""
 
 " Disable javascript/jsx from polyglot, must be before polyglot loads
-  let g:polyglot_disabled = ['jsx', 'javascript']
+let g:polyglot_disabled = ['jsx', 'javascript']
 
 call plug#begin('~/.local/share/nvim/plugged')
 
@@ -76,7 +76,7 @@ Plug 'christoomey/vim-tmux-navigator'
 Plug 'mr-ubik/vim-hackerman-syntax'
 Plug 'tpope/vim-abolish'
 Plug 'zxqfl/tabnine-vim'
-Plug 'dracula/vim'
+Plug 'benbernard/dracula-vim', { 'dir': '~/submodules/dracula-vim' }
 
 " Disabled plugins:
 " Plug 'ternjs/tern_for_vim', {'do': 'npm install'} " Doesn't seem to work well
