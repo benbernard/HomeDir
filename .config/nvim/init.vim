@@ -76,7 +76,7 @@ Plug 'christoomey/vim-tmux-navigator'
 Plug 'mr-ubik/vim-hackerman-syntax'
 Plug 'tpope/vim-abolish'
 Plug 'zxqfl/tabnine-vim'
-Plug 'benbernard/dracula-vim', { 'dir': '~/submodules/dracula-vim' }
+Plug 'dracula/vim', { 'as': 'dracula-vim' }
 
 " Disabled plugins:
 " Plug 'ternjs/tern_for_vim', {'do': 'npm install'} " Doesn't seem to work well
