@@ -99,7 +99,8 @@ fzf-git-status-widget() {
   local files=$(
     git status --porcelain |
     sed 's/^...//' |
-    fzf -m --ansi --preview='git -c color.status=always status -s | grep {}; echo; git diff --color {}'
+    fzf -m --ansi --preview='git -c color.status=always status -s | grep {}; echo; git diff --color {}' |
+    tr '\n' ' '
   )
 
   if [[ -z "$files" ]]; then

@@ -1679,6 +1679,8 @@ Work:Restore Window Arrangement</string>
 					<dict>
 						<key>Root</key>
 						<dict>
+							<key>Splitter ID</key>
+							<string>50D9F6EC-A93C-452A-A974-1FA592DFA88C</string>
 							<key>Subviews</key>
 							<array>
 								<dict>
@@ -1842,8 +1844,12 @@ Work:Restore Window Arrangement</string>
 											<true/>
 											<key>Background Color</key>
 											<dict>
+												<key>Alpha Component</key>
+												<real>1</real>
 												<key>Blue Component</key>
 												<real>0.0</real>
+												<key>Color Space</key>
+												<string>sRGB</string>
 												<key>Green Component</key>
 												<real>0.0</real>
 												<key>Red Component</key>
@@ -1894,11 +1900,15 @@ Work:Restore Window Arrangement</string>
 											<string>No</string>
 											<key>Custom Directory</key>
 											<string>No</string>
+											<key>Custom Window Title</key>
+											<string>nt default</string>
 											<key>Default Bookmark</key>
 											<string>No</string>
 											<key>Description</key>
 											<string>Default</string>
 											<key>Disable Window Resizing</key>
+											<true/>
+											<key>Draw Powerline Glyphs</key>
 											<true/>
 											<key>Flashing Bell</key>
 											<false/>
@@ -2214,15 +2224,17 @@ Work:Restore Window Arrangement</string>
 											<key>Name</key>
 											<string>Default</string>
 											<key>Non Ascii Font</key>
-											<string>InconsolataForPowerline-dz 12</string>
+											<string>MesloLGS-NF-Regular 12</string>
 											<key>Non-ASCII Anti Aliased</key>
 											<true/>
 											<key>Non-ASCII Ligatures</key>
 											<true/>
 											<key>Normal Font</key>
-											<string>InconsolataForPowerline-dz 12</string>
+											<string>MesloLGS-NF-Regular 12</string>
 											<key>Option Key Sends</key>
 											<integer>0</integer>
+											<key>Prevent Opening in a Tab</key>
+											<true/>
 											<key>Prompt Before Closing 2</key>
 											<false/>
 											<key>Right Option Key Sends</key>
@@ -2257,6 +2269,105 @@ Work:Restore Window Arrangement</string>
 											<string></string>
 											<key>Silence Bell</key>
 											<false/>
+											<key>Smart Selection Rules</key>
+											<array>
+												<dict>
+													<key>notes</key>
+													<string>Word bounded by whitespace</string>
+													<key>precision</key>
+													<string>low</string>
+													<key>regex</key>
+													<string>\S+</string>
+												</dict>
+												<dict>
+													<key>notes</key>
+													<string>C++ namespace::identifier</string>
+													<key>precision</key>
+													<string>normal</string>
+													<key>regex</key>
+													<string>([a-zA-Z0-9_]+::)+[a-zA-Z0-9_]+</string>
+												</dict>
+												<dict>
+													<key>notes</key>
+													<string>Paths</string>
+													<key>precision</key>
+													<string>normal</string>
+													<key>regex</key>
+													<string>\~?/?([[:letter:][:number:]._-]+/+)+[[:letter:][:number:]._-]+/?</string>
+												</dict>
+												<dict>
+													<key>notes</key>
+													<string>Quoted string</string>
+													<key>precision</key>
+													<string>normal</string>
+													<key>regex</key>
+													<string>@?"(?:[^"\\]|\\.)*"</string>
+												</dict>
+												<dict>
+													<key>notes</key>
+													<string>Java/Python include paths</string>
+													<key>precision</key>
+													<string>normal</string>
+													<key>regex</key>
+													<string>([[:letter:][:number:]._]+\.)+[[:letter:][:number:]._]+</string>
+												</dict>
+												<dict>
+													<key>notes</key>
+													<string>mailto URL</string>
+													<key>precision</key>
+													<string>normal</string>
+													<key>regex</key>
+													<string>\bmailto:([a-z0-9A-Z_]+@)?([a-zA-Z0-9\-]+\.)*[a-zA-Z0-9\-]+\b</string>
+												</dict>
+												<dict>
+													<key>notes</key>
+													<string>Obj-C selector</string>
+													<key>precision</key>
+													<string>high</string>
+													<key>regex</key>
+													<string>@selector\([^)]+\)</string>
+												</dict>
+												<dict>
+													<key>notes</key>
+													<string>email address</string>
+													<key>precision</key>
+													<string>high</string>
+													<key>regex</key>
+													<string>\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}\b</string>
+												</dict>
+												<dict>
+													<key>notes</key>
+													<string>HTTP URL</string>
+													<key>precision</key>
+													<string>very_high</string>
+													<key>regex</key>
+													<string>https?://([a-z0-9A-Z]+(:[a-zA-Z0-9]+)?@)?([a-z0-9A-Z][-a-z0-9A-Z]*\.)+[A-Za-z][-A-Za-z]*((:[0-9]+)?)(/[a-zA-Z0-9;/\.\-_+%?&amp;@=#\(\)~]*)?</string>
+												</dict>
+												<dict>
+													<key>notes</key>
+													<string>SSH URL</string>
+													<key>precision</key>
+													<string>very_high</string>
+													<key>regex</key>
+													<string>\bssh:([a-z0-9A-Z_]+@)?([a-zA-Z0-9\-]+\.)*[a-zA-Z0-9\-]+\b</string>
+												</dict>
+												<dict>
+													<key>notes</key>
+													<string>Telnet URL</string>
+													<key>precision</key>
+													<string>very_high</string>
+													<key>regex</key>
+													<string>\btelnet:([a-z0-9A-Z_]+@)?([a-zA-Z0-9\-]+\.)*[a-zA-Z0-9\-]+\b</string>
+												</dict>
+												<dict>
+													<key>notes</key>
+													<string>File URL</string>
+													<key>precision</key>
+													<string>high</string>
+													<key>regex</key>
+													<string>file://([a-z0-9A-Z]+(:[a-zA-Z0-9]+)?@)?([a-z0-9A-Z][-a-z0-9A-Z]*\.)+[A-Za-z][-A-Za-z]*((:[0-9]+)?)(/[a-zA-Z0-9;/\.\-_+%?&amp;@=#\(\)~]*)?</string>
+												</dict>
+											</array>
 											<key>Sync Title</key>
 											<false/>
 											<key>Tags</key>
@@ -2284,6 +2395,8 @@ Work:Restore Window Arrangement</string>
 											<true/>
 											<key>Use Bright Bold</key>
 											<true/>
+											<key>Use Custom Window Title</key>
+											<true/>
 											<key>Use Italic Font</key>
 											<true/>
 											<key>Use Non-ASCII Font</key>
@@ -2304,9 +2417,12 @@ Work:Restore Window Arrangement</string>
 										<key>Commands</key>
 										<array>
 											<string>nt default</string>
+											<string>nt default</string>
 										</array>
 										<key>Directories</key>
 										<array>
+											<string>/Users/bernard</string>
+											<string>/Users/bernard</string>
 											<string>/Users/bernard</string>
 											<string>/Users/bernard</string>
 										</array>
@@ -2317,6 +2433,8 @@ Work:Restore Window Arrangement</string>
 										</dict>
 										<key>Hostname to Shell</key>
 										<dict>
+											<key>bernard@Ben-2019-MacBookPro.local</key>
+											<string>zsh</string>
 											<key>bernard@gremben.local</key>
 											<string>zsh</string>
 										</dict>
@@ -2334,9 +2452,23 @@ Work:Restore Window Arrangement</string>
 												<key>User name</key>
 												<string>bernard</string>
 											</dict>
+											<dict>
+												<key>Host name</key>
+												<string>Ben-2019-MacBookPro.local</string>
+												<key>User name</key>
+												<string>bernard</string>
+											</dict>
+											<dict>
+												<key>Host name</key>
+												<string>Ben-2019-MacBookPro.local</string>
+												<key>User name</key>
+												<string>bernard</string>
+											</dict>
 										</array>
 										<key>Is UTF-8</key>
 										<true/>
+										<key>Key Labels</key>
+										<dict/>
 										<key>Name Controller State</key>
 										<dict>
 											<key>icon title stack</key>
@@ -2346,13 +2478,11 @@ Work:Restore Window Arrangement</string>
 										</dict>
 										<key>Program</key>
 										<dict>
-											<key>Command</key>
-											<string>login -fp "bernard"</string>
 											<key>Type</key>
-											<string>Command</string>
+											<string>Shell Launcher</string>
 										</dict>
 										<key>Rows</key>
-										<integer>81</integer>
+										<integer>86</integer>
 										<key>Session GUID</key>
 										<string>14A1D6CF-C128-4DD9-A93C-BB68BC5888A7</string>
 										<key>Short Lived Single Use</key>
@@ -2375,7 +2505,7 @@ Work:Restore Window Arrangement</string>
 										<key>height</key>
 										<real>1394</real>
 										<key>width</key>
-										<real>1705</real>
+										<real>1707</real>
 										<key>x</key>
 										<real>0.0</real>
 										<key>y</key>
@@ -2390,7 +2520,7 @@ Work:Restore Window Arrangement</string>
 								<key>height</key>
 								<real>1394</real>
 								<key>width</key>
-								<real>1705</real>
+								<real>1707</real>
 								<key>x</key>
 								<real>0.0</real>
 								<key>y</key>
@@ -2399,6 +2529,8 @@ Work:Restore Window Arrangement</string>
 							<key>isVertical</key>
 							<false/>
 						</dict>
+						<key>Tab GUID</key>
+						<string>BBB15E1D-DFA0-4A12-8A3B-E656AEA25154</string>
 					</dict>
 				</array>
 				<key>TerminalGuid</key>
@@ -2431,7 +2563,7 @@ Work:Restore Window Arrangement</string>
 				<key>Use Transparency</key>
 				<true/>
 				<key>Width</key>
-				<real>1705</real>
+				<real>1707</real>
 				<key>Window Type</key>
 				<integer>0</integer>
 				<key>X Origin</key>
@@ -2447,7 +2579,7 @@ Work:Restore Window Arrangement</string>
 				<key>Has Toolbelt</key>
 				<false/>
 				<key>Height</key>
-				<real>1027</real>
+				<real>1097</real>
 				<key>Hide After Opening</key>
 				<false/>
 				<key>Hiding Toolbelt Should Resize Window</key>
@@ -2467,6 +2599,8 @@ Work:Restore Window Arrangement</string>
 					<dict>
 						<key>Root</key>
 						<dict>
+							<key>Splitter ID</key>
+							<string>FB46628E-3753-4AFC-9417-2CEEB1035E3D</string>
 							<key>Subviews</key>
 							<array>
 								<dict>
@@ -2684,6 +2818,8 @@ Work:Restore Window Arrangement</string>
 											<string>No</string>
 											<key>Custom Directory</key>
 											<string>No</string>
+											<key>Custom Window Title</key>
+											<string>nt irc</string>
 											<key>Default Bookmark</key>
 											<string>No</string>
 											<key>Description</key>
@@ -2704,7 +2840,7 @@ Work:Restore Window Arrangement</string>
 												<real>0.73333334922790527</real>
 											</dict>
 											<key>Guid</key>
-											<string>594DA881-81C1-4ACB-8CEF-E5CFEEC79B73</string>
+											<string>F76365D5-966F-4A6C-99DD-E0B5DDCF93F8</string>
 											<key>Has Hotkey</key>
 											<false/>
 											<key>Horizontal Spacing</key>
@@ -3008,15 +3144,19 @@ Work:Restore Window Arrangement</string>
 											<key>Name</key>
 											<string>IRC</string>
 											<key>Non Ascii Font</key>
-											<string>MesloLGS-NF-Regular 12</string>
+											<string>MesloLGS-NF-Regular 13</string>
 											<key>Non-ASCII Anti Aliased</key>
 											<true/>
 											<key>Non-ASCII Ligatures</key>
 											<true/>
 											<key>Normal Font</key>
-											<string>MesloLGS-NF-Regular 12</string>
+											<string>MesloLGS-NF-Regular 13</string>
 											<key>Option Key Sends</key>
 											<integer>0</integer>
+											<key>Original Guid</key>
+											<string>594DA881-81C1-4ACB-8CEF-E5CFEEC79B73</string>
+											<key>Prevent Opening in a Tab</key>
+											<true/>
 											<key>Prompt Before Closing 2</key>
 											<false/>
 											<key>Right Option Key Sends</key>
@@ -3177,6 +3317,8 @@ Work:Restore Window Arrangement</string>
 											<true/>
 											<key>Use Bright Bold</key>
 											<true/>
+											<key>Use Custom Window Title</key>
+											<true/>
 											<key>Use Italic Font</key>
 											<true/>
 											<key>Use Non-ASCII Font</key>
@@ -3193,13 +3335,16 @@ Work:Restore Window Arrangement</string>
 											<string>Default</string>
 										</dict>
 										<key>Columns</key>
-										<integer>236</integer>
+										<integer>220</integer>
 										<key>Commands</key>
 										<array>
+											<string>nt irc</string>
 											<string>nt irc</string>
 										</array>
 										<key>Directories</key>
 										<array>
+											<string>/Users/bernard</string>
+											<string>/Users/bernard</string>
 											<string>/Users/bernard</string>
 											<string>/Users/bernard</string>
 										</array>
@@ -3210,6 +3355,8 @@ Work:Restore Window Arrangement</string>
 										</dict>
 										<key>Hostname to Shell</key>
 										<dict>
+											<key>bernard@Ben-2019-MacBookPro.local</key>
+											<string>zsh</string>
 											<key>bernard@gremben.local</key>
 											<string>zsh</string>
 										</dict>
@@ -3227,9 +3374,23 @@ Work:Restore Window Arrangement</string>
 												<key>User name</key>
 												<string>bernard</string>
 											</dict>
+											<dict>
+												<key>Host name</key>
+												<string>Ben-2019-MacBookPro.local</string>
+												<key>User name</key>
+												<string>bernard</string>
+											</dict>
+											<dict>
+												<key>Host name</key>
+												<string>Ben-2019-MacBookPro.local</string>
+												<key>User name</key>
+												<string>bernard</string>
+											</dict>
 										</array>
 										<key>Is UTF-8</key>
 										<true/>
+										<key>Key Labels</key>
+										<dict/>
 										<key>Name Controller State</key>
 										<dict>
 											<key>icon title stack</key>
@@ -3237,15 +3398,20 @@ Work:Restore Window Arrangement</string>
 											<key>window title stack</key>
 											<array/>
 										</dict>
+										<key>Overridden Fields</key>
+										<array>
+											<string>Normal Font</string>
+											<string>Original Guid</string>
+											<string>Guid</string>
+											<string>Non Ascii Font</string>
+										</array>
 										<key>Program</key>
 										<dict>
-											<key>Command</key>
-											<string>login -fp "bernard"</string>
 											<key>Type</key>
-											<string>Command</string>
+											<string>Shell Launcher</string>
 										</dict>
 										<key>Rows</key>
-										<integer>58</integer>
+										<integer>62</integer>
 										<key>Session GUID</key>
 										<string>B65CE9CA-B4FE-4A05-B6E5-27BF88ABD5AB</string>
 										<key>Short Lived Single Use</key>
@@ -3266,9 +3432,9 @@ Work:Restore Window Arrangement</string>
 									<key>frame</key>
 									<dict>
 										<key>height</key>
-										<real>1004</real>
+										<real>1074</real>
 										<key>width</key>
-										<real>1680</real>
+										<real>1792</real>
 										<key>x</key>
 										<real>0.0</real>
 										<key>y</key>
@@ -3281,9 +3447,9 @@ Work:Restore Window Arrangement</string>
 							<key>frame</key>
 							<dict>
 								<key>height</key>
-								<real>1004</real>
+								<real>1074</real>
 								<key>width</key>
-								<real>1680</real>
+								<real>1792</real>
 								<key>x</key>
 								<real>0.0</real>
 								<key>y</key>
@@ -3292,6 +3458,8 @@ Work:Restore Window Arrangement</string>
 							<key>isVertical</key>
 							<false/>
 						</dict>
+						<key>Tab GUID</key>
+						<string>8F95F793-3A9F-4A23-B038-48949B36F149</string>
 					</dict>
 				</array>
 				<key>TerminalGuid</key>
@@ -3324,13 +3492,13 @@ Work:Restore Window Arrangement</string>
 				<key>Use Transparency</key>
 				<true/>
 				<key>Width</key>
-				<real>1680</real>
+				<real>1792</real>
 				<key>Window Type</key>
 				<integer>0</integer>
 				<key>X Origin</key>
 				<real>5120</real>
 				<key>Y Origin</key>
-				<real>-667</real>
+				<real>-636</real>
 			</dict>
 		</array>
 	</dict>

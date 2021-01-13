@@ -386,6 +386,9 @@ nmap <Leader>fp :CopyPath<cr>
   nmap [s :ALEPreviousWrap<CR>
   nmap ]s :ALENextWrap<CR>
 
+  " Map \ad to :ALEDetail
+  map <Leader>ad :ALEDetail<CR>
+
   " Turn off html linters
   let g:ale_linters = {
   \   'html': [],
