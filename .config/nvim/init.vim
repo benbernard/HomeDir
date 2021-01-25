@@ -785,15 +785,15 @@ let g:sql_type_default = 'pgsql'
 """"""""""""""" Version 7 Settings """"""""""""""""""""
 
 " Changing spelling highlight to be underline, must come at the end
-hi clear SpellBad
-hi SpellBad cterm=underline
-
-hi clear SpellCap
-hi SpellCap cterm=underline
+" hi clear SpellBad
+" hi SpellBad cterm=underline
+"
+" hi clear SpellCap
+" hi SpellCap cterm=underline
 
 " Change search hilights
-hi IncSearch guifg=NONE guibg=#233466 guisp=#233466 gui=NONE ctermfg=blue ctermbg=yellow cterm=NONE
-hi Search ctermfg=17 ctermbg=45 guifg=#00005f guibg=#00dfff guisp=#233466 gui=NONE
+" hi IncSearch guifg=NONE guibg=#233466 guisp=#233466 gui=NONE ctermfg=blue ctermbg=yellow cterm=NONE
+" hi Search ctermfg=17 ctermbg=45 guifg=#00005f guibg=#00dfff guisp=#233466 gui=NONE
 
 " If site.vim is present, include it now
 if ( filereadable($HOME . "/site/site.vim") )
