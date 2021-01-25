@@ -257,3 +257,9 @@ ATLauncher/
 gaol/
 Parallels/
 Applications (Parallels)/
+.instacart*
+.isc/
+.rbenv/
+.wget-hsts
+carrot/
+src/

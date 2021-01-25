@@ -75,7 +75,7 @@ Plug 'andymass/vim-matchup'
 Plug 'christoomey/vim-tmux-navigator'
 Plug 'mr-ubik/vim-hackerman-syntax'
 Plug 'tpope/vim-abolish'
-Plug 'zxqfl/tabnine-vim'
+" Plug 'zxqfl/tabnine-vim'
 Plug 'dracula/vim', { 'as': 'dracula-vim' }
 
 " Disabled plugins:
