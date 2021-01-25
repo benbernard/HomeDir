@@ -4,6 +4,7 @@
   color = auto
   rename = copy
   colorMoved = default
+  mnemonicprefix = true
 
 [pager]
   color = true
@@ -21,7 +22,7 @@
   whitespace = red reverse
 
 [core]
-  whitespace=fix,-indent-with-non-tab,trailing-space,cr-at-eol
+  whitespace = fix,-indent-with-non-tab,trailing-space,cr-at-eol,space-before-tab
   pager = delta
   excludesfile = ~/.gitignore_global
 
@@ -80,6 +81,7 @@
   keepBackup = false
   keepTemporaries = false
   tool = p4merge
+  stat = true
 
 [mergetool "p4merge"]
   cmd = p4merge "$BASE" "$LOCAL" "$REMOTE" "$MERGED"
