@@ -264,3 +264,5 @@ Applications (Parallels)/
 carrot/
 src/
 .config/ei/cdrp_dir
+.ecr/
+.config/bento/

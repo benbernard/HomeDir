@@ -143,3 +143,18 @@
   commit-decoration-style = bold yellow box ul
   file-style = bold yellow ul
   # file-decoration-style = none
+
+# Stuff from insta-setup.sh that I didn't want in global gitconfig
+[http]
+	postBuffer = 524288000
+
+[credential]
+	helper = osxkeychain
+
+[url "git@github.com:"]
+	insteadOf = https://github.com/
+
+[user]
+	name = Ben Bernard
+	email = ben.bernard@instacart.com
+  username = benbernard

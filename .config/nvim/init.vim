@@ -20,7 +20,6 @@ Plug 'Shougo/vimproc.vim', { 'do': 'make' }
 Plug 'Shougo/unite.vim'
 Plug 'bkad/CamelCaseMotion'
 Plug 'vim-scripts/UnconditionalPaste'
-Plug 'jiangmiao/auto-pairs'
 Plug 'junegunn/fzf', { 'do': 'yes \| ./install' }
 Plug 'sjl/gundo.vim'
 Plug 'bruschill/madeofcode'
@@ -75,8 +74,11 @@ Plug 'andymass/vim-matchup'
 Plug 'christoomey/vim-tmux-navigator'
 Plug 'mr-ubik/vim-hackerman-syntax'
 Plug 'tpope/vim-abolish'
-" Plug 'zxqfl/tabnine-vim'
+Plug 'zxqfl/tabnine-vim'
 Plug 'dracula/vim', { 'as': 'dracula-vim' }
+Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
+" Plug 'jiangmiao/auto-pairs'
+Plug 'Raimondi/delimitMate' " Trying this instead of auto-pairs for TabNine compatability
 
 " Disabled plugins:
 " Plug 'ternjs/tern_for_vim', {'do': 'npm install'} " Doesn't seem to work well
@@ -111,8 +113,8 @@ set nolinebreak                      " don't wrap at words, messes up copying
 set smartcase                        " if any capitol in search, turns search case sensitive
 set shiftwidth=2                     " use 2 space indenting
 set softtabstop=2                    " really use 2 space indenting
-set ts=2                             " Default to 4 spaces for tabs
-set tags=./.tags,~/flexport/.tags                      " Setup the standard tags files
+set ts=2                             " Default to 2 spaces for tabs
+set tags=./.tags                     " Setup the standard tags files
 set textwidth=0                      " turn wrapping off
 set visualbell                       " Use a flash instead of a sound for bells
 set wildmode=longest:full            " Matches only to longest filename, displays to menu possible matches
@@ -402,6 +404,7 @@ nmap <Leader>fp :CopyPath<cr>
   \  'javascript': ['prettier', 'eslint'],
   \  'python': ['autopep8'],
   \  'typescript': ['prettier', 'eslint', "tslint"],
+  \  'go': ['gofmt', 'goimports', 'remove_trailing_lines']
   \}
 
   " Let ALE fixers run on save
@@ -782,7 +785,11 @@ autocmd FileType javascript call TextEnableCodeSnip('pgsql', 'SQL`', '`', 'NONE'
 " Use pgsql.vim for sql highlighting
 let g:sql_type_default = 'pgsql'
 
-""""""""""""""" Version 7 Settings """"""""""""""""""""
+" Turn off listchars for go
+autocmd FileType go setlocal nolist
+autocmd FileType go setlocal noexpandtab
+
+"""""""""""""""" Version 7 Settings """"""""""""""""""""
 
 " Changing spelling highlight to be underline, must come at the end
 " hi clear SpellBad
