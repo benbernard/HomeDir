@@ -4,7 +4,7 @@
   color = auto
   rename = copy
   colorMoved = default
-  mnemonicprefix = true
+	mnemonicprefix = true
 
 [pager]
   color = true
@@ -22,9 +22,12 @@
   whitespace = red reverse
 
 [core]
-  whitespace = fix,-indent-with-non-tab,trailing-space,cr-at-eol,space-before-tab
-  pager = delta
+	whitespace = trailing-space,space-before-tab
+  # pager = delta
   excludesfile = ~/.gitignore_global
+	untrackedCache = true
+	sparseCheckoutCone = true
+	# hooksPath = /Users/benbernard/.git/hooks
 
 [alias]
   # These I acutally use
@@ -36,6 +39,10 @@
   s = ! git status -s | awk '{print $2}'
   mt = mergetool
   cp = cherry-pick
+  pull = pull --rebase
+  sp = samepull
+  ls = ls-files
+
 
   # These I generally don't
   st = status -uno
@@ -45,7 +52,6 @@
   lgfiles = log --name-only --no-merges
   lol = log --graph --decorate --pretty=oneline --abbrev-commit --no-merges
   lola = log --graph --decorate --pretty=oneline --abbrev-commit --all --no-merges
-  ls = ls-files
   lf = log --no-merges --pretty='format:%C(red)%h%Creset %C(magenta)%ar%Creset %C(yellow)%an%Creset %Cgreen%s%Creset %C(cyan)%d%Creset' --
   log-file = log --no-merges --
   alog = log --date-order --all --graph --format=\"%C(green)%h%Creset %C(yellow)%an%Creset %C(blue bold)%ad%Creset %C(red bold)%d%Creset%s\"
@@ -53,28 +59,23 @@
   agrep = grep-of-doom
   mergeff = merge --ff-only --no-stat
   update-master = updatemaster
-
-  # Assume-unchanged aliases
-  au = update-index --assume-unchanged
-  nau = update-index --no-assume-unchanged
-  lsau = !git ls-files -v | grep "^[[:lower:]]"
+  sortedbranches = for-each-ref --sort=-committerdate refs/heads/ --format='%(refname:short)'
 
   # Testing these
-  pull = pull --rebase
-  sp = samepull
+  modified =!git log --no-commit-id --oneline --pretty=format:"" --name-only --relative master..HEAD | sort | uniq | grep -v '^$'
+  changed = !git diff `git merge-base HEAD origin/master`
+  ten = l -10
 
   # grep=use-agrep
 
 [difftool]
-    prompt = no
+  prompt = no
 
 # Never gc and never expire reflogs
 [gc]
   auto = 0
   reflogExpire = never
   reflogExpireUnreachable = never
-
-[merge]
 
 [merge]
   conflictstyle = diff3
@@ -90,7 +91,7 @@
 [hub]
 
 [user]
-  name = Ben Bernard
+	name = Ben Bernard
   email = github@benjaminbernard.com
   username = benbernard
 
@@ -99,6 +100,7 @@
 
 [mergetool]
   keepBackup = false
+  keepTemporaries = false
 
 [filter "media"]
   clean = git-media-clean %f
@@ -118,9 +120,10 @@
   cmd = run-githelp
 [branch]
   autosetuprebase = always
-  sort = authordate
+	sort = -committerdate
 [fetch]
   prune = true
+	writeCommitGraph = true
 
 # Always use ssh for github urls
 # This doesn't work with cargo, disabling
@@ -143,3 +146,31 @@
   commit-decoration-style = bold yellow box ul
   file-style = bold yellow ul
   # file-decoration-style = none
+
+[init]
+  defaultBranch = main
+
+[http]
+	postBuffer = 524288000
+
+[credential]
+	helper = osxkeychain
+
+[url "git@github.com:"]
+  insteadOf = https://github.com/
+
+# Job-specific identity and repo settings live in the private site repo, not
+# this public repo. Absent on machines without ~/site.
+[include]
+  path = ~/site/gitconfig.site
+
+[feature]
+	manyFiles = 1
+[url "ssh://git@github.com"]
+	insteadOf = https://github.com
+[index]
+	sparse = true
+[rerere]
+	enabled = true
+[safe]
+	directory = /var/app
