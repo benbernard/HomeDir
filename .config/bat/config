@@ -1,1 +1,4 @@
---theme="Dracula"
+# --theme="Dracula"
+--theme="1337"
+# Do not decorate lines, so that I can copy out efficiently
+-p
