@@ -38,7 +38,11 @@ USAGE
     dir="${dir}/$1"
   fi
 
-  cd $dir
+  if type realpath 1>/dev/null 2>/dev/null; then
+    cd `realpath $dir`
+  else
+    cd $dir
+  fi
 }
 
 cdrpReset () {
