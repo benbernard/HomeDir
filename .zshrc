@@ -50,11 +50,3 @@ if [[ -e ~/.zproifle ]]; then
 fi
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
-
-
-### BEGIN--Instacart Shell Settings. (Updated: Wed Jan 27 10:08:40 PST 2021. [Script Version 1.2.6])
-# This Line Added Automatically by Instacart Setup Script
-# The sourced file contains all of the instacart utilities and shell settings
-# To remove this functionality, leave the block, and enter "NO-TOUCH" in the BEGIN line, and comment the line below:
-source /Users/benbernard/.instacart_shell_profile
-### END--Instacart Shell Settings.
