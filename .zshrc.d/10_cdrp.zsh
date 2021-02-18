@@ -1,6 +1,11 @@
 EI_CONFIG_PATH=${HOME}/.config/ei
 CDRP_ROOT_FILE=${EI_CONFIG_PATH}/cdrp_dir
 
+# Make config path if it doesn't exist
+if [[ ! -d ${EI_CONFIG_PATH} ]]; then
+  mkdir -p ${EI_CONFIG_PATH}
+fi
+
 # cdrp system
 # cdrp cd's to a source control repo
 cdrp () {
