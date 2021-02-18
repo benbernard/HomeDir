@@ -1,6 +1,23 @@
-# Added by ForgeCode installer
-export PATH="/Users/benbernard/.local/bin:$PATH"
-# Fix when setenv isn't available
+# Eanble this section to log everything zsh does at startup
+# zmodload zsh/datetime
+# setopt PROMPT_SUBST
+# PS4='+$EPOCHREALTIME %N:%i> '
+#
+# logfile=$(mktemp zsh_profile.XXXXXXXX)
+# echo "Logging to $logfile"
+# exec 3>&2 2>$logfile
+#
+# setopt XTRACE
+
+# Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
+# Initialization code that may require console input (password prompts, [y/n]
+# confirmations, etc.) must go above this block; everything else may go below.
+if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+fi
+
+# Fix when setenv isn't available, should probably just move to export at some
+# point.
 setenv() {
   export $1=$2
 }
@@ -10,55 +27,6 @@ SUBMODULE_DIR=${HOME}/submodules
 submodule() {
   echo ${SUBMODULE_DIR}/$1
 }
-
-# VS Code shell special handling
-if [[ "$TERM_PROGRAM" == "vscode" ]]; then
-  # Load essential environment settings
-  if [ -f ~/.zshrc.d/02_environment.zsh ]; then
-    source ~/.zshrc.d/02_environment.zsh
-  fi
-
-  # Skip the rest of the startup configuration
-  return 0
-fi
-
-# To do profiling ZSH_PROFILE=1
-
-if [[ "$ZSH_PROFILE" == "1" ]]; then
- zmodload zsh/zprof
-fi
-
-# To get detailed command logging on startup (and always) ZSH_CMD_LOGGING=1
-if [[ "$ZSH_CMD_LOGGING" == "1" ]]; then
-  zmodload zsh/datetime
-  setopt PROMPT_SUBST
-  PS4='+$EPOCHREALTIME %N:%i> '
-
-  logfile=$(mktemp zsh_profile.XXXXXXXX)
-  echo "Logging to $logfile"
-  exec 3>&2 2>$logfile
-  setopt XTRACE
-fi
-
-# compinit is deferred and called at the end (see lines 99-115)
-# autoload -Uz compinit  # Commented out - loaded later
-# ZSH_DISABLE_COMPFIX=true  # Not needed with deferred compinit approach
-
-# Disable prompt to update oh my zsh
-DISABLE_UPDATE_PROMPT=true
-
-# I've decide that instant prompt isn't worth it, would rather have an initialized shell
-# Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
-# Initialization code that may require console input (password prompts, [y/n]
-# confirmations, etc.) must go above this block; everything else may go below.
-#
-# p10k instant prompt.  I've decided to disable this feature, as I just want an initalized shell, not a fake one
-# Do not do instant prompt if we are recording a demo
-# if [[ ${recording} != "true" ]]; then
-#   if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
-#     source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
-#   fi
-# fi
 
 if [[ -e "${HOME}/site/use_minimal" ]]; then
   source ${HOME}/.minimal/zsh/zshrc
@@ -70,20 +38,10 @@ then
   ZSH_VERSION=`$SHELL --version | /usr/bin/cut -d ' ' -f 2`
 fi
 
-# Source files in .shellrc.d (I don't use this, but some systems do)
-if [ -d ~/.shellrc.d ]; then
-  for i in $(find $HOME/.shellrc.d/ -name '*.sh' -o -name '*.zsh' | sort); do
-    . $i
-  done
-  unset i
-fi
-
 # Source all files in .zshrc.d
-if [ -d ~/.zshrc.d ]; then
-  foreach i (`ls -1 ~/.zshrc.d/*.zsh`) {
-    source $i
-  }
-fi
+foreach i (`ls -1 ~/.zshrc.d/*.zsh`) {
+  source $i
+}
 
 PATH=$PATH:$HOME/.rvm/bin # Add RVM to PATH for scripting
 
@@ -92,105 +50,3 @@ if [[ -e ~/.zproifle ]]; then
 fi
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
-
-# This was for Warp terminal, which I don't think is ready yet
-# printf '\eP$f{"hook": "SourcedRcFileForWarp", "value": { "shell": "zsh"}}\x9c'
-
-# Perform compinit after everything has loaded.  Only do a full compinit if
-# zcompdump file is older than 24 hours
-# First, undefine the no-op compinit wrapper from 00_oh_my_zsh.zsh
-unfunction compinit 2>/dev/null
-unfunction compdef 2>/dev/null
-autoload -Uz compinit
-if [[ -n ${ZDOTDIR}/.zcompdump(#qN.mh+24) ]]; then
-	compinit -u;
-else
-	compinit -C -u;
-fi;
-
-# Replay queued compdef calls
-for _compdef_call in "${_compdef_queue[@]}"; do
-  compdef ${=_compdef_call}
-done
-unset _compdef_queue _compdef_call
-
-# Load syntax highlighting AFTER compinit to avoid "unhandled ZLE widget" warnings
-FAST_SYNTAX_PATH=$(submodule fast-syntax-highlighting)/fast-syntax-highlighting.plugin.zsh
-if [[ -e ${FAST_SYNTAX_PATH} ]]; then
-  source ${FAST_SYNTAX_PATH}
-fi
-
-#THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
-export SDKMAN_DIR="$HOME/.sdkman"
-[[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
-
-# Print out profiling if enabled
-if [[ "$ZSH_PROFILE" == "1" ]]; then
- zprof
-fi
-
-# The next line updates PATH for the Google Cloud SDK.
-if [ -f '/Users/benbernard/Downloads/google-cloud-sdk/path.zsh.inc' ]; then . '/Users/benbernard/Downloads/google-cloud-sdk/path.zsh.inc'; fi
-
-# The next line enables shell command completion for gcloud.
-if [ -f '/Users/benbernard/Downloads/google-cloud-sdk/completion.zsh.inc' ]; then . '/Users/benbernard/Downloads/google-cloud-sdk/completion.zsh.inc'; fi
-
-# Load pyenv automatically by appending
-# the following to
-# ~/.zprofile (for login shells)
-# and ~/.zshrc (for interactive shells) :
-
-if command -v pyenv 1>/dev/null 2>/dev/null; then
-  export PYENV_ROOT="$HOME/.pyenv"
-  [[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
-  # pyenv init cached in ~/.cache/pyenv.zsh (see ~/.zshrc.d/04_pyenv_cached.zsh)
-  # eval "$(pyenv init -)"
-fi
-
-# eval "$(starship init zsh)"
-
-# Added by Windsurf
-export PATH="/Users/benbernard/.codeium/windsurf/bin:$PATH"
-
-# Added by Windsurf
-export PATH="/Users/benbernard/.codeium/windsurf/bin:$PATH"
-
-# Node PATH is managed by fnm in ~/.zshrc.d/04_fnm.zsh
-
-# Ensure ~/bin comes before fnm in PATH (for bd wrapper and other custom scripts)
-export PATH="$HOME/bin:$PATH"
-
-# Auto-Warpify
-[[ "$-" == *i* && -z "$CODEX_SHELL" ]] && printf 'P$f{"hook": "SourcedRcFileForWarp", "value": { "shell": "zsh", "uname": "Linux" }}�'
-
-# bun completions
-[ -s "/Users/benbernard/.bun/_bun" ] && source "/Users/benbernard/.bun/_bun"
-
-# bun
-export BUN_INSTALL="$HOME/.bun"
-export PATH="$BUN_INSTALL/bin:$PATH"
-# >>> forge initialize >>>
-# !! Contents within this block are managed by 'forge zsh setup' !!
-# !! Do not edit manually - changes will be overwritten !!
-
-if [[ -n "$FORGE_SIMPLE_ZSH" ]]; then
-    # Add required zsh plugins if not already present
-    if [[ ! " ${plugins[@]} " =~ " zsh-autosuggestions " ]]; then
-        plugins+=(zsh-autosuggestions)
-    fi
-    if [[ ! " ${plugins[@]} " =~ " zsh-syntax-highlighting " ]]; then
-        plugins+=(zsh-syntax-highlighting)
-    fi
-
-    # Load forge shell plugin (commands, completions, keybindings) if not already loaded
-    if [[ -z "$_FORGE_PLUGIN_LOADED" ]]; then
-        eval "$(forge zsh plugin)"
-    fi
-
-    # Load forge shell theme (prompt with AI context) if not already loaded
-    if [[ -z "$_FORGE_THEME_LOADED" ]]; then
-        eval "$(forge zsh theme)"
-    fi
-fi
-
-# <<< forge initialize <<<
