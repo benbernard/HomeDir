@@ -19,6 +19,7 @@ brew install reattach-to-user-namespace \
  ripgrep \
  ssh-copy-id \
  wget \
+ gh \
  coreutils
 
 # Blank screensaver installs

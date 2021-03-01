@@ -32,6 +32,7 @@ path=(
   $HOME/bin/python-install/bin
   $HOME/.yarn/bin
   ${HOME}/.config/yarn/global/bin
+  ${HOME}/.local/bin
 )
 
 export VIM_TEMP="/var/tmp/$USER/vim-temp"

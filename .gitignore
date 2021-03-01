@@ -267,3 +267,4 @@ src/
 .ecr/
 .config/bento/
 .config/iterm2/
+.config/micro/buffers
