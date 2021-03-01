@@ -66,15 +66,13 @@
   # grep=use-agrep
 
 [difftool]
-    prompt = no
+  prompt = no
 
 # Never gc and never expire reflogs
 [gc]
   auto = 0
   reflogExpire = never
   reflogExpireUnreachable = never
-
-[merge]
 
 [merge]
   conflictstyle = diff3
@@ -99,6 +97,7 @@
 
 [mergetool]
   keepBackup = false
+  keepTemporaries = false
 
 [filter "media"]
   clean = git-media-clean %f
@@ -158,3 +157,6 @@
 	name = Ben Bernard
 	email = ben.bernard@instacart.com
   username = benbernard
+
+[init]
+	defaultBranch = main
