@@ -402,7 +402,7 @@ nmap <Leader>fp :CopyPath<cr>
   " Turn on prettier and eslint fixers for javascript
   let g:ale_fixers = {
   \  'javascript': ['prettier', 'eslint'],
-  \  'python': ['autopep8'],
+  \  'python': ['autopep8', 'yapf', 'autoimport'],
   \  'typescript': ['prettier', 'eslint', "tslint"],
   \  'go': ['gofmt', 'goimports', 'remove_trailing_lines']
   \}
@@ -580,6 +580,9 @@ let g:vim_markdown_folding_disabled=1
 " Ultisnips
   "let g:UltiSnipsJumpForwardTrigger="<c-w>"
   "let g:UltiSnipsJumpBackwardTrigger="<c-q>"
+
+  " Use global python rather than local virtualenv
+  let g:python3_host_prog="/usr/local/bin/python3"
 
   " Map \us to unit search for snips
   nnoremap <leader>us :<C-u>Unite -buffer-name=snippets -start-insert -no-empty ultisnips<cr>
