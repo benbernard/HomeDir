@@ -140,3 +140,18 @@ setNodeVersion () {
 ppgrep() {
   pgrep "$@" | xargs ps -fp 2>/dev/null;
 }
+
+# kill processes on a port
+function killport(){
+  echo "Processes on port:$1 are below (if any):"
+  lsof -i tcp:$1
+  echo "\nShould we kill them all?"
+  vared -p 'y/n: ' -c ans
+  if [[ $ans == "y" ]]
+  then
+    echo "Killing proceses on port:$1"
+    lsof -ti tcp:$1 | xargs kill
+  else
+    echo "Not killing processes on port:$1"
+  fi
+}

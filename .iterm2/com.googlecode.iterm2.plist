@@ -248,12 +248,16 @@ Work:Restore Window Arrangement</string>
 			</dict>
 			<key>Ansi 4 Color</key>
 			<dict>
+				<key>Alpha Component</key>
+				<real>1</real>
 				<key>Blue Component</key>
-				<real>0.73333334922790527</real>
+				<real>1</real>
+				<key>Color Space</key>
+				<string>sRGB</string>
 				<key>Green Component</key>
-				<real>0.0</real>
+				<real>0.43780137927893115</real>
 				<key>Red Component</key>
-				<real>0.0</real>
+				<real>0.3175201416015625</real>
 			</dict>
 			<key>Ansi 5 Color</key>
 			<dict>
@@ -692,7 +696,7 @@ Work:Restore Window Arrangement</string>
 			<key>Normal Font</key>
 			<string>MesloLGS-NF-Regular 12</string>
 			<key>Option Key Sends</key>
-			<integer>0</integer>
+			<integer>2</integer>
 			<key>Prevent Opening in a Tab</key>
 			<true/>
 			<key>Prompt Before Closing 2</key>
@@ -1415,7 +1419,7 @@ Work:Restore Window Arrangement</string>
 			<key>Normal Font</key>
 			<string>MesloLGS-NF-Regular 12</string>
 			<key>Option Key Sends</key>
-			<integer>0</integer>
+			<integer>2</integer>
 			<key>Prevent Opening in a Tab</key>
 			<true/>
 			<key>Prompt Before Closing 2</key>
