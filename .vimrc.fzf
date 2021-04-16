@@ -5,27 +5,27 @@
 " this setting will not change that.
 "
 " Taken from: https://github.com/junegunn/fzf.vim/issues/581
-let g:fzf_colors =
-        \ { "fg":      ["fg", "Normal"],
-        \ "bg":      ["bg", "Normal"],
-        \ "hl":      ["fg", "IncSearch"],
-        \ "fg+":     ["fg", "CursorLine", "CursorColumn", "Normal"],
-        \ "bg+":     ["bg", "CursorLine", "CursorColumn"],
-        \ "hl+":     ["fg", "IncSearch"],
-        \ "info":    ["fg", "IncSearch"],
-        \ "border":  ["fg", "Ignore"],
-        \ "prompt":  ["fg", "Comment"],
-        \ "pointer": ["fg", "IncSearch"],
-        \ "marker":  ["fg", "IncSearch"],
-        \ "spinner": ["fg", "IncSearch"],
-        \ "header":  ["fg", "WildMenu"] }
-
+" let g:fzf_colors =
+"         \ { "fg":      ["fg", "Normal"],
+"         \ "bg":      ["bg", "Normal"],
+"         \ "hl":      ["fg", "IncSearch"],
+"         \ "fg+":     ["fg", "CursorLine", "CursorColumn", "Normal"],
+"         \ "bg+":     ["bg", "CursorLine", "CursorColumn"],
+"         \ "hl+":     ["fg", "IncSearch"],
+"         \ "info":    ["fg", "IncSearch"],
+"         \ "border":  ["fg", "Ignore"],
+"         \ "prompt":  ["fg", "Comment"],
+"         \ "pointer": ["fg", "IncSearch"],
+"         \ "marker":  ["fg", "IncSearch"],
+"         \ "spinner": ["fg", "IncSearch"],
+"         \ "header":  ["fg", "WildMenu"] }
+"
 " Make ctrl-a search files
 nnoremap <C-a> :Files<cr>
-"autocmd VimEnter * nnoremap <C-a> :<C-u>Unite -buffer-name=files -prompt-direction=above -start-insert file_rec/async:!<cr>
 
-" set history directory into normal tmp dir
-let g:fzf_history_dir = $HOME . "/.config/nvim/tmp"
+" set history directory into normal tmp dir, this seems to mess up up/down in
+" file search DISABLED
+" let g:fzf_history_dir = $HOME . "/.config/nvim/tmp"
 
 function! Insert_line_match(line)
   execute "normal!o" . join(split(a:line, ":")[3:-1],":") . "\<esc>"
