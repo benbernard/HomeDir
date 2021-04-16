@@ -397,6 +397,7 @@ nmap <Leader>fp :CopyPath<cr>
   \   'javascript': ['flow', 'eslint'],
   \   'ruby': ['rubocop'],
   \   'python': ['pylint'],
+  \   'go': ['gofmt', 'govet'],
   \}
 
   " Turn on prettier and eslint fixers for javascript
