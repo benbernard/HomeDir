@@ -270,3 +270,4 @@ src/
 .config/micro/buffers
 bin/micro
 .pylint.d/
+.irb_history

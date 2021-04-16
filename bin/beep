@@ -1,3 +1,4 @@
 #!/bin/bash
 
-osascript -e beep
+# This seems to be more reliable than osascript -e beep
+afplay /System/Library/Sounds/Ping.aiff -v 0.2 -r 2 &
