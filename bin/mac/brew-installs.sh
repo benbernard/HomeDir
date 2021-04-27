@@ -21,9 +21,13 @@ brew install reattach-to-user-namespace \
  wget \
  gh \
  shellcheck \
+ mackup \
+ pkg-config \
+ libevent \
  coreutils
 
 # Blank screensaver installs
 brew tap theseal/blank-screensaver
 brew install --cask blank-screensaver
 
+pip3 install pynvim
