@@ -19,6 +19,8 @@ print "   Clipboard: $current_contents\n";
 
 my $last_screen_write = "";
 
+system(qw(tmux set-buffer foo));
+
 while(1) {
   my $new = get_clip();
   my $new_screen = get_screen_contents();
