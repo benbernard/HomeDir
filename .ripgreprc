@@ -1,0 +1,11 @@
+# Search hidden files i.e. .zshrc
+--hidden
+
+# Exclude VSC dirs
+--glob=!{.git,.svn,.tldr,node_modules,Trash,vendor}
+
+# Exclude files.
+--glob=!{package-lock.json,Gemfile.lock}
+
+# Use smart case by god
+--smart-case

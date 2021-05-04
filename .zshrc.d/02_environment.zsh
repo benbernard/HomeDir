@@ -87,3 +87,6 @@ export PYTHONUSERBASE=$HOME/bin/python-install
 
 # Setup site-specific gradle location
 export GRADLE_HOME=${HOME}/site/gradle
+
+# Make rg use a config file
+export RIPGREP_CONFIG_PATH=${HOME}/.ripgreprc

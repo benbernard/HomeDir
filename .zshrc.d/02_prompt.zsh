@@ -65,12 +65,14 @@ source $(submodule powerlevel10k)/powerlevel10k.zsh-theme
 
 # powerlevel10k config is in 03_p10k.zsh
 
-zmodload zsh/zpty 1>/dev/null 2>/dev/null
-if type zpty >/dev/null;
-then;
-  # zsh-autosuggestions setup
-  export ZSH_AUTOSUGGEST_BUFFER_MAX_SIZE=20
-  export ZSH_AUTOSUGGEST_USE_ASYNC=1
-  source ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
-  bindkey '^^' autosuggest-accept # Binds Ctrl-6 to accept suggestion, iterm maps Ctrl-Enter to Ctrl-6 (Send Hex Code -> 0x1E)
+if [[ ${recording} != "true" ]]; then
+  zmodload zsh/zpty 1>/dev/null 2>/dev/null
+  if type zpty >/dev/null;
+  then;
+    # zsh-autosuggestions setup
+    export ZSH_AUTOSUGGEST_BUFFER_MAX_SIZE=20
+    export ZSH_AUTOSUGGEST_USE_ASYNC=1
+    source ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
+    bindkey '^^' autosuggest-accept # Binds Ctrl-6 to accept suggestion, iterm maps Ctrl-Enter to Ctrl-6 (Send Hex Code -> 0x1E)
+  fi
 fi
