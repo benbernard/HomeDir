@@ -515,6 +515,11 @@ nmap <Leader>fp :CopyPath<cr>
   map <Leader>cp :cprev<CR>
   map <Leader>cc :cclose<CR>
 
+  " Mapping for location window controls
+  map <Leader>ln :lnext<CR>
+  map <Leader>lp :lprev<CR>
+  map <Leader>lc :lclose<CR>
+
 "Visual Mode Maps
 
 "Insert Mode Maps
