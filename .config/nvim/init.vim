@@ -520,6 +520,8 @@ nmap <Leader>fp :CopyPath<cr>
   map <Leader>lp :lprev<CR>
   map <Leader>lc :lclose<CR>
 
+  map <Leader>gc :GoCallers<CR>
+
 "Visual Mode Maps
 
 "Insert Mode Maps
