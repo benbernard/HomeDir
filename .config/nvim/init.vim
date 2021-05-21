@@ -74,11 +74,12 @@ Plug 'andymass/vim-matchup'
 Plug 'christoomey/vim-tmux-navigator'
 Plug 'mr-ubik/vim-hackerman-syntax'
 Plug 'tpope/vim-abolish'
-Plug 'zxqfl/tabnine-vim'
+" Plug 'zxqfl/tabnine-vim'
 Plug 'dracula/vim', { 'as': 'dracula-vim' }
 Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
 " Plug 'jiangmiao/auto-pairs'
 Plug 'Raimondi/delimitMate' " Trying this instead of auto-pairs for TabNine compatability
+Plug 'preservim/tagbar'
 
 " Disabled plugins:
 " Plug 'ternjs/tern_for_vim', {'do': 'npm install'} " Doesn't seem to work well
@@ -520,8 +521,6 @@ nmap <Leader>fp :CopyPath<cr>
   map <Leader>lp :lprev<CR>
   map <Leader>lc :lclose<CR>
 
-  map <Leader>gc :GoCallers<CR>
-
 "Visual Mode Maps
 
 "Insert Mode Maps
@@ -545,12 +544,7 @@ let g:vim_markdown_folding_disabled=1
  nmap <Leader>ti @t
 
 " Deoplete config
-  let g:deoplete#enable_at_startup = 0
-
-  " omni complete functions
-  if !exists('g:deoplete#omni#input_patterns')
-    let g:deoplete#omni#input_patterns = {}
-  endif
+  let g:deoplete#enable_at_startup = 1
 
   " omnifuncs
   augroup omnifuncs
@@ -562,7 +556,8 @@ let g:vim_markdown_folding_disabled=1
     autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
   augroup end
 
-    let g:deoplete#auto_complete_delay=150
+  " This is deprecated, trying default now
+  " let g:deoplete#auto_complete_delay=150
 
   " tern
   " if exists('g:plugs["tern_for_vim"]')
@@ -708,6 +703,39 @@ let g:gutentags_cache_dir = expand('~/.cache/tags')
 " change focus to quickfix window after search (optional).
 let g:gutentags_plus_switch = 1
 
+""""""""""""""" Better Go Support """"""""""""""""""""
+" Maps
+map <Leader>gc :GoCallers<CR>
+map <Leader>ga :GoAlternate<CR>
+map <Leader>gf :GoDeclsDir<CR>
+map <Leader>gdb :GoDocBrowser<CR>
+map <Leader>gdl :GoDoc<CR>
+map <Leader>gdt :GoDefType<CR>
+
+
+" Vim-go settings
+let g:go_auto_sameids = 1 " auto-highlight identifiers
+let g:go_updatetime = 150 " Quicker updates for auto_sameid
+
+" Use a different higlight color for sameid
+hi def link goSameId IncSearch
+
+" From vim-go documentation, enable deoplete for go
+call deoplete#custom#option('omni_patterns', { 'go': '[^. *\t]\.\w*' })
+
+" Turn off listchars for go
+autocmd FileType go setlocal nolist
+autocmd FileType go setlocal noexpandtab
+
+" To fix completion stuff from ALE, see
+" https://github.com/dense-analysis/ale/issues/3373
+" Pre-emptively disable ALE completions (which I don't want anyway), for a
+" future fix to ALE
+let g:ale_completion_enabled = 0
+
+" Open tagbar automatically
+autocmd FileType go nested :TagbarOpen
+
 """"""""""""""" Typos """"""""""""""""""""
 " A list of iabbrev to correct common typos
 
@@ -795,10 +823,6 @@ autocmd FileType javascript call TextEnableCodeSnip('pgsql', 'SQL`', '`', 'NONE'
 
 " Use pgsql.vim for sql highlighting
 let g:sql_type_default = 'pgsql'
-
-" Turn off listchars for go
-autocmd FileType go setlocal nolist
-autocmd FileType go setlocal noexpandtab
 
 """""""""""""""" Version 7 Settings """"""""""""""""""""
 
