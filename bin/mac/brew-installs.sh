@@ -24,6 +24,7 @@ brew install reattach-to-user-namespace \
  mackup \
  pkg-config \
  libevent \
+ ctags \
  coreutils
 
 # Blank screensaver installs
