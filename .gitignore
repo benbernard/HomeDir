@@ -273,3 +273,4 @@ bin/micro
 .irb_history
 .cache_ggshield
 .dlv/
+.config/packer

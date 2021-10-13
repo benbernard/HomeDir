@@ -155,3 +155,8 @@ function killport(){
     echo "Not killing processes on port:$1"
   fi
 }
+
+# Browse yaml files as JSON with fx
+yqfx() {
+  yq -o json eval "$@" | fx
+}

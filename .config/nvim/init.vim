@@ -108,7 +108,8 @@ set fo+=qr                           " q: gq foramts with comments, see :help fo
 set foldcolumn=0                     " turn off the foldcolumn
 set history=200                      " Remember 100 lines of history, for commands and searches
 set hls                              " highlight search terms
-set list                             " Show tabs differently
+" set list                             " Show tabs differently
+set nolist                           " Do not show tabs different (*sigh* go)
 set listchars=tab:>-                 " Use >--- for tabs
 set nolinebreak                      " don't wrap at words, messes up copying
 set smartcase                        " if any capitol in search, turns search case sensitive
@@ -130,6 +131,7 @@ set splitbelow                       " When splitting horiztonally, new file is 
 set ttimeoutlen=30                   " timeout on key-codes after 30ms (shorter than ei)
 set signcolumn=yes                   " Always display the notes column for ALE/gitgutter
 set inccommand=nosplit               " Increment display of s commands (maybe others in future)
+set completeopt=menu,preview,noinsert " Do not auto-insert completions
 scriptencoding utf-8                 " Use utf-8 to encode vimscript (so that options key maps can work)
 
 colorscheme dracula " current colorscheme
@@ -329,13 +331,6 @@ nmap <Leader>fp :CopyPath<cr>
 
   let g:rvRlogOptions = '-zLT' "Display log in local timezone
 
-"AddressComplete Settings
-  "automatically address complete on exit
-  let g:addressCompleteOnExit = 1
-
-  " setup <++> in empty header fields, redefine tab to move between them
-  let g:useMailFieldTabbing = 1
-
 "Buff explorer settings
   let g:bufExplorerSplitOutPathName=-1 " Don't split the path and file name.
 
@@ -399,6 +394,7 @@ nmap <Leader>fp :CopyPath<cr>
   \   'ruby': ['rubocop'],
   \   'python': ['pylint'],
   \   'go': ['gofmt', 'govet'],
+  \   'sh': [],
   \}
 
   " Turn on prettier and eslint fixers for javascript
@@ -714,7 +710,7 @@ map <Leader>gdt :GoDefType<CR>
 
 
 " Vim-go settings
-let g:go_auto_sameids = 1 " auto-highlight identifiers
+let g:go_auto_sameids = 0 " auto-highlight identifiers
 let g:go_updatetime = 150 " Quicker updates for auto_sameid
 
 " Use a different higlight color for sameid
