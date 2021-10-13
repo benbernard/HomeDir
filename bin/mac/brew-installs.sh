@@ -25,6 +25,8 @@ brew install reattach-to-user-namespace \
  pkg-config \
  libevent \
  ctags \
+ yq \
+ fx \
  coreutils
 
 # Blank screensaver installs
