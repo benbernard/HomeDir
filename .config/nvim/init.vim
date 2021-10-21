@@ -581,7 +581,11 @@ let g:vim_markdown_folding_disabled=1
   "let g:UltiSnipsJumpBackwardTrigger="<c-q>"
 
   " Use global python rather than local virtualenv
-  let g:python3_host_prog="/usr/local/bin/python3"
+  if filereadable("/usr/local/bin/python3")
+    let g:python3_host_prog="/usr/local/bin/python3"
+  elseif filereadable("/usr/bin/python3")
+    let g:python3_host_prog="/usr/bin/python3"
+  endif
 
   " Map \us to unit search for snips
   nnoremap <leader>us :<C-u>Unite -buffer-name=snippets -start-insert -no-empty ultisnips<cr>
