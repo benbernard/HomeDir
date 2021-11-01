@@ -28,9 +28,6 @@
 [submodule "submodules/powerlevel10k.git"]
 	path = submodules/powerlevel10k
 	url = git@github.com:romkatv/powerlevel10k.git
-[submodule "submodules/fast-syntax-highlighting"]
-	path = submodules/fast-syntax-highlighting
-	url = git@github.com:zdharma/fast-syntax-highlighting.git
 [submodule "submodules/tmux"]
 	path = submodules/tmux
 	url = git@github.com:amling/tmux.git
