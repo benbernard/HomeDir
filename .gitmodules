@@ -31,3 +31,6 @@
 [submodule "submodules/tmux"]
 	path = submodules/tmux
 	url = git@github.com:amling/tmux.git
+[submodule "submodules/fast-syntax-highlighting"]
+	path = submodules/fast-syntax-highlighting
+	url = git@github.com:zdharma-continuum/fast-syntax-highlighting
