@@ -3,7 +3,9 @@
 # This script is only to allow tmux to work by default out of the box
 # It prints a warning and runs zsh
 
-echo 'Warning, using ~/bin/reattach-to-user-namespace, should either install with brew or modify .tmux.conf'
+if [[ $IS_REMOTE_INSTANCE -ne "true" ]]; then
+  echo 'Warning, using ~/bin/reattach-to-user-namespace, should either install with brew or modify .tmux.conf'
+fi
 
 if [ -x "$(command -v zsh)" ]; then
   zsh

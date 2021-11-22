@@ -160,3 +160,12 @@ function killport(){
 yqfx() {
   yq -o json eval "$@" | fx
 }
+
+# Make scp check for a remote "file" somewhere in the command
+function scp() {
+  if [[ ! "$@" =~ ":" ]]; then
+    echo "No remote file in scp!, bailing"
+  else
+    `whereis scp` "$@"
+  fi
+}
