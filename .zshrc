@@ -55,5 +55,20 @@ fi
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
-# Suppress shell setting modifications
-### BEGIN--Instacart Shell Settings. () NO-TOUCH
+
+### BEGIN--Instacart Shell Settings. (Updated: Wed Jul 14 13:32:34 PDT 2021. [Script Version 1.3.16])
+# This Line Added Automatically by Instacart Setup Script
+# The sourced file contains all of the instacart utilities and shell settings
+# To remove this functionality, leave the block, and enter "NO-TOUCH" in the BEGIN line, and comment the line below:
+source /Users/benbernard/.instacart_shell_profile
+### END--Instacart Shell Settings.
+
+
+# BENTO_COMPLETIONS_START
+export BENTO_COMPLETIONS_VERSION=2
+
+autoload -U compinit; compinit
+source <(bento completion zsh --silent)
+export PGHOST=localhost # Set PGHOST to talk to bento postgres
+
+# BENTO_COMPLETIONS_END
