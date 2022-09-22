@@ -274,3 +274,5 @@ bin/micro
 .cache_ggshield
 .dlv/
 .config/packer
+OneDrive
+.zsh_sessions/
