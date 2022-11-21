@@ -15,7 +15,7 @@
 	url = http://github.com/robbyrussell/oh-my-zsh.git
 [submodule "zsh-completions"]
 	path = submodules/zsh-completions
-	url = git://github.com/zsh-users/zsh-completions.git
+	url = https://github.com/zsh-users/zsh-completions.git
 [submodule "userScripts/commentTracker"]
 	path = submodules/commentTracker
 	url = git@github.com:benbernard/CommentTracker.git
