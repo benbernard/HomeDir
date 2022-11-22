@@ -42,6 +42,14 @@ then
   ZSH_VERSION=`$SHELL --version | /usr/bin/cut -d ' ' -f 2`
 fi
 
+# Source files in .shellrc.d (I don't use this, but some systems do)
+if [ -d ~/.shellrc.d ]; then
+  for i in $(find $HOME/.shellrc.d/ -name '*.sh' -o -name '*.zsh' | sort); do
+    . $i
+  done
+  unset i
+fi
+
 # Source all files in .zshrc.d
 foreach i (`ls -1 ~/.zshrc.d/*.zsh`) {
   source $i
@@ -56,11 +64,16 @@ fi
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
 
-### BEGIN--Instacart Shell Settings. (Updated: Wed Jul 14 13:32:34 PDT 2021. [Script Version 1.3.16])
+IC_SHELL_RC=/Users/benbernard/.instacart_shell_profile
+if [[ -e ${IC_SHELL_RC} ]]; then
+  source ${IC_SHELL_RC}
+fi
+
+### BEGIN--Instacart Shell Settings. (Updated: Wed Jul 14 13:32:34 PDT 2021. [Script Version 1.3.16]) NO-TOUCH
 # This Line Added Automatically by Instacart Setup Script
 # The sourced file contains all of the instacart utilities and shell settings
 # To remove this functionality, leave the block, and enter "NO-TOUCH" in the BEGIN line, and comment the line below:
-source /Users/benbernard/.instacart_shell_profile
+# source ${IC_SHELL_RC}
 ### END--Instacart Shell Settings.
 
 
