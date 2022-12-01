@@ -34,3 +34,6 @@
 [submodule "submodules/fast-syntax-highlighting"]
 	path = submodules/fast-syntax-highlighting
 	url = git@github.com:zdharma-continuum/fast-syntax-highlighting
+[submodule "submodules/fzf"]
+	path = submodules/fzf
+	url = git@github.com:junegunn/fzf.git

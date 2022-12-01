@@ -166,6 +166,6 @@ function scp() {
   if [[ ! "$@" =~ ":" ]]; then
     echo "No remote file in scp!, bailing"
   else
-    `whereis scp` "$@"
+    `whereis -bq scp` "$@"
   fi
 }
