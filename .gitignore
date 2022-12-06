@@ -223,7 +223,6 @@ bin/python-install/
 .gremlin/
 .gradle/
 .tabnine/
-.vscode/
 .config/gh/
 .env-improvement
 .sonarlint/
@@ -276,3 +275,4 @@ bin/micro
 .config/packer
 OneDrive
 .zsh_sessions/
+.vscode/extensions/*/
