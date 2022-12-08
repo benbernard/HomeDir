@@ -29,14 +29,3 @@ zstyle :compinstall filename "$HOME/.zshrc"
 ## Set all hosts completions to use .hosts
 #zstyle -e ':completion:*:*' hosts 'reply=($(cat $HOME/.hosts))'
 ##zstyle -e ':completion:*:*:*' hosts 'reply=($(cat $HOME/.hosts))'
-
-autoload -Uz compinit
-if uname -a | grep Darwin 1>/dev/null 2>/dev/null; then
-  if [ $(date +'%j') != $(stat -f '%Sm' -t '%j' ~/.zcompdump) ]; then
-    compinit
-  else
-    compinit -C
-  fi
-else
-  compinit
-fi

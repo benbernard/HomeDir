@@ -62,10 +62,10 @@ fi
 
 # powerlevel10k setup
 source $(submodule powerlevel10k)/powerlevel10k.zsh-theme
-
 # powerlevel10k config is in 03_p10k.zsh
 
-if [[ ${recording} != "true" ]]; then
+# only use autosuggest if not in VSCODE and not recording
+if [[ ${recording} != "true"  && -z "$VSCODE_IPC_HOOK_CLI" ]]; then
   zmodload zsh/zpty 1>/dev/null 2>/dev/null
   if type zpty >/dev/null;
   then;

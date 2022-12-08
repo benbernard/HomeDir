@@ -80,7 +80,7 @@ export FZF_DEFAULT_OPTS='--height 40% --reverse --border -i -m --bind ctrl-A:sel
 #   %* - The time with seconds
 # Example:
 #   title:2+11:22:04 > setopt prompt_subst
-export PS4='%1N:%i+%* > '
+# export PS4='%1N:%i+%* > '
 
 
 export PYTHONUSERBASE=$HOME/bin/python-install
