@@ -5,8 +5,15 @@ alias 'rtt=recs totable'
 alias 'ns=ninjaWarpSearch'
 
 #ls alias, mainly add --color
-alias 'ls=/bin/ls -G'
-alias 'lt=/bin/ls -G -latr'
+
+if [[ $(uname) == "Darwin" ]]; then
+  alias 'ls=/bin/ls -G'
+  alias 'lt=/bin/ls -G -latr'
+else
+  alias 'ls=/bin/ls --color=auto'
+  alias 'lt=/bin/ls --color=auto -latr'
+fi
+
 
 #zmv stuff
 autoload zmv
