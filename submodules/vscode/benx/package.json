@@ -10,7 +10,8 @@
     "Other"
   ],
   "activationEvents": [
-    "onCommand:benx.createFile"
+    "onCommand:benx.createFile",
+    "onCommand:benx.searchOpenFiles"
   ],
   "main": "./extension.js",
   "contributes": {
@@ -18,6 +19,10 @@
       {
         "command": "benx.createFile",
         "title": "Create New File next to current file"
+      },
+      {
+        "command": "benx.searchOpenFiles",
+        "title": "Search Open File Names"
       }
     ]
   },
