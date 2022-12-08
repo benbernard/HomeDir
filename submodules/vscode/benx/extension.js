@@ -90,6 +90,78 @@ function activate(context) {
 		await vscode.window.showTextDocument(doc);
 	});
 	context.subscriptions.push(createFile);
+
+	// Search through open files
+	let searchOpenFiles = vscode.commands.registerCommand('benx.searchOpenFiles', async function () {
+		let editor = vscode.window.activeTextEditor;
+
+		if (!editor) {
+			// show message about not being in a file
+			vscode.window.showInformationMessage('Sorry, no open text editor');
+			return;
+		}
+
+		// Get collect all open uris from the current tabs
+		let openFiles = [];
+		for (let tabGroup of vscode.window.tabGroups.all) {
+			for (let tab of tabGroup.tabs) {
+				let input = tab.input;
+				// Check if input.uri is defined
+
+				// @ts-ignore
+				let uri = input.uri;
+				if (uri.scheme === 'file') {
+					openFiles.push(createFileHelper(uri));
+				} else {
+					vscode.window.showInformationMessage(`Sorry, ${uri.scheme} is not supported`);
+				}
+			}
+		}
+
+		// create cancellation token
+		const cancellationToken = new vscode.CancellationTokenSource().token;
+
+		// Quick pick one of the files
+		let selectedFile = await vscode.window.showQuickPick(openFiles, {
+			placeHolder: 'Select a file to open',
+		}, cancellationToken);
+
+		if (!selectedFile || cancellationToken.isCancellationRequested) {
+			return;
+		}
+
+		// show selected file
+		if (selectedFile) {
+			let doc = await vscode.workspace.openTextDocument(selectedFile.uri)
+			await vscode.window.showTextDocument(doc);
+		}
+	});
+	context.subscriptions.push(searchOpenFiles);
+}
+
+// create a file helper object
+// takes a vscode.Uri and returns an object with a label and uri
+/**
+ * @param {vscode.Uri} uri
+ */
+function createFileHelper(uri) {
+	// get all workspace folders
+	let workspaceFolders = vscode.workspace.workspaceFolders;
+	for (let workspaceFolder of workspaceFolders) {
+		// if the uri is in the workspace folder, remove the workspace folder from the path
+		if (uri.fsPath.startsWith(workspaceFolder.uri.fsPath)) {
+			let relativePath = uri.fsPath.substring(workspaceFolder.uri.fsPath.length + 1);
+			return {
+				label: `${workspaceFolder.name}/${relativePath}`,
+				uri: uri,
+			};
+		}
+	}
+
+	return {
+		label: uri.fsPath,
+		uri: uri,
+	};
 }
 
 // This method is called when your extension is deactivated
