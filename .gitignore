@@ -276,6 +276,7 @@ bin/micro
 OneDrive
 .zsh_sessions/
 .vscode/extensions/*/
+.vscode/extensions/.obsolete
 .bin/
 .config/pulse/
 .pumpkin/
