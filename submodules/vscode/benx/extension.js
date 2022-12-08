@@ -147,20 +147,18 @@ function activate(context) {
 function createFileHelper(uri) {
 	// get all workspace folders
 	let workspaceFolders = vscode.workspace.workspaceFolders;
+	let relativePath = uri.fsPath;
 	for (let workspaceFolder of workspaceFolders) {
 		// if the uri is in the workspace folder, remove the workspace folder from the path
 		if (uri.fsPath.startsWith(workspaceFolder.uri.fsPath)) {
-			let relativePath = uri.fsPath.substring(workspaceFolder.uri.fsPath.length + 1);
-			return {
-				label: `${workspaceFolder.name}/${relativePath}`,
-				uri: uri,
-			};
+			relativePath = uri.fsPath.substring(workspaceFolder.uri.fsPath.length + 1);
 		}
 	}
 
 	return {
-		label: uri.fsPath,
+		label: relativePath,
 		uri: uri,
+		detail: uri.fsPath,
 	};
 }
 
