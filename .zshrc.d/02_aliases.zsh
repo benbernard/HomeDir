@@ -92,6 +92,14 @@ alias od=onedrivecmd
 
 alias 'rspecf=bin/rspec --fail-fast'
 
+# Git aliases
+alias 'gcam=git commit -am'
+alias 'gc=git commit'
+alias 'gcm=git commit -m'
+
+alias 'gmt=git mergetool'
+alias 'grbc=git rebase --continue'
+
 # Docker attach without killing container
 # alias 'da=docker attach --sig-proxy=false'
 

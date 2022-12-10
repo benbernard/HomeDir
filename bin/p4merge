@@ -1,2 +1,9 @@
-#!/bin/sh
-/Applications/p4merge.app/Contents/MacOS/p4merge "$@" 1>/dev/null 2>/dev/null
+#!/bin/bash
+
+P4MERGE=/Applications/p4merge.app/Contents/MacOS/p4merge
+if [ -f "$P4MERGE" ]; then
+    "$P4MERGE" "$@" 1>/dev/null 2>/dev/null
+else
+    echo "p4merge not found at $P4MERGE, perhaps you need to install it?"
+    exit 1
+fi
