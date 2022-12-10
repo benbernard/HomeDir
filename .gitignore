@@ -294,3 +294,5 @@ unata-*/
 vector_bento.toml
 .config/configstore/update-notifier-yo.json
 .config/lazygit/
+.vscode/extensions/.obsolete
+.config/github-copilot/

@@ -81,11 +81,6 @@ fi
 ### BEGIN--Instacart Shell Settings. (Updated: Wed Jul 14 13:32:34 PDT 2021. [Script Version 1.3.16]) NO-TOUCH
 ### END--Instacart Shell Settings.
 
-
-# BENTO_COMPLETIONS_START
-export BENTO_COMPLETIONS_VERSION=100
-# BENTO_COMPLETIONS_END
-
 autoload -Uz compinit
 if [[ -n ${ZDOTDIR}/.zcompdump(#qN.mh+24) ]]; then
 	compinit;
@@ -93,6 +88,7 @@ else
 	compinit -C;
 fi;
 
+# Print out profiling if enabled
 if [[ "$ZSH_PROFILE" == "1" ]]; then
  zprof
 fi

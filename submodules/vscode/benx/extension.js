@@ -87,6 +87,10 @@ function activate(context) {
 		await vscode.workspace.fs.writeFile(vscode.Uri.file(fullNewFilePath), new Uint8Array());
 		// Open the new file
 		let doc = await vscode.workspace.openTextDocument(fullNewFilePath)
+		if (!doc) {
+			throw new Error(`Could not open file ${fullNewFilePath}`);
+		}
+
 		await vscode.window.showTextDocument(doc);
 	});
 	context.subscriptions.push(createFile);
@@ -133,6 +137,10 @@ function activate(context) {
 		// show selected file
 		if (selectedFile) {
 			let doc = await vscode.workspace.openTextDocument(selectedFile.uri)
+
+			if (!doc) {
+				throw new Error(`Could not open file ${selectedFile.uri}`)
+			}
 			await vscode.window.showTextDocument(doc);
 		}
 	});

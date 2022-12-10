@@ -80,6 +80,7 @@ Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
 " Plug 'jiangmiao/auto-pairs'
 Plug 'Raimondi/delimitMate' " Trying this instead of auto-pairs for TabNine compatability
 Plug 'preservim/tagbar'
+Plug 'github/copilot.vim'
 
 " Disabled plugins:
 " Plug 'ternjs/tern_for_vim', {'do': 'npm install'} " Doesn't seem to work well
