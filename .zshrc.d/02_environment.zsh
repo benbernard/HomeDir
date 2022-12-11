@@ -13,6 +13,7 @@ setenv LESS '-i -R'
 export GOPATH="$HOME/gocode"
 
 path=(
+  $HOME/homebrew/bin
   /usr/local/bin # Local bin ahead of path so it can override
   $PATH
   $HOME/bin
@@ -33,6 +34,7 @@ path=(
   $HOME/.yarn/bin
   ${HOME}/.config/yarn/global/bin
   ${HOME}/.local/bin
+  $(submodule tmux)
 )
 
 export VIM_TEMP="/var/tmp/$USER/vim-temp"
