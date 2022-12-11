@@ -1,7 +1,8 @@
 # Taken from: https://github.com/dteoh/SlowQuitApps
 
-brew tap dteoh/sqa
-brew install --cask slowquitapps
+echo "Install from https://github.com/Lessica/SlowQuitApps/releases"
+#brew tap dteoh/sqa
+#brew install --cask slowquitapps
 
 # Set to 5 seconds
 defaults write com.dteoh.SlowQuitApps delay -int 1000

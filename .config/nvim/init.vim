@@ -582,7 +582,10 @@ let g:vim_markdown_folding_disabled=1
   "let g:UltiSnipsJumpBackwardTrigger="<c-q>"
 
   " Use global python rather than local virtualenv
-  if filereadable("/usr/local/bin/python3")
+
+  if filereadable("/Users/bernard/homebrew/bin/python3")
+    let g:python3_host_prog="/Users/bernard/homebrew/bin/python3"
+  elseif filereadable("/usr/local/bin/python3")
     let g:python3_host_prog="/usr/local/bin/python3"
   elseif filereadable("/usr/bin/python3")
     let g:python3_host_prog="/usr/bin/python3"

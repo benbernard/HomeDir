@@ -215,6 +215,7 @@ private/
 eclipse-workspace/
 eclipse/
 OneDrive/
+OneDrive
 .onedrive*
 .config/StardewValley/
 .config/configstore/nodemon.json
@@ -296,3 +297,11 @@ vector_bento.toml
 .config/lazygit/
 .vscode/extensions/.obsolete
 .config/github-copilot/
+.sdkman
+.serverless
+.config/github-copilot
+.config/Autodesk
+Amazon Drive Results/Amazon Photos Downloads/Archived Music
+homebrew/
+.serverlessrc
+.snapmaker-luban.json
