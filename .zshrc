@@ -16,6 +16,9 @@ if [[ "$ZSH_CMD_LOGGING" == "1" ]]; then
   setopt XTRACE
 fi
 
+# Fuck it, disable compaudit
+ZSH_DISABLE_COMPFIX=true
+
 # I've decide th at instant prompt isn't worth it, would rather have an initialized shell
 # Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
 # Initialization code that may require console input (password prompts, [y/n]
@@ -83,9 +86,9 @@ fi
 
 autoload -Uz compinit
 if [[ -n ${ZDOTDIR}/.zcompdump(#qN.mh+24) ]]; then
-	compinit;
+	compinit -u;
 else
-	compinit -C;
+	compinit -C -u;
 fi;
 
 export NVM_DIR="$HOME/.nvm"
