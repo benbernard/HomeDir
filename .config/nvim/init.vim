@@ -218,6 +218,9 @@ au FileType stylus setl iskeyword-=#,-
 
 """"""""""""""" General speedups """"""""""""""""
 
+" Copy entire file with <Leader>ca
+map <Leader>ca maggVGy`a
+
 " Do not display the command mode editing window on q:
 map q: :q
 

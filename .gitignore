@@ -276,8 +276,7 @@ bin/micro
 .config/packer
 OneDrive
 .zsh_sessions/
-.vscode/extensions/*/
-.vscode/extensions/.obsolete
+.vscode
 .bin/
 .config/pulse/
 .pumpkin/
@@ -295,7 +294,6 @@ unata-*/
 vector_bento.toml
 .config/configstore/update-notifier-yo.json
 .config/lazygit/
-.vscode/extensions/.obsolete
 .config/github-copilot/
 .sdkman
 .serverless
