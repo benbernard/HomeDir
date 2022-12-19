@@ -13,8 +13,9 @@ setenv LESS '-i -R'
 export GOPATH="$HOME/gocode"
 
 path=(
-  $HOME/homebrew/bin
+  $(submodule fzf)/bin # Fzf is first, because some systems have an old fzf installed
   /usr/local/bin # Local bin ahead of path so it can override
+  $HOME/homebrew/bin
   $PATH
   $HOME/bin
   /usr/local/symlinks
