@@ -51,6 +51,13 @@ chsh -s ${NEW_ZSH}
 echo 'Fixing better touch tool'
 cp -r ~/OneDrive/Mackup/Library/Application\ Support/BetterTouchTool /Users/ben/Library/Application\ Support/
 
+echo Installing VimPlug
+sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim --create-dirs \
+       https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
+
+echo Installing pynvim
+/usr/bin/python3 -m pip install pynvim
+
 echo "================================================================================"
 echo "========================== POST INSTALL INSTRUCTIONS ==========================="
 echo "================================================================================"
