@@ -68,5 +68,13 @@ echo
 echo "1. Re-save iterm2 window profile, otherwise you'll startin in /"
 echo "2. Be sure to grant karabiner-grabber, and better touch tool full disk access"
 echo "3. If better touch tool isn't working properly, good luck.  Maybe look at: https://community.folivora.ai/t/btt-not-opening/27402"
+echo "4. Install Choosey - https://choosy.app/"
+echo "4. Install Karabiner Elements - https://karabiner-elements.pqrs.org/"
+echo "5. Install Better Touch Tool - https://folivora.ai/"
+echo "6. Install Krisp.ai - https://krisp.ai/"
+echo "7. Install VSCode - https://code.visualstudio.com/"
+echo "8. Install Slack - https://slack.com/downloads/mac"
+echo "9. Install Alfred - https://www.alfredapp.com/"
+echo " -- Or just try running installApps.sh (experimental)"
 
 echo "Done!"
