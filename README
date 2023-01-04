@@ -1,11 +1,16 @@
 # Installing: (not meant to be run as a script)
-git clone git://github.com/benbernard/HomeDir.git
-cd HomeDir
-git submodule init
-git submodule update
-cd ..
-sudo mv $HOME $HOME.old
-sudo mv HomeDir $HOME
+
+Try copying locally and running:
+bin/mac/setupMac.sh
+
+# Old Instructions
+
+  git clone git://github.com/benbernard/HomeDir.git
+  cd HomeDir
+  git submodule init
+  git submodule update
+  cd ..
+  rsync -av HomeDir/ .
 
 
-... I don't really do it that way anymore
+... I should really setup a drop script to do this
