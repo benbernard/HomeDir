@@ -31,3 +31,6 @@ brew install --cask alfred
 
 echo "Installing Wavebox..."
 brew install --cask wavebox
+
+echo "Installing Inkdrop"
+brew install --cask inkdrop
