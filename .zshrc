@@ -16,12 +16,8 @@ if [[ "$ZSH_CMD_LOGGING" == "1" ]]; then
   setopt XTRACE
 fi
 
+# Load completion functions
 autoload -Uz compinit
-if [[ -n ${ZDOTDIR}/.zcompdump(#qN.mh+24) ]]; then
-	compinit -u;
-else
-	compinit -C -u;
-fi;
 
 # Fuck it, disable compaudit
 ZSH_DISABLE_COMPFIX=true
@@ -84,6 +80,13 @@ fi
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
+# Perform compinit after everything has loaded.  Only do a full compinit if
+# zcompdump file is older than 24 hours
+if [[ -n ${ZDOTDIR}/.zcompdump(#qN.mh+24) ]]; then
+	compinit -u;
+else
+	compinit -C -u;
+fi;
 
 ### BEGIN--Instacart Shell Settings. (Updated: Wed Jul 14 13:32:34 PDT 2021. [Script Version 1.3.16]) NO-TOUCH
 ### END--Instacart Shell Settings.
