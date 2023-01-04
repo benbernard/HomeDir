@@ -159,3 +159,6 @@
 
 [user]
   email = ben.bernard@instacart.com
+
+[feature]
+  manyFiles = 1

@@ -1,5 +1,3 @@
-require "awesome_print"
-AwesomePrint.irb!
 
 
 ### BEGIN--Carrot console helpers. (Updated: Wed Jan  4 10:16:20 PST 2023. [Script Version 1.3.22])

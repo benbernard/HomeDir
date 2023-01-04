@@ -16,10 +16,17 @@ if [[ "$ZSH_CMD_LOGGING" == "1" ]]; then
   setopt XTRACE
 fi
 
+autoload -Uz compinit
+if [[ -n ${ZDOTDIR}/.zcompdump(#qN.mh+24) ]]; then
+	compinit -u;
+else
+	compinit -C -u;
+fi;
+
 # Fuck it, disable compaudit
 ZSH_DISABLE_COMPFIX=true
 
-# I've decide th at instant prompt isn't worth it, would rather have an initialized shell
+# I've decide that instant prompt isn't worth it, would rather have an initialized shell
 # Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
 # Initialization code that may require console input (password prompts, [y/n]
 # confirmations, etc.) must go above this block; everything else may go below.
@@ -63,9 +70,11 @@ if [ -d ~/.shellrc.d ]; then
 fi
 
 # Source all files in .zshrc.d
-foreach i (`ls -1 ~/.zshrc.d/*.zsh`) {
-  source $i
-}
+if [ -d ~/.zshrc.d ]; then
+  foreach i (`ls -1 ~/.zshrc.d/*.zsh`) {
+    source $i
+  }
+fi
 
 PATH=$PATH:$HOME/.rvm/bin # Add RVM to PATH for scripting
 
@@ -76,24 +85,8 @@ fi
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
 
-IC_SHELL_RC=/Users/benbernard/.instacart_shell_profile
-if [[ -e ${IC_SHELL_RC} ]]; then
-  source ${IC_SHELL_RC}
-fi
-
 ### BEGIN--Instacart Shell Settings. (Updated: Wed Jul 14 13:32:34 PDT 2021. [Script Version 1.3.16]) NO-TOUCH
 ### END--Instacart Shell Settings.
-
-autoload -Uz compinit
-if [[ -n ${ZDOTDIR}/.zcompdump(#qN.mh+24) ]]; then
-	compinit -u;
-else
-	compinit -C -u;
-fi;
-
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
 #THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
 export SDKMAN_DIR="$HOME/.sdkman"

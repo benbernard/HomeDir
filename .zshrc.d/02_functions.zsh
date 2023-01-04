@@ -132,8 +132,8 @@ setNodeVersion () {
   VERSION=$1
 
   pushd /usr/local/bin
-  ln -sf ${HOME}/.nvm/versions/node/v${VERSION}/bin/node
-  ln -sf ${HOME}/.nvm/versions/node/v${VERSION}/bin/npm
+  sudo ln -sf ${HOME}/.nvm/versions/node/v${VERSION}/bin/node
+  sudo ln -sf ${HOME}/.nvm/versions/node/v${VERSION}/bin/npm
   popd
 }
 
