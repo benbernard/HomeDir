@@ -58,6 +58,9 @@ sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.
 echo Installing pynvim
 /usr/bin/python3 -m pip install pynvim
 
+echo Installing fzf
+~/submodules/fzf/install --completion --key-bindings --no-update-rc
+
 echo "================================================================================"
 echo "========================== POST INSTALL INSTRUCTIONS ==========================="
 echo "================================================================================"
