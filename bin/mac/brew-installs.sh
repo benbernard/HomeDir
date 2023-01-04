@@ -25,6 +25,7 @@ brew install reattach-to-user-namespace \
  libevent \
  ctags \
  yq \
+ git-secrets \
  fx \
  lazygit \
  coreutils
@@ -36,10 +37,3 @@ brew install --cask blank-screensaver
 # Install Fonts
 brew tap homebrew/cask-fonts
 brew install --cask font-hack-nerd-font
-
-pip3 install pynvim
-
-sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim --create-dirs \
-       https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
-
-/usr/bin/python3 -m pip install pynvim
