@@ -2,6 +2,12 @@
 
 echo "Setting up Mac..."
 
+echo "Setup sudo to use touch id, this may need your password..."
+sudo sed -i bak '1 i\
+auth sufficient pam_tid.so
+' /etc/pam.d/sudo
+
+
 echo "Installing Xcode Command Line Tools..."
 xcode-select --install
 
