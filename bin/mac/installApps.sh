@@ -5,7 +5,10 @@ echo "Installing apps from brew cask"
 echo "Installing Chrome..."
 brew install --cask google-chrome
 
-echo "Installing Iterm2"
+echo "Installing OneDrive..."
+brew install --cask onedrive
+
+echo "Installing Iterm2..."
 brew install --cask iterm2
 
 echo "Installing Choosy..."
@@ -32,5 +35,6 @@ brew install --cask alfred
 echo "Installing Wavebox..."
 brew install --cask wavebox
 
-echo "Installing Inkdrop"
+echo "Installing Inkdrop..."
 brew install --cask inkdrop
+
