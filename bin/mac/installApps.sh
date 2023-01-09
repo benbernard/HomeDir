@@ -38,3 +38,6 @@ brew install --cask wavebox
 echo "Installing Inkdrop..."
 brew install --cask inkdrop
 
+echo "Installing Dash..."
+brew install --cask dash
+
