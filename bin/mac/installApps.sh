@@ -41,3 +41,5 @@ brew install --cask inkdrop
 echo "Installing Dash..."
 brew install --cask dash
 
+echo "Installing p4merge"
+brew install --cask p4v

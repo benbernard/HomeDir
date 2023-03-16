@@ -22,6 +22,9 @@ autoload -Uz compinit
 # Fuck it, disable compaudit
 ZSH_DISABLE_COMPFIX=true
 
+# Disable prompt to update oh my zsh
+DISABLE_UPDATE_PROMPT=true
+
 # I've decide that instant prompt isn't worth it, would rather have an initialized shell
 # Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
 # Initialization code that may require console input (password prompts, [y/n]
