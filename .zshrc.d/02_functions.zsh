@@ -162,10 +162,11 @@ yqfx() {
 }
 
 # Make scp check for a remote "file" somewhere in the command
+SCP_LOCATION=`which scp`
 function scp() {
   if [[ ! "$@" =~ ":" ]]; then
     echo "No remote file in scp!, bailing"
   else
-    `whereis -bq scp` "$@"
+    ${SCP_LOCATION} "$@"
   fi
 }
