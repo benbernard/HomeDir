@@ -306,3 +306,21 @@ homebrew/
 .redhat/anonymousId
 .copilot-*
 .config/simple-update-notifier
+.conda
+.config/configstore/update-notifier-yo.json
+.config/fish/config.fish
+.diffusionbee
+.orbstack
+.vscode-insiders
+Library/Application Support/iTerm2
+OrbStack
+miniconda3
+.actrc
+.tcshrc
+.xonshrc
+bin/docker
+bin/docker-buildx
+bin/docker-compose
+bin/docker-credential-osxkeychain
+bin/orb
+bin/orbctl
