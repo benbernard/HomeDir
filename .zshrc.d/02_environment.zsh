@@ -15,6 +15,7 @@ export GOPATH="$HOME/gocode"
 path=(
   $(submodule fzf)/bin # Fzf is first, because some systems have an old fzf installed
   /usr/local/bin # Local bin ahead of path so it can override
+  $(submodule tmux)
   $HOME/homebrew/bin
   $PATH
   $HOME/bin
@@ -35,7 +36,6 @@ path=(
   $HOME/.yarn/bin
   ${HOME}/.config/yarn/global/bin
   ${HOME}/.local/bin
-  $(submodule tmux)
 )
 
 export VIM_TEMP="/var/tmp/$USER/vim-temp"
