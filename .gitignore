@@ -324,3 +324,6 @@ bin/docker-compose
 bin/docker-credential-osxkeychain
 bin/orb
 bin/orbctl
+.pip/pip.conf
+.swiftpm
+.zprofile.pysave
