@@ -43,3 +43,6 @@ brew install --cask dash
 
 echo "Installing p4merge"
 brew install --cask p4v
+
+echo "Installing Finicky..."
+brew install --cask finicky
