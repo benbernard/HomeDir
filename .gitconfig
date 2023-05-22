@@ -23,7 +23,7 @@
 
 [core]
   whitespace = fix,-indent-with-non-tab,trailing-space,cr-at-eol,space-before-tab
-  pager = delta
+  # pager = delta
   excludesfile = ~/.gitignore_global
 	# hooksPath = /Users/benbernard/.git/hooks
 
@@ -37,6 +37,10 @@
   s = ! git status -s | awk '{print $2}'
   mt = mergetool
   cp = cherry-pick
+  pull = pull --rebase
+  sp = samepull
+  ls = ls-files
+
 
   # These I generally don't
   st = status -uno
@@ -46,7 +50,6 @@
   lgfiles = log --name-only --no-merges
   lol = log --graph --decorate --pretty=oneline --abbrev-commit --no-merges
   lola = log --graph --decorate --pretty=oneline --abbrev-commit --all --no-merges
-  ls = ls-files
   lf = log --no-merges --pretty='format:%C(red)%h%Creset %C(magenta)%ar%Creset %C(yellow)%an%Creset %Cgreen%s%Creset %C(cyan)%d%Creset' --
   log-file = log --no-merges --
   alog = log --date-order --all --graph --format=\"%C(green)%h%Creset %C(yellow)%an%Creset %C(blue bold)%ad%Creset %C(red bold)%d%Creset%s\"
@@ -55,14 +58,8 @@
   mergeff = merge --ff-only --no-stat
   update-master = updatemaster
 
-  # Assume-unchanged aliases
-  au = update-index --assume-unchanged
-  nau = update-index --no-assume-unchanged
-  lsau = !git ls-files -v | grep "^[[:lower:]]"
-
   # Testing these
-  pull = pull --rebase
-  sp = samepull
+  sortedbranches = for-each-ref --sort=-committerdate refs/heads/ --format='%(refname:short)'
 
   # grep=use-agrep
 
