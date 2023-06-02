@@ -96,55 +96,55 @@ function activate(context) {
 	context.subscriptions.push(createFile);
 
 	// Search through open files
-	let searchOpenFiles = vscode.commands.registerCommand('benx.searchOpenFiles', async function () {
-		let editor = vscode.window.activeTextEditor;
+	// let searchOpenFiles = vscode.commands.registerCommand('benx.searchOpenFiles', async function () {
+	// 	let editor = vscode.window.activeTextEditor;
 
-		if (!editor) {
-			// show message about not being in a file
-			vscode.window.showInformationMessage('Sorry, no open text editor');
-			return;
-		}
+	// 	if (!editor) {
+	// 		// show message about not being in a file
+	// 		vscode.window.showInformationMessage('Sorry, no open text editor');
+	// 		return;
+	// 	}
 
-		// Get collect all open uris from the current tabs
-		let openFiles = [];
-		for (let tabGroup of vscode.window.tabGroups.all) {
-			for (let tab of tabGroup.tabs) {
-				let input = tab.input;
-				// Check if input.uri is defined
+	// 	// Get collect all open uris from the current tabs
+	// 	let openFiles = [];
+	// 	for (let tabGroup of vscode.window.tabGroups.all) {
+	// 		for (let tab of tabGroup.tabs) {
+	// 			let input = tab.input;
+	// 			// Check if input.uri is defined
 
-				// @ts-ignore
-				let uri = input.uri;
-				if (uri.scheme === 'file') {
-					openFiles.push(createFileHelper(uri));
-				} else {
-					vscode.window.showInformationMessage(`Sorry, ${uri.scheme} is not supported`);
-				}
-			}
-		}
+	// 			// @ts-ignore
+	// 			let uri = input.uri;
+	// 			if (uri.scheme === 'file') {
+	// 				openFiles.push(createFileHelper(uri));
+	// 			} else {
+	// 				vscode.window.showInformationMessage(`Sorry, ${uri.scheme} is not supported`);
+	// 			}
+	// 		}
+	// 	}
 
-		// create cancellation token
-		const cancellationToken = new vscode.CancellationTokenSource().token;
+	// 	// create cancellation token
+	// 	const cancellationToken = new vscode.CancellationTokenSource().token;
 
-		// Quick pick one of the files
-		let selectedFile = await vscode.window.showQuickPick(openFiles, {
-			placeHolder: 'Select a file to open',
-		}, cancellationToken);
+	// 	// Quick pick one of the files
+	// 	let selectedFile = await vscode.window.showQuickPick(openFiles, {
+	// 		placeHolder: 'Select a file to open',
+	// 	}, cancellationToken);
 
-		if (!selectedFile || cancellationToken.isCancellationRequested) {
-			return;
-		}
+	// 	if (!selectedFile || cancellationToken.isCancellationRequested) {
+	// 		return;
+	// 	}
 
-		// show selected file
-		if (selectedFile) {
-			let doc = await vscode.workspace.openTextDocument(selectedFile.uri)
+	// 	// show selected file
+	// 	if (selectedFile) {
+	// 		let doc = await vscode.workspace.openTextDocument(selectedFile.uri)
 
-			if (!doc) {
-				throw new Error(`Could not open file ${selectedFile.uri}`)
-			}
-			await vscode.window.showTextDocument(doc);
-		}
-	});
-	context.subscriptions.push(searchOpenFiles);
+	// 		if (!doc) {
+	// 			throw new Error(`Could not open file ${selectedFile.uri}`)
+	// 		}
+	// 		await vscode.window.showTextDocument(doc);
+	// 	}
+	// });
+	// context.subscriptions.push(searchOpenFiles);
 }
 
 // create a file helper object
