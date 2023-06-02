@@ -57,9 +57,11 @@
   agrep = grep-of-doom
   mergeff = merge --ff-only --no-stat
   update-master = updatemaster
+  sortedbranches = for-each-ref --sort=-committerdate refs/heads/ --format='%(refname:short)'
 
   # Testing these
-  sortedbranches = for-each-ref --sort=-committerdate refs/heads/ --format='%(refname:short)'
+  modified =!git log --no-commit-id --oneline --pretty=format:"" --name-only --relative master..HEAD | sort | uniq | grep -v '^$'
+  changed = !git diff `git merge-base HEAD origin/master`
 
   # grep=use-agrep
 

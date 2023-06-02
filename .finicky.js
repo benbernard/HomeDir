@@ -15,15 +15,27 @@ const NEW_CHROME_WINDOW = (options) => {
   }
 };
 
+const MEET_IN_ONE = (options) => {
+  return {
+    name: '/Applications/MeetInOne.app',
+  }
+};
+
 module.exports = {
   defaultBrowser: "Google Chrome",
   options: {
     logRequests: true,
   },
+  // rewrite: [{
+  //   match: /^https?:\/\/meet\.google\.com\/.*$/,
+  //   url: (options) => {
+  //     return 'meetinone://url=' + options.urlString
+  //   },
+  // }],
   handlers: [
     {
       match: /^https?:\/\/meet\.google\.com\/.*$/,
-      browser: NEW_CHROME_WINDOW
+      browser: WORK_CHROME,
     },
     {
       match: /fernet.io/,

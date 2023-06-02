@@ -83,6 +83,9 @@ fi
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
+# This was for Warp terminal, which I don't think is ready yet
+# printf '\eP$f{"hook": "SourcedRcFileForWarp", "value": { "shell": "zsh"}}\x9c'
+
 # Perform compinit after everything has loaded.  Only do a full compinit if
 # zcompdump file is older than 24 hours
 if [[ -n ${ZDOTDIR}/.zcompdump(#qN.mh+24) ]]; then

@@ -327,3 +327,5 @@ bin/orbctl
 .pip/pip.conf
 .swiftpm
 .zprofile.pysave
+.slack
+.warp
