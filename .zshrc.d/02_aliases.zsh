@@ -4,14 +4,20 @@ alias 'rpp=recs toprettyprint --one'
 alias 'rtt=recs totable'
 alias 'ns=ninjaWarpSearch'
 
-#ls alias, mainly add --color
 
-if [[ $(uname) == "Darwin" ]]; then
-  alias 'ls=/bin/ls -G'
-  alias 'lt=/bin/ls -G -latr'
-else
-  alias 'ls=/bin/ls --color=auto'
-  alias 'lt=/bin/ls --color=auto -latr'
+# These aliases mess up warp completions, so I'm going to try without them in warp
+if [[ "${WARP_IS_LOCAL_SHELL_SESSION}" -ne 1 ]]; then
+  #ls alias, mainly add --color
+  if [[ $(uname) == "Darwin" ]]; then
+    alias 'ls=/bin/ls -G'
+    alias 'lt=/bin/ls -G -latr'
+  else
+    alias 'ls=/bin/ls --color=auto'
+    alias 'lt=/bin/ls --color=auto -latr'
+  fi
+
+  # noglob fixes HEAD^ in shell commands
+  alias 'git=noglob git'
 fi
 
 
@@ -42,16 +48,6 @@ alias 's3_upload.pl=s3_upload.pl --prompt'
 # Prompt when about to overwrite a file with mv (use -f to force)
 alias 'mv=mv -i'
 
-# noglob fixes HEAD^ in shell commands
-alias 'git=noglob git'
-
-# If hub is installed alias git to it
-if type hub >/dev/null;
-then
-  # noglob fixes HEAD^ in shell commands
-  alias 'git=noglob hub'
-fi
-
 # Use gcal instead of useless cal
 alias cal=gcal
 alias cal3='gcal .'
@@ -77,9 +73,6 @@ alias 'longtail=tail -n 1000 -f'
 
 alias 'gcm=git commit -m '
 
-# Add alias for sublime merge
-alias smerge="/Applications/Sublime\ Merge.app/Contents/MacOS/sublime_merge &!"
-
 # Make run-help / help work
 autoload -Uz run-help
 autoload -Uz run-help-git
@@ -88,7 +81,7 @@ autoload -Uz run-help-svk
 unalias run-help 2>/dev/null
 alias help=run-help
 
-alias od=onedrivecmd
+# alias od=onedrivecmd
 
 alias 'rspecf=bin/rspec --fail-fast'
 
