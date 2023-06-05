@@ -21,6 +21,13 @@ const MEET_IN_ONE = (options) => {
   }
 };
 
+const MEETING_CHROME = (options) => {
+  return {
+    name: "/Users/benbernard/bin/OpenMeetAS.app",
+    appType: 'appPath'
+  }
+}
+
 module.exports = {
   defaultBrowser: "Google Chrome",
   options: {
@@ -35,7 +42,7 @@ module.exports = {
   handlers: [
     {
       match: /^https?:\/\/meet\.google\.com\/.*$/,
-      browser: WORK_CHROME,
+      browser: MEETING_CHROME,
     },
     {
       match: /fernet.io/,

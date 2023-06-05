@@ -62,6 +62,7 @@
   # Testing these
   modified =!git log --no-commit-id --oneline --pretty=format:"" --name-only --relative master..HEAD | sort | uniq | grep -v '^$'
   changed = !git diff `git merge-base HEAD origin/master`
+  ten = l -10
 
   # grep=use-agrep
 
