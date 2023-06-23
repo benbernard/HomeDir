@@ -105,4 +105,3 @@ export SDKMAN_DIR="$HOME/.sdkman"
 if [[ "$ZSH_PROFILE" == "1" ]]; then
  zprof
 fi
-
