@@ -36,6 +36,7 @@ path=(
   $HOME/.yarn/bin
   ${HOME}/.config/yarn/global/bin
   ${HOME}/.local/bin
+  ${HOME}/.paths/nvm
 )
 
 export VIM_TEMP="/var/tmp/$USER/vim-temp"
