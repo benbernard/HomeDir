@@ -9,8 +9,7 @@ alias 'ns=ninjaWarpSearch'
 if [[ "${WARP_IS_LOCAL_SHELL_SESSION}" -ne 1 ]]; then
   #ls alias, mainly add --color
   if [[ $(uname) == "Darwin" ]]; then
-    alias 'ls=/bin/ls -G'
-    alias 'lt=/bin/ls -G -latr'
+    alias 'ls=/bin/ls -G' alias 'lt=/bin/ls -G -latr'
   else
     alias 'ls=/bin/ls --color=auto'
     alias 'lt=/bin/ls --color=auto -latr'
