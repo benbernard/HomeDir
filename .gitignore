@@ -331,3 +331,5 @@ bin/orbctl
 .warp
 .iterm2
 .paths
+.matplotlib/fontlist-v330.json
+Library/Application Support/iTerm2/version.txt

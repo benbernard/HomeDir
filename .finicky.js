@@ -57,7 +57,19 @@ module.exports = {
       browser: WORK_CHROME,
     },
     {
+      match: /youtube.com/,
+      browser: HOME_CHROME,
+    },
+    {
+      match: /amazon.com/,
+      browser: HOME_CHROME,
+    },
+    {
       match: /mychart.seattlechildrens.org/,
+      browser: HOME_CHROME,
+    },
+    {
+      match: /linkedin.com/,
       browser: HOME_CHROME,
     },
     {

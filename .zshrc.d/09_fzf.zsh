@@ -97,9 +97,9 @@ bindkey '^G' fzf-git-widget
 fzf-git-status-widget() {
   setopt localoptions pipefail 2> /dev/null
   local files=$(
-    git status --porcelain |
+    git status -s |
     sed 's/^...//' |
-    fzf -m --ansi --preview='git -c color.status=always status -s | grep {}; echo; git diff --color {}' |
+    fzf -m --ansi --preview='~/bin/status-preview.sh {}' |
     tr '\n' ' '
   )
 
