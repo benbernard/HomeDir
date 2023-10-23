@@ -46,3 +46,6 @@ brew install --cask p4v
 
 echo "Installing Finicky..."
 brew install --cask finicky
+
+echo "Installing Cursor..."
+brew install --cask cursor

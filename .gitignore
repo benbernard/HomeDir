@@ -333,3 +333,8 @@ bin/orbctl
 .paths
 .matplotlib/fontlist-v330.json
 Library/Application Support/iTerm2/version.txt
+.config/.jira/.config.yml
+.cursor/extensions
+.cursor
+.cursor-tutor
+bin/jira
