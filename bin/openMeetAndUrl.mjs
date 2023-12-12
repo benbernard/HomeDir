@@ -9,7 +9,9 @@ function openGoogleMeet() {
     '/Users/benbernard/Applications/Chrome Apps.localized/Google Meet.app'
   ]
 
+  // console.log(`Running ${command} ${args.join(' ')}`);
   spawnSync(command, args, { stdio: 'inherit' })
+  spawnSync('sleep', [2], { stdio: 'inherit' })
 }
 
 function openUrl(url) {
@@ -21,14 +23,36 @@ function openUrl(url) {
     url
   ]
 
+  // console.log(`Running ${command} ${args.join(' ')}`);
   spawnSync(command, args, { stdio: 'inherit' })
 }
 
-openGoogleMeet();
+// Find if the Google Meet.app is running
+function isGoogleMeetRunning() {
+  const command = 'ps'
+  const args = [
+    '-ax',
+    '-o',
+    'command'
+  ]
 
-if (process.argv.length < 3) {
-  console.log('Usage: openMeetAndUrl <url>')
-  process.exit(1)
+  const result = spawnSync(command, args, { stdio: 'pipe' })
+  const output = result.stdout.toString()
+
+  return output.includes('Google Meet.app/Contents/MacOS/app_mode_loader')
 }
 
-openUrl(process.argv[2])
+function main() {
+  if (!isGoogleMeetRunning()) {
+    openGoogleMeet();
+  }
+
+  if (process.argv.length < 3) {
+    console.log('Usage: openMeetAndUrl <url>')
+    process.exit(1)
+  }
+
+  openUrl(process.argv[2])
+}
+
+main();

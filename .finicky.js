@@ -41,6 +41,14 @@ module.exports = {
   // }],
   handlers: [
     {
+      match: /zoom.us/,
+      browser: WORK_CHROME,
+    },
+    {
+      match: /call.benjaminbernard.com/,
+      browser: WORK_CHROME,
+    },
+    {
       match: /^https?:\/\/meet\.google\.com\/.*$/,
       browser: MEETING_CHROME,
     },
@@ -59,6 +67,10 @@ module.exports = {
     {
       match: /youtube.com/,
       browser: HOME_CHROME,
+    },
+    {
+      match: /aws.amazon.com/,
+      browser: WORK_CHROME,
     },
     {
       match: /amazon.com/,
