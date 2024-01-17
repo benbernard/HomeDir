@@ -95,6 +95,10 @@ module.exports = {
     {
       match: /^(https?:\/\/)?go\//,
       browser: WORK_CHROME,
+    },
+    {
+      match: /tailscale.com/,
+      browser: WORK_CHROME,
     }
   ]
 }
