@@ -1,0 +1,15 @@
+/* Comment, so we can see what that looks like */
+.mtki {
+  font-family: 'Monaspace Radon';
+  font-style: normal;
+}
+
+.mtk11 {
+  font-family: 'Monaspace Xenon';
+}
+
+.mtk5,
+.mtk6,
+.mtk12 {
+  font-family: 'Monaspace Argon';
+}
