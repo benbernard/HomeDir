@@ -15,6 +15,11 @@
 # 11. parameter - meetingNotes (string)- the complete notes of a meeting -  if no notes are set, value "EMPTY" will be used
 
 on meetingStart(eventId, title, allday, startDate, endDate, eventLocation, repeatingEvent, attendeeCount, meetingUrl, meetingService, meetingNotes)
+    -- If the title has "Focus Time" or "Lunch" in it, do nothing
+    if title contains "Focus Time (via Clockwise)" or title contains "Lunch (via Clockwise)" then
+        return
+    end if
+    
     -- Truncate meeting notes to first 500 characters
     if length of meetingNotes > 500 then
         set meetingNotes to text 1 thru 500 of meetingNotes
