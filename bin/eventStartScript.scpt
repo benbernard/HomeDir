@@ -1,5 +1,10 @@
 #!/usr/bin/env osascript
 
+# Future Ben:
+# This is installed by going to 
+# ~Library/Application Scripts/leits.MeetingBar
+# And creating a symlink to ~/bin/eventStartScript.scpt
+
 # the method to be called with the following parameters for the next meeting.
 #
 # 1. parameter - eventId (string) - unique identifier from apples eventkit implementation
