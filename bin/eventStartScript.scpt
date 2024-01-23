@@ -20,42 +20,22 @@
 # 11. parameter - meetingNotes (string)- the complete notes of a meeting -  if no notes are set, value "EMPTY" will be used
 
 on meetingStart(eventId, title, allday, startDate, endDate, eventLocation, repeatingEvent, attendeeCount, meetingUrl, meetingService, meetingNotes)
-    -- If the title has "Focus Time" or "Lunch" in it, do nothing
-    if title contains "Focus Time (via Clockwise)" or title contains "Lunch (via Clockwise)" then
-        return
-    end if
-    
-    -- Truncate meeting notes to first 500 characters
-    if length of meetingNotes > 500 then
-        set meetingNotes to text 1 thru 500 of meetingNotes
-    end if
+    -- Convert all parameters to text
+    set eventId to eventId as text
+    set title to title as text
+    set allday to allday as text
+    set startDate to startDate as text
+    set endDate to endDate as text
+    set eventLocation to eventLocation as text
+    set repeatingEvent to repeatingEvent as text
+    set attendeeCount to attendeeCount as text
+    set meetingUrl to meetingUrl as text
+    set meetingService to meetingService as text
+    set meetingNotes to meetingNotes as text
 
-    -- Format the date and time
-    set startTime to (time string of startDate) & " - " & (time string of endDate)
+    -- Prepare the command to call the other script with all parameters
+    set command to "nohup ~/bin/event-prompt.sh " & eventId & " " & quoted form of title & " " & allday & " " & quoted form of startDate & " " & quoted form of endDate & " " & quoted form of eventLocation & " " & repeatingEvent & " " & attendeeCount & " " & quoted form of meetingUrl & " " & quoted form of meetingService & " " & quoted form of meetingNotes & " > /dev/null 2>&1 &"
 
-    -- Format the dialog message
-    set dialogMessage to title & "
-" & startTime & "
-
-" & meetingService & "
-
-" & "Notes:" & "
-" & meetingNotes
-    
-    tell application "Finder"
-        activate
-        try
-            with timeout of 600 seconds
-                set dialogResult to display dialog dialogMessage with title "MeetingBar Auto Join" buttons {"OK", "Cancel"} default button "OK"
-                
-                if button returned of dialogResult is "OK" then
-                    tell application "System Events"
-                        open location meetingUrl
-                    end tell
-                end if
-            end timeout
-        on error number -128
-            -- Do nothing when the user cancels
-        end try
-    end tell
+    -- Execute the command
+    do shell script command
 end meetingStart
