@@ -65,6 +65,13 @@ module.exports = {
       browser: WORK_CHROME,
     },
     {
+      match: /http:\/\/home\.ben/,
+      browser: HOME_CHROME,
+      url: (url) => {
+        return "chrome://newtab"
+      },
+    },
+    {
       match: /youtube.com/,
       browser: HOME_CHROME,
     },
@@ -98,7 +105,7 @@ module.exports = {
     },
     {
       match: /tailscale.com/,
-      browser: WORK_CHROME,
+      browser: WORK_CHROME
     }
-  ]
+  ],
 }
