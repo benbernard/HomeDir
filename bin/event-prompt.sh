@@ -19,25 +19,25 @@ originalMeetingNotes=$meetingNotes
 meetingNotes=$(echo $meetingNotes | textutil -convert txt -format html -stdin -stdout)
 meetingNotes=$(echo ${meetingNotes} | tr -dc 'a-zA-Z0-9.? ~\n' | tr -d '"')
 
-# {
-#   echo
-#   echo "Event ID: $eventId"
-#   echo "Title: $title"
-#   echo "All Day: $allday"
-#   echo "Start Date: $startDate"
-#   echo "End Date: $endDate"
-#   echo "Location: $eventLocation"
-#   echo "Repeating Event: $repeatingEvent"
-#   echo "Attendee Count: $attendeeCount"
-#   echo "Meeting URL: $meetingUrl"
-#   echo "Meeting Service: $meetingService"
-#   echo "Meeting Notes: $meetingNotes"
-#   echo "Original Meeting Notes: $originalMeetingNotes"
-#   echo "Timestamp: $(date)"
-#   echo
-# } >> ~/event-log.txt
+{
+  echo
+  echo "Event ID: $eventId"
+  echo "Title: $title"
+  echo "All Day: $allday"
+  echo "Start Date: $startDate"
+  echo "End Date: $endDate"
+  echo "Location: $eventLocation"
+  echo "Repeating Event: $repeatingEvent"
+  echo "Attendee Count: $attendeeCount"
+  echo "Meeting URL: $meetingUrl"
+  echo "Meeting Service: $meetingService"
+  echo "Meeting Notes: $meetingNotes"
+  echo "Original Meeting Notes: $originalMeetingNotes"
+  echo "Timestamp: $(date)"
+  echo
+} >> ~/event-log.txt
 
-osascript event-prompt.applescript \
+osascript ~/bin/event-prompt.applescript \
   "$eventId" \
   "$title" \
   $allday \
@@ -48,5 +48,5 @@ osascript event-prompt.applescript \
   $attendeeCount \
   "$meetingUrl" \
   "$meetingService" \
-  "$meetingNotes"
-#   "$meetingNotes" >> ~/event-log.txt 2>&1
+  "$meetingNotes" >> ~/event-log.txt 2>&1
+  # "$meetingNotes"

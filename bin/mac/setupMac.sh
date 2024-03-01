@@ -31,6 +31,9 @@ ${BIN_DIR}/brew-installs.sh
 echo "Running setupDefaults.sh"
 ${BIN_DIR}/setupDefaults.sh
 
+echo "Installing autin"
+bash <(curl --proto '=https' --tlsv1.2 -sSf https://setup.atuin.sh)
+
 # Check if ~/OneDrive exists
 if [! -d ~/OneDrive ]; then
     echo "OneDrive not found. Please install OneDrive, sync config_content_backup, and hit enter"
