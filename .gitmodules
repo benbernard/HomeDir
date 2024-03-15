@@ -40,3 +40,6 @@
 [submodule "submodules/fonts"]
 	path = submodules/fonts
 	url = https://github.com/powerline/fonts.git
+[submodule "submodules/vial-qmk"]
+	path = submodules/vial-qmk
+	url = git@github.com:benbernard/vial-qmk.git
