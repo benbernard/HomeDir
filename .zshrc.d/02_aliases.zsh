@@ -64,6 +64,7 @@ then;
 fi
 
 alias 'viminit=vim ~/.config/nvim/init.vim'
+alias 'vimvsinit=vim ~/.config/nvim/vscode-init.vim'
 alias 'cleanvim=vim -u NONE'
 alias 'sudovim=sudo vim -u NONE --noplugin'
 alias 'vimchanged=vim `git s`'
@@ -100,3 +101,11 @@ alias cdcl=cdrp
 
 # Enable nice repl stuff for node
 alias 'nr=node --experimental-repl-await --async-stack-traces'
+
+
+# Copilot
+alias '??=gh copilot suggest -t shell'
+alias '?g=gh copilot suggest -t git'
+alias '?gh=gh copilot suggest -t gh'
+
+alias 'lg=lazygit'
