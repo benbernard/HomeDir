@@ -68,7 +68,7 @@ module.exports = {
       match: /http:\/\/home\.ben/,
       browser: HOME_CHROME,
       url: (url) => {
-        return "chrome://newtab"
+        return "https://google.com"
       },
     },
     {
