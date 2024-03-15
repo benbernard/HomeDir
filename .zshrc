@@ -105,3 +105,19 @@ export SDKMAN_DIR="$HOME/.sdkman"
 if [[ "$ZSH_PROFILE" == "1" ]]; then
  zprof
 fi
+
+# The next line updates PATH for the Google Cloud SDK.
+if [ -f '/Users/benbernard/Downloads/google-cloud-sdk/path.zsh.inc' ]; then . '/Users/benbernard/Downloads/google-cloud-sdk/path.zsh.inc'; fi
+
+# The next line enables shell command completion for gcloud.
+if [ -f '/Users/benbernard/Downloads/google-cloud-sdk/completion.zsh.inc' ]; then . '/Users/benbernard/Downloads/google-cloud-sdk/completion.zsh.inc'; fi
+
+# Load pyenv automatically by appending
+# the following to
+# ~/.zprofile (for login shells)
+# and ~/.zshrc (for interactive shells) :
+
+export PYENV_ROOT="$HOME/.pyenv"
+[[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
+eval "$(pyenv init -)"
+
