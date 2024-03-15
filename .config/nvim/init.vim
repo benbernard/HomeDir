@@ -135,6 +135,7 @@ set signcolumn=yes                   " Always display the notes column for ALE/g
 set inccommand=nosplit               " Increment display of s commands (maybe others in future)
 set completeopt=menu,preview,noinsert " Do not auto-insert completions
 scriptencoding utf-8                 " Use utf-8 to encode vimscript (so that options key maps can work)
+let g:vimsyn_embed = 'lPr'           " Enable embedded lua / python/ ruby in VIML files
 
 colorscheme dracula " current colorscheme
 
@@ -849,4 +850,3 @@ let g:sql_type_default = 'pgsql'
 if ( filereadable($HOME . "/site/site.vim") )
   source $HOME/site/site.vim
 endif
-
