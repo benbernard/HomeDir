@@ -347,3 +347,9 @@ iCloud Drive (Archive)/TextEdit
 ava-extension
 .bash-preexec.sh
 Google Drive
+.config/atuin
+.config/gcloud
+.boto
+.zhistory
+aigateway
+bento
