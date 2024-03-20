@@ -109,3 +109,6 @@ alias '?g=gh copilot suggest -t git'
 alias '?gh=gh copilot suggest -t gh'
 
 alias 'lg=lazygit'
+
+# vitest
+alias 'vt=npx vitest --no-watch --bail 1'
