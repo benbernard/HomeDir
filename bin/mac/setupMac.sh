@@ -5,10 +5,14 @@ set -e
 echo "Setting up Mac..."
 
 echo "Setup sudo to use touch id, this may need your password..."
-sudo sed -i bak '1 i\
-auth sufficient pam_tid.so
-' /etc/pam.d/sudo
-
+# sudo sed -i bak '1 i\
+# auth sufficient pam_tid.so
+# ' /etc/pam.d/sudo
+sudo sh -c 'cat <<EOF > /etc/pam.d/sudo_local
+# sudo_local: local config file which survives system update and is included for sudo
+# uncomment following line to enable Touch ID for sudo
+auth       sufficient     pam_tid.so
+EOF'
 
 echo "Installing Xcode Command Line Tools..."
 xcode-select --install
@@ -106,7 +110,7 @@ echo "==========================================================================
 echo "========================== POST INSTALL INSTRUCTIONS ==========================="
 echo "================================================================================"
 
-echo <<EOF
+cat <<EOF
 
 Karabiner:
 1. Grant karabiner-grabber full disk access, or it won't working
