@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 echo "Setting up Mac..."
 
 echo "Setup sudo to use touch id, this may need your password..."
@@ -31,8 +33,12 @@ ${BIN_DIR}/brew-installs.sh
 echo "Running setupDefaults.sh"
 ${BIN_DIR}/setupDefaults.sh
 
-echo "Installing autin"
-bash <(curl --proto '=https' --tlsv1.2 -sSf https://setup.atuin.sh)
+echo "Installing Apps"
+${BIN_DIR}/instalApps.sh
+
+
+# echo "Installing autin"
+# bash <(curl --proto '=https' --tlsv1.2 -sSf https://setup.atuin.sh)
 
 # Check if ~/OneDrive exists
 if [! -d ~/OneDrive ]; then
@@ -70,20 +76,73 @@ echo Installing pynvim
 echo Installing fzf
 ~/submodules/fzf/install --completion --key-bindings --no-update-rc
 
+echo "Installing event script"
+mkdir ~'/Library/Application Scripts/leits.MeetingBar'
+cd ~'/Library/Application Scripts/leits.MeetingBar'
+ln -s ~/bin/eventStartScript.scpt
+cd
+
+echo "================================================================================"
+echo "========================== Interactive Section!      ==========================="
+echo "================================================================================"
+echo
+echo "I'm going to run p10k configure, answer yes to installing fonts"
+# Run with zsh so that we can get the modern evironment
+echo "% p10k configure"
+zsh -c 'p10k configure'
+
+
+echo
+echo "Now loggin into gh"
+echo "% gh auth login"
+zsh -c 'gh auth login'
+
+echo
+echo "Installing copilot extension"
+echo '% gh extension install github/gh-copilot'
+zsh -c 'gh extension install github/gh-copilot'
+
 echo "================================================================================"
 echo "========================== POST INSTALL INSTRUCTIONS ==========================="
 echo "================================================================================"
-echo
-echo "1. Re-save iterm2 window profile, otherwise you'll startin in /"
-echo "2. Be sure to grant karabiner-grabber, and better touch tool full disk access"
-echo "3. If better touch tool isn't working properly, good luck.  Maybe look at: https://community.folivora.ai/t/btt-not-opening/27402"
-echo "4. Install Choosey - https://choosy.app/"
-echo "4. Install Karabiner Elements - https://karabiner-elements.pqrs.org/"
-echo "5. Install Better Touch Tool - https://folivora.ai/"
-echo "6. Install Krisp.ai - https://krisp.ai/"
-echo "7. Install VSCode - https://code.visualstudio.com/"
-echo "8. Install Slack - https://slack.com/downloads/mac"
-echo "9. Install Alfred - https://www.alfredapp.com/"
-echo " -- Or just try running installApps.sh (experimental)"
+
+echo <<EOF
+
+Karabiner:
+1. Grant karabiner-grabber full disk access, or it won't working
+
+Better Touch Tool
+1. Grant better touch tool full disk access, or it won't working
+2. Sync config with dropbox
+3. Turn on window moving/resize keys in preferences
+4. If better touch tool isn't working properly, good luck.
+   Maybe look at: https://community.folivora.ai/t/btt-not-opening/27402
+
+Iterm:
+1. Try in general/settings setting the setting to ~/OneDrive/config_content_backups/iterm-new
+
+If that doesn't work:
+1. Be sure to set the Meslo NF font, this should've been installed by powerline
+   (p10k configure)
+2. Set ctrl-enter to send ctrl-6 (hex code 0x1E) so that zsh-suggestions works
+
+Chrome:
+1. Be sure to setup both chrome profiles, name one 'Work' and one 'Home', then
+   alfred should work
+
+Finicky:
+1. Start it, make sure meetings load correctly (may need to look at
+   ../openMeetAndUrl.mjs for node version)
+
+MeetingBar:
+1. Start it, sync mac calendar, make sure new notifications work
+2. You may need to save an event start script with the contents of
+   ~/bin/eventStartScript.scpt
+
+DONE!
+EOF
+
+# echo "1. Re-save iterm2 window profile, otherwise you'll startin in /"
+
 
 echo "Done!"

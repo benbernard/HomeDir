@@ -16,7 +16,7 @@ on run argv
     if title contains "Focus Time (via Clockwise)" or title contains "Lunch (via Clockwise)" then
         return
     end if
-  
+
     -- Truncate meeting notes to first 500 characters
     if length of meetingNotes > 500 then
         set meetingNotes to text 1 thru 500 of meetingNotes

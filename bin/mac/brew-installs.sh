@@ -28,7 +28,9 @@ brew install reattach-to-user-namespace \
  git-secrets \
  fx \
  lazygit \
- coreutils
+ coreutils \
+ pyenv \
+ tmux
 
 # Blank screensaver installs
 brew tap theseal/blank-screensaver

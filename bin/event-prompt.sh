@@ -36,6 +36,7 @@ meetingNotes=$(echo ${meetingNotes} | tr -dc 'a-zA-Z0-9.? ~\n' | tr -d '"')
   echo "Timestamp: $(date)"
   echo
 } >> ~/event-log.txt
+# }
 
 osascript ~/bin/event-prompt.applescript \
   "$eventId" \

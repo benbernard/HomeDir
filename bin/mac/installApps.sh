@@ -2,6 +2,8 @@
 
 echo "Installing apps from brew cask"
 
+# TODO: Add guards for all these to see if they've already been installed
+
 echo "Installing Chrome..."
 brew install --cask google-chrome
 
@@ -10,9 +12,6 @@ brew install --cask onedrive
 
 echo "Installing Iterm2..."
 brew install --cask iterm2
-
-echo "Installing Choosy..."
-brew install --cask choosy
 
 echo "Installing Karabiner Elements..."
 brew install --cask karabiner-elements
@@ -35,12 +34,6 @@ brew install --cask alfred
 echo "Installing Wavebox..."
 brew install --cask wavebox
 
-echo "Installing Inkdrop..."
-brew install --cask inkdrop
-
-echo "Installing Dash..."
-brew install --cask dash
-
 echo "Installing p4merge"
 brew install --cask p4v
 
@@ -49,3 +42,20 @@ brew install --cask finicky
 
 echo "Installing Cursor..."
 brew install --cask cursor
+
+echo "Installing linear"
+brew install --cask linear-linear
+
+echo "Installing meetingbar"
+brew install --cask meetingbar
+
+# Graveyard
+# echo "Installing Inkdrop..."
+# brew install --cask inkdrop
+#
+# echo "Installing Dash..."
+# brew install --cask dash
+#
+# echo "Installing Choosy..."
+# brew install --cask choosy
+#

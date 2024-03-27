@@ -1,4 +1,4 @@
-#!/usr/local/bin/node
+#!/opt/homebrew/bin/node
 
 import { spawnSync } from 'child_process';
 
