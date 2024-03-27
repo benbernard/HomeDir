@@ -36,11 +36,13 @@ auth     optional     /opt/homebrew/lib/pam/pam_reattach.so  ignore_ssh
 auth     sufficient   pam_tid.so
 EOF'
 
+echo "Installing Apps"
+${BIN_DIR}/instalApps.sh
+
+# Must run after cursor / vscode install
 echo "Running setupDefaults.sh"
 ${BIN_DIR}/setupDefaults.sh
 
-echo "Installing Apps"
-${BIN_DIR}/instalApps.sh
 
 # Check if ~/OneDrive exists
 if [! -d ~/OneDrive ]; then
