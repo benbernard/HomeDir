@@ -1,6 +1,8 @@
 
 
-### BEGIN--Carrot console helpers. (Updated: Wed Jan  4 10:16:20 PST 2023. [Script Version 1.3.22])
+
+
+### BEGIN--Carrot console helpers. (Updated: Wed Mar 27 07:16:41 PDT 2024. [Script Version 1.3.27])
 if ENV["CARROT_DIR"]
   helpers_dir = File.join(ENV["CARROT_DIR"], "setup", "ruby_console_helpers")
   Dir[File.join(helpers_dir, "*.rb")].each do |file|
