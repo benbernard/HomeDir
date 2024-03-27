@@ -43,3 +43,6 @@
 [submodule "submodules/vial-qmk"]
 	path = submodules/vial-qmk
 	url = git@github.com:benbernard/vial-qmk.git
+[submodule "submodules/SpeedyMeet"]
+	path = submodules/SpeedyMeet
+	url = git@github.com:rexfm/SpeedyMeet.git
