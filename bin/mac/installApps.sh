@@ -4,58 +4,43 @@ echo "Installing apps from brew cask"
 
 # TODO: Add guards for all these to see if they've already been installed
 
-echo "Installing Chrome..."
-brew install --cask google-chrome
+installed_casks=$(brew list --cask)
 
-echo "Installing OneDrive..."
-brew install --cask onedrive
+function install_cask() {
+  local cask_name=$1
+  local app_name=${2:-$1}
+  if [ -d "/Applications/${app_name}.app" ] || [ -d "$HOME/Applications/${app_name}.app" ]; then
+    echo "$app_name is already installed in Applications."
+  elif ! echo "$installed_casks" | grep -q "$cask_name"; then
+    echo "Installing $cask_name..."
+    brew install --cask "$cask_name"
+  else
+    echo "$cask_name is already installed via Homebrew Cask."
+  fi
+}
 
-echo "Installing Iterm2..."
-brew install --cask iterm2
-
-echo "Installing Karabiner Elements..."
-brew install --cask karabiner-elements
-
-echo "Installing Better Touch Tool..."
-brew install --cask bettertouchtool
-
-echo "Installing Krisp.ai..."
-brew install --cask krisp
-
-echo "Installing VSCode..."
-brew install --cask visual-studio-code
-
-echo "Installing Slack..."
-brew install --cask slack
-
-echo "Installing Alfred..."
-brew install --cask alfred
-
-echo "Installing Wavebox..."
-brew install --cask wavebox
-
-echo "Installing p4merge"
-brew install --cask p4v
-
-echo "Installing Finicky..."
-brew install --cask finicky
-
-echo "Installing Cursor..."
-brew install --cask cursor
-
-echo "Installing linear"
-brew install --cask linear-linear
-
-echo "Installing meetingbar"
-brew install --cask meetingbar
+install_cask "google-chrome" "Google Chrome"
+install_cask "onedrive" "OneDrive"
+install_cask "iterm2" "iTerm"
+install_cask "karabiner-elements" "Karabiner-Elements"
+install_cask "bettertouchtool" "BetterTouchTool"
+install_cask "krisp" "krisp"
+install_cask "visual-studio-code" "Visual Studio Code"
+install_cask "slack" "Slack"
+install_cask "alfred" "Alfred 5"
+install_cask "wavebox" "Wavebox"
+install_cask "p4v" "p4v"
+install_cask "finicky" "Finicky"
+install_cask "cursor" "Cursor"
+install_cask "linear-linear" "Linear"
+install_cask "meetingbar" "MeetingBar"
+install_cask "snagit" "Snagit"
+install_cask "tailscale" "Tailscale"
+install_cask "orbstack" "Orbstack"
+install_cask "bitwarden" "Bitwarden"
+install_cask "hiddenbar" "Hidden Bar"
 
 # Graveyard
-# echo "Installing Inkdrop..."
-# brew install --cask inkdrop
-#
-# echo "Installing Dash..."
-# brew install --cask dash
-#
-# echo "Installing Choosy..."
-# brew install --cask choosy
-#
+# install_cask "inkdrop"
+# install_cask "dash"
+# install_cask "choosy"
