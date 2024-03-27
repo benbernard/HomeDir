@@ -4,16 +4,6 @@ set -e
 
 echo "Setting up Mac..."
 
-echo "Setup sudo to use touch id, this may need your password..."
-# sudo sed -i bak '1 i\
-# auth sufficient pam_tid.so
-# ' /etc/pam.d/sudo
-sudo sh -c 'cat <<EOF > /etc/pam.d/sudo_local
-# sudo_local: local config file which survives system update and is included for sudo
-# uncomment following line to enable Touch ID for sudo
-auth       sufficient     pam_tid.so
-EOF'
-
 echo "Installing Xcode Command Line Tools..."
 xcode-select --install
 
@@ -34,15 +24,23 @@ BIN_DIR=${HOME}/bin/mac
 echo "Running brew-installs.sh"
 ${BIN_DIR}/brew-installs.sh
 
+# This must happen after pam_reattach is installed by brew
+echo "Setup sudo to use touch id, this may need your password..."
+# sudo sed -i bak '1 i\
+# auth sufficient pam_tid.so
+# ' /etc/pam.d/sudo
+sudo sh -c 'cat <<EOF > /etc/pam.d/sudo_local
+# sudo_local: local config file which survives system update and is included for sudo
+# uncomment following line to enable Touch ID for sudo
+auth     optional     /opt/homebrew/lib/pam/pam_reattach.so  ignore_ssh
+auth     sufficient   pam_tid.so
+EOF'
+
 echo "Running setupDefaults.sh"
 ${BIN_DIR}/setupDefaults.sh
 
 echo "Installing Apps"
 ${BIN_DIR}/instalApps.sh
-
-
-# echo "Installing autin"
-# bash <(curl --proto '=https' --tlsv1.2 -sSf https://setup.atuin.sh)
 
 # Check if ~/OneDrive exists
 if [! -d ~/OneDrive ]; then

@@ -30,6 +30,7 @@ brew install reattach-to-user-namespace \
  lazygit \
  coreutils \
  pyenv \
+ pam-reattach \
  tmux
 
 # Blank screensaver installs
