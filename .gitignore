@@ -276,7 +276,6 @@ bin/micro
 .config/packer
 OneDrive
 .zsh_sessions/
-.vscode
 .bin/
 .config/pulse/
 .pumpkin/
@@ -334,8 +333,6 @@ bin/orbctl
 .matplotlib/fontlist-v330.json
 Library/Application Support/iTerm2/version.txt
 .config/.jira/.config.yml
-.cursor/extensions
-.cursor
 .cursor-tutor
 bin/jira
 ava
