@@ -1,7 +1,7 @@
 ava-shell () {
   local tmpfile=$(mktemp);
   trap 'rm -f $tmpfile' EXIT;
-  if ~/repos/bento/bentodev ava shell "$@" --result-file $tmpfile; then
+  if bento ava shell "$@" --result-file $tmpfile; then
     if [ -e "$tmpfile" ]; then
       local fixed_cmd=$(cat $tmpfile);
       print -z "$fixed_cmd";
