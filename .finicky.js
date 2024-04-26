@@ -8,6 +8,16 @@ const HOME_CHROME = {
   profile: "Profile 1",
 };
 
+// const LINEAR_APP = () => {
+//   return {
+//     name: ""
+//   }
+// }
+//
+const LINEAR_APP = {
+  name: "Linear",
+}
+
 const NEW_CHROME_WINDOW = (options) => {
   return {
     ...WORK_CHROME,
@@ -55,6 +65,11 @@ module.exports = {
     {
       match: /fernet.io/,
       browser: WORK_CHROME,
+    },
+    // This must come before the instacart to workchrome handler
+    {
+      match: /^(https?:\/\/)linear.app\//,
+      browser: LINEAR_APP,
     },
     {
       match: /instacart/,
@@ -107,5 +122,6 @@ module.exports = {
       match: /tailscale.com/,
       browser: WORK_CHROME
     }
+
   ],
 }
