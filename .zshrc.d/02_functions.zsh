@@ -173,3 +173,22 @@ function scp() {
     ${SCP_LOCATION} "$@"
   fi
 }
+
+function oc() {
+  if [[ ! -d .git ]]; then
+    echo "Error: Not in the root directory of the repo"
+    return 1
+  fi
+
+  local workspace_files=(*.code-workspace(N))
+  if [[ ${#workspace_files[@]} -eq 0 ]]; then
+    echo "No .code-workspace file found. Opening current repo: $(basename $(pwd))"
+    cursor .
+  elif [[ ${#workspace_files[@]} -eq 1 ]]; then
+    echo "Opening ${workspace_files[1]}"
+    cursor "${workspace_files[1]}"
+  else
+    echo "Error: Expected one .code-workspace file, found ${#workspace_files[@]}:"
+    printf '%s\n' "${workspace_files[@]}"
+  fi
+}
