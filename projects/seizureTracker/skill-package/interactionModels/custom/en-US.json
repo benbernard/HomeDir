@@ -1,0 +1,95 @@
+{
+  "interactionModel": {
+    "dialog": {
+      "intents": [
+        {
+          "slots": [
+            {
+              "name": "seizureDuration",
+              "elicitationRequired": true,
+              "type": "AMAZON.DURATION",
+              "confirmationRequired": false,
+              "prompts": {
+                "elicitation": "Elicit.Slot.605139723429.1449369334794"
+              }
+            }
+          ],
+          "name": "TrackSeizure",
+          "confirmationRequired": false,
+          "prompts": {}
+        }
+      ],
+      "delegationStrategy": "ALWAYS"
+    },
+    "languageModel": {
+      "intents": [
+        {
+          "name": "AMAZON.CancelIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.HelpIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.StopIntent",
+          "samples": []
+        },
+        {
+          "slots": [],
+          "name": "HelloWorldIntent",
+          "samples": [
+            "hello",
+            "how are you",
+            "say hi world",
+            "say hi",
+            "hi",
+            "say hello world",
+            "say hello"
+          ]
+        },
+        {
+          "name": "AMAZON.NavigateHomeIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.FallbackIntent",
+          "samples": []
+        },
+        {
+          "slots": [
+            {
+              "name": "seizureDuration",
+              "type": "AMAZON.DURATION",
+              "samples": [
+                "{seizureDuration} seizure",
+                "a {seizureDuration} seizure",
+                "{seizureDuration}"
+              ]
+            }
+          ],
+          "name": "TrackSeizure",
+          "samples": [
+            "track {seizureDuration}",
+            "record {seizureDuration}",
+            "record a {seizureDuration} seizure",
+            "track a {seizureDuration} seizure"
+          ]
+        }
+      ],
+      "types": [],
+      "invocationName": "seizure tracker"
+    },
+    "prompts": [
+      {
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "What was the duration?"
+          }
+        ],
+        "id": "Elicit.Slot.605139723429.1449369334794"
+      }
+    ]
+  }
+}

@@ -358,3 +358,4 @@ lefthook.yml
 .conductorone
 .config/graphite/user_config
 .redis-insight
+.ask
