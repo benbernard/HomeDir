@@ -55,6 +55,7 @@ ghcs() {
 	FUNCNAME="$funcstack[1]"
 	TARGET="shell"
 	local GH_DEBUG="$GH_DEBUG"
+	local GH_HOST="$GH_HOST"
 
 	read -r -d '' __USAGE <<-EOF
 	Wrapper around \`gh copilot suggest\` to suggest a command based on a natural language description of the desired output effort.
@@ -64,10 +65,11 @@ ghcs() {
 	  $FUNCNAME [flags] <prompt>
 
 	FLAGS
-	  -d, --debug              Enable debugging
-	  -h, --help               Display help usage
-	  -t, --target target      Target for suggestion; must be shell, gh, git
-	                           default: "$TARGET"
+	  -d, --debug           Enable debugging
+	  -h, --help            Display help usage
+	      --hostname        The GitHub host to use for authentication
+	  -t, --target target   Target for suggestion; must be shell, gh, git
+	                        default: "$TARGET"
 
 	EXAMPLES
 
@@ -109,6 +111,10 @@ ghcs() {
 				return 0
 				;;
 
+			hostname)
+				GH_HOST="$OPTARG"
+				;;
+
 			target | t)
 				TARGET="$OPTARG"
 				;;
@@ -118,24 +124,25 @@ ghcs() {
 	# shift so that $@, $1, etc. refer to the non-option arguments
 	shift "$((OPTIND-1))"
 
-	TMPFILE="$(mktemp -t gh-copilotXXX)"
+	TMPFILE="$(mktemp -t gh-copilotXXXXXX)"
 	trap 'rm -f "$TMPFILE"' EXIT
-	if GH_DEBUG="$GH_DEBUG" gh copilot suggest -t "$TARGET" "$@" --shell-out "$TMPFILE"; then
+	if GH_DEBUG="$GH_DEBUG" GH_HOST="$GH_HOST" gh copilot suggest -t "$TARGET" "$@" --shell-out "$TMPFILE"; then
 		if [ -s "$TMPFILE" ]; then
 			FIXED_CMD="$(cat $TMPFILE)"
 			# print -s "$FIXED_CMD"
 			# echo
+			# eval "$FIXED_CMD"
 			print -z "$FIXED_CMD"
 		fi
 	else
 		return 1
 	fi
 }
-alias '??=ghcs'
 
 ghce() {
 	FUNCNAME="$funcstack[1]"
 	local GH_DEBUG="$GH_DEBUG"
+	local GH_HOST="$GH_HOST"
 
 	read -r -d '' __USAGE <<-EOF
 	Wrapper around \`gh copilot explain\` to explain a given input command in natural language.
@@ -144,8 +151,9 @@ ghce() {
 	  $FUNCNAME [flags] <command>
 
 	FLAGS
-	  -d, --debug   Enable debugging
-	  -h, --help    Display help usage
+	  -d, --debug      Enable debugging
+	  -h, --help       Display help usage
+	      --hostname   The GitHub host to use for authentication
 
 	EXAMPLES
 
@@ -176,11 +184,18 @@ ghce() {
 				echo "$__USAGE"
 				return 0
 				;;
+
+			hostname)
+				GH_HOST="$OPTARG"
+				;;
 		esac
 	done
 
 	# shift so that $@, $1, etc. refer to the non-option arguments
 	shift "$((OPTIND-1))"
 
-	GH_DEBUG="$GH_DEBUG" gh copilot explain "$@"
+	GH_DEBUG="$GH_DEBUG" GH_HOST="$GH_HOST" gh copilot explain "$@"
 }
+
+
+alias '??=ghcs'

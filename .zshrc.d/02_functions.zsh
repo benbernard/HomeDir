@@ -175,8 +175,10 @@ function scp() {
 }
 
 function oc() {
+  local current_dir=$(pwd)
+  pushd $(git rev-parse --show-toplevel 2>/dev/null) 1>/dev/null
   if [[ ! -d .git ]]; then
-    echo "Error: Not in the root directory of the repo"
+    echo "Error: .git directory not found"
     return 1
   fi
 
@@ -191,4 +193,16 @@ function oc() {
     echo "Error: Expected one .code-workspace file, found ${#workspace_files[@]}:"
     printf '%s\n' "${workspace_files[@]}"
   fi
+
+  cd $current_dir
+}
+
+pgtable() {
+  bash -c "psql "'$DATABASE_URL'" -c '\H' -c '\d+ $1'" > "/tmp/$1.html" &&
+    echo '<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tiny.css@0.12/dist/light.css">' >> "/tmp/$1.html" &&
+    open "/tmp/$1.html"
+}
+
+lsPorts() {
+  sudo lsof -iTCP -sTCP:LISTEN -n -P | awk 'NR>1 {print $9, $1, $2}' | sed 's/.*://' | while read port process pid; do echo "Port $port: $(ps -p $pid -o command= | sed 's/^-//') (PID: $pid)"; done | sort -n
 }

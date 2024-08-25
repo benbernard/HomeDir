@@ -355,3 +355,6 @@ event-log.txt
 carrot
 lefthook.yml
 .rediscli_history
+.conductorone
+.config/graphite/user_config
+.redis-insight
