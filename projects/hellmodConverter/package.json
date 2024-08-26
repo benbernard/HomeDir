@@ -1,11 +1,16 @@
 {
-  "name": "hellmodconverter",
+  "name": "hellmod-converter",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "lint": "biome lint .",
+    "format": "biome format . --write",
+    "convert": "tsx convert.ts"
   },
-  "author": "",
-  "license": "MIT"
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "@biomejs/biome": "^1.5.3",
+    "tsx": "^4.0.0"
+  }
 }
