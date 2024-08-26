@@ -9,8 +9,12 @@
     "convert": "tsx convert.ts"
   },
   "devDependencies": {
-    "typescript": "^5.0.0",
     "@biomejs/biome": "^1.5.3",
-    "tsx": "^4.0.0"
+    "tsx": "^4.0.0",
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@types/node": "^22.5.0",
+    "lua-in-js": "^2.2.5"
   }
 }
