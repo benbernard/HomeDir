@@ -14,7 +14,12 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
+    "@serverless/typescript": "^3.38.0",
+    "@types/aws-lambda": "^8.10.143",
     "@types/node": "^22.5.0",
-    "lua-in-js": "^2.2.5"
+    "esbuild": "^0.23.1",
+    "lua-in-js": "^2.2.5",
+    "serverless": "^4.2.3",
+    "serverless-esbuild": "^1.52.1"
   }
 }
