@@ -49,7 +49,7 @@ const SeizureTrackerHandler = {
 		);
 	},
 
-	handle(handlerInput) {
+	async handle(handlerInput) {
 		const speakOutput = "Tracked";
 		const value = Alexa.getSlotValue(
 			handlerInput.requestEnvelope,
@@ -81,9 +81,31 @@ const SeizureTrackerHandler = {
 			durationString += `${seconds[1]} second${seconds[1] === "1" ? "" : "s"}`;
 		}
 
-		return handlerInput.responseBuilder
-			.speak(`Tracked, ${durationString}`)
-			.getResponse();
+		// Convert duration to total seconds
+		const totalSeconds =
+			(minutes ? Number.parseInt(minutes[1]) * 60 : 0) +
+			(seconds ? Number.parseInt(seconds[1]) : 0);
+
+		const ky = await import("ky-universal").then((module) => module.default);
+
+		try {
+			await ky.post("https://hooks.zapier.com/hooks/catch/19913642/26cj2dl/", {
+				json: {
+					totalSeconds,
+					date: new Date().toISOString(),
+					notes: "",
+				},
+			});
+
+			return handlerInput.responseBuilder
+				.speak(`Tracked, ${durationString}`)
+				.getResponse();
+		} catch (error) {
+			console.error("Error sending data to Zapier:", error);
+			return handlerInput.responseBuilder
+				.speak("Error sending data to Zapier")
+				.getResponse();
+		}
 	},
 };
 
