@@ -88,11 +88,15 @@ const SeizureTrackerHandler = {
 
 		const ky = await import("ky-universal").then((module) => module.default);
 
+		const pacificTime = new Date().toLocaleString("en-US", {
+			timeZone: "America/Los_Angeles",
+		});
+
 		try {
 			await ky.post("https://hooks.zapier.com/hooks/catch/19913642/26cj2dl/", {
 				json: {
 					totalSeconds,
-					date: new Date().toISOString(),
+					date: pacificTime,
 					notes: "",
 				},
 			});
