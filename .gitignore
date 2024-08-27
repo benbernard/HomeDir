@@ -359,3 +359,6 @@ lefthook.yml
 .config/graphite/user_config
 .redis-insight
 .ask
+.cdk/
+.degit/
+projects/seizure-import/export.zip
