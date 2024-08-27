@@ -262,7 +262,6 @@ Applications (Parallels)/
 .rbenv/
 .wget-hsts
 carrot/
-src/
 .config/ei/cdrp_dir
 .ecr/
 .config/bento/
