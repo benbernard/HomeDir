@@ -361,3 +361,4 @@ lefthook.yml
 .cdk/
 .degit/
 projects/seizure-import/export.zip
+projects/seizure-import/data
