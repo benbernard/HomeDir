@@ -10,6 +10,8 @@
 	"license": "MIT",
 	"dependencies": {
 		"@biomejs/biome": "^1.8.3",
+		"@types/node": "^22.5.1",
+		"csv-writer": "^1.6.0",
 		"tsx": "^4.19.0",
 		"typescript": "^5.5.4"
 	}
