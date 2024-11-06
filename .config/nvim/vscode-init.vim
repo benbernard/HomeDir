@@ -1,5 +1,7 @@
 let g:ale_emit_conflict_warnings = 0
 
+" cspell:disable
+
 """"""""""""""""" Plugins Setup """"""""""""""""""""""""""""""""
 
 " Disable javascript/jsx from polyglot, must be before polyglot loads
@@ -247,6 +249,13 @@ endif
 
 " Setup CamelCaseMotion
   call camelcasemotion#CreateMotionMappings(',')
+  
+" Disable some matchup functionality
+" It causes vscode to insert random characters when typing
+let g:matchup_matchparen_enabled = 0
+let g:matchup_motion_enabled = 1
+let g:matchup_text_obj_enabled = 1
+
 
 """"""""""""""" Typos """"""""""""""""""""
 " A list of iabbrev to correct common typos

@@ -59,6 +59,10 @@ module.exports = {
       browser: WORK_CHROME,
     },
     {
+      match: /app\.krisp\.ai/,
+      browser: WORK_CHROME,
+    },
+    {
       match: /^https?:\/\/meet\.google\.com\/.*$/,
       browser: MEETING_CHROME,
     },
