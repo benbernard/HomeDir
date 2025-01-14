@@ -362,3 +362,10 @@ lefthook.yml
 .degit/
 projects/seizure-import/export.zip
 projects/seizure-import/data
+.buildkite
+.config/bk.yaml
+.gk
+.supermaven
+bin/bk
+vs-code-trial
+.bk.yaml
