@@ -74,5 +74,6 @@ if [[ ${recording} != "true"  && -z "$VSCODE_IPC_HOOK_CLI" ]]; then
     export ZSH_AUTOSUGGEST_USE_ASYNC=1
     source ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
     bindkey '^^' autosuggest-accept # Binds Ctrl-6 to accept suggestion, iterm maps Ctrl-Enter to Ctrl-6 (Send Hex Code -> 0x1E)
+    bindkey '\e[27;5;13~' autosuggest-accept # Binds escape code for ctrl+enter in ghostty, also needs support in tmux.conf
   fi
 fi
