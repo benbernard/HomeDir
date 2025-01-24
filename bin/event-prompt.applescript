@@ -35,7 +35,7 @@ on run argv
 
 " & "Notes:" & "
 " & meetingNotes
-    tell application "iTerm"
+    tell application "MeetingBar"
         activate
         try
             with timeout of 600 seconds
