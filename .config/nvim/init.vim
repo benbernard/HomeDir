@@ -57,7 +57,7 @@ Plug 'tpope/vim-unimpaired'
 Plug 'thinca/vim-unite-history'
 Plug 'triglav/vim-visual-increment'
 Plug 'jlanzarotta/bufexplorer'
-Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
+" Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
 Plug 'junegunn/fzf.vim'
 Plug 'justinmk/vim-sneak'
 Plug 'machakann/vim-highlightedyank'
@@ -546,7 +546,7 @@ let g:vim_markdown_folding_disabled=1
  nmap <Leader>ti @t
 
 " Deoplete config
-  let g:deoplete#enable_at_startup = 1
+  " let g:deoplete#enable_at_startup = 1
 
   " omnifuncs
   augroup omnifuncs
@@ -643,14 +643,14 @@ let g:vim_markdown_folding_disabled=1
   let g:multi_cursor_start_key='<Leader>m'
 
   " Called once right before you start selecting multiple cursors
-  function! Multiple_cursors_before()
-    let b:deoplete_disable_auto_complete=1
-  endfunction
+  " function! Multiple_cursors_before()
+  "   let b:deoplete_disable_auto_complete=1
+  " endfunction
 
   " Called once only when the multiple selection is canceled (default <Esc>)
-  function! Multiple_cursors_after()
-    let b:deoplete_disable_auto_complete=0
-  endfunction
+  " function! Multiple_cursors_after()
+  "   let b:deoplete_disable_auto_complete=0
+  " endfunction
 
   let g:multi_cursor_exit_from_visual_mode=0 " Do not exist multi cursors with esc from visual mode
   let g:multi_cursor_exit_from_insert_mode=0 " Do not exist multi cursors with esc from insert mode
@@ -730,7 +730,7 @@ let g:go_updatetime = 150 " Quicker updates for auto_sameid
 hi def link goSameId IncSearch
 
 " From vim-go documentation, enable deoplete for go
-call deoplete#custom#option('omni_patterns', { 'go': '[^. *\t]\.\w*' })
+" call deoplete#custom#option('omni_patterns', { 'go': '[^. *\t]\.\w*' })
 
 " Turn off listchars for go
 autocmd FileType go setlocal nolist
