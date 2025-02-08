@@ -354,6 +354,7 @@ event-log.txt
 carrot
 lefthook.yml
 .rediscli_history
+<<<<<<< HEAD
 .conductorone
 .config/graphite/user_config
 .redis-insight
@@ -369,3 +370,4 @@ projects/seizure-import/data
 bin/bk
 vs-code-trial
 .bk.yaml
+.cursor-tutor-1
