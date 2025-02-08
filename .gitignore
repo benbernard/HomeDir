@@ -475,3 +475,4 @@ g-meet-app/bin/darwin-arm64-133
 .claude/RTK.md
 .claude/hooks/.rtk-hook.sha256
 .claude/hooks/rtk-rewrite.sh
+.cursor.old
