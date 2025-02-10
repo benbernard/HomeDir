@@ -354,7 +354,6 @@ event-log.txt
 carrot
 lefthook.yml
 .rediscli_history
-<<<<<<< HEAD
 .conductorone
 .config/graphite/user_config
 .redis-insight
@@ -371,3 +370,7 @@ bin/bk
 vs-code-trial
 .bk.yaml
 .cursor-tutor-1
+.vercel
+.specstory/history
+bin/ts/package-lock.json
+next-save
