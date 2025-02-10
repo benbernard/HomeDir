@@ -374,3 +374,5 @@ vs-code-trial
 .specstory/history
 bin/ts/package-lock.json
 next-save
+bin/ts/.specstory/history
+bin/ts/dist

@@ -2,14 +2,37 @@
   "name": "bin-ben",
   "version": "1.0.0",
   "main": "index.js",
+  "bin": {
+    "s3upload": "./dist/s3upload.js"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "prebuild": "biome check --apply-unsafe .",
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "format": "biome format --write .",
+    "lint": "biome lint .",
+    "check": "biome check .",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "ensure-dev": "ts-node scripts/ensure-dev-setup.ts",
+    "dev": "npm run ensure-dev && npm run build:watch"
   },
   "author": "",
   "license": "MIT",
   "description": "",
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.744.0",
+    "@aws-sdk/credential-provider-ini": "^3.744.0",
+    "@aws-sdk/lib-storage": "^3.744.0",
+    "@types/mime-types": "^2.1.4",
+    "chalk": "^4.1.2",
+    "mime-types": "^2.1.35",
     "ts-node": "^10.9.2",
-    "typescript": "^5.7.3"
+    "typescript": "^5.7.3",
+    "yargs": "^17.7.2"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "1.5.3",
+    "@types/node": "^20.17.17",
+    "@types/yargs": "^17.0.33"
   }
 }
