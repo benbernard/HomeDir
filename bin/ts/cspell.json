@@ -1,0 +1,23 @@
+{
+  "version": "0.2",
+  "language": "en",
+  "ignorePaths": [
+    "node_modules/**",
+    ".env.local"
+  ],
+  "words": [
+    "Clobazam",
+    "confs",
+    "Epidiolex",
+    "fromclipboard",
+    "Latenode",
+    "luxon",
+    "Maildir",
+    "Noninteractive",
+    "papaparse",
+    "Pheno",
+    "Toastify",
+    "turbopack",
+    "userdir"
+  ]
+}
