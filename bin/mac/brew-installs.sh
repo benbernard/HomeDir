@@ -31,6 +31,7 @@ brew install reattach-to-user-namespace \
  coreutils \
  pyenv \
  pam-reattach \
+ loom \
  tmux
 
 # Blank screensaver installs
