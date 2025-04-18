@@ -1,4 +1,4 @@
-#!/usr/local/bin/node
+#!/Users/benbernard/.nvm/versions/node/v23.10.0/bin/node
 
 import { spawnSync } from "node:child_process";
 
