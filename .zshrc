@@ -1,3 +1,25 @@
+# Fix when setenv isn't available
+setenv() {
+  export $1=$2
+}
+
+# Add helper for getting submodule directories
+SUBMODULE_DIR=${HOME}/submodules
+submodule() {
+  echo ${SUBMODULE_DIR}/$1
+}
+
+# VS Code shell special handling
+if [[ "$TERM_PROGRAM" == "vscode" ]]; then
+  # Load essential environment settings
+  if [ -f ~/.zshrc.d/02_environment.zsh ]; then
+    source ~/.zshrc.d/02_environment.zsh
+  fi
+
+  # Skip the rest of the startup configuration
+  return 0
+fi
+
 # To do profiling ZSH_PROFILE=1
 
 if [[ "$ZSH_PROFILE" == "1" ]]; then
@@ -37,18 +59,6 @@ DISABLE_UPDATE_PROMPT=true
 #     source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 #   fi
 # fi
-
-# Fix when setenv isn't available, should probably just move to export at some
-# point.
-setenv() {
-  export $1=$2
-}
-
-# Add helper for getting submodule directories
-SUBMODULE_DIR=${HOME}/submodules
-submodule() {
-  echo ${SUBMODULE_DIR}/$1
-}
 
 if [[ -e "${HOME}/site/use_minimal" ]]; then
   source ${HOME}/.minimal/zsh/zshrc
@@ -121,3 +131,14 @@ export PYENV_ROOT="$HOME/.pyenv"
 [[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
 eval "$(pyenv init -)"
 
+eval "$(starship init zsh)"
+
+# Added by Windsurf
+export PATH="/Users/benbernard/.codeium/windsurf/bin:$PATH"
+
+# Added by Windsurf
+export PATH="/Users/benbernard/.codeium/windsurf/bin:$PATH"
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion

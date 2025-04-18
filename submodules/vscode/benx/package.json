@@ -1,45 +1,48 @@
 {
-  "name": "benx",
-  "displayName": "BenX",
-  "description": "",
-  "version": "0.0.2",
-  "engines": {
-    "vscode": "^1.73.0"
-  },
-  "categories": [
-    "Other"
-  ],
-  "activationEvents": [
-    "onCommand:benx.createFile",
-    "onCommand:benx.searchOpenFiles"
-  ],
-  "main": "./extension.js",
-  "contributes": {
-    "commands": [
-      {
-        "command": "benx.createFile",
-        "title": "Create New File next to current file"
-      },
-      {
-        "command": "benx.searchOpenFiles",
-        "title": "Search Open File Names"
-      }
-    ]
-  },
-  "scripts": {
-    "lint": "eslint .",
-    "pretest": "npm run lint",
-    "test": "node ./test/runTest.js"
-  },
-  "devDependencies": {
-    "@types/vscode": "^1.73.0",
-    "@types/glob": "^8.0.0",
-    "@types/mocha": "^10.0.1",
-    "@types/node": "16.x",
-    "eslint": "^8.28.0",
-    "glob": "^8.0.3",
-    "mocha": "^10.1.0",
-    "typescript": "^4.9.3",
-    "@vscode/test-electron": "^2.2.0"
-  }
+	"name": "benx",
+	"displayName": "BenX",
+	"description": "",
+	"version": "0.0.2",
+	"engines": {
+		"vscode": "^1.73.0"
+	},
+	"categories": [
+		"Other"
+	],
+	"activationEvents": [
+		"onCommand:benx.createFile",
+		"onCommand:benx.searchOpenFiles"
+	],
+	"main": "./extension.js",
+	"contributes": {
+		"commands": [
+			{
+				"command": "benx.createFile",
+				"title": "Create New File next to current file"
+			},
+			{
+				"command": "benx.searchOpenFiles",
+				"title": "Search Open File Names"
+			}
+		]
+	},
+	"scripts": {
+		"lint": "eslint .",
+		"pretest": "npm run lint",
+		"test": "node ./test/runTest.js"
+	},
+	"devDependencies": {
+		"@types/vscode": "^1.73.0",
+		"@types/glob": "^8.0.0",
+		"@types/mocha": "^10.0.1",
+		"@types/node": "16.x",
+		"eslint": "^8.28.0",
+		"glob": "^8.0.3",
+		"mocha": "^10.1.0",
+		"typescript": "^4.9.3",
+		"@vscode/test-electron": "^2.2.0"
+	},
+	"__metadata": {
+		"size": 75459
+	}
 }

@@ -376,3 +376,14 @@ bin/ts/package-lock.json
 next-save
 bin/ts/.specstory/history
 bin/ts/dist
+.th-client
+
+.config/neuron
+.config/olive/traces
+
+.cursor-nightly
+.windsurf
+.codeium/windsurf
+
+.claude
+.claude.json
