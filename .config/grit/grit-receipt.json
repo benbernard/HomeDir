@@ -1,0 +1,1 @@
+{"binaries":["grit"],"binary_aliases":{},"cdylibs":[],"cstaticlibs":[],"install_prefix":"/Users/benbernard/.grit/bin","provider":{"source":"cargo-dist","version":"0.22.0"},"source":{"app_name":"grit","name":"gritql","owner":"getgrit","release_type":"github"},"version":"0.1.0-alpha.1743007075"}
