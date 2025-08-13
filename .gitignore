@@ -397,3 +397,4 @@ bin/ts/dist
 .lume/cache/ghcr/trycua/sha256_238e9479dcfdfe12f56aad6c7972d15728c368d37b00064ccb7464686938ea38
 .secret-guard
 .streamlit
+.motd_shown
