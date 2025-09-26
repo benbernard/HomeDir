@@ -398,3 +398,5 @@ bin/ts/dist
 .secret-guard
 .streamlit
 .motd_shown
+.codex
+.kiro
