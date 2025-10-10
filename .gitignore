@@ -400,3 +400,7 @@ bin/ts/dist
 .motd_shown
 .codex
 .kiro
+.config/gohan
+.config/gohan-local
+.claude.json.backup
+cookbook
