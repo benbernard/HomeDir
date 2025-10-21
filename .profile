@@ -10,3 +10,6 @@ fi
 [[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm" # Load RVM into a shell session *as a function*
 
 . "$HOME/.grit/bin/env"
+
+# Job-specific login-shell setup lives in the private site repo, not this public repo.
+[ -f "$HOME/site/site.sh" ] && . "$HOME/site/site.sh"
