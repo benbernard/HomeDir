@@ -404,3 +404,4 @@ bin/ts/dist
 .config/gohan-local
 .claude.json.backup
 cookbook
+.config/gohan*/

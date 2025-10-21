@@ -10,3 +10,8 @@ fi
 [[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm" # Load RVM into a shell session *as a function*
 
 . "$HOME/.grit/bin/env"
+
+# >>> gohan setup, do not edit this section <<<
+# !! Contents within this block are managed by gohan !!
+export PATH="$PATH:/Users/benbernard/.config/gohan/bin"
+# <<< gohan setup end <<<

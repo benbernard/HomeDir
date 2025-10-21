@@ -19,24 +19,33 @@ originalMeetingNotes=$meetingNotes
 meetingNotes=$(echo $meetingNotes | textutil -convert txt -format html -stdin -stdout)
 meetingNotes=$(echo ${meetingNotes} | tr -dc 'a-zA-Z0-9.? ~\n' | tr -d '"')
 
-{
-  echo
-  echo "Event ID: $eventId"
-  echo "Title: $title"
-  echo "All Day: $allday"
-  echo "Start Date: $startDate"
-  echo "End Date: $endDate"
-  echo "Location: $eventLocation"
-  echo "Repeating Event: $repeatingEvent"
-  echo "Attendee Count: $attendeeCount"
-  echo "Meeting URL: $meetingUrl"
-  echo "Meeting Service: $meetingService"
-  echo "Meeting Notes: $meetingNotes"
-  echo "Original Meeting Notes: $originalMeetingNotes"
-  echo "Timestamp: $(date)"
-  echo
-} >> ~/event-log.txt
-# }
+# Format event data
+eventData=$(cat <<EOF
+
+Event ID: $eventId
+Title: $title
+All Day: $allday
+Start Date: $startDate
+End Date: $endDate
+Location: $eventLocation
+Repeating Event: $repeatingEvent
+Attendee Count: $attendeeCount
+Meeting URL: $meetingUrl
+Meeting Service: $meetingService
+Meeting Notes: $meetingNotes
+Original Meeting Notes: $originalMeetingNotes
+Timestamp: $(date)
+
+EOF
+)
+
+# Write to log file
+echo "$eventData" >> ~/event-log.txt
+
+# Check for and invoke meeting-prompt.sh if it exists
+if [ -f ~/site/meeting-prompt.sh ]; then
+  echo "$eventData" | ~/site/meeting-prompt.sh --verbose &
+fi
 
 osascript ~/bin/event-prompt.applescript \
   "$eventId" \
