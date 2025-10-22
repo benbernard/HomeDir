@@ -1,11 +1,11 @@
-import { mkdir, writeFile } from "fs/promises";
 import { createWriteStream } from "fs";
 import { dirname } from "path";
-import { DownloadItem } from "./db";
-import fetch from "node-fetch";
 import { Readable } from "stream";
-import { promisify } from "util";
 import { pipeline } from "stream";
+import { promisify } from "util";
+import { mkdir, writeFile } from "fs/promises";
+import fetch from "node-fetch";
+import { DownloadItem } from "./db";
 
 const pipelineAsync = promisify(pipeline);
 

@@ -1,28 +1,28 @@
 #!/usr/bin/env node
 
+import { exec } from "child_process";
+import { homedir } from "os";
+import { join } from "path";
+import { promisify } from "util";
+import chalk from "chalk";
+import clipboardy from "clipboardy";
+import { JSDOM } from "jsdom";
+import pLimit from "p-limit";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
-import { promisify } from "util";
-import { exec } from "child_process";
-import clipboardy from "clipboardy";
 import { getHtmlFromClipboard } from "./clipboard";
 import {
-  createTable,
+  DownloadItem,
   addDownloadItem,
+  createTable,
+  generateFilename,
+  getById,
   listDownloadItems,
   removeById,
   removeByUrl,
-  generateFilename,
   updateItemError,
-  getById,
-  DownloadItem,
 } from "./db";
-import { JSDOM } from "jsdom";
-import { downloadFile, DownloadProgress } from "./download";
-import { homedir } from "os";
-import { join } from "path";
-import pLimit from "p-limit";
-import chalk from "chalk";
+import { DownloadProgress, downloadFile } from "./download";
 
 const execAsync = promisify(exec);
 
