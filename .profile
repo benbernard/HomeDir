@@ -12,7 +12,6 @@ fi
 . "$HOME/.grit/bin/env"
 
 # >>> gohan setup, do not edit this section <<<
-# GOHAN_RC_VERSION=1
 # !! Contents within this block are managed by gohan !!
-export PATH="/Users/benbernard/.config/gohan/bin:$PATH"
+export PATH="$PATH:/Users/benbernard/.config/gohan/bin"
 # <<< gohan setup end <<<
