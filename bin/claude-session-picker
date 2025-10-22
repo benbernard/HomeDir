@@ -1,0 +1,807 @@
+#!/usr/bin/env bash
+
+# Claude Code Session Picker
+# Lists all Claude Code sessions sorted by recent activity with fzf
+
+set -euo pipefail
+
+# Configuration
+CLAUDE_PROJECTS_DIR="${HOME}/.claude/projects"
+CACHE_DIR="${HOME}/.config/claude-session-picker"
+CACHE_FILE="${CACHE_DIR}/summaries.json"
+RESUME_DIRECTLY=false
+DEBUG_MODE=false
+ONLY_FILE=""
+PREVIEW_ONLY=false
+
+# Ensure cache directory exists
+mkdir -p "$CACHE_DIR"
+
+# Initialize cache file if it doesn't exist
+if [ ! -f "$CACHE_FILE" ]; then
+    echo '{}' > "$CACHE_FILE"
+fi
+
+# Parse arguments
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        -r|--resume)
+            RESUME_DIRECTLY=true
+            shift
+            ;;
+        --debug)
+            DEBUG_MODE=true
+            shift
+            ;;
+        --only)
+            ONLY_FILE="$2"
+            shift 2
+            ;;
+        --preview)
+            PREVIEW_ONLY=true
+            shift
+            ;;
+        -h|--help)
+            echo "Usage: claude-session-picker [OPTIONS]"
+            echo ""
+            echo "Browse and select Claude Code sessions with fzf"
+            echo ""
+            echo "Options:"
+            echo "  -r, --resume       Automatically resume the selected session"
+            echo "  --debug            Debug mode: process only one session and show curl command"
+            echo "  --only FILE        Only consider the specified session file (for debugging)"
+            echo "  --preview          Print preview for --only file and exit (requires --only)"
+            echo "  -h, --help         Show this help message"
+            echo ""
+            echo "Keybindings:"
+            echo "  Ctrl-/             Toggle preview window"
+            echo "  ESC                Cancel selection"
+            exit 0
+            ;;
+        *)
+            echo "Unknown option: $1" >&2
+            echo "Use --help for usage information" >&2
+            exit 1
+            ;;
+    esac
+done
+
+# Handle --preview mode
+if [ "$PREVIEW_ONLY" = true ]; then
+    if [ -z "$ONLY_FILE" ]; then
+        echo "Error: --preview requires --only FILE" >&2
+        exit 1
+    fi
+
+    if [ ! -f "$ONLY_FILE" ]; then
+        echo "Error: File not found: $ONLY_FILE" >&2
+        exit 1
+    fi
+
+    # Run the preview command
+    session_file="$ONLY_FILE"
+    project_dir=$(dirname "$session_file")
+    project_name=$(basename "$project_dir" | sed "s/^-Users-benbernard-/~\//" | sed "s/-/\//g")
+
+    echo "=== Session Info ==="
+    echo "Project: $project_name"
+    echo "File: $session_file"
+    echo ""
+
+    # Get first user message
+    first_message=$(jq -r '
+        select(.type == "user" and
+               (.isSidechain == false or .isSidechain == null) and
+               (.isMeta == false or .isMeta == null) and
+               .message.role == "user") |
+        if (.message.content | type) == "string" then
+            .message.content
+        elif (.message.content | type) == "array" then
+            [.message.content[] | select(.type == "text") | .text] | join(" ")
+        else
+            empty
+        end
+    ' "$session_file" 2>/dev/null | grep -v '<command' | grep -v '<local-command' | grep -v '^Caveat:' | head -n 1 | sed 's/Caveat:.*//g' | sed 's/<[^>]*>//g' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' || true)
+
+    if [ -n "$first_message" ]; then
+        echo "=== First Message ==="
+        echo "$first_message" | cut -c 1-200
+        echo ""
+    fi
+
+    echo "=== All Messages ==="
+    echo ""
+
+    # Read entire file and format messages (filter out sidechain messages)
+    messages_temp=$(mktemp)
+    cat "$session_file" | jq -r "
+        select((.type == \"user\" or .type == \"assistant\") and (.isSidechain == false or .isSidechain == null)) |
+        (if .type == \"user\" then
+            if .message.content then
+                if (.message.content | type) == \"string\" then
+                    .message.content
+                elif (.message.content | type) == \"array\" then
+                    [.message.content[] | select(.type == \"text\") | .text] | join(\" \")
+                else
+                    \"\"
+                end
+            else
+                \"\"
+            end
+        elif .type == \"assistant\" then
+            if .message.content then
+                if (.message.content | type) == \"string\" then
+                    .message.content
+                elif (.message.content | type) == \"array\" then
+                    [.message.content[] | select(.type == \"text\") | .text] | join(\"\n\")
+                else
+                    \"\"
+                end
+            else
+                \"\"
+            end
+        else
+            \"\"
+        end) as \$content |
+        if (\$content | length) > 0 then
+            (if .type == \"user\" then \"USER\" else \"ASSISTANT\" end) + \"\\n\" + \$content + \"\\n\"
+        else
+            empty
+        end
+    " 2>/dev/null | sed "s/<[^>]*>//g" | awk '
+        /^USER$/ {
+            printf "\033[0m\n\033[96mUSER:\n"
+            next
+        }
+        /^ASSISTANT$/ {
+            printf "\033[0m\n\033[91mASSISTANT:\n"
+            next
+        }
+        { print }
+        END {
+            printf "\033[0m"
+        }
+    ' > "$messages_temp"
+
+    if [ ! -s "$messages_temp" ]; then
+        echo "No Messages"
+    else
+        cat "$messages_temp"
+    fi
+    rm -f "$messages_temp"
+
+    exit 0
+fi
+
+# Check if fzf is available
+if ! command -v fzf &> /dev/null; then
+    echo "Error: fzf is not installed" >&2
+    exit 1
+fi
+
+# Check if jq is available
+if ! command -v jq &> /dev/null; then
+    echo "Error: jq is not installed" >&2
+    exit 1
+fi
+
+# Function to get summary from cache
+get_cached_summary() {
+    local session_id="$1"
+    jq -r --arg sid "$session_id" '.[$sid] // empty' "$CACHE_FILE" 2>/dev/null
+}
+
+# Function to save summary to cache
+save_cached_summary() {
+    local session_id="$1"
+    local summary="$2"
+
+    # Create temp file with updated cache
+    local temp_cache=$(mktemp)
+    jq --arg sid "$session_id" --arg sum "$summary" '. + {($sid): $sum}' "$CACHE_FILE" > "$temp_cache" 2>/dev/null
+
+    # Atomic replace
+    mv "$temp_cache" "$CACHE_FILE"
+}
+
+# Function to generate summaries in batch using gpt-5-nano
+# Takes a newline-separated list of messages (up to 10)
+# Returns a newline-separated list of summaries
+generate_summaries_batch() {
+    local messages="$1"
+    local debug_mode="${2:-false}"
+
+    # Count messages
+    local count=$(echo "$messages" | grep -c '^')
+
+    if [ "$count" -eq 0 ]; then
+        return 1
+    fi
+
+    # Build numbered list for prompt
+    local numbered_list=""
+    local i=1
+    while IFS= read -r msg; do
+        numbered_list="${numbered_list}${i}. ${msg}"$'\n'
+        i=$((i + 1))
+    done <<< "$messages"
+
+    local prompt="Summarize each of these Claude Code session requests in 3-8 words each.
+Return ONLY a JSON array of strings, one summary per request, in the same order.
+
+${numbered_list}
+
+Return format: [\"summary 1\", \"summary 2\", ...]
+Each summary should be a clear, concise description of what the user is asking for."
+
+    local json_data=$(jq -n \
+        --arg model "gpt-5-nano" \
+        --arg content "$prompt" \
+        '{model: $model, reasoning_effort: "minimal", messages: [{role: "user", content: $content}]}')
+
+    if [ "$debug_mode" = true ]; then
+        echo "=== DEBUG: Batch size: $count ===" >&2
+        echo "=== DEBUG: Curl command ===" >&2
+        echo "curl -s -m 30 --connect-timeout 10 -w \"\\n%{http_code}\" \\" >&2
+        echo "  https://aigateway.instacart.tools/unified/benbernard-personal/v1/chat/completions \\" >&2
+        echo "  -H \"Content-Type: application/json\" \\" >&2
+        echo "  -d '$json_data'" >&2
+        echo "" >&2
+        echo "=== Messages to summarize ===" >&2
+        echo "$numbered_list" >&2
+        echo "" >&2
+    fi
+
+    local response=$(curl -s -m 30 --connect-timeout 10 -w "\n%{http_code}" https://aigateway.instacart.tools/unified/benbernard-personal/v1/chat/completions \
+        -H "Content-Type: application/json" \
+        -d "$json_data" 2>/dev/null)
+
+    local http_code=$(echo "$response" | tail -n1)
+    local body=$(echo "$response" | sed '$d')
+
+    if [ "$debug_mode" = true ]; then
+        echo "=== Response HTTP Code ===" >&2
+        echo "$http_code" >&2
+        echo "" >&2
+        echo "=== Response Body ===" >&2
+        echo "$body" | jq . >&2 2>/dev/null || echo "$body" >&2
+        echo "" >&2
+    fi
+
+    if [ "$http_code" -eq 200 ] && [ -n "$body" ]; then
+        local content=$(echo "$body" | jq -r '.choices[0].message.content' 2>/dev/null)
+
+        if [ -n "$content" ] && [ "$content" != "null" ]; then
+            # Validate it's a JSON array
+            local array_check=$(echo "$content" | jq -e 'type == "array"' 2>/dev/null)
+            if [ "$array_check" != "true" ]; then
+                if [ "$debug_mode" = true ]; then
+                    echo "=== ERROR: Response is not a JSON array ===" >&2
+                fi
+                return 1
+            fi
+
+            # Validate we got the expected number of summaries
+            local received_count=$(echo "$content" | jq 'length' 2>/dev/null)
+            if [ "$received_count" != "$count" ]; then
+                if [ "$debug_mode" = true ]; then
+                    echo "=== ERROR: Expected $count summaries, got $received_count ===" >&2
+                fi
+                return 1
+            fi
+
+            # Convert JSON array to newline-separated list
+            echo "$content" | jq -r '.[]' 2>/dev/null
+            return 0
+        fi
+    fi
+
+    # Return failure
+    return 1
+}
+
+
+# Create a preview command that will work in fzf
+# {2} will be replaced by the second field (session file path) by fzf
+preview_command='
+    session_file={2}
+    project_dir=$(dirname "$session_file")
+    project_name=$(basename "$project_dir" | sed "s/^-Users-benbernard-/~\//" | sed "s/-/\//g")
+
+    echo "=== Session Info ==="
+    echo "Project: $project_name"
+    echo "File: $session_file"
+    echo ""
+
+    # Get first user message
+    first_message=$(jq -r '\''
+        select(.type == "user" and
+               (.isSidechain == false or .isSidechain == null) and
+               (.isMeta == false or .isMeta == null) and
+               .message.role == "user") |
+        if (.message.content | type) == "string" then
+            .message.content
+        elif (.message.content | type) == "array" then
+            [.message.content[] | select(.type == "text") | .text] | join(" ")
+        else
+            empty
+        end
+    '\'' "$session_file" 2>/dev/null | grep -v '\''<command'\'' | grep -v '\''<local-command'\'' | grep -v '\''^Caveat:'\'' | head -n 1 | sed '\''s/Caveat:.*//g'\'' | sed '\''s/<[^>]*>//g'\'' | sed '\''s/^[[:space:]]*//;s/[[:space:]]*$//'\'' || true)
+
+    if [ -n "$first_message" ]; then
+        echo "=== First Message ==="
+        echo "$first_message" | cut -c 1-200
+        echo ""
+    fi
+
+    echo "=== All Messages ==="
+    echo ""
+
+    # Read entire file and format messages (filter out sidechain messages)
+    messages_temp=$(mktemp)
+    cat "$session_file" | jq -r "
+        select((.type == \"user\" or .type == \"assistant\") and (.isSidechain == false or .isSidechain == null)) |
+        (if .type == \"user\" then
+            if .message.content then
+                if (.message.content | type) == \"string\" then
+                    .message.content
+                elif (.message.content | type) == \"array\" then
+                    [.message.content[] | select(.type == \"text\") | .text] | join(\" \")
+                else
+                    \"\"
+                end
+            else
+                \"\"
+            end
+        elif .type == \"assistant\" then
+            if .message.content then
+                if (.message.content | type) == \"string\" then
+                    .message.content
+                elif (.message.content | type) == \"array\" then
+                    [.message.content[] | select(.type == \"text\") | .text] | join(\"\n\")
+                else
+                    \"\"
+                end
+            else
+                \"\"
+            end
+        else
+            \"\"
+        end) as \$content |
+        if (\$content | length) > 0 then
+            (if .type == \"user\" then \"USER\" else \"ASSISTANT\" end) + \"\\n\" + \$content + \"\\n\"
+        else
+            empty
+        end
+    " 2>/dev/null | sed "s/<[^>]*>//g" | awk '\''{
+        if ($0 == "USER") {
+            printf "\033[0m\n\033[96mUSER:\n"
+        } else if ($0 == "ASSISTANT") {
+            printf "\033[0m\n\033[91mASSISTANT:\n"
+        } else {
+            print
+        }
+    } END {
+        printf "\033[0m"
+    }'\'' > "$messages_temp"
+
+    if [ ! -s "$messages_temp" ]; then
+        echo "No Messages"
+    else
+        cat "$messages_temp"
+    fi
+    rm -f "$messages_temp"
+'
+
+# Collect all sessions (fast - just metadata, no file content reading)
+sessions_data=$(mktemp)
+
+echo "Scanning sessions..." >&2
+
+if [ -n "$ONLY_FILE" ]; then
+    # Only process the specified file
+    if [ ! -f "$ONLY_FILE" ]; then
+        echo "Error: File not found: $ONLY_FILE" >&2
+        exit 1
+    fi
+
+    echo "Using only file: $ONLY_FILE" >&2
+
+    # Get file info
+    file_info=$(stat -f "%m|%N" "$ONLY_FILE" 2>/dev/null)
+    mtime=$(echo "$file_info" | cut -d'|' -f1)
+    session_file=$(echo "$file_info" | cut -d'|' -f2)
+
+    # Extract project dir and session id
+    project_dir=$(dirname "$session_file")
+    session_id=$(basename "$session_file" .jsonl)
+
+    # Format timestamp
+    last_modified=$(date -r "$mtime" "+%Y-%m-%d %H:%M" 2>/dev/null)
+
+    # Output: mtime|project_dir|session_file|session_id|last_modified
+    echo "${mtime}|${project_dir}|${session_file}|${session_id}|${last_modified}" > "$sessions_data"
+else
+    # Calculate cutoff time (yesterday at 00:00:00)
+    today_start=$(date -j -f "%Y-%m-%d %H:%M:%S" "$(date +%Y-%m-%d) 00:00:00" "+%s")
+    yesterday_start=$((today_start - 86400))
+
+    # Use stat to get modification times efficiently, filter to last 2 days
+    find "$CLAUDE_PROJECTS_DIR" -name "*.jsonl" -type f -print0 2>/dev/null | \
+        xargs -0 stat -f "%m|%N" 2>/dev/null | \
+        awk -F'|' -v cutoff="$yesterday_start" '{
+            mtime = $1
+            if (mtime >= cutoff) {
+                print $0
+            }
+        }' | \
+        sort -t'|' -k1 -rn | \
+        awk -F'|' '{
+            session_file = $2
+            mtime = $1
+
+            # Extract project dir and session id
+            n = split(session_file, parts, "/")
+            session_id = parts[n]
+            gsub(/\.jsonl$/, "", session_id)
+            project_dir = substr(session_file, 1, length(session_file) - length(parts[n]) - 1)
+
+            # Format timestamp
+            cmd = "date -r " mtime " \"+%Y-%m-%d %H:%M\" 2>/dev/null"
+            cmd | getline last_modified
+            close(cmd)
+
+            # Output: mtime|project_dir|session_file|session_id|last_modified
+            print mtime "|" project_dir "|" session_file "|" session_id "|" last_modified
+        }' > "$sessions_data"
+fi
+
+# Check if any sessions were found
+if [ ! -s "$sessions_data" ]; then
+    echo "No sessions found from today or yesterday in $CLAUDE_PROJECTS_DIR" >&2
+    exit 1
+fi
+
+# Load titles for all sessions (with parallel summary generation)
+sessions_with_titles=$(mktemp)
+sessions_with_titles_temp=$(mktemp)
+progress_file=$(mktemp)
+
+# Count total sessions and sessions needing summaries
+total_sessions=$(wc -l < "$sessions_data")
+sessions_with_summaries=0
+sessions_needing_summaries=0
+
+echo "Checking existing summaries..." >&2
+while IFS='|' read -r mtime project_dir session_file session_id last_modified; do
+    # Check cache first, then session file
+    cached=$(get_cached_summary "$session_id")
+    if [ -n "$cached" ] || grep -q '"type":"summary"' "$session_file" 2>/dev/null; then
+        sessions_with_summaries=$((sessions_with_summaries + 1))
+    else
+        sessions_needing_summaries=$((sessions_needing_summaries + 1))
+    fi
+done < "$sessions_data"
+
+echo "Found $total_sessions sessions: $sessions_with_summaries with summaries, $sessions_needing_summaries need generation" >&2
+
+# DEBUG MODE: Process a batch of sessions needing summaries
+if [ "$DEBUG_MODE" = true ]; then
+    echo "=== DEBUG MODE: Processing up to 3 sessions ===" >&2
+    echo "" >&2
+
+    # Collect up to 3 sessions needing summaries
+    test_sessions=$(mktemp)
+    test_messages=""
+    test_ids=()
+    count=0
+
+    while IFS='|' read -r mtime project_dir session_file session_id last_modified; do
+        [ $count -ge 3 ] && break
+
+        cached=$(get_cached_summary "$session_id")
+        if [ -z "$cached" ] || [ "$cached" = "(Empty session)" ]; then
+            if ! grep -q '"type":"summary"' "$session_file" 2>/dev/null; then
+                # Check file age
+                file_mtime=$(stat -f "%m" "$session_file" 2>/dev/null)
+                current_time=$(date +%s)
+                age=$((current_time - file_mtime))
+
+                if [ $age -lt 300 ]; then
+                    echo "Skipping $session_id - modified less than 5 minutes ago" >&2
+                    continue
+                fi
+
+                # Extract first message
+                first_message=$(jq -r '
+                    select(.type == "user" and
+                           (.isSidechain == false or .isSidechain == null) and
+                           (.isMeta == false or .isMeta == null) and
+                           .message.role == "user") |
+                    if (.message.content | type) == "string" then
+                        .message.content
+                    elif (.message.content | type) == "array" then
+                        [.message.content[] | select(.type == "text") | .text] | join(" ")
+                    else
+                        empty
+                    end
+                ' "$session_file" 2>/dev/null | grep -v '<command' | grep -v '<local-command' | head -n 1 | tr -d '\n' || true)
+
+                first_message=$(echo "$first_message" | sed 's/Caveat:.*//g' | sed 's/<[^>]*>//g' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' || true)
+
+                if [ -n "$first_message" ]; then
+                    echo "Found session: $session_id" >&2
+                    echo "  First message: ${first_message:0:100}..." >&2
+                    test_ids+=("$session_id")
+                    test_messages="${test_messages}${first_message}"$'\n'
+                    count=$((count + 1))
+                fi
+            fi
+        fi
+    done < "$sessions_data"
+
+    if [ $count -eq 0 ]; then
+        echo "No sessions found needing summaries" >&2
+        exit 0
+    fi
+
+    echo "" >&2
+    echo "=== Calling batch API with $count message(s) ===" >&2
+
+    # Remove trailing newline
+    test_messages=$(echo "$test_messages" | sed '$d')
+
+    summaries=$(generate_summaries_batch "$test_messages" "true")
+    api_success=$?
+
+    echo "" >&2
+    echo "=== Results ===" >&2
+    echo "API success: $api_success" >&2
+
+    if [ $api_success -eq 0 ]; then
+        i=0
+        while IFS= read -r summary; do
+            if [ $i -lt ${#test_ids[@]} ]; then
+                session_id="${test_ids[$i]}"
+                echo "[$((i+1))] $session_id: $summary" >&2
+                save_cached_summary "$session_id" "$summary"
+            fi
+            i=$((i + 1))
+        done <<< "$summaries"
+
+        echo "" >&2
+        echo "=== Cache verification ===" >&2
+        for session_id in "${test_ids[@]}"; do
+            cached=$(get_cached_summary "$session_id")
+            if [ -n "$cached" ]; then
+                echo "✓ $session_id: $cached" >&2
+            else
+                echo "✗ $session_id: NOT CACHED" >&2
+            fi
+        done
+    else
+        echo "✗ Batch API call failed" >&2
+    fi
+
+    rm -f "$test_sessions"
+    exit 0
+fi
+
+# Generate summaries in batches if needed
+batch_summaries_file=$(mktemp)
+
+if [ $sessions_needing_summaries -gt 0 ]; then
+    echo "Generating summaries in batches of up to 10..." >&2
+
+    # Collect sessions needing summaries with their first messages
+    sessions_to_summarize=$(mktemp)
+    while IFS='|' read -r mtime project_dir session_file session_id last_modified; do
+        cached=$(get_cached_summary "$session_id")
+        if [ -z "$cached" ] || [ "$cached" = "(Empty session)" ]; then
+            if ! grep -q '"type":"summary"' "$session_file" 2>/dev/null; then
+                # Extract first message
+                first_message=$(jq -r '
+                    select(.type == "user" and
+                           (.isSidechain == false or .isSidechain == null) and
+                           (.isMeta == false or .isMeta == null) and
+                           .message.role == "user") |
+                    if (.message.content | type) == "string" then
+                        .message.content
+                    elif (.message.content | type) == "array" then
+                        [.message.content[] | select(.type == "text") | .text] | join(" ")
+                    else
+                        empty
+                    end
+                ' "$session_file" 2>/dev/null | grep -v '<command' | grep -v '<local-command' | grep -v '^Caveat:' | head -n 1 | tr -d '\n' || true)
+
+                # Clean up message
+                first_message=$(echo "$first_message" | sed 's/Caveat:.*//g' | sed 's/<[^>]*>//g' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//') || true
+
+                if [ -n "$first_message" ]; then
+                    echo "${session_id}|${first_message}" >> "$sessions_to_summarize"
+                fi
+            fi
+        fi
+    done < "$sessions_data"
+
+    # Process in batches of 10
+    if [ -f "$sessions_to_summarize" ] && [ -s "$sessions_to_summarize" ]; then
+        batch_size=10
+        batch_num=0
+        total_batches=$(( ($(wc -l < "$sessions_to_summarize") + batch_size - 1) / batch_size ))
+
+        echo "Processing $total_batches batch(es)..." >&2
+
+        # Split into batches and process
+        split -l "$batch_size" "$sessions_to_summarize" "${sessions_to_summarize}.batch."
+
+        for batch_file in "${sessions_to_summarize}.batch."*; do
+            batch_num=$((batch_num + 1))
+            echo "  Batch $batch_num/$total_batches..." >&2
+
+            # Extract session IDs and messages
+            session_ids=()
+            messages=""
+            while IFS='|' read -r session_id message; do
+                session_ids+=("$session_id")
+                messages="${messages}${message}"$'\n'
+            done < "$batch_file"
+
+            # Remove trailing newline
+            messages=$(echo "$messages" | sed '$d')
+
+            # Generate summaries for this batch
+            summaries=$(generate_summaries_batch "$messages" "$DEBUG_MODE")
+            api_success=$?
+
+            if [ $api_success -eq 0 ]; then
+                # Map summaries back to session IDs
+                i=0
+                while IFS= read -r summary; do
+                    if [ $i -lt ${#session_ids[@]} ]; then
+                        session_id="${session_ids[$i]}"
+                        echo "${session_id}|${summary}" >> "$batch_summaries_file"
+                        # Save to cache immediately
+                        save_cached_summary "$session_id" "$summary"
+                        echo "    ✓ ${summary:0:50}..." >&2
+                    fi
+                    i=$((i + 1))
+                done <<< "$summaries"
+            else
+                echo "    ✗ Batch failed, sessions will use fallback titles" >&2
+            fi
+
+            rm -f "$batch_file"
+        done
+    fi
+
+    rm -f "$sessions_to_summarize"
+fi
+
+# Export functions for use in background jobs
+export -f get_cached_summary
+export CACHE_FILE
+
+# Now build the final list with titles
+cat "$sessions_data" | while IFS='|' read -r mtime project_dir session_file session_id last_modified; do
+    # Check cache first
+    title=$(get_cached_summary "$session_id")
+
+    # Skip cached empty sessions
+    if [ -z "$title" ] || [ "$title" = "(Empty session)" ]; then
+        # Check session file for summary type entry
+        title=$(grep -m 1 '"type":"summary"' "$session_file" 2>/dev/null | jq -r '.summary' 2>/dev/null | head -c 80 || true)
+    fi
+
+    # If still no title, check batch results
+    if [ -z "$title" ] && [ -f "$batch_summaries_file" ]; then
+        title=$(grep "^${session_id}|" "$batch_summaries_file" 2>/dev/null | cut -d'|' -f2- | head -n 1 || true)
+    fi
+
+    # Check if session is empty
+    if [ -z "$title" ]; then
+        first_message=$(jq -r '
+            select(.type == "user" and
+                   (.isSidechain == false or .isSidechain == null) and
+                   (.isMeta == false or .isMeta == null) and
+                   .message.role == "user") |
+            if (.message.content | type) == "string" then
+                .message.content
+            elif (.message.content | type) == "array" then
+                [.message.content[] | select(.type == "text") | .text] | join(" ")
+            else
+                empty
+            end
+        ' "$session_file" 2>/dev/null | grep -v '<command' | grep -v '<local-command' | head -n 1 | tr -d '\n' || true)
+
+        if [ -z "$first_message" ]; then
+            title="(Empty session)"
+        else
+            # Fallback to first message excerpt
+            title=$(echo "$first_message" | sed 's/<[^>]*>//g' | head -c 60 || echo "(No title)")
+        fi
+    fi
+
+    # Default if still empty
+    if [ -z "$title" ]; then
+        title="(No title)"
+    fi
+
+    echo "${mtime}|${project_dir}|${session_file}|${session_id}|${last_modified}|${title}"
+done > "$sessions_with_titles_temp"
+
+# Sort by modification time
+sort -t'|' -k1 -rn "$sessions_with_titles_temp" > "$sessions_with_titles"
+
+trap "rm -f $sessions_data $sessions_with_titles $sessions_with_titles_temp $progress_file $batch_summaries_file" EXIT
+
+echo "Done! Loaded $total_sessions sessions." >&2
+
+# Format for fzf display and let user select
+# Use tab as delimiter between display and hidden data
+selected=$(cat "$sessions_with_titles" | awk -F'|' '{
+    project = $2
+    gsub(/.*\/-Users-benbernard-/, "~/", project)
+    gsub(/-/, "/", project)
+    title = $6
+    last_modified = $5
+    session_file = $3
+    printf "%s %s - %s\t%s\n", last_modified, title, project, session_file
+}' | fzf \
+    --ansi \
+    --delimiter='\t' \
+    --with-nth=1 \
+    --header="Select a Claude Code session from today/yesterday (ESC to cancel, Ctrl-/ toggle preview)" \
+    --preview="$preview_command" \
+    --preview-window=right:60%:wrap \
+    --height=100% \
+    --border \
+    --prompt="Session> " \
+    --pointer="▶" \
+    --marker="✓" \
+    --bind 'ctrl-/:toggle-preview' \
+    --info=inline)
+
+if [ -z "$selected" ]; then
+    echo "No session selected" >&2
+    exit 1
+fi
+
+# Extract the session file path from the selected line
+session_file=$(echo "$selected" | cut -f2)
+
+if [ -z "$session_file" ]; then
+    echo "Error: Could not extract session file path" >&2
+    exit 1
+fi
+
+# Find the matching line in sessions_with_titles
+matching_line=$(grep -F "$session_file" "$sessions_with_titles" | head -n 1)
+
+if [ -z "$matching_line" ]; then
+    echo "Error: Could not find session data" >&2
+    exit 1
+fi
+
+project_dir=$(echo "$matching_line" | cut -d'|' -f2)
+session_id=$(echo "$matching_line" | cut -d'|' -f4)
+
+# Convert project dir back to actual path
+actual_dir=$(basename "$project_dir" | sed 's/^-/\//' | sed 's/-/\//g')
+
+if [ "$RESUME_DIRECTLY" = true ]; then
+    echo "Resuming session $session_id in $actual_dir..."
+    cd "$actual_dir" && exec claude --resume "$session_id"
+else
+    echo ""
+    echo "Selected session:"
+    echo "  Session ID: $session_id"
+    echo "  Directory: $actual_dir"
+    echo "  File: $session_file"
+    echo ""
+    echo "To resume this session, run:"
+    echo "  cd \"$actual_dir\" && claude --resume $session_id"
+    echo ""
+    echo "Or copy this command:"
+    echo "  claude-session-picker --resume"
+fi
