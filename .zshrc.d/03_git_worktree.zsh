@@ -351,19 +351,58 @@ wt() {
 }
 
 # Add completion for wt command
-# Disabled for now due to compdef issues
-# if type compdef &>/dev/null; then
-#   _wt() {
-#     local -a subcommands
-#     subcommands=(
-#       'clone:Clone a GitHub repo and create master worktree'
-#       'list:List all worktrees'
-#       'ls:List all worktrees'
-#       'remove:Remove a worktree'
-#       'rm:Remove a worktree'
-#       'help:Show help message'
-#     )
-#     _describe 'wt subcommand' subcommands
-#   }
-#   compdef _wt wt
-# fi
+_wt() {
+  local -a subcommands
+  local curcontext="$curcontext" state line
+  typeset -A opt_args
+
+  subcommands=(
+    'clone:Clone a GitHub repo and create master worktree'
+    '-b:Create new branch and worktree'
+    'list:List all worktrees'
+    'ls:List all worktrees'
+    'remove:Remove a worktree'
+    'rm:Remove a worktree'
+    '--help:Show help message'
+    '-h:Show help message'
+    'help:Show help message'
+  )
+
+  _arguments -C \
+    '(-v --verbose)'{-v,--verbose}'[Show debug output]' \
+    '1: :->subcommand' \
+    '*::arg:->args'
+
+  case $state in
+    subcommand)
+      _describe 'wt subcommand' subcommands
+      ;;
+    args)
+      case $line[1] in
+        -b)
+          # For -b, complete with git branch names
+          if [[ $CURRENT -eq 1 ]]; then
+            # First argument after -b: new branch name (no completion)
+            _message 'new branch name'
+          elif [[ $CURRENT -eq 2 ]]; then
+            # Second argument: base branch (complete from existing branches)
+            local -a branches
+            branches=(${(f)"$(git branch --format='%(refname:short)' 2>/dev/null)"})
+            _describe 'base branch' branches
+          fi
+          ;;
+        clone)
+          _message 'user/repo or repo'
+          ;;
+        remove|rm)
+          # Complete with worktree paths
+          local -a worktrees
+          worktrees=(${(f)"$(git worktree list --porcelain 2>/dev/null | awk '/^worktree / {print substr($0, 10)}')"})
+          _describe 'worktree path' worktrees
+          ;;
+      esac
+      ;;
+  esac
+}
+
+compdef _wt wt
