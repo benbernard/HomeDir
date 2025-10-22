@@ -177,8 +177,8 @@ function scp() {
 function oc() {
   local current_dir=$(pwd)
   pushd $(git rev-parse --show-toplevel 2>/dev/null) 1>/dev/null
-  if [[ ! -d .git ]]; then
-    echo "Error: .git directory not found"
+  if [[ ! -e .git ]]; then
+    echo "Error: .git not found"
     return 1
   fi
 
