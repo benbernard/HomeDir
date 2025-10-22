@@ -1,12 +1,12 @@
 import { CreateTableCommand, DynamoDBClient } from "@aws-sdk/client-dynamodb";
+import { fromIni } from "@aws-sdk/credential-provider-ini";
 import {
+  DeleteCommand,
   DynamoDBDocumentClient,
   PutCommand,
   QueryCommand,
   ScanCommand,
-  DeleteCommand,
 } from "@aws-sdk/lib-dynamodb";
-import { fromIni } from "@aws-sdk/credential-provider-ini";
 
 const TABLE_NAME = "download-queue";
 

@@ -5,16 +5,16 @@ import { basename } from "path";
 import { createInterface } from "readline";
 import {
   HeadBucketCommand,
-  S3Client,
   HeadObjectCommand,
+  S3Client,
   S3ServiceException,
 } from "@aws-sdk/client-s3";
+import { fromIni } from "@aws-sdk/credential-provider-ini";
 import { Upload } from "@aws-sdk/lib-storage";
+import chalk from "chalk";
+import { lookup } from "mime-types";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
-import { fromIni } from "@aws-sdk/credential-provider-ini";
-import { lookup } from "mime-types";
-import chalk from "chalk";
 
 interface UploadOptions {
   file?: string;
