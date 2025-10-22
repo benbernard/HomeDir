@@ -80,11 +80,18 @@ if [ "$PREVIEW_ONLY" = true ]; then
 
     # Run the preview command
     session_file="$ONLY_FILE"
-    project_dir=$(dirname "$session_file")
-    project_name=$(basename "$project_dir" | sed "s/^-Users-benbernard-/~\//" | sed "s/-/\//g")
+
+    # Extract actual working directory from session file
+    actual_dir=$(jq -r 'select(.type == "user" and .cwd) | .cwd' "$session_file" 2>/dev/null | head -1 || echo "")
+    if [ -z "$actual_dir" ]; then
+        actual_dir="(unknown)"
+    fi
+    display_dir="$actual_dir"
+    # Replace home directory with ~
+    display_dir=$(echo "$display_dir" | sed "s|^/Users/benbernard|~|")
 
     echo "=== Session Info ==="
-    echo "Project: $project_name"
+    echo "Project: $display_dir"
     echo "File: $session_file"
     echo ""
 
@@ -166,7 +173,7 @@ if [ "$PREVIEW_ONLY" = true ]; then
     if [ ! -s "$messages_temp" ]; then
         echo "No Messages"
     else
-        cat "$messages_temp"
+        tac "$messages_temp"
     fi
     rm -f "$messages_temp"
 
@@ -305,11 +312,18 @@ Each summary should be a clear, concise description of what the user is asking f
 # {2} will be replaced by the second field (session file path) by fzf
 preview_command='
     session_file={2}
-    project_dir=$(dirname "$session_file")
-    project_name=$(basename "$project_dir" | sed "s/^-Users-benbernard-/~\//" | sed "s/-/\//g")
+
+    # Extract actual working directory from session file
+    actual_dir=$(jq -r '\''select(.type == "user" and .cwd) | .cwd'\'' "$session_file" 2>/dev/null | head -1 || echo "")
+    if [ -z "$actual_dir" ]; then
+        actual_dir="(unknown)"
+    fi
+    display_dir="$actual_dir"
+    # Replace home directory with ~
+    display_dir=$(echo "$display_dir" | sed "s|^/Users/benbernard|~|")
 
     echo "=== Session Info ==="
-    echo "Project: $project_name"
+    echo "Project: $display_dir"
     echo "File: $session_file"
     echo ""
 
@@ -388,7 +402,7 @@ preview_command='
     if [ ! -s "$messages_temp" ]; then
         echo "No Messages"
     else
-        cat "$messages_temp"
+        tac "$messages_temp"
     fi
     rm -f "$messages_temp"
 '
@@ -727,7 +741,13 @@ cat "$sessions_data" | while IFS='|' read -r mtime project_dir session_file sess
         title="(No title)"
     fi
 
-    echo "${mtime}|${project_dir}|${session_file}|${session_id}|${last_modified}|${title}"
+    # Extract actual working directory from session file
+    actual_dir=$(jq -r 'select(.type == "user" and .cwd) | .cwd' "$session_file" 2>/dev/null | head -1 || echo "")
+    if [ -z "$actual_dir" ]; then
+        actual_dir="(unknown)"
+    fi
+
+    echo "${mtime}|${actual_dir}|${session_file}|${session_id}|${last_modified}|${title}"
 done > "$sessions_with_titles_temp"
 
 # Sort by modification time
@@ -740,13 +760,13 @@ echo "Done! Loaded $total_sessions sessions." >&2
 # Format for fzf display and let user select
 # Use tab as delimiter between display and hidden data
 selected=$(cat "$sessions_with_titles" | awk -F'|' '{
-    project = $2
-    gsub(/.*\/-Users-benbernard-/, "~/", project)
-    gsub(/-/, "/", project)
+    actual_dir = $2
+    # Replace home directory with ~
+    gsub(/^\/Users\/benbernard/, "~", actual_dir)
     title = $6
     last_modified = $5
     session_file = $3
-    printf "%s %s - %s\t%s\n", last_modified, title, project, session_file
+    printf "%s %s - %s\t%s\n", last_modified, title, actual_dir, session_file
 }' | fzf \
     --ansi \
     --delimiter='\t' \
@@ -783,15 +803,12 @@ if [ -z "$matching_line" ]; then
     exit 1
 fi
 
-project_dir=$(echo "$matching_line" | cut -d'|' -f2)
+actual_dir=$(echo "$matching_line" | cut -d'|' -f2)
 session_id=$(echo "$matching_line" | cut -d'|' -f4)
-
-# Convert project dir back to actual path
-actual_dir=$(basename "$project_dir" | sed 's/^-/\//' | sed 's/-/\//g')
 
 if [ "$RESUME_DIRECTLY" = true ]; then
     echo "Resuming session $session_id in $actual_dir..."
-    cd "$actual_dir" && exec claude --resume "$session_id"
+    cd "$actual_dir" && exec claude --dangerously-skip-permissions --resume "$session_id"
 else
     echo ""
     echo "Selected session:"
