@@ -405,3 +405,4 @@ bin/ts/dist
 .claude.json.backup
 cookbook
 .config/gohan*/
+.config/claude-session-picker

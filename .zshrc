@@ -148,7 +148,10 @@ export NVM_DIR="$HOME/.nvm"
 # Auto-Warpify
 [[ "$-" == *i* ]] && printf 'P$f{"hook": "SourcedRcFileForWarp", "value": { "shell": "zsh", "uname": "Linux" }}�'
 
+export PATH="$PATH:${HOME}/.config/gohan/bin"
+
 # >>> gohan setup, do not edit this section <<<
+# GOHAN_RC_VERSION=1
 # !! Contents within this block are managed by gohan !!
-export PATH="$PATH:/Users/benbernard/.config/gohan/bin"
+export PATH="/Users/benbernard/.config/gohan/bin:$PATH"
 # <<< gohan setup end <<<
