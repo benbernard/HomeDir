@@ -68,6 +68,11 @@ wt() {
         return 1
       fi
 
+      # Configure fetch refspec for bare repository
+      echo "Configuring remote fetch refspec..."
+      cd "$bare_dir"
+      git config remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'
+
       # Create master worktree
       echo "Creating master worktree at $master_dir..."
       cd "$bare_dir"
@@ -135,6 +140,20 @@ wt() {
       if [[ -z "$base_branch" ]]; then
         base_branch=$(git branch --show-current)
         echo "Using current branch '$base_branch' as base"
+      fi
+
+      # Ensure fetch refspec is configured (for repos cloned before this change)
+      local fetch_refspec=$(git config --get remote.origin.fetch)
+      if [[ "$fetch_refspec" != "+refs/heads/*:refs/remotes/origin/*" ]]; then
+        [[ $verbose -eq 1 ]] && echo "DEBUG: Configuring fetch refspec for remote.origin"
+        git config remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'
+      fi
+
+      # Fetch from origin to update remote tracking branches
+      echo "Fetching from origin to update remote tracking branches..."
+      git fetch origin
+      if [[ $? -ne 0 ]]; then
+        echo "Warning: Failed to fetch from origin. Continuing anyway..."
       fi
 
       # In a worktree setup, create new worktrees as siblings
