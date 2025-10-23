@@ -17,8 +17,32 @@ wt() {
     fi
     # Change to the target directory
     cd "$target_path"
+  elif [[ "$output" =~ __WT_ATTACH__(.+):(.+)$ ]]; then
+    local branch_name="${match[1]}"
+    local worktree_path="${match[2]}"
+    # Remove the directive from output
+    output="${output%__WT_ATTACH__*}"
+    # Print the output (without the directive)
+    if [[ -n "$output" ]]; then
+      echo "$output"
+    fi
+    # Attach the worktree to a nested tmux session
+    echo "Attaching worktree: $branch_name"
+    echo "Path: $worktree_path"
+
+    # Create outer tmux window and set up nested session
+    # The command will:
+    # 1. Create the inner session (if it doesn't exist)
+    # 2. Create a new window in the inner session
+    # 3. Set the outer window title
+    # 4. Attach to the inner session
+    tmux new-window -n "$branch_name" -c "$worktree_path" \
+      "zsh -c 'TMUX=\"\" tmux new-session -d -s \"$branch_name\" -c \"$worktree_path\" 2>/dev/null; \
+               TMUX=\"\" tmux new-window -t \"$branch_name\" -d -c \"$worktree_path\"; \
+               echo -e -n \"\\033knt: $branch_name\\033\\\\\"; \
+               TMUX=\"\" exec tmux attach-session -t \"$branch_name\"'"
   else
-    # No directory change, just print the output
+    # No directive, just print the output
     echo "$output"
   fi
 
@@ -36,6 +60,7 @@ _wt() {
     '-b:Create new branch and worktree'
     'list:List all worktrees'
     'ls:List all worktrees'
+    'attach:Attach worktree to nested tmux session'
     'remove:Remove a worktree'
     'rm:Remove a worktree'
     '--help:Show help message'

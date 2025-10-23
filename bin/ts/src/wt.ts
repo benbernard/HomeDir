@@ -9,8 +9,9 @@ import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
 
 interface CommandResult {
-  action?: "cd";
+  action?: "cd" | "attach";
   path?: string;
+  branch?: string;
   exitCode: number;
 }
 
@@ -404,6 +405,168 @@ async function removeCommand(
   return { exitCode: 0 };
 }
 
+function isInTmux(): boolean {
+  return !!process.env.TMUX;
+}
+
+function getTmuxSessions(): string[] {
+  try {
+    const output = execSync('tmux list-sessions -F "#{session_name}"', {
+      encoding: "utf-8",
+    }).trim();
+    return output ? output.split("\n") : [];
+  } catch {
+    return [];
+  }
+}
+
+async function attachCommand(verbose: boolean): Promise<CommandResult> {
+  // Check if fzf is available
+  try {
+    execSync("command -v fzf", { stdio: "pipe" });
+  } catch {
+    logError("fzf is not installed");
+    return { exitCode: 1 };
+  }
+
+  // Check if we're in tmux
+  if (!isInTmux()) {
+    logError("Not in a tmux session");
+    return { exitCode: 1 };
+  }
+
+  // Check if we're in a worktree parent directory first (has bare/ subdir)
+  let useBareSubdir = false;
+  let gitDir: string | null = null;
+
+  if (
+    existsSync("./bare/.git") ||
+    existsSync("./bare/HEAD") ||
+    existsSync("./bare/config")
+  ) {
+    useBareSubdir = true;
+    gitDir = join(process.cwd(), "bare");
+    logDebug("Detected worktree parent directory, using bare/", verbose);
+  } else {
+    gitDir = getGitCommonDir();
+    if (!gitDir) {
+      logError("Not in a git repository or worktree parent directory");
+      return { exitCode: 1 };
+    }
+  }
+
+  // Get list of existing tmux sessions
+  const sessions = getTmuxSessions();
+  const sessionSet = new Set(sessions);
+
+  if (verbose) {
+    console.log("DEBUG: Existing tmux sessions:");
+    for (const session of sessions) {
+      console.log(`  - '${session}'`);
+    }
+    console.log("");
+  }
+
+  // Get worktrees
+  const worktrees = getWorktrees(gitDir);
+
+  if (verbose) {
+    console.log("DEBUG: Processing worktrees:");
+  }
+
+  // Filter out bare worktrees and ones with existing sessions
+  const unattachedWorktrees = worktrees.filter((wt) => {
+    if (wt.bare) {
+      if (verbose) {
+        console.log("  Worktree: BARE (skipping)");
+      }
+      return false;
+    }
+
+    if (!wt.branch) {
+      if (verbose) {
+        console.log(`  Worktree: path='${wt.path}', no branch (skipping)`);
+      }
+      return false;
+    }
+
+    if (verbose) {
+      console.log(`  Worktree: branch='${wt.branch}', path='${wt.path}'`);
+    }
+
+    if (sessionSet.has(wt.branch)) {
+      if (verbose) {
+        console.log("    -> attached (session exists)");
+      }
+      return false;
+    }
+
+    if (verbose) {
+      console.log("    -> UNATTACHED (adding to list)");
+    }
+    return true;
+  });
+
+  if (verbose) {
+    console.log("");
+  }
+
+  if (unattachedWorktrees.length === 0) {
+    logInfo("No unattached worktrees found");
+    logInfo("All worktrees have active tmux sessions");
+    return { exitCode: 0 };
+  }
+
+  // Format for fzf display
+  const formatted = unattachedWorktrees
+    .map((wt) => {
+      const branch = wt.branch.padEnd(20);
+      return `${branch} ${wt.path}`;
+    })
+    .join("\n");
+
+  // Create preview script
+  const preview = `
+    wt_path=$(echo {} | awk '{print $NF}')
+    wt_branch=$(echo {} | awk '{print $1}')
+    echo "Branch: $wt_branch"
+    echo "Path: $wt_path"
+    echo ""
+    cd "$wt_path" && command git log --color --oneline --decorate -10
+  `;
+
+  try {
+    const result = spawnSync(
+      "fzf",
+      ["--header=Select worktree to attach", `--preview=${preview}`],
+      {
+        input: formatted,
+        encoding: "utf-8",
+        stdio: ["pipe", "pipe", "inherit"],
+      },
+    );
+
+    const selected = result.stdout.trim();
+    logDebug(`selected=${selected}`, verbose);
+
+    if (selected) {
+      const parts = selected.split(/\s+/);
+      const branch = parts[0];
+      const path = parts[parts.length - 1];
+
+      if (branch && path) {
+        logDebug(`Attaching worktree: ${branch} at ${path}`, verbose);
+        return { action: "attach", branch, path, exitCode: 0 };
+      }
+    }
+  } catch (error) {
+    logError(`Failed to run fzf: ${error}`);
+    return { exitCode: 1 };
+  }
+
+  return { exitCode: 0 };
+}
+
 async function interactiveCommand(verbose: boolean): Promise<CommandResult> {
   logDebug("Interactive mode triggered", verbose);
 
@@ -505,6 +668,9 @@ function showHelp(): void {
   );
   console.log("  wt list|ls                      List all worktrees");
   console.log(
+    "  wt attach                       Attach worktree to nested tmux session (requires tmux + fzf)",
+  );
+  console.log(
     "  wt remove|rm [path]             Remove a worktree (defaults to current directory)",
   );
   console.log("  wt --help|-h|help               Show this help message");
@@ -527,6 +693,9 @@ function showHelp(): void {
   );
   console.log("  wt -b feature-123               # Create from current branch");
   console.log("  wt -b feature-123 main          # Create from main branch");
+  console.log(
+    "  wt attach                       # Attach unattached worktree to tmux session",
+  );
   console.log(
     "  wt remove                       # Remove current worktree (checks for uncommitted changes)",
   );
@@ -571,6 +740,7 @@ async function main() {
       },
     )
     .command(["list", "ls"], "List all worktrees")
+    .command("attach", "Attach worktree to nested tmux session")
     .command(["remove [path]", "rm [path]"], "Remove a worktree", (yargs) => {
       return yargs.positional("path", {
         describe: "Path to worktree (defaults to current directory)",
@@ -597,6 +767,8 @@ async function main() {
     );
   } else if (command === "list" || command === "ls") {
     result = await listCommand();
+  } else if (command === "attach") {
+    result = await attachCommand(verbose);
   } else if (command === "remove" || command === "rm") {
     result = await removeCommand(argv.path as string | undefined);
   } else if (command === "help" || argv.help) {
@@ -614,6 +786,8 @@ async function main() {
   // Output result for shell wrapper
   if (result.action === "cd" && result.path) {
     console.log(`__WT_CD__${result.path}`);
+  } else if (result.action === "attach" && result.branch && result.path) {
+    console.log(`__WT_ATTACH__${result.branch}:${result.path}`);
   }
 
   process.exit(result.exitCode);
