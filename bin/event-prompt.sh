@@ -42,11 +42,13 @@ EOF
 # Write to log file
 echo "$eventData" >> ~/event-log.txt
 
+HOME=/Users/benbernard
+
 # Check for and invoke meeting-prompt.sh if it exists
 if [ -f ~/site/meeting-prompt.sh ]; then
-  echo "$(date): Calling meeting-prompt.sh in background" >> ~/event-log.txt
+  echo "$(date): Calling ${HOME}/site/meeting-prompt.sh in background" >> ~/event-log.txt
   echo "SHELL: $SHELL, TERM: $TERM, DISPLAY: $DISPLAY" >> ~/event-log.txt
-  echo "$eventData" | ~/site/meeting-prompt.sh --verbose &
+  echo "$eventData" | ${HOME}/site/meeting-prompt.sh --verbose &
   meeting_prompt_pid=$!
   echo "$(date): meeting-prompt.sh PID: $meeting_prompt_pid" >> ~/event-log.txt
 fi
