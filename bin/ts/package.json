@@ -7,12 +7,13 @@
     "downloader": "./dist/downloader.js",
     "wt-bin": "./dist/wt.js",
     "ic-bin": "./dist/ic.js",
-    "git-cleanup-bin": "./dist/git-cleanup.js"
+    "git-cleanup-bin": "./dist/git-cleanup.js",
+    "git-prune-old-bin": "./dist/git-prune-old.js"
   },
   "scripts": {
     "prebuild": "biome check --apply-unsafe .",
     "build": "tsc",
-    "postbuild": "chmod +x dist/s3upload.js dist/downloader.js dist/wt.js dist/ic.js dist/git-cleanup.js",
+    "postbuild": "chmod +x dist/s3upload.js dist/downloader.js dist/wt.js dist/ic.js dist/git-cleanup.js dist/git-prune-old.js",
     "build:watch": "tsc --watch",
     "format": "biome format --write .",
     "lint": "biome lint .",
