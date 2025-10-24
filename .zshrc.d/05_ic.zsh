@@ -2,45 +2,21 @@
 # This wraps the TypeScript implementation at ~/bin/ic-bin
 
 ic() {
-  # Create a temporary file for command exchange
-  local cmd_file=$(mktemp)
+  # Create a temporary script file
+  local script_file=$(mktemp)
 
-  # Run ic-bin with the command exchange file, let output flow normally
-  ic-bin --shell-command-exchange "$cmd_file" "$@"
+  # Run ic-bin with the script file path, let output flow normally
+  ic-bin --shell-integration-script "$script_file" "$@"
   local exit_code=$?
 
-  # Read and execute commands from the file
-  if [[ -f "$cmd_file" && -s "$cmd_file" ]]; then
-    while IFS= read -r line; do
-      # Extract command from JSON using jq (prefer) or sed fallback
-      local cmd=""
-      if command -v jq &> /dev/null; then
-        cmd=$(echo "$line" | jq -r '.run' 2>/dev/null)
-      fi
-
-      if [[ -z "$cmd" ]]; then
-        # Fallback: use sed with proper newline handling
-        cmd=$(echo "$line" | sed -E 's/^\{"run":"(.*)"\}$/\1/' | sed 's/\\"/"/g' | sed 's/\\n/\n/g')
-      fi
-
-      # Execute the command
-      if [[ -n "$cmd" ]]; then
-        # For multi-line commands (like heredocs), write to temp file and execute
-        if [[ "$cmd" == *$'\n'* ]]; then
-          local exec_script=$(mktemp)
-          echo "$cmd" > "$exec_script"
-          zsh "$exec_script"
-          rm -f "$exec_script"
-        else
-          # Single-line commands can use eval
-          eval "$cmd"
-        fi
-      fi
-    done < "$cmd_file"
+  # Execute the script if it exists and is not empty
+  if [[ -f "$script_file" && -s "$script_file" ]]; then
+    # Always source - scripts can use subshells for isolation if needed
+    source "$script_file"
   fi
 
   # Clean up
-  rm -f "$cmd_file"
+  rm -f "$script_file"
 
   return $exit_code
 }
@@ -76,8 +52,7 @@ _ic() {
           ;;
         attach|a)
           _arguments \
-            '--force[Recreate session even if it exists]' \
-            '--resume[Resume existing session (fail if not exists or attached)]'
+            '--force[Detach other clients and attach]'
           ;;
       esac
       ;;
