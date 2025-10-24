@@ -48,7 +48,7 @@ on run argv
                 end if
             end timeout
         on error errMsg number errNum
-            do shell script "echo \"Apple  Script Error: \" & errMsg & \" Error Number: \" & errNum"
+            do shell script "echo " & quoted form of ("AppleScript Error: " & errMsg & " Error Number: " & (errNum as string))
         end try
     end tell
 end run

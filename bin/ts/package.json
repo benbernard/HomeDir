@@ -5,7 +5,8 @@
   "bin": {
     "s3upload": "./dist/s3upload.js",
     "downloader": "./dist/downloader.js",
-    "wt-bin": "./dist/wt.js"
+    "wt-bin": "./dist/wt.js",
+    "ic-bin": "./dist/ic.js"
   },
   "scripts": {
     "prebuild": "biome check --apply-unsafe .",
