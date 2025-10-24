@@ -248,7 +248,10 @@ async function cloneCommand(input: string): Promise<CommandResult> {
   return { exitCode: 0 };
 }
 
-async function attachCommand(force: boolean): Promise<CommandResult> {
+async function attachCommand(
+  force: boolean,
+  cwd: boolean,
+): Promise<CommandResult> {
   // Check if in tmux
   if (!process.env.TMUX) {
     logError("Not in a tmux session");
@@ -284,27 +287,37 @@ async function attachCommand(force: boolean): Promise<CommandResult> {
     // Ignore errors, continue
   }
 
-  // Get repo root
   let repoRoot: string;
-  try {
-    repoRoot = execSync("git rev-parse --show-toplevel", {
-      encoding: "utf-8",
-    }).trim();
-  } catch {
-    logError("Not in a git repository");
-    return { exitCode: 1 };
+  let repoDirName: string;
+
+  if (cwd) {
+    // Use current working directory
+    repoRoot = process.cwd();
+    repoDirName = basename(repoRoot);
+  } else {
+    // Get repo root
+    try {
+      repoRoot = execSync("git rev-parse --show-toplevel", {
+        encoding: "utf-8",
+      }).trim();
+    } catch {
+      logError("Not in a git repository");
+      return { exitCode: 1 };
+    }
+
+    // Verify repo is under ~/repos
+    const reposDir = join(homedir(), "repos");
+    if (!repoRoot.startsWith(reposDir)) {
+      logError("Must be in a repo under ~/repos");
+      return { exitCode: 1 };
+    }
+
+    // Extract repo directory name
+    repoDirName = basename(repoRoot);
   }
 
-  // Verify repo is under ~/repos
-  const reposDir = join(homedir(), "repos");
-  if (!repoRoot.startsWith(reposDir)) {
-    logError("Must be in a repo under ~/repos");
-    return { exitCode: 1 };
-  }
-
-  // Extract repo directory name and create session name
+  // Create session name
   // Use underscore instead of colon because tmux converts colons to underscores
-  const repoDirName = basename(repoRoot);
   const sessionName = `ic_${repoDirName}`;
 
   // Check if session already exists
@@ -399,7 +412,7 @@ function showHelp(): void {
     "  ic clone|c <repo>               Clone repo (defaults to instacart/<repo>)",
   );
   console.log(
-    "  ic attach|a [--force]           Attach to nested tmux session (create if needed)",
+    "  ic attach|a [--force] [--cwd]   Attach to nested tmux session (create if needed)",
   );
   console.log("  ic --help|-h|help               Show this help message");
   console.log("");
@@ -415,6 +428,9 @@ function showHelp(): void {
   );
   console.log(
     "  ic a --force                    # Detach other clients and attach",
+  );
+  console.log(
+    "  ic a --cwd                      # Attach from current directory (no ~/repos check)",
   );
 }
 
@@ -439,11 +455,18 @@ async function main() {
       ["attach", "a"],
       "Attach current repo to nested tmux session",
       (yargs) => {
-        return yargs.option("force", {
-          type: "boolean",
-          description: "Detach other clients and attach",
-          default: false,
-        });
+        return yargs
+          .option("force", {
+            type: "boolean",
+            description: "Detach other clients and attach",
+            default: false,
+          })
+          .option("cwd", {
+            type: "boolean",
+            description:
+              "Use current working directory without requiring ~/repos",
+            default: false,
+          });
       },
     )
     .command(["help", "--help", "-h"], "Show help message")
@@ -463,7 +486,7 @@ async function main() {
   if (command === "clone" || command === "c") {
     result = await cloneCommand(argv.repo as string);
   } else if (command === "attach" || command === "a") {
-    result = await attachCommand(argv.force as boolean);
+    result = await attachCommand(argv.force as boolean, argv.cwd as boolean);
   } else if (command === "help" || argv.help) {
     showHelp();
     result = { exitCode: 0 };
