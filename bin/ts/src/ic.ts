@@ -1,11 +1,18 @@
 #!/usr/bin/env node
 
 import { execSync } from "child_process";
-import { appendFileSync, existsSync, readdirSync } from "fs";
+import {
+  appendFileSync,
+  existsSync,
+  readFileSync,
+  readdirSync,
+  writeFileSync,
+} from "fs";
 import { homedir } from "os";
 import { basename, join } from "path";
 import * as readline from "readline";
 import chalk from "chalk";
+import { dedent } from "ts-dedent";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
 
@@ -13,7 +20,12 @@ interface CommandResult {
   exitCode: number;
 }
 
-let shellCommandExchangeFile: string | undefined;
+interface IcConfig {
+  hooks?: Record<string, string[]>;
+  autoDetect?: Record<string, string[]>;
+}
+
+let shellIntegrationScript: string | undefined;
 
 function logError(message: string): void {
   console.error(`${chalk.red("Error:")} ${message}`);
@@ -28,15 +40,23 @@ function logSuccess(message: string): void {
 }
 
 function outputCommand(cmd: string): void {
-  if (shellCommandExchangeFile) {
-    // Write to file as JSON
-    appendFileSync(
-      shellCommandExchangeFile,
-      `${JSON.stringify({ run: cmd })}\n`,
-    );
+  if (shellIntegrationScript) {
+    // Append command to script file
+    appendFileSync(shellIntegrationScript, `${cmd}\n`);
   } else {
     // Print in human-readable format for debugging
     console.log(`Would run: ${cmd}`);
+  }
+}
+
+function outputScript(scriptContent: string): void {
+  if (shellIntegrationScript) {
+    // Write script content directly to file
+    writeFileSync(shellIntegrationScript, scriptContent, { encoding: "utf-8" });
+  } else {
+    // Print in human-readable format for debugging
+    console.log("Would run script:");
+    console.log(scriptContent);
   }
 }
 
@@ -56,6 +76,90 @@ function prompt(question: string, defaultValue?: string): Promise<string> {
       resolve(answer.trim() || defaultValue || "");
     });
   });
+}
+
+function loadIcConfig(): IcConfig {
+  const configPath = join(homedir(), ".icrc.json");
+
+  if (!existsSync(configPath)) {
+    // Return default config
+    return {
+      autoDetect: {
+        "package.json": ["npm install"],
+        Gemfile: ["bundle install"],
+        "requirements.txt": ["pip install -r requirements.txt"],
+        "go.mod": ["go mod download"],
+      },
+    };
+  }
+
+  try {
+    const configContent = readFileSync(configPath, "utf-8");
+    const config = JSON.parse(configContent) as IcConfig;
+
+    // Merge with defaults if autoDetect is not provided
+    if (!config.autoDetect) {
+      config.autoDetect = {
+        "package.json": ["npm install"],
+        Gemfile: ["bundle install"],
+        "requirements.txt": ["pip install -r requirements.txt"],
+        "go.mod": ["go mod download"],
+      };
+    }
+
+    return config;
+  } catch (error) {
+    logError(`Failed to load config from ${configPath}: ${error}`);
+    return {
+      autoDetect: {
+        "package.json": ["npm install"],
+        Gemfile: ["bundle install"],
+        "requirements.txt": ["pip install -r requirements.txt"],
+        "go.mod": ["go mod download"],
+      },
+    };
+  }
+}
+
+function detectRepoFiles(repoDir: string): string[] {
+  const detectedFiles: string[] = [];
+  const filesToCheck = [
+    "package.json",
+    "Gemfile",
+    "requirements.txt",
+    "go.mod",
+  ];
+
+  for (const file of filesToCheck) {
+    if (existsSync(join(repoDir, file))) {
+      detectedFiles.push(file);
+    }
+  }
+
+  return detectedFiles;
+}
+
+function resolveSetupHooks(
+  config: IcConfig,
+  repoIdentifier: string,
+  detectedFiles: string[],
+): string[] {
+  // First check for exact repo identifier match (user/repo format)
+  if (config.hooks?.[repoIdentifier]) {
+    return config.hooks[repoIdentifier];
+  }
+
+  // If no exact match, use autoDetect based on detected files
+  const commands: string[] = [];
+  if (config.autoDetect) {
+    for (const file of detectedFiles) {
+      if (config.autoDetect[file]) {
+        commands.push(...config.autoDetect[file]);
+      }
+    }
+  }
+
+  return commands;
 }
 
 async function cloneCommand(input: string): Promise<CommandResult> {
@@ -115,32 +219,64 @@ async function cloneCommand(input: string): Promise<CommandResult> {
   }
 
   logSuccess(`Successfully cloned to ${repoDir}`);
+
+  // Run setup hooks
+  const config = loadIcConfig();
+  const detectedFiles = detectRepoFiles(repoDir);
+  const repoIdentifier = `${user}/${repo}`;
+  const hooks = resolveSetupHooks(config, repoIdentifier, detectedFiles);
+
+  if (hooks.length > 0) {
+    logInfo(`Running setup hooks for ${repoIdentifier}...`);
+    for (const command of hooks) {
+      logInfo(`Running: ${command}`);
+      try {
+        execSync(command, {
+          cwd: repoDir,
+          stdio: "inherit",
+        });
+        logSuccess(`Completed: ${command}`);
+      } catch (error) {
+        logError(`Failed to run: ${command}`);
+        // Continue with remaining hooks and don't abort
+      }
+    }
+    logSuccess("Setup hooks completed");
+  }
+
   outputCommand(`cd "${repoDir}"`);
   return { exitCode: 0 };
 }
 
-async function attachCommand(
-  force: boolean,
-  resume: boolean,
-): Promise<CommandResult> {
+async function attachCommand(force: boolean): Promise<CommandResult> {
   // Check if in tmux
   if (!process.env.TMUX) {
     logError("Not in a tmux session");
     return { exitCode: 1 };
   }
 
-  // Check if already in a nested tmux session (detect ic_ prefix in current session)
+  // Check if already in a nested tmux session
   try {
-    const currentSession = execSync(
-      'tmux display-message -p "#{session_name}"',
+    const tmuxInfo = execSync(
+      'tmux display-message -p "#{session_name}|#{pane_title}|#{window_name}"',
       {
         encoding: "utf-8",
       },
     ).trim();
 
-    if (currentSession.startsWith("ic_")) {
+    const [sessionName, paneTitle, windowName] = tmuxInfo.split("|");
+
+    // Detect nested tmux by checking window/pane titles
+    const isNested =
+      windowName.startsWith("nt:") ||
+      windowName.startsWith("ic:") ||
+      paneTitle.startsWith("nt:") ||
+      paneTitle.startsWith("ic:") ||
+      paneTitle.includes("Nested TM"); // Fallback for generic nested indicator
+
+    if (isNested) {
       logError(
-        `Already in a nested tmux session '${currentSession}'. Detach first.`,
+        `Already in a nested tmux session (window: '${windowName}'). Detach first.`,
       );
       return { exitCode: 1 };
     }
@@ -182,76 +318,72 @@ async function attachCommand(
     sessionExists = false;
   }
 
-  // Handle --resume flag
-  if (resume) {
-    if (!sessionExists) {
-      logError(
-        `Session '${sessionName}' does not exist. Use 'ic a' without --resume to create it.`,
-      );
-      return { exitCode: 1 };
-    }
-
-    // Check if another client is attached
+  if (sessionExists) {
+    // Session exists - check if it's attached
+    let isAttached = false;
     try {
       const clients = execSync(`tmux list-clients -t "${sessionName}" 2>&1`, {
         encoding: "utf-8",
       }).trim();
-
-      if (clients) {
-        logError(
-          `Session '${sessionName}' is already attached by another client.`,
-        );
-        logInfo("Active clients:");
-        console.log(clients);
-        return { exitCode: 1 };
-      }
+      isAttached = clients.length > 0;
     } catch {
-      // No clients attached, which is what we want
+      isAttached = false;
     }
 
-    logInfo(`Resuming session '${sessionName}'...`);
+    if (isAttached) {
+      // Session is attached
+      if (force) {
+        logInfo(
+          `Session '${sessionName}' is attached, detaching other clients...`,
+        );
+        // Detach all other clients
+        try {
+          execSync(`tmux detach-client -s "${sessionName}" -a`, {
+            stdio: "pipe",
+          });
+        } catch {
+          // Ignore errors
+        }
+      } else {
+        logError(
+          `Session '${sessionName}' is already attached. Use --force to detach other clients.`,
+        );
+        return { exitCode: 1 };
+      }
+    }
 
-    // Just attach to existing session, don't create windows
-    const resumeScript = [
-      `printf '\\033knt: ${sessionName}\\033\\\\'`,
-      `TMUX= exec tmux attach-session -t "${sessionName}"`,
-    ].join("\n");
+    // Session exists and not attached (or we detached others), attach to it
+    logInfo(`Attaching to existing session '${sessionName}'...`);
 
-    const resumeCommand = `tmpscript=$(mktemp) && cat > "$tmpscript" << 'ICEOF'\n${resumeScript}\nICEOF\ntmux new-window -n "${sessionName}" -c "${repoRoot}" "zsh $tmpscript; rm -f $tmpscript"`;
+    const attachExistingScript = dedent`
+      (
+        printf '\\033kic: ${repoDirName}\\033\\\\'
+        local TMUX=""
+        tmux attach-session -t "${sessionName}"
+      )
+    `;
 
-    outputCommand(resumeCommand);
-
+    outputScript(attachExistingScript);
     return { exitCode: 0 };
   }
 
-  // Normal attach behavior (not --resume)
-  if (sessionExists) {
-    if (!force) {
-      logError(
-        `Session '${sessionName}' already exists. Use --force to recreate or --resume to attach.`,
-      );
-      return { exitCode: 1 };
-    }
-    logInfo(`Session '${sessionName}' exists, attaching with --force...`);
-  } else {
-    logInfo(`Creating new session '${sessionName}'...`);
-  }
+  // Session doesn't exist, create it
+  logInfo(`Creating new session '${sessionName}'...`);
 
-  // Create a single command that sets up a new outer tmux window with nested session
-  // Use a temp script approach to avoid complex quote escaping
-  const scriptCommands = [
-    `TMUX= tmux new-session -d -s "${sessionName}" -c "${repoRoot}" 2>/dev/null`,
-    `TMUX= tmux new-window -t "${sessionName}:1" -c "${repoRoot}"`,
-    `TMUX= tmux new-window -t "${sessionName}:2" -c "${repoRoot}"`,
-    `TMUX= tmux select-window -t "${sessionName}:0"`,
-    `printf '\\033knt: ${sessionName}\\033\\\\'`,
-    `TMUX= exec tmux attach-session -t "${sessionName}"`,
-  ].join("\n");
+  // Create a script that sets up nested tmux session and attaches to it
+  const createScript = dedent`
+    (
+      printf '\\033kic: ${repoDirName}\\033\\\\'
+      local TMUX=""
+      tmux new-session -d -s "${sessionName}" -c "${repoRoot}"
+      tmux new-window -t "${sessionName}:1" -c "${repoRoot}"
+      tmux new-window -t "${sessionName}:2" -c "${repoRoot}"
+      tmux select-window -t "${sessionName}:0"
+      tmux attach-session -t "${sessionName}"
+    )
+  `;
 
-  // Create the command that writes a temp script and executes it
-  const setupCommand = `tmpscript=$(mktemp) && cat > "$tmpscript" << 'ICEOF'\n${scriptCommands}\nICEOF\ntmux new-window -n "${sessionName}" -c "${repoRoot}" "zsh $tmpscript; rm -f $tmpscript"`;
-
-  outputCommand(setupCommand);
+  outputScript(createScript);
 
   return { exitCode: 0 };
 }
@@ -267,10 +399,7 @@ function showHelp(): void {
     "  ic clone|c <repo>               Clone repo (defaults to instacart/<repo>)",
   );
   console.log(
-    "  ic attach|a [--force]           Create/attach nested tmux session",
-  );
-  console.log(
-    "  ic attach|a --resume            Resume existing session (fail if attached)",
+    "  ic attach|a [--force]           Attach to nested tmux session (create if needed)",
   );
   console.log("  ic --help|-h|help               Show this help message");
   console.log("");
@@ -282,19 +411,18 @@ function showHelp(): void {
     "  ic c myrepo                     # Clone git@github.com:instacart/myrepo.git",
   );
   console.log(
-    "  ic a                            # Create nested tmux (3 windows)",
+    "  ic a                            # Attach to nested tmux (create if needed)",
   );
-  console.log("  ic a --resume                   # Resume existing session");
   console.log(
-    "  ic a --force                    # Recreate session even if exists",
+    "  ic a --force                    # Detach other clients and attach",
   );
 }
 
 async function main() {
   const argv = await yargs(hideBin(process.argv))
-    .option("shell-command-exchange", {
+    .option("shell-integration-script", {
       type: "string",
-      description: "File path for shell command exchange",
+      description: "File path for shell integration script",
       hidden: true,
     })
     .command(
@@ -311,18 +439,11 @@ async function main() {
       ["attach", "a"],
       "Attach current repo to nested tmux session",
       (yargs) => {
-        return yargs
-          .option("force", {
-            type: "boolean",
-            description: "Recreate session even if it exists",
-            default: false,
-          })
-          .option("resume", {
-            type: "boolean",
-            description:
-              "Resume existing session (fail if not exists or attached)",
-            default: false,
-          });
+        return yargs.option("force", {
+          type: "boolean",
+          description: "Detach other clients and attach",
+          default: false,
+        });
       },
     )
     .command(["help", "--help", "-h"], "Show help message")
@@ -330,8 +451,8 @@ async function main() {
     .version(false)
     .parse();
 
-  // Set the shell command exchange file if provided
-  shellCommandExchangeFile = argv["shell-command-exchange"] as
+  // Set the shell integration script file if provided
+  shellIntegrationScript = argv["shell-integration-script"] as
     | string
     | undefined;
 
@@ -342,7 +463,7 @@ async function main() {
   if (command === "clone" || command === "c") {
     result = await cloneCommand(argv.repo as string);
   } else if (command === "attach" || command === "a") {
-    result = await attachCommand(argv.force as boolean, argv.resume as boolean);
+    result = await attachCommand(argv.force as boolean);
   } else if (command === "help" || argv.help) {
     showHelp();
     result = { exitCode: 0 };

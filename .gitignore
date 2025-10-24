@@ -406,3 +406,4 @@ bin/ts/dist
 cookbook
 .config/gohan*/
 .config/claude-session-picker
+.icrc.json

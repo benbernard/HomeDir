@@ -38,6 +38,7 @@
     "node-fetch": "^2.7.0",
     "p-limit": "^6.2.0",
     "simple-mac-clipboard": "^1.1.4",
+    "ts-dedent": "^2.2.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.7.3",
     "yargs": "^17.7.2"
