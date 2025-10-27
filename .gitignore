@@ -385,8 +385,6 @@ bin/ts/dist
 .windsurf
 .codeium/windsurf
 
-.claude
-.claude.json
 .EasyOCR/model
 .anthropic
 .cua
@@ -407,3 +405,12 @@ cookbook
 .config/gohan*/
 .config/claude-session-picker
 .icrc.json
+.claude/debug
+.claude/file-history
+.claude/ide
+.claude/projects
+.claude/shell-snapshots
+.claude/statsig
+.claude/todos
+.claude/history.jsonl
+.claude.json
