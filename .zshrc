@@ -152,5 +152,5 @@ export PATH="$PATH:${HOME}/.config/gohan/bin"
 
 # >>> gohan setup, do not edit this section <<<
 # !! Contents within this block are managed by gohan !!
-export PATH="$PATH:/Users/benbernard/.config/gohan/bin"
+[ -f "/Users/benbernard/.config/gohan/gohan.sh" ] && source "/Users/benbernard/.config/gohan/gohan.sh"
 # <<< gohan setup end <<<

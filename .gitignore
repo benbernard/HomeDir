@@ -414,3 +414,5 @@ cookbook
 .claude/todos
 .claude/history.jsonl
 .claude.json
+.config/fish/conf.d/gohan.fish
+.config/olive
