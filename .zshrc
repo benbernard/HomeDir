@@ -133,7 +133,7 @@ if command -v pyenv 1>/dev/null 2>/dev/null; then
   eval "$(pyenv init -)"
 fi
 
-eval "$(starship init zsh)"
+# eval "$(starship init zsh)"
 
 # Added by Windsurf
 export PATH="/Users/benbernard/.codeium/windsurf/bin:$PATH"

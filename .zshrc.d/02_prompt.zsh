@@ -61,7 +61,7 @@ if autoload +X url-quote-magic 2> /dev/null; then
 fi
 
 # powerlevel10k setup
-# source $(submodule powerlevel10k)/powerlevel10k.zsh-theme
+source $(submodule powerlevel10k)/powerlevel10k.zsh-theme
 # powerlevel10k config is in 03_p10k.zsh
 
 # only use autosuggest if not in VSCODE and not recording
