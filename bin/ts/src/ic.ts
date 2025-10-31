@@ -248,6 +248,36 @@ async function cloneCommand(input: string): Promise<CommandResult> {
   return { exitCode: 0 };
 }
 
+interface SessionStatus {
+  exists: boolean;
+  isAttached: boolean;
+}
+
+function checkSessionStatus(sessionName: string): SessionStatus {
+  let sessionExists = false;
+  let isAttached = false;
+
+  try {
+    execSync(`tmux has-session -t \"${sessionName}\" 2>&1`, {
+      stdio: "pipe",
+    });
+    sessionExists = true;
+
+    try {
+      const clients = execSync(`tmux list-clients -t \"${sessionName}\" 2>&1`, {
+        encoding: "utf-8",
+      }).trim();
+      isAttached = clients.length > 0;
+    } catch {
+      isAttached = false;
+    }
+  } catch {
+    sessionExists = false;
+  }
+
+  return { exists: sessionExists, isAttached };
+}
+
 async function attachCommand(
   force: boolean,
   cwd: boolean,
@@ -287,32 +317,63 @@ async function attachCommand(
     // Ignore errors, continue
   }
 
+  // Always use current working directory (--cwd is implied)
+  const currentDir = process.cwd();
+
+  // Check if we're in a git repository and if we're at the root
+  let gitRoot: string | null = null;
+  try {
+    gitRoot = execSync("git rev-parse --show-toplevel", {
+      encoding: "utf-8",
+      cwd: currentDir,
+    }).trim();
+  } catch {
+    // Not in a git repository - that's okay, we'll use currentDir
+  }
+
+  // If we're in a git repo but not at the root, prompt for choice
   let repoRoot: string;
   let repoDirName: string;
 
-  if (cwd) {
-    // Use current working directory
-    repoRoot = process.cwd();
-    repoDirName = basename(repoRoot);
+  if (gitRoot && gitRoot !== currentDir) {
+    // Check session status for both locations
+    const cwdSessionName = `ic_${basename(currentDir)}`;
+    const rootSessionName = `ic_${basename(gitRoot)}`;
+    const cwdStatus = checkSessionStatus(cwdSessionName);
+    const rootStatus = checkSessionStatus(rootSessionName);
+
+    // Build status strings
+    const cwdStatusStr = cwdStatus.exists
+      ? cwdStatus.isAttached
+        ? " (session exists & attached)"
+        : " (session exists)"
+      : " (no session)";
+    const rootStatusStr = rootStatus.exists
+      ? rootStatus.isAttached
+        ? " (session exists & attached)"
+        : " (session exists)"
+      : " (no session)";
+
+    // Prompt for choice
+    const response = await prompt(
+      `Not at git repo root. Choose:\n  [CWD] Current dir: ${currentDir}${cwdStatusStr}\n  [ROOT] Git root: ${gitRoot}${rootStatusStr}\nChoice`,
+      "CWD",
+    );
+
+    const choice = response.toUpperCase().trim();
+    if (choice === "ROOT" || choice === "R") {
+      repoRoot = gitRoot;
+      repoDirName = basename(gitRoot);
+    } else if (choice === "CWD" || choice === "C" || choice === "") {
+      repoRoot = currentDir;
+      repoDirName = basename(currentDir);
+    } else {
+      logInfo("Aborted");
+      return { exitCode: 0 };
+    }
   } else {
-    // Get repo root
-    try {
-      repoRoot = execSync("git rev-parse --show-toplevel", {
-        encoding: "utf-8",
-      }).trim();
-    } catch {
-      logError("Not in a git repository");
-      return { exitCode: 1 };
-    }
-
-    // Verify repo is under ~/repos
-    const reposDir = join(homedir(), "repos");
-    if (!repoRoot.startsWith(reposDir)) {
-      logError("Must be in a repo under ~/repos");
-      return { exitCode: 1 };
-    }
-
-    // Extract repo directory name
+    // At root or not in git repo, use current directory
+    repoRoot = currentDir;
     repoDirName = basename(repoRoot);
   }
 
@@ -320,29 +381,15 @@ async function attachCommand(
   // Use underscore instead of colon because tmux converts colons to underscores
   const sessionName = `ic_${repoDirName}`;
 
-  // Check if session already exists
-  let sessionExists = false;
-  try {
-    execSync(`tmux has-session -t "${sessionName}" 2>&1`, {
-      stdio: "pipe",
-    });
-    sessionExists = true;
-  } catch {
-    sessionExists = false;
-  }
+  // Check if session already exists using helper
+  const sessionStatus = checkSessionStatus(sessionName);
+  const sessionExists = sessionStatus.exists;
+  const isAttached = sessionStatus.isAttached;
+
+  // Track if we need to cd to repoRoot (when ROOT was chosen and not already there)
+  const needsCd = gitRoot && repoRoot === gitRoot && currentDir !== gitRoot;
 
   if (sessionExists) {
-    // Session exists - check if it's attached
-    let isAttached = false;
-    try {
-      const clients = execSync(`tmux list-clients -t "${sessionName}" 2>&1`, {
-        encoding: "utf-8",
-      }).trim();
-      isAttached = clients.length > 0;
-    } catch {
-      isAttached = false;
-    }
-
     if (isAttached) {
       // Session is attached
       if (force) {
@@ -368,9 +415,10 @@ async function attachCommand(
     // Session exists and not attached (or we detached others), attach to it
     logInfo(`Attaching to existing session '${sessionName}'...`);
 
+    const cdPrefix = needsCd ? `cd "${repoRoot}"\n        ` : "";
     const attachExistingScript = dedent`
       (
-        printf '\\033kic: ${repoDirName}\\033\\\\'
+        ${cdPrefix}printf '\\033kic: ${repoDirName}\\033\\\\'
         local TMUX=""
         tmux attach-session -t "${sessionName}"
       )
@@ -384,9 +432,10 @@ async function attachCommand(
   logInfo(`Creating new session '${sessionName}'...`);
 
   // Create a script that sets up nested tmux session and attaches to it
+  const cdPrefixForCreate = needsCd ? `cd "${repoRoot}"\n      ` : "";
   const createScript = dedent`
     (
-      printf '\\033kic: ${repoDirName}\\033\\\\'
+      ${cdPrefixForCreate}printf '\\033kic: ${repoDirName}\\033\\\\'
       local TMUX=""
       tmux new-session -d -s "${sessionName}" -c "${repoRoot}"
       tmux new-window -t "${sessionName}:1" -c "${repoRoot}"
@@ -430,7 +479,7 @@ function showHelp(): void {
     "  ic a --force                    # Detach other clients and attach",
   );
   console.log(
-    "  ic a --cwd                      # Attach from current directory (no ~/repos check)",
+    "  ic a --cwd                      # Use current directory (deprecated, always implied)",
   );
 }
 
@@ -464,8 +513,8 @@ async function main() {
           .option("cwd", {
             type: "boolean",
             description:
-              "Use current working directory without requiring ~/repos",
-            default: false,
+              "Use current working directory (deprecated, always implied)",
+            default: true,
           });
       },
     )
