@@ -54,15 +54,20 @@ nsc () {
   screen -c ~/.screenrc.nested -x -RR -e l -S "$@"
 }
 
-# Nested Screen
+# Nested tmux - uses separate socket (-L nested) and config
 nesttm () {
   # Change the current screen title
   echo -e -n '\033k'nt: $1'\033\\'
 
-  local TMUX=""
-
-  # and invoke screen
-  tmux attach-session -t "$@" || tmux new-session -s "$@"
+  # Use separate socket for nested tmux with nested config
+  # First check if session exists
+  if env -u TMUX tmux -L nested has-session -t "$@" 2>/dev/null; then
+    # Session exists, attach to it
+    env -u TMUX tmux -L nested -f ~/.tmux.nested.conf attach-session -t "$@"
+  else
+    # Create new session with nested config
+    env -u TMUX tmux -L nested -f ~/.tmux.nested.conf new-session -s "$@"
+  fi
 }
 
 mvscreenshot() {

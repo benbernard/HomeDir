@@ -1,3 +1,33 @@
 #!/bin/sh
 
-tmux move-window -t "$1" || tmux swap-window -t "$1" || tmux move-window -t "$1"
+# Get current window index and ID
+current_idx=$(tmux display-message -p '#{window_index}')
+current_window=$(tmux display-message -p '#{window_id}')
+
+# Parse target (e.g., :-1 or :+1)
+target="$1"
+if [ "$target" = ":-1" ]; then
+    # Move left - target is one less than current
+    target_idx=$((current_idx - 1))
+elif [ "$target" = ":+1" ]; then
+    # Move right - target is one more than current  
+    target_idx=$((current_idx + 1))
+else
+    # Assume it's already an absolute index
+    target_idx="$target"
+fi
+
+# Check if target index is valid (must be >= base-index, typically 0 or 1)
+if [ "$target_idx" -lt 0 ]; then
+    # Can't move further left
+    exit 0
+fi
+
+# Try to move window to target position
+if ! tmux move-window -t "$target_idx" 2>/dev/null; then
+    # Target is occupied, so swap instead
+    # Use -d flag to swap without changing focus, then select our original window
+    tmux swap-window -t "$target_idx" -d
+    # Select the window that was originally current (it's now at target position)
+    tmux select-window -t "$current_window"
+fi
