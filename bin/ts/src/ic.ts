@@ -258,15 +258,19 @@ function checkSessionStatus(sessionName: string): SessionStatus {
   let isAttached = false;
 
   try {
-    execSync(`tmux has-session -t \"${sessionName}\" 2>&1`, {
+    // Check on nested socket (-L nested)
+    execSync(`tmux -L nested has-session -t \"${sessionName}\" 2>&1`, {
       stdio: "pipe",
     });
     sessionExists = true;
 
     try {
-      const clients = execSync(`tmux list-clients -t \"${sessionName}\" 2>&1`, {
-        encoding: "utf-8",
-      }).trim();
+      const clients = execSync(
+        `tmux -L nested list-clients -t \"${sessionName}\" 2>&1`,
+        {
+          encoding: "utf-8",
+        },
+      ).trim();
       isAttached = clients.length > 0;
     } catch {
       isAttached = false;
@@ -381,7 +385,8 @@ async function attachCommand(
   // Use underscore instead of colon because tmux converts colons to underscores
   const sessionName = `ic_${repoDirName}`;
 
-  // Check if session already exists using helper
+  // Check if session already exists on nested socket using helper
+  // Note: checkSessionStatus needs to be updated to support -L flag
   const sessionStatus = checkSessionStatus(sessionName);
   const sessionExists = sessionStatus.exists;
   const isAttached = sessionStatus.isAttached;
@@ -398,7 +403,7 @@ async function attachCommand(
         );
         // Detach all other clients
         try {
-          execSync(`tmux detach-client -s "${sessionName}" -a`, {
+          execSync(`tmux -L nested detach-client -s "${sessionName}" -a`, {
             stdio: "pipe",
           });
         } catch {
@@ -419,8 +424,8 @@ async function attachCommand(
     const attachExistingScript = dedent`
       (
         ${cdPrefix}printf '\\033kic: ${repoDirName}\\033\\\\'
-        local TMUX=""
-        tmux attach-session -t "${sessionName}"
+
+        env -u TMUX tmux -L nested -f ~/.tmux.nested.conf attach-session -t "${sessionName}"
       )
     `;
 
@@ -436,12 +441,12 @@ async function attachCommand(
   const createScript = dedent`
     (
       ${cdPrefixForCreate}printf '\\033kic: ${repoDirName}\\033\\\\'
-      local TMUX=""
-      tmux new-session -d -s "${sessionName}" -c "${repoRoot}"
-      tmux new-window -t "${sessionName}:1" -c "${repoRoot}"
-      tmux new-window -t "${sessionName}:2" -c "${repoRoot}"
-      tmux select-window -t "${sessionName}:0"
-      tmux attach-session -t "${sessionName}"
+
+      env -u TMUX tmux -L nested -f ~/.tmux.nested.conf new-session -d -s "${sessionName}" -c "${repoRoot}"
+      env -u TMUX tmux -L nested new-window -t "${sessionName}:1" -c "${repoRoot}"
+      env -u TMUX tmux -L nested new-window -t "${sessionName}:2" -c "${repoRoot}"
+      env -u TMUX tmux -L nested select-window -t "${sessionName}:0"
+      env -u TMUX tmux -L nested -f ~/.tmux.nested.conf attach-session -t "${sessionName}"
     )
   `;
 
