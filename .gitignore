@@ -416,3 +416,4 @@ cookbook
 .claude.json
 .config/fish/conf.d/gohan.fish
 .config/olive
+.config/fish/completions

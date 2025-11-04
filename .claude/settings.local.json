@@ -3,7 +3,9 @@
     "allow": [
       "mcp__chrome-devtools__evaluate_script",
       "Bash(echo $fpath)",
-      "Bash(source:*)"
+      "Bash(source:*)",
+      "Bash(bento remote hook --help:*)",
+      "Bash(gohan:*)"
     ],
     "deny": [],
     "ask": []
