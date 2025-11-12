@@ -37,4 +37,4 @@ SETUVAR fish_pager_color_selected_background:\x2dr
 SETUVAR fish_pager_color_selected_completion:\x1d
 SETUVAR fish_pager_color_selected_description:\x1d
 SETUVAR fish_pager_color_selected_prefix:\x1d
-SETUVAR fish_user_paths:/Users/benbernard/\x2econfig/gohan/bin
+SETUVAR fish_user_paths:/Users/benbernard/\x2econfig/gohan/bin\x1e/var/folders/s0/brcxr3md5kbbq4g3d16fv9wm0000gp/T/gohan\x2dcli\x2dNdTf08/gohan/bin
