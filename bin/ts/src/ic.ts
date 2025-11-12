@@ -253,23 +253,34 @@ interface SessionStatus {
   isAttached: boolean;
 }
 
+/**
+ * Execute a tmux command on the nested socket with the nested config file.
+ * Automatically prepends "tmux -L nested -f ~/.tmux.nested.conf" to the command.
+ */
+function execNestedTmux(
+  command: string,
+  options?: Parameters<typeof execSync>[1],
+): ReturnType<typeof execSync> {
+  const fullCommand = `tmux -L nested -f ~/.tmux.nested.conf ${command}`;
+  return execSync(fullCommand, options);
+}
+
 function checkSessionStatus(sessionName: string): SessionStatus {
   let sessionExists = false;
   let isAttached = false;
 
   try {
     // Check on nested socket (-L nested)
-    execSync(`tmux -L nested has-session -t \"${sessionName}\" 2>&1`, {
+    execNestedTmux(`has-session -t \"${sessionName}\" 2>&1`, {
       stdio: "pipe",
     });
     sessionExists = true;
 
     try {
-      const clients = execSync(
-        `tmux -L nested list-clients -t \"${sessionName}\" 2>&1`,
-        {
+      const clients = (
+        execNestedTmux(`list-clients -t \"${sessionName}\" 2>&1`, {
           encoding: "utf-8",
-        },
+        }) as string
       ).trim();
       isAttached = clients.length > 0;
     } catch {
@@ -403,7 +414,7 @@ async function attachCommand(
         );
         // Detach all other clients
         try {
-          execSync(`tmux -L nested detach-client -s "${sessionName}" -a`, {
+          execNestedTmux(`detach-client -s "${sessionName}" -a`, {
             stdio: "pipe",
           });
         } catch {
@@ -443,9 +454,9 @@ async function attachCommand(
       ${cdPrefixForCreate}printf '\\033kic: ${repoDirName}\\033\\\\'
 
       env -u TMUX tmux -L nested -f ~/.tmux.nested.conf new-session -d -s "${sessionName}" -c "${repoRoot}"
-      env -u TMUX tmux -L nested new-window -t "${sessionName}:1" -c "${repoRoot}"
-      env -u TMUX tmux -L nested new-window -t "${sessionName}:2" -c "${repoRoot}"
-      env -u TMUX tmux -L nested select-window -t "${sessionName}:0"
+      env -u TMUX tmux -L nested -f ~/.tmux.nested.conf new-window -t "${sessionName}:1" -c "${repoRoot}"
+      env -u TMUX tmux -L nested -f ~/.tmux.nested.conf new-window -t "${sessionName}:2" -c "${repoRoot}"
+      env -u TMUX tmux -L nested -f ~/.tmux.nested.conf select-window -t "${sessionName}:0"
       env -u TMUX tmux -L nested -f ~/.tmux.nested.conf attach-session -t "${sessionName}"
     )
   `;
