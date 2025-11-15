@@ -271,14 +271,16 @@ function checkSessionStatus(sessionName: string): SessionStatus {
 
   try {
     // Check on nested socket (-L nested)
-    execNestedTmux(`has-session -t \"${sessionName}\" 2>&1`, {
+    // Use exact match by prefixing '=' to prevent partial matching (e.g., 'olive' matching 'olive-server')
+    execNestedTmux(`has-session -t \"=${sessionName}\" 2>&1`, {
       stdio: "pipe",
     });
     sessionExists = true;
 
     try {
+      // Use exact match for list-clients as well
       const clients = (
-        execNestedTmux(`list-clients -t \"${sessionName}\" 2>&1`, {
+        execNestedTmux(`list-clients -t \"=${sessionName}\" 2>&1`, {
           encoding: "utf-8",
         }) as string
       ).trim();
