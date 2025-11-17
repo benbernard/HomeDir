@@ -162,25 +162,73 @@ function resolveSetupHooks(
   return commands;
 }
 
+/**
+ * Parse GitHub URL or user/repo format and extract user and repo name.
+ * Supports:
+ * - https://github.com/user/repo
+ * - https://github.com/user/repo.git
+ * - git@github.com:user/repo.git
+ * - git@github.com:user/repo
+ * - user/repo
+ * - repo (defaults to instacart)
+ */
+function parseGitHubInput(
+  input: string,
+): { user: string; repo: string } | null {
+  // Remove trailing slashes
+  const trimmedInput = input.trim().replace(/\/$/, "");
+
+  // Pattern 1: HTTPS URL
+  const httpsMatch = trimmedInput.match(
+    /^https?:\/\/github\.com\/([^\/]+)\/([^\/]+?)(\.git)?$/,
+  );
+  if (httpsMatch) {
+    return { user: httpsMatch[1], repo: httpsMatch[2] };
+  }
+
+  // Pattern 2: SSH URL (git@github.com:user/repo.git or git@github.com:user/repo)
+  const sshMatch = trimmedInput.match(
+    /^git@github\.com:([^\/]+)\/(.+?)(\.git)?$/,
+  );
+  if (sshMatch) {
+    return { user: sshMatch[1], repo: sshMatch[2] };
+  }
+
+  // Pattern 3: user/repo format
+  if (trimmedInput.includes("/")) {
+    const parts = trimmedInput.split("/");
+    if (parts.length === 2) {
+      return { user: parts[0], repo: parts[1] };
+    }
+  }
+
+  // Pattern 4: Just repo name, default to instacart
+  if (
+    trimmedInput &&
+    !trimmedInput.includes("/") &&
+    !trimmedInput.includes(":")
+  ) {
+    return { user: "instacart", repo: trimmedInput };
+  }
+
+  return null;
+}
+
 async function cloneCommand(input: string): Promise<CommandResult> {
   if (!input) {
-    logError("Usage: ic clone <user/repo> or <repo>");
+    logError("Usage: ic clone <user/repo> or <repo> or <github-url>");
     return { exitCode: 1 };
   }
 
-  // Parse input
-  let user: string;
-  let repo: string;
-
-  if (input.includes("/")) {
-    const parts = input.split("/");
-    user = parts[0];
-    repo = parts[1];
-  } else {
-    // Just repo name provided, default to instacart
-    user = "instacart";
-    repo = input;
+  // Parse input to extract user and repo
+  const parsed = parseGitHubInput(input);
+  if (!parsed) {
+    logError(`Invalid input format: ${input}`);
+    logError("Expected: user/repo, repo, or GitHub URL");
+    return { exitCode: 1 };
   }
+
+  const { user, repo } = parsed;
 
   const repoUrl = `git@github.com:${user}/${repo}.git`;
   const reposDir = join(homedir(), "repos");
@@ -479,6 +527,9 @@ function showHelp(): void {
     "  ic clone|c <repo>               Clone repo (defaults to instacart/<repo>)",
   );
   console.log(
+    "  ic clone|c <github-url>         Clone from GitHub URL (HTTPS or SSH)",
+  );
+  console.log(
     "  ic attach|a [--force] [--cwd]   Attach to nested tmux session (create if needed)",
   );
   console.log("  ic --help|-h|help               Show this help message");
@@ -490,6 +541,8 @@ function showHelp(): void {
   console.log(
     "  ic c myrepo                     # Clone git@github.com:instacart/myrepo.git",
   );
+  console.log("  ic c https://github.com/user/repo  # Clone from HTTPS URL");
+  console.log("  ic c git@github.com:user/repo.git  # Clone from SSH URL");
   console.log(
     "  ic a                            # Attach to nested tmux (create if needed)",
   );
