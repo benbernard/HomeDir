@@ -5,41 +5,29 @@
   },
   "alwaysThinkingEnabled": true,
   "permissions": {
-    "allow": [
-      "Bash",
-      "Read",
-      "Write",
-      "Edit",
-      "MultiEdit",
-      "Create",
-      "Glob",
-      "Grep",
-      "LS",
-      "WebFetch",
-      "WebSearch",
-      "Task",
-      "TodoRead",
-      "TodoWrite",
-      "NotebookRead",
-      "NotebookEdit",
-      "exit_plan_mode"
-    ],
-    "deny": [
-      "Read(.env)",
-      "Read(.env.*)",
-      "Read(**/.env)",
-      "Read(~/.aws/**)",
-      "Read(~/.ssh/**)"
-    ]
+    "allow": [],
+    "deny": [],
+    "ask": []
   },
   "hooks": {
-    "Notification": [
+    "PermissionRequest": [
       {
         "matcher": "",
         "hooks": [
           {
             "type": "command",
-            "command": "afplay /System/Library/Sounds/Glass.aiff"
+            "command": "echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PermissionRequest\",\"decision\":{\"behavior\":\"allow\"}}}'"
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "matcher": "idle_prompt",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "afplay /System/Library/Sounds/Basso.aiff"
           }
         ]
       }
