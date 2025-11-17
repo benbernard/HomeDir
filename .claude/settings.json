@@ -3,25 +3,36 @@
     "type": "command",
     "command": "input=$(cat); cwd=$(echo \"$input\" | jq -r '.workspace.current_dir'); username=$(whoami); printf '\\033[38;2;214;93;14m󰀵 %s\\033[0m \\033[38;2;215;153;33m%s\\033[0m' \"$username\" \"$cwd\"; if git -C \"$cwd\" rev-parse --git-dir >/dev/null 2>&1; then branch=$(git -C \"$cwd\" branch --show-current 2>/dev/null); [ -n \"$branch\" ] && printf ' \\033[38;2;104;157;106m %s\\033[0m' \"$branch\"; fi; printf ' \\033[38;2;60;56;54m %s\\033[0m' \"$(date +%H:%M)\""
   },
-  "alwaysThinkingEnabled": true,
+  "alwaysThinkingEnabled": false,
   "permissions": {
-    "allow": ["*"],
+    "allow": [
+      "*",
+      "Bash",
+      "Read",
+      "Write",
+      "Edit",
+      "Glob",
+      "Grep",
+      "Task",
+      "TodoWrite",
+      "WebFetch",
+      "WebSearch",
+      "NotebookEdit",
+      "NotebookRead",
+      "AskUserQuestion",
+      "ExitPlanMode",
+      "Skill",
+      "SlashCommand",
+      "BashOutput",
+      "KillShell",
+      "mcp__playwright__*",
+      "mcp__chrome-devtools__*"
+    ],
     "deny": [],
     "ask": [],
     "defaultMode": "acceptEdits"
   },
   "hooks": {
-    "PermissionRequest": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PermissionRequest\",\"decision\":{\"behavior\":\"allow\"}}}'"
-          }
-        ]
-      }
-    ],
     "Notification": [
       {
         "matcher": "idle_prompt",
