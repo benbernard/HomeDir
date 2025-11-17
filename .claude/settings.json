@@ -28,7 +28,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "claude-notify idle_prompt"
+            "command": "/Users/benbernard/bin/claude-notify idle_prompt"
           }
         ]
       }
@@ -39,7 +39,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "claude-notify stop"
+            "command": "/Users/benbernard/bin/claude-notify stop"
           }
         ]
       }
