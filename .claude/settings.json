@@ -20,7 +20,6 @@
       "NotebookEdit",
       "NotebookRead",
       "AskUserQuestion",
-      "ExitPlanMode",
       "Skill",
       "SlashCommand",
       "BashOutput",
