@@ -8,12 +8,13 @@
     "wt-bin": "./dist/wt.js",
     "ic-bin": "./dist/ic.js",
     "git-cleanup-bin": "./dist/git-cleanup.js",
-    "git-prune-old-bin": "./dist/git-prune-old.js"
+    "git-prune-old-bin": "./dist/git-prune-old.js",
+    "claude-notify-bin": "./dist/claude-notify.js"
   },
   "scripts": {
     "prebuild": "biome check --apply-unsafe .",
     "build": "tsc",
-    "postbuild": "chmod +x dist/s3upload.js dist/downloader.js dist/wt.js dist/ic.js dist/git-cleanup.js dist/git-prune-old.js",
+    "postbuild": "chmod +x dist/s3upload.js dist/downloader.js dist/wt.js dist/ic.js dist/git-cleanup.js dist/git-prune-old.js dist/claude-notify.js",
     "build:watch": "tsc --watch",
     "format": "biome format --write .",
     "lint": "biome lint .",
@@ -44,7 +45,8 @@
     "ts-dedent": "^2.2.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.7.3",
-    "yargs": "^17.7.2"
+    "yargs": "^17.7.2",
+    "zx": "^8.8.5"
   },
   "devDependencies": {
     "@biomejs/biome": "1.5.3",

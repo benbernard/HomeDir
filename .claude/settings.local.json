@@ -5,7 +5,21 @@
       "Bash(echo $fpath)",
       "Bash(source:*)",
       "Bash(bento remote hook --help:*)",
-      "Bash(gohan:*)"
+      "Bash(gohan:*)",
+      "Bash(git -C /Users/benbernard ls-files)",
+      "Bash(tmux display-message:*)",
+      "Bash(mdfind:*)",
+      "Bash(terminal-notifier:*)",
+      "Bash(mdls:*)",
+      "Bash(if [ -n \"$TMUX\" ])",
+      "Bash(then echo \"In TMUX: $TMUX\")",
+      "Bash(tmux -L nested list-sessions)",
+      "Bash(fi)",
+      "Bash(tmux:*)",
+      "Bash(tmux list-sessions:*)",
+      "Bash(env)",
+      "Bash(ps:*)",
+      "WebFetch(domain:code.claude.com)"
     ],
     "deny": [],
     "ask": []

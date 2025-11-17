@@ -5,9 +5,10 @@
   },
   "alwaysThinkingEnabled": true,
   "permissions": {
-    "allow": [],
+    "allow": ["*"],
     "deny": [],
-    "ask": []
+    "ask": [],
+    "defaultMode": "acceptEdits"
   },
   "hooks": {
     "PermissionRequest": [
@@ -27,7 +28,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "afplay /System/Library/Sounds/Basso.aiff"
+            "command": "claude-notify idle_prompt"
           }
         ]
       }
@@ -38,7 +39,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "afplay /System/Library/Sounds/Glass.aiff"
+            "command": "claude-notify stop"
           }
         ]
       }

@@ -372,7 +372,6 @@ vs-code-trial
 .cursor-tutor-1
 .vercel
 .specstory/history
-bin/ts/package-lock.json
 next-save
 bin/ts/.specstory/history
 bin/ts/dist
@@ -417,3 +416,4 @@ cookbook
 .config/fish/conf.d/gohan.fish
 .config/olive
 .config/fish/completions
+.claude/notification-state-*
