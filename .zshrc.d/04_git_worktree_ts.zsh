@@ -1,9 +1,9 @@
 # Git worktree management function - TypeScript wrapper
-# This wraps the TypeScript implementation at ~/bin/wt-bin
+# This wraps the TypeScript implementation at ~/bin/ts/dist/wt
 
 wt() {
   # Capture the output from the TypeScript binary
-  local output=$(wt-bin "$@" 2>&1)
+  local output=$(command wt "$@" 2>&1)
   local exit_code=$?
 
   # Check if the output contains a directory change directive

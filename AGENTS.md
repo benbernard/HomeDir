@@ -99,11 +99,58 @@ Limit searches to known source-controlled directories:
 
 ## Working with TypeScript Modules (bin/ts)
 
-When modifying TypeScript utilities:
+### Creating New Scripts
+
+**IMPORTANT**: All new utility scripts should be written in TypeScript in `bin/ts/src/`.
+
+When creating a new script:
+1. Write the TypeScript source in `bin/ts/src/your-script.ts`
+2. Start with the shebang: `#!/usr/bin/env node`
+3. Use `yargs` for CLI argument parsing (already in dependencies)
+4. For scripts that interact heavily with shell commands, use the `zx` library (already in dependencies)
+5. Build with `npm run build` in `bin/ts/`
+6. The compiled script will be at `bin/ts/dist/your-script.js` and will be automatically available on PATH (via `~/.zshrc.d/01_bin_ts.zsh`)
+
+**Note**: No need to create wrapper scripts or set execute permissions - the `bin/ts/dist` directory is on PATH, and Node.js will execute the scripts directly.
+
+### Example Script Structure
+
+```typescript
+#!/usr/bin/env node
+
+import yargs from 'yargs';
+import { hideBin } from 'yargs/helpers';
+import { $ } from 'zx'; // Optional: for shell interactions
+
+$.verbose = false; // Silence zx output
+
+async function main() {
+  const argv = await yargs(hideBin(process.argv))
+    .option('option', {
+      alias: 'o',
+      type: 'string',
+      description: 'Description',
+      default: 'default-value',
+    })
+    .help()
+    .alias('help', 'h')
+    .example('$0 -o value', 'Example usage')
+    .argv;
+
+  // Your script logic here
+}
+
+main();
+```
+
+### Modifying Existing TypeScript Utilities
+
 1. Source files are in `bin/ts/src/`
 2. Check `bin/ts/package.json` for build commands
-3. Compiled output goes to `bin/ts/dist/`
+3. Compiled output goes to `bin/ts/dist/` (without `.js` extensions)
 4. The module has its own dependencies in `bin/ts/node_modules/`
+5. Build with: `npm run build` (runs biome check, esbuild, and removes `.js` extensions)
+6. Watch mode available: `npm run build:watch` (automatically rebuilds and removes extensions on file changes)
 
 ## Configuration Management
 

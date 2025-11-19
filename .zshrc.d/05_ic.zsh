@@ -1,12 +1,12 @@
 # IC - Simple Git Clone & Attach Manager - TypeScript wrapper
-# This wraps the TypeScript implementation at ~/bin/ic-bin
+# This wraps the TypeScript implementation at ~/bin/ts/dist/ic
 
 ic() {
   # Create a temporary script file
   local script_file=$(mktemp)
 
-  # Run ic-bin with the script file path, let output flow normally
-  ic-bin --shell-integration-script "$script_file" "$@"
+  # Run ic with the script file path, let output flow normally
+  command ic --shell-integration-script "$script_file" "$@"
   local exit_code=$?
 
   # Execute the script if it exists and is not empty
