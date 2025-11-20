@@ -5,9 +5,10 @@
 ### Source-Controlled Areas
 - **Root home directory**: The home directory itself (`/Users/benbernard`) is under source control (git)
 - **bin/ts**: Contains TypeScript modules that are source-controlled. This includes:
-  - TypeScript source files in `bin/ts/src/`
+  - TypeScript source files in `bin/ts/src/` (executable with `tsx`)
   - Configuration files (package.json, tsconfig.json, biome.json, etc.)
-  - Build output in `bin/ts/dist/` (not tracked)
+  - Symlinks in `bin/ts/src/` for command names without `.ts` extension
+  - Note: `node_modules/` and `dist/` (if present) are not tracked
 - **Configuration files**: Most dotfiles and `.config/` subdirectories are tracked
 
 ### NOT Source-Controlled
@@ -76,10 +77,16 @@ Limit searches to known source-controlled directories:
 
 ### bin/ts/
 - TypeScript project with custom CLI utilities
-- Source files in `bin/ts/src/`
-- Built with npm/TypeScript
-- Likely includes utilities like `ic` (interactive container/session management)
+- Source files in `bin/ts/src/` (executable TypeScript files)
+- **No compilation needed** - runs directly using `tsx`
+- Includes utilities like:
+  - `ic` (interactive container/session management - wrapped by shell function)
+  - `wt` (worktree management - wrapped by shell function)
+  - `read-tree` (file tree scanner)
+  - `git-cleanup`, `git-prune-old` (git utilities)
+  - And more
 - Has its own package.json, tsconfig.json, and node_modules (not tracked)
+- `bin/ts/src/` is on PATH via `~/.zshrc.d/01_bin_ts.zsh`
 
 ### .config/
 - Standard XDG config directory
@@ -105,18 +112,19 @@ Limit searches to known source-controlled directories:
 
 When creating a new script:
 1. Write the TypeScript source in `bin/ts/src/your-script.ts`
-2. Start with the shebang: `#!/usr/bin/env node`
+2. Start with the shebang: `#!/usr/bin/env tsx`
 3. Use `yargs` for CLI argument parsing (already in dependencies)
 4. For scripts that interact heavily with shell commands, use the `zx` library (already in dependencies)
-5. Build with `npm run build` in `bin/ts/`
-6. The compiled script will be at `bin/ts/dist/your-script.js` and will be automatically available on PATH (via `~/.zshrc.d/01_bin_ts.zsh`)
+5. Make the file executable: `chmod +x bin/ts/src/your-script.ts`
+6. Create a symlink without the `.ts` extension: `ln -sf your-script.ts your-script`
+7. The script is now available as `your-script` in your PATH - **no compilation needed!**
 
-**Note**: No need to create wrapper scripts or set execute permissions - the `bin/ts/dist` directory is on PATH, and Node.js will execute the scripts directly.
+**Note**: Scripts run directly using `tsx` which compiles TypeScript on-the-fly. The `bin/ts/src/` directory is on PATH via `~/.zshrc.d/01_bin_ts.zsh`, along with `bin/ts/node_modules/.bin/` for accessing `tsx`.
 
 ### Example Script Structure
 
 ```typescript
-#!/usr/bin/env node
+#!/usr/bin/env tsx
 
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
@@ -146,11 +154,13 @@ main();
 ### Modifying Existing TypeScript Utilities
 
 1. Source files are in `bin/ts/src/`
-2. Check `bin/ts/package.json` for build commands
-3. Compiled output goes to `bin/ts/dist/` (without `.js` extensions)
-4. The module has its own dependencies in `bin/ts/node_modules/`
-5. Build with: `npm run build` (runs biome check, esbuild, and removes `.js` extensions)
-6. Watch mode available: `npm run build:watch` (automatically rebuilds and removes extensions on file changes)
+2. Edit the `.ts` file directly - changes take effect immediately (no build step required!)
+3. The module has its own dependencies in `bin/ts/node_modules/`
+4. For development with type checking: `npm run build:watch` in `bin/ts/` (optional - runs TypeScript type checker in watch mode)
+5. All executable scripts have:
+   - Shebang: `#!/usr/bin/env tsx`
+   - Execute permission: `chmod +x`
+   - Symlink without `.ts` extension for clean command names
 
 ## Configuration Management
 

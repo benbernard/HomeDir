@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env tsx
 
 import { exec } from "child_process";
 import { homedir } from "os";

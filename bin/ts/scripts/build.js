@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const { build } = require('esbuild');
+const { context, build } = require('esbuild');
 const { readdirSync, renameSync, chmodSync } = require('fs');
 const { join } = require('path');
 
@@ -23,19 +23,6 @@ const buildOptions = {
   format: 'cjs',
 };
 
-if (isWatch) {
-  buildOptions.watch = {
-    onRebuild(error) {
-      if (error) {
-        console.error('Watch build failed:', error);
-      } else {
-        removeExtensionsAndMakeExecutable();
-        console.log('Rebuild complete');
-      }
-    },
-  };
-}
-
 function removeExtensionsAndMakeExecutable() {
   const files = readdirSync(distDir);
   for (const file of files) {
@@ -48,13 +35,38 @@ function removeExtensionsAndMakeExecutable() {
   }
 }
 
-build(buildOptions)
-  .then(() => {
+async function main() {
+  if (isWatch) {
+    const ctx = await context(buildOptions);
+
+    // Do initial build
+    await ctx.rebuild();
     removeExtensionsAndMakeExecutable();
-    console.log(isWatch ? 'Watching for changes...' : 'Build complete');
-    if (!isWatch) process.exit(0);
-  })
-  .catch((err) => {
-    console.error(err);
-    process.exit(1);
-  });
+    console.log('Initial build complete. Watching for changes...');
+
+    // Start watching
+    await ctx.watch();
+
+    // Watch for changes and process
+    const chokidar = require('chokidar');
+    chokidar.watch(distDir + '/*.js').on('add', () => {
+      setTimeout(() => {
+        try {
+          removeExtensionsAndMakeExecutable();
+          console.log('Rebuild complete');
+        } catch (err) {
+          // Ignore errors during processing
+        }
+      }, 100);
+    });
+  } else {
+    await build(buildOptions);
+    removeExtensionsAndMakeExecutable();
+    console.log('Build complete');
+  }
+}
+
+main().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});
