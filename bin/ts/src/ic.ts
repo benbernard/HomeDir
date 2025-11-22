@@ -78,6 +78,27 @@ function prompt(question: string, defaultValue?: string): Promise<string> {
   });
 }
 
+/**
+ * Get the repos directory from cdrp config or fallback to ~/repos
+ */
+function getReposDir(): string {
+  const cdrpConfigPath = join(homedir(), ".config", "ei", "cdrp_dir");
+
+  if (existsSync(cdrpConfigPath)) {
+    try {
+      const reposDir = readFileSync(cdrpConfigPath, "utf-8").trim();
+      if (reposDir && existsSync(reposDir)) {
+        return reposDir;
+      }
+    } catch {
+      // Fall through to default
+    }
+  }
+
+  // Default to ~/repos
+  return join(homedir(), "repos");
+}
+
 function loadIcConfig(): IcConfig {
   const configPath = join(homedir(), ".icrc.json");
 
@@ -214,7 +235,82 @@ function parseGitHubInput(
   return null;
 }
 
-async function cloneCommand(input: string): Promise<CommandResult> {
+/**
+ * Detect if the given path is within a workspace directory structure.
+ * Returns the workspace name if detected, null otherwise.
+ *
+ * Examples:
+ *   ~/repos/myFeature/ava -> "myFeature"
+ *   ~/repos/myFeature -> "myFeature" (if it contains subdirectories)
+ *   ~/repos/standalone-repo -> null
+ */
+function detectWorkspace(path: string): string | null {
+  const reposDir = getReposDir();
+
+  // Check if path is under ~/repos
+  if (!path.startsWith(reposDir)) {
+    return null;
+  }
+
+  // Get relative path from repos dir
+  const relativePath = path.slice(reposDir.length + 1);
+  const parts = relativePath.split("/").filter((p) => p.length > 0);
+
+  if (parts.length === 0) {
+    // We're exactly at ~/repos
+    return null;
+  }
+
+  if (parts.length >= 2) {
+    // We're in a subdirectory like ~/repos/myFeature/ava
+    // First part is the workspace name
+    return parts[0];
+  }
+
+  if (parts.length === 1) {
+    // We're at ~/repos/something
+    // Check if this directory is a workspace (no .git) or a standalone repo (has .git)
+    const potentialWorkspace = join(reposDir, parts[0]);
+
+    if (!existsSync(potentialWorkspace)) {
+      return null;
+    }
+
+    // If it has a .git directory, it's a standalone repo, not a workspace
+    const gitDir = join(potentialWorkspace, ".git");
+    if (existsSync(gitDir)) {
+      return null;
+    }
+
+    // No .git directory means it's a workspace
+    return parts[0];
+  }
+
+  return null;
+}
+
+/**
+ * Check if the given path is exactly a workspace directory (not a repo within it).
+ * Returns true if path is ~/repos/<workspace>, false otherwise.
+ */
+function isWorkspaceDir(path: string): boolean {
+  const reposDir = getReposDir();
+
+  if (!path.startsWith(reposDir)) {
+    return false;
+  }
+
+  const relativePath = path.slice(reposDir.length + 1);
+  const parts = relativePath.split("/").filter((p) => p.length > 0);
+
+  // It's a workspace dir if we're exactly one level deep
+  return parts.length === 1;
+}
+
+async function cloneCommand(
+  input: string,
+  workspaceFlag?: string,
+): Promise<CommandResult> {
   if (!input) {
     logError("Usage: ic clone <user/repo> or <repo> or <github-url>");
     return { exitCode: 1 };
@@ -230,9 +326,39 @@ async function cloneCommand(input: string): Promise<CommandResult> {
 
   const { user, repo } = parsed;
 
+  // Determine workspace context
+  const currentDir = process.cwd();
+  const currentWorkspace = detectWorkspace(currentDir);
+  let targetWorkspace: string | null = null;
+
+  if (workspaceFlag) {
+    // Explicit workspace flag provided
+    targetWorkspace = workspaceFlag;
+  } else if (currentWorkspace) {
+    // We're in a workspace directory, prompt for choice
+    const response = await prompt(
+      `Clone into workspace '${currentWorkspace}' or globally? [workspace/GLOBAL]`,
+      "GLOBAL",
+    );
+
+    const choice = response.toUpperCase().trim();
+    if (choice === "WORKSPACE" || choice === "W") {
+      targetWorkspace = currentWorkspace;
+    }
+    // Otherwise targetWorkspace stays null (global clone)
+  }
+
   const repoUrl = `git@github.com:${user}/${repo}.git`;
-  const reposDir = join(homedir(), "repos");
-  let repoDir = join(reposDir, repo);
+  const reposDir = getReposDir();
+  let repoDir: string;
+
+  if (targetWorkspace) {
+    // Clone into workspace
+    repoDir = join(reposDir, targetWorkspace, repo);
+  } else {
+    // Clone globally to ~/repos
+    repoDir = join(reposDir, repo);
+  }
 
   // Handle directory collision with prompt
   if (existsSync(repoDir)) {
@@ -266,7 +392,13 @@ async function cloneCommand(input: string): Promise<CommandResult> {
     return { exitCode: 1 };
   }
 
-  logSuccess(`Successfully cloned to ${repoDir}`);
+  if (targetWorkspace) {
+    logSuccess(
+      `Successfully cloned to workspace '${targetWorkspace}': ${repoDir}`,
+    );
+  } else {
+    logSuccess(`Successfully cloned to ${repoDir}`);
+  }
 
   // Run setup hooks
   const config = loadIcConfig();
@@ -385,66 +517,83 @@ async function attachCommand(
   // Always use current working directory (--cwd is implied)
   const currentDir = process.cwd();
 
-  // Check if we're in a git repository and if we're at the root
-  let gitRoot: string | null = null;
-  try {
-    gitRoot = execSync("git rev-parse --show-toplevel", {
-      encoding: "utf-8",
-      cwd: currentDir,
-    }).trim();
-  } catch {
-    // Not in a git repository - that's okay, we'll use currentDir
-  }
+  // Check if we're in a workspace directory
+  const workspace = detectWorkspace(currentDir);
 
-  // If we're in a git repo but not at the root, prompt for choice
   let repoRoot: string;
   let repoDirName: string;
+  let isWorkspaceSession = false;
 
-  if (gitRoot && gitRoot !== currentDir) {
-    // Check session status for both locations
-    const cwdSessionName = `ic_${basename(currentDir)}`;
-    const rootSessionName = `ic_${basename(gitRoot)}`;
-    const cwdStatus = checkSessionStatus(cwdSessionName);
-    const rootStatus = checkSessionStatus(rootSessionName);
+  if (workspace) {
+    // We're in a workspace - always attach at workspace level
+    const reposDir = getReposDir();
+    repoRoot = join(reposDir, workspace);
+    repoDirName = workspace;
+    isWorkspaceSession = true;
 
-    // Build status strings
-    const cwdStatusStr = cwdStatus.exists
-      ? cwdStatus.isAttached
-        ? " (session exists & attached)"
-        : " (session exists)"
-      : " (no session)";
-    const rootStatusStr = rootStatus.exists
-      ? rootStatus.isAttached
-        ? " (session exists & attached)"
-        : " (session exists)"
-      : " (no session)";
-
-    // Prompt for choice
-    const response = await prompt(
-      `Not at git repo root. Choose:\n  [CWD] Current dir: ${currentDir}${cwdStatusStr}\n  [ROOT] Git root: ${gitRoot}${rootStatusStr}\nChoice`,
-      "CWD",
-    );
-
-    const choice = response.toUpperCase().trim();
-    if (choice === "ROOT" || choice === "R") {
-      repoRoot = gitRoot;
-      repoDirName = basename(gitRoot);
-    } else if (choice === "CWD" || choice === "C" || choice === "") {
-      repoRoot = currentDir;
-      repoDirName = basename(currentDir);
-    } else {
-      logInfo("Aborted");
-      return { exitCode: 0 };
-    }
+    logInfo(`Detected workspace '${workspace}', attaching at workspace level`);
   } else {
-    // At root or not in git repo, use current directory
-    repoRoot = currentDir;
-    repoDirName = basename(repoRoot);
+    // Not in a workspace, use existing git repo logic
+    // Check if we're in a git repository and if we're at the root
+    let gitRoot: string | null = null;
+    try {
+      gitRoot = execSync("git rev-parse --show-toplevel", {
+        encoding: "utf-8",
+        cwd: currentDir,
+      }).trim();
+    } catch {
+      // Not in a git repository - that's okay, we'll use currentDir
+    }
+
+    // If we're in a git repo but not at the root, prompt for choice
+    if (gitRoot && gitRoot !== currentDir) {
+      // Check session status for both locations
+      const cwdSessionName = `ic_${basename(currentDir)}`;
+      const rootSessionName = `ic_${basename(gitRoot)}`;
+      const cwdStatus = checkSessionStatus(cwdSessionName);
+      const rootStatus = checkSessionStatus(rootSessionName);
+
+      // Build status strings
+      const cwdStatusStr = cwdStatus.exists
+        ? cwdStatus.isAttached
+          ? " (session exists & attached)"
+          : " (session exists)"
+        : " (no session)";
+      const rootStatusStr = rootStatus.exists
+        ? rootStatus.isAttached
+          ? " (session exists & attached)"
+          : " (session exists)"
+        : " (no session)";
+
+      // Prompt for choice
+      const response = await prompt(
+        `Not at git repo root. Choose:\n  [CWD] Current dir: ${currentDir}${cwdStatusStr}\n  [ROOT] Git root: ${gitRoot}${rootStatusStr}\nChoice`,
+        "CWD",
+      );
+
+      const choice = response.toUpperCase().trim();
+      if (choice === "ROOT" || choice === "R") {
+        repoRoot = gitRoot;
+        repoDirName = basename(gitRoot);
+      } else if (choice === "CWD" || choice === "C" || choice === "") {
+        repoRoot = currentDir;
+        repoDirName = basename(currentDir);
+      } else {
+        logInfo("Aborted");
+        return { exitCode: 0 };
+      }
+    } else {
+      // At root or not in git repo, use current directory
+      repoRoot = currentDir;
+      repoDirName = basename(repoRoot);
+    }
   }
 
   // Create session name
-  // Use underscore instead of colon because tmux converts colons to underscores
-  const sessionName = `ic_${repoDirName}`;
+  // Use workspace naming for workspace sessions, regular naming otherwise
+  const sessionName = isWorkspaceSession
+    ? `ic_ws_${repoDirName}`
+    : `ic_${repoDirName}`;
 
   // Check if session already exists on nested socket using helper
   // Note: checkSessionStatus needs to be updated to support -L flag
@@ -452,8 +601,10 @@ async function attachCommand(
   const sessionExists = sessionStatus.exists;
   const isAttached = sessionStatus.isAttached;
 
-  // Track if we need to cd to repoRoot (when ROOT was chosen and not already there)
-  const needsCd = gitRoot && repoRoot === gitRoot && currentDir !== gitRoot;
+  // Track if we need to cd to repoRoot
+  // For workspace sessions: cd if not at workspace root
+  // For regular sessions: cd if ROOT was chosen and not already there
+  const needsCd = currentDir !== repoRoot;
 
   if (sessionExists) {
     if (isAttached) {
@@ -516,41 +667,127 @@ async function attachCommand(
   return { exitCode: 0 };
 }
 
+async function workspaceStartCommand(name?: string): Promise<CommandResult> {
+  const reposDir = getReposDir();
+  let workspaceName = name;
+
+  if (!workspaceName) {
+    // No name provided, try to infer from current directory
+    const currentDir = process.cwd();
+
+    // Check if we're one level under repos dir
+    if (currentDir.startsWith(reposDir)) {
+      const relativePath = currentDir.slice(reposDir.length + 1);
+      const parts = relativePath.split("/").filter((p) => p.length > 0);
+
+      if (parts.length === 1) {
+        // We're at ~/repos/something - use this as workspace name
+        workspaceName = parts[0];
+      }
+    }
+
+    if (!workspaceName) {
+      logError("Must provide workspace name or run from a directory under repos");
+      logError("Usage: ic workspace start <name>");
+      logError("   or: cd ~/repos/myWorkspace && ic workspace start");
+      return { exitCode: 1 };
+    }
+  }
+
+  const workspaceDir = join(reposDir, workspaceName);
+
+  // Check if directory exists
+  if (!existsSync(workspaceDir)) {
+    // Create the workspace directory
+    try {
+      execSync(`mkdir -p "${workspaceDir}"`, { stdio: "inherit" });
+      logSuccess(`Created workspace directory: ${workspaceDir}`);
+    } catch (error) {
+      logError(`Failed to create workspace directory: ${error}`);
+      return { exitCode: 1 };
+    }
+  } else {
+    // Directory exists, check if it's already a workspace or a repo
+    const gitDir = join(workspaceDir, ".git");
+    if (existsSync(gitDir)) {
+      logError(
+        `Directory ${workspaceDir} is a git repository, not a workspace`,
+      );
+      return { exitCode: 1 };
+    }
+
+    const workspaceFile = join(workspaceDir, ".workspace");
+    if (existsSync(workspaceFile)) {
+      logInfo(`Workspace '${workspaceName}' already exists at ${workspaceDir}`);
+      return { exitCode: 0 };
+    }
+  }
+
+  // Create .workspace file
+  const workspaceFile = join(workspaceDir, ".workspace");
+  try {
+    writeFileSync(workspaceFile, "", { encoding: "utf-8" });
+    logSuccess(`Created workspace '${workspaceName}' at ${workspaceDir}`);
+  } catch (error) {
+    logError(`Failed to create .workspace file: ${error}`);
+    return { exitCode: 1 };
+  }
+
+  // Change to the workspace directory
+  outputCommand(`cd "${workspaceDir}"`);
+
+  return { exitCode: 0 };
+}
+
 function showHelp(): void {
   console.log("IC - Simple Git Clone & Attach Manager");
   console.log("");
   console.log("Usage:");
   console.log(
-    "  ic clone|c <user/repo>          Clone repo to ~/repos with SSH",
+    "  ic clone|c <user/repo> [-w <workspace>]  Clone repo to ~/repos with SSH",
   );
   console.log(
-    "  ic clone|c <repo>               Clone repo (defaults to instacart/<repo>)",
+    "  ic clone|c <repo> [-w <workspace>]       Clone repo (defaults to instacart/<repo>)",
   );
   console.log(
-    "  ic clone|c <github-url>         Clone from GitHub URL (HTTPS or SSH)",
+    "  ic clone|c <github-url> [-w <workspace>] Clone from GitHub URL (HTTPS or SSH)",
   );
   console.log(
-    "  ic attach|a [--force] [--cwd]   Attach to nested tmux session (create if needed)",
+    "  ic attach|a [--force] [--cwd]            Attach to nested tmux session (create if needed)",
   );
-  console.log("  ic --help|-h|help               Show this help message");
+  console.log(
+    "  ic workspace start [name]                Create a new workspace directory",
+  );
+  console.log(
+    "  ic ws start [name]                       Alias for workspace start",
+  );
+  console.log(
+    "  ic --help|-h|help                        Show this help message",
+  );
   console.log("");
   console.log("Examples:");
   console.log(
-    "  ic c user/repo                  # Clone git@github.com:user/repo.git",
+    "  ic c user/repo                     # Clone git@github.com:user/repo.git",
   );
   console.log(
-    "  ic c myrepo                     # Clone git@github.com:instacart/myrepo.git",
-  );
-  console.log("  ic c https://github.com/user/repo  # Clone from HTTPS URL");
-  console.log("  ic c git@github.com:user/repo.git  # Clone from SSH URL");
-  console.log(
-    "  ic a                            # Attach to nested tmux (create if needed)",
+    "  ic c myrepo                        # Clone git@github.com:instacart/myrepo.git",
   );
   console.log(
-    "  ic a --force                    # Detach other clients and attach",
+    "  ic c myrepo -w myFeature           # Clone into ~/repos/myFeature/myrepo",
+  );
+  console.log("  ic c https://github.com/user/repo     # Clone from HTTPS URL");
+  console.log("  ic c git@github.com:user/repo.git     # Clone from SSH URL");
+  console.log(
+    "  ic ws start myFeature              # Create workspace ~/repos/myFeature",
   );
   console.log(
-    "  ic a --cwd                      # Use current directory (deprecated, always implied)",
+    "  ic a                               # Attach to nested tmux (create if needed)",
+  );
+  console.log(
+    "  ic a --force                       # Detach other clients and attach",
+  );
+  console.log(
+    "  ic a --cwd                         # Use current directory (deprecated, always implied)",
   );
 }
 
@@ -565,10 +802,16 @@ async function main() {
       ["clone <repo>", "c <repo>"],
       "Clone a GitHub repo with SSH",
       (yargs) => {
-        return yargs.positional("repo", {
-          describe: "Repository in format user/repo or just repo",
-          type: "string",
-        });
+        return yargs
+          .positional("repo", {
+            describe: "Repository in format user/repo or just repo",
+            type: "string",
+          })
+          .option("workspace", {
+            alias: "w",
+            type: "string",
+            description: "Clone into a workspace directory",
+          });
       },
     )
     .command(
@@ -589,6 +832,16 @@ async function main() {
           });
       },
     )
+    .command(
+      ["workspace start [name]", "ws start [name]"],
+      "Create a new workspace directory",
+      (yargs) => {
+        return yargs.positional("name", {
+          describe: "Workspace name",
+          type: "string",
+        });
+      },
+    )
     .command(["help", "--help", "-h"], "Show help message")
     .help(false)
     .version(false)
@@ -600,13 +853,19 @@ async function main() {
     | undefined;
 
   const command = argv._[0] as string | undefined;
+  const subcommand = argv._[1] as string | undefined;
 
   let result: CommandResult;
 
   if (command === "clone" || command === "c") {
-    result = await cloneCommand(argv.repo as string);
+    result = await cloneCommand(
+      argv.repo as string,
+      argv.workspace as string | undefined,
+    );
   } else if (command === "attach" || command === "a") {
     result = await attachCommand(argv.force as boolean, argv.cwd as boolean);
+  } else if ((command === "workspace" || command === "ws") && subcommand === "start") {
+    result = await workspaceStartCommand(argv.name as string | undefined);
   } else if (command === "help" || argv.help) {
     showHelp();
     result = { exitCode: 0 };
