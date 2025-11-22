@@ -59,6 +59,18 @@ nesttm () {
   # Change the current screen title
   echo -e -n '\033k'nt: $1'\033\\'
 
+  # Capture outer tmux window name if in tmux
+  local outer_window=""
+  if [ -n "$TMUX" ]; then
+    outer_window=$(tmux display-message -p '#W')
+  fi
+
+  # Set the outer window name in nested tmux's global environment
+  # This makes it available to all shells in the nested session
+  if [ -n "$outer_window" ]; then
+    env -u TMUX tmux -L nested set-environment -g OUTER_TMUX_WINDOW "$outer_window"
+  fi
+
   # Use separate socket for nested tmux with nested config
   # First check if session exists
   if env -u TMUX tmux -L nested has-session -t "$@" 2>/dev/null; then

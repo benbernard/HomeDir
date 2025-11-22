@@ -1,2 +1,9 @@
 # keybind = ctrl+enter=paste:\x1b[27;5;13~
 
+# Nested tmux window movement: Ctrl+Shift+Alt+Arrow
+# Send standard xterm escape sequences with modifier 8 (Shift+Alt+Ctrl)
+# Modifier calculation: Shift(1) + Alt(2) + Ctrl(4) = 7, then +1 = 8
+keybind = ctrl+alt+shift+arrow_left=text:\x1b[1;8D
+keybind = ctrl+alt+shift+arrow_right=text:\x1b[1;8C
+keybind = ctrl+alt+shift+arrow_up=text:\x1b[1;8A
+keybind = ctrl+alt+shift+arrow_down=text:\x1b[1;8B

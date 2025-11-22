@@ -33,6 +33,13 @@ async function main() {
     // Ignore errors
   }
 
+  // Check if Claude is in the active window (both nested and outer if applicable)
+  if (await isClaudeInActiveWindow()) {
+    // Claude is visible, skip notification but update state
+    await writeState(stateFile, lockFile, notificationType);
+    return;
+  }
+
   // Get TMUX context
   const tmuxContext = await getTmuxContext();
 
@@ -66,9 +73,9 @@ async function main() {
       sound = "Basso";
   }
 
-  // Add TMUX context to message if available
+  // Add TMUX context to message if available (put window name first)
   if (tmuxContext) {
-    message = `${message} [window: ${tmuxContext}]`;
+    message = `[${tmuxContext}] ${message}`;
   }
 
   // Send notification using terminal-notifier with Claude icon
@@ -82,25 +89,109 @@ async function main() {
   await writeState(stateFile, lockFile, notificationType);
 }
 
+async function isClaudeInActiveWindow(): Promise<boolean> {
+  // Check if we're in tmux at all
+  const tmux = process.env.TMUX;
+  if (!tmux) {
+    // Not in tmux, can't determine, assume not active
+    return false;
+  }
+
+  // Parse TMUX variable to detect nested session
+  const socketPath = tmux.split(",")[0];
+  const socketName = socketPath.split("/").pop() || "";
+
+  // If we're in nested tmux
+  if (socketName === "nested") {
+    // Check if current nested window is active
+    try {
+      const nestedActive = await $`tmux display-message -p '#{window_active}'`;
+      const isNestedActive = nestedActive.stdout.trim() === "1";
+
+      if (!isNestedActive) {
+        // Not in active nested window
+        return false;
+      }
+
+      // Nested window is active, now check if outer window is active
+      // Get the outer window name from global environment
+      let outerWindowName: string | null = null;
+      const envOuterWindow = process.env.OUTER_TMUX_WINDOW;
+      if (envOuterWindow) {
+        outerWindowName = envOuterWindow;
+      } else {
+        try {
+          const result = await $`tmux show-environment -g OUTER_TMUX_WINDOW`;
+          const match = result.stdout.match(/^OUTER_TMUX_WINDOW=(.+)$/m);
+          if (match) {
+            outerWindowName = match[1];
+          }
+        } catch {
+          // Can't get outer window name
+          return false;
+        }
+      }
+
+      if (!outerWindowName) {
+        // No outer window name available
+        return false;
+      }
+
+      // Get currently active window name in outer tmux
+      try {
+        const outerActive = await $`tmux -L default display-message -p '#W'`;
+        const activeOuterWindow = outerActive.stdout.trim();
+        return activeOuterWindow === outerWindowName;
+      } catch {
+        return false;
+      }
+    } catch {
+      return false;
+    }
+  }
+
+  // We're in regular tmux, just check if current window is active
+  try {
+    const active = await $`tmux display-message -p '#{window_active}'`;
+    return active.stdout.trim() === "1";
+  } catch {
+    return false;
+  }
+}
+
 async function getTmuxContext(): Promise<string | null> {
+  // Check if we're in tmux at all
   const tmux = process.env.TMUX;
   if (!tmux) {
     return null;
   }
 
-  try {
-    // Parse TMUX variable: /tmp/tmux-502/default,12345,0
-    const socketPath = tmux.split(",")[0];
-    const socketName = socketPath.split("/").pop() || "";
+  // Parse TMUX variable to detect nested session: /tmp/tmux-502/nested,12345,0
+  const socketPath = tmux.split(",")[0];
+  const socketName = socketPath.split("/").pop() || "";
 
-    // If we're in a nested TMUX session, query the outer session
-    if (socketName === "nested") {
-      // Get the outer tmux window name from the default socket
-      const result = await $`tmux -L default display-message -p '#W'`;
-      return result.stdout.trim();
+  // If we're in nested tmux
+  if (socketName === "nested") {
+    // Get OUTER_TMUX_WINDOW from environment (set by nesttm function)
+    const outerWindow = process.env.OUTER_TMUX_WINDOW;
+    if (outerWindow) {
+      return outerWindow;
     }
+    // If not set, try to get it from tmux GLOBAL environment (-g flag)
+    try {
+      const result = await $`tmux show-environment -g OUTER_TMUX_WINDOW`;
+      const match = result.stdout.match(/^OUTER_TMUX_WINDOW=(.+)$/m);
+      if (match) {
+        return match[1];
+      }
+    } catch {
+      // Ignore errors
+    }
+    return null;
+  }
 
-    // We're in the outer TMUX, get current window name
+  // We're in regular tmux, get current window name
+  try {
     const result = await $`tmux display-message -p '#W'`;
     return result.stdout.trim();
   } catch {
