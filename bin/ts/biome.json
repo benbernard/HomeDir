@@ -8,13 +8,13 @@
     "rules": {
       "recommended": true
     },
-    "ignore": ["dist", "node_modules", "build", "*.js"]
+    "ignore": ["dist", "node_modules", "build", "coverage", "*.js"]
   },
   "formatter": {
     "enabled": true,
     "formatWithErrors": false,
     "indentStyle": "space",
     "indentWidth": 2,
-    "ignore": ["dist", "node_modules", "build", "*.js"]
+    "ignore": ["dist", "node_modules", "build", "coverage", "*.js"]
   }
 }

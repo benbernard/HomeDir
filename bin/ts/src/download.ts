@@ -9,7 +9,7 @@ import { DownloadItem } from "./db";
 
 const pipelineAsync = promisify(pipeline);
 
-interface SpeedSample {
+export interface SpeedSample {
   timestamp: number;
   bytes: number;
 }
@@ -26,7 +26,7 @@ export interface DownloadProgress {
   error?: string;
 }
 
-function calculateSpeed(
+export function calculateSpeed(
   samples: SpeedSample[],
   currentTime: number,
   windowSeconds: number,
