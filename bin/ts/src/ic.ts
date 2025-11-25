@@ -6,6 +6,7 @@ import {
   existsSync,
   readFileSync,
   readdirSync,
+  realpathSync,
   writeFileSync,
 } from "fs";
 import { homedir } from "os";
@@ -855,7 +856,21 @@ async function main() {
 }
 
 // Only run main if this is the entry point (not imported)
-if (import.meta.url === `file://${process.argv[1]}`) {
+// Use realpathSync to handle symlinks and macOS /private prefix
+function isEntryPoint(): boolean {
+  try {
+    const importPath = new URL(import.meta.url).pathname;
+    const argvPath = process.argv[1];
+    // Resolve both paths to handle symlinks and /private prefix on macOS
+    const resolvedImport = realpathSync(importPath);
+    const resolvedArgv = realpathSync(argvPath);
+    return resolvedImport === resolvedArgv;
+  } catch {
+    return false;
+  }
+}
+
+if (isEntryPoint()) {
   main().catch((error) => {
     logError(`Unexpected error: ${error}`);
     process.exit(1);
