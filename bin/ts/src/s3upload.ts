@@ -15,6 +15,8 @@ import chalk from "chalk";
 import { lookup } from "mime-types";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
+import { logError, logInfo, logSuccess, logWarning } from "./lib/logger";
+import { promptYesNo } from "./lib/prompts";
 
 interface UploadOptions {
   file?: string;
@@ -26,23 +28,6 @@ interface UploadOptions {
   region: string;
   yes: boolean;
   _: string[];
-}
-
-function logError(message: string, details?: unknown) {
-  console.error(`${chalk.red("Error: ")}${message}`);
-  if (details) console.error(chalk.gray(details));
-}
-
-function logInfo(message: string) {
-  console.log(`${chalk.blue("→ ")}${message}`);
-}
-
-function logSuccess(message: string) {
-  console.log(`${chalk.green("✓ ")}${message}`);
-}
-
-function logWarning(message: string) {
-  console.log(`${chalk.yellow("! ")}${message}`);
 }
 
 async function testBucketAccess(client: S3Client, bucket: string) {
@@ -87,20 +72,6 @@ async function promptForName(
   }
 
   return uploadName;
-}
-
-async function promptYesNo(question: string): Promise<boolean> {
-  const rl = createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  });
-
-  const answer = await new Promise<string>((resolve) => {
-    rl.question(chalk.yellow(`${question} (y/N) `), resolve);
-  });
-  rl.close();
-
-  return answer.toLowerCase() === "y" || answer.toLowerCase() === "yes";
 }
 
 async function checkFileExists(

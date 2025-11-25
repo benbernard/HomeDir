@@ -19,7 +19,10 @@
     "format": "biome format --write .",
     "lint": "biome lint .",
     "check": "biome check .",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest run --coverage",
     "ensure-dev": "ts-node scripts/ensure-dev-setup.ts",
     "dev": "npm run ensure-dev && npm run build:watch"
   },
@@ -54,9 +57,15 @@
     "@types/node": "^20.17.17",
     "@types/node-fetch": "^2.6.12",
     "@types/yargs": "^17.0.33",
+    "@vitest/coverage-v8": "^4.0.13",
+    "@vitest/ui": "^4.0.13",
+    "aws-sdk-client-mock": "^4.1.0",
+    "aws-sdk-client-mock-vitest": "^6.2.1",
     "chokidar": "^4.0.3",
     "concurrently": "^9.2.1",
     "esbuild": "^0.27.0",
-    "tsx": "^4.20.6"
+    "memfs": "^4.51.0",
+    "tsx": "^4.20.6",
+    "vitest": "^4.0.13"
   }
 }

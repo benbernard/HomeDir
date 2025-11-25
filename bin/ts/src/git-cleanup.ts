@@ -1,10 +1,17 @@
 #!/usr/bin/env tsx
 
-import { execSync, spawnSync } from "child_process";
-import * as readline from "readline";
 import chalk from "chalk";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
+import { execGit, execGitSafe } from "./lib/git";
+import {
+  logDebug,
+  logError,
+  logInfo,
+  logSuccess,
+  logWarning,
+} from "./lib/logger";
+import { confirmAction } from "./lib/prompts";
 
 interface CleanupOptions {
   dryRun: boolean;
@@ -22,55 +29,6 @@ interface BranchInfo {
   remoteSha: string | null;
   isMerged: boolean;
   isGone: boolean;
-}
-
-function logError(message: string): void {
-  console.error(`${chalk.red("Error:")} ${message}`);
-}
-
-function logInfo(message: string): void {
-  console.log(`${chalk.blue("→")} ${message}`);
-}
-
-function logSuccess(message: string): void {
-  console.log(`${chalk.green("✓")} ${message}`);
-}
-
-function logWarning(message: string): void {
-  console.log(`${chalk.yellow("!")} ${message}`);
-}
-
-function logDebug(message: string, verbose: boolean): void {
-  if (verbose) {
-    console.log(`${chalk.gray("DEBUG:")} ${message}`);
-  }
-}
-
-function execGit(args: string[], silent = false): string {
-  try {
-    return execSync(`git ${args.join(" ")}`, {
-      encoding: "utf-8",
-      stdio: silent ? "pipe" : ["pipe", "pipe", "pipe"],
-    }).trim();
-  } catch (error) {
-    if (!silent) throw error;
-    return "";
-  }
-}
-
-function execGitSafe(args: string[]): {
-  stdout: string;
-  stderr: string;
-  status: number;
-} {
-  const result = spawnSync("git", args, {
-    encoding: "utf-8",
-  });
-  return {
-    stdout: (result.stdout || "").trim(),
-    stderr: (result.stderr || "").trim(),
-    status: result.status || 0,
-  };
 }
 
 function getCurrentBranch(): string | null {
@@ -282,20 +240,6 @@ function pruneRemote(remote: string, dryRun: boolean): boolean {
     return false;
   }
   return true;
-}
-
-async function confirmAction(message: string): Promise<boolean> {
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  });
-
-  return new Promise((resolve) => {
-    rl.question(`${chalk.yellow("?")} ${message} (y/N): `, (answer) => {
-      rl.close();
-      resolve(answer.toLowerCase() === "y" || answer.toLowerCase() === "yes");
-    });
-  });
 }
 
 async function cleanupBranches(options: CleanupOptions): Promise<number> {

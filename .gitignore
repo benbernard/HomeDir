@@ -417,3 +417,4 @@ cookbook
 .config/olive
 .config/fish/completions
 .claude/notification-state-*
+.claude/.credentials.json

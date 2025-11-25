@@ -10,11 +10,12 @@ import {
 } from "fs";
 import { homedir } from "os";
 import { basename, join } from "path";
-import * as readline from "readline";
 import chalk from "chalk";
 import { dedent } from "ts-dedent";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
+import { logError, logInfo, logSuccess } from "./lib/logger";
+import { prompt } from "./lib/prompts";
 
 interface CommandResult {
   exitCode: number;
@@ -26,18 +27,6 @@ interface IcConfig {
 }
 
 let shellIntegrationScript: string | undefined;
-
-function logError(message: string): void {
-  console.error(`${chalk.red("Error:")} ${message}`);
-}
-
-function logInfo(message: string): void {
-  console.log(`${chalk.blue("→")} ${message}`);
-}
-
-function logSuccess(message: string): void {
-  console.log(`${chalk.green("✓")} ${message}`);
-}
 
 function outputCommand(cmd: string): void {
   if (shellIntegrationScript) {
@@ -60,28 +49,10 @@ function outputScript(scriptContent: string): void {
   }
 }
 
-function prompt(question: string, defaultValue?: string): Promise<string> {
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  });
-
-  return new Promise((resolve) => {
-    const promptText = defaultValue
-      ? `${question} [${defaultValue}]: `
-      : `${question}: `;
-
-    rl.question(promptText, (answer) => {
-      rl.close();
-      resolve(answer.trim() || defaultValue || "");
-    });
-  });
-}
-
 /**
  * Get the repos directory from cdrp config or fallback to ~/repos
  */
-function getReposDir(): string {
+export function getReposDir(): string {
   const cdrpConfigPath = join(homedir(), ".config", "ei", "cdrp_dir");
 
   if (existsSync(cdrpConfigPath)) {
@@ -99,7 +70,7 @@ function getReposDir(): string {
   return join(homedir(), "repos");
 }
 
-function loadIcConfig(): IcConfig {
+export function loadIcConfig(): IcConfig {
   const configPath = join(homedir(), ".icrc.json");
 
   if (!existsSync(configPath)) {
@@ -142,7 +113,7 @@ function loadIcConfig(): IcConfig {
   }
 }
 
-function detectRepoFiles(repoDir: string): string[] {
+export function detectRepoFiles(repoDir: string): string[] {
   const detectedFiles: string[] = [];
   const filesToCheck = [
     "package.json",
@@ -160,7 +131,7 @@ function detectRepoFiles(repoDir: string): string[] {
   return detectedFiles;
 }
 
-function resolveSetupHooks(
+export function resolveSetupHooks(
   config: IcConfig,
   repoIdentifier: string,
   detectedFiles: string[],
@@ -193,7 +164,7 @@ function resolveSetupHooks(
  * - user/repo
  * - repo (defaults to instacart)
  */
-function parseGitHubInput(
+export function parseGitHubInput(
   input: string,
 ): { user: string; repo: string } | null {
   // Remove trailing slashes
@@ -244,7 +215,7 @@ function parseGitHubInput(
  *   ~/repos/myFeature -> "myFeature" (if it contains subdirectories)
  *   ~/repos/standalone-repo -> null
  */
-function detectWorkspace(path: string): string | null {
+export function detectWorkspace(path: string): string | null {
   const reposDir = getReposDir();
 
   // Check if path is under ~/repos
@@ -687,7 +658,9 @@ async function workspaceStartCommand(name?: string): Promise<CommandResult> {
     }
 
     if (!workspaceName) {
-      logError("Must provide workspace name or run from a directory under repos");
+      logError(
+        "Must provide workspace name or run from a directory under repos",
+      );
       logError("Usage: ic workspace start <name>");
       logError("   or: cd ~/repos/myWorkspace && ic workspace start");
       return { exitCode: 1 };
@@ -864,7 +837,10 @@ async function main() {
     );
   } else if (command === "attach" || command === "a") {
     result = await attachCommand(argv.force as boolean, argv.cwd as boolean);
-  } else if ((command === "workspace" || command === "ws") && subcommand === "start") {
+  } else if (
+    (command === "workspace" || command === "ws") &&
+    subcommand === "start"
+  ) {
     result = await workspaceStartCommand(argv.name as string | undefined);
   } else if (command === "help" || argv.help) {
     showHelp();
@@ -878,7 +854,10 @@ async function main() {
   process.exit(result.exitCode);
 }
 
-main().catch((error) => {
-  logError(`Unexpected error: ${error}`);
-  process.exit(1);
-});
+// Only run main if this is the entry point (not imported)
+if (import.meta.url === `file://${process.argv[1]}`) {
+  main().catch((error) => {
+    logError(`Unexpected error: ${error}`);
+    process.exit(1);
+  });
+}
