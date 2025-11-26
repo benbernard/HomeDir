@@ -54,6 +54,5 @@
     "type": "command",
     "command": "input=$(cat); cwd=$(echo \"$input\" | jq -r '.workspace.current_dir'); username=$(whoami); printf '\\033[38;2;214;93;14m󰀵 %s\\033[0m \\033[38;2;215;153;33m%s\\033[0m' \"$username\" \"$cwd\"; if git -C \"$cwd\" rev-parse --git-dir >/dev/null 2>&1; then branch=$(git -C \"$cwd\" branch --show-current 2>/dev/null); [ -n \"$branch\" ] && printf ' \\033[38;2;104;157;106m %s\\033[0m' \"$branch\"; fi; printf ' \\033[38;2;60;56;54m %s\\033[0m' \"$(date +%H:%M)\""
   },
-  "alwaysThinkingEnabled": true,
-  "model": "anthropic.claude-opus-4-5-20251101-v1:0"
+  "alwaysThinkingEnabled": true
 }

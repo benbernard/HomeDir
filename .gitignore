@@ -418,3 +418,5 @@ cookbook
 .config/fish/completions
 .claude/notification-state-*
 .claude/.credentials.json
+.claude/plans
+.config/claude-notify
