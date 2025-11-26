@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+# View the latest claude-notify log entry
+# Usage: claude-notify-log [N]  - show last N entries (default 1)
+#        claude-notify-log all  - show entire log
+
+LOG_FILE="$HOME/.config/claude-notify/notifications.log"
+
+if [[ ! -f "$LOG_FILE" ]]; then
+  echo "No notification log found at $LOG_FILE"
+  exit 1
+fi
+
+# Get the number of entries to show (default 1)
+NUM_ENTRIES="${1:-1}"
+
+if [[ "$NUM_ENTRIES" == "all" ]]; then
+  cat "$LOG_FILE"
+else
+  # Use grep to find all separator line numbers, take last N, and show from first of those to end
+  FIRST_LINE=$(grep -n "=== New notification ===" "$LOG_FILE" | tail -"$NUM_ENTRIES" | head -1 | cut -d: -f1)
+  if [[ -n "$FIRST_LINE" ]]; then
+    tail -n +${FIRST_LINE} "$LOG_FILE"
+  else
+    cat "$LOG_FILE"
+  fi
+fi

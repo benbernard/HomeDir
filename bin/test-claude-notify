@@ -1,0 +1,97 @@
+#!/usr/bin/env bash
+
+# Test script for claude-notify
+# Usage: ./test-claude-notify.sh [stop|idle_prompt]
+
+set -euo pipefail
+
+NOTIFICATION_TYPE="${1:-stop}"
+CLAUDE_NOTIFY="$HOME/bin/ts/src/claude-notify"
+
+echo "=== Testing claude-notify ===" >&2
+echo "Script: $CLAUDE_NOTIFY" >&2
+
+# Check if script exists
+if [[ ! -f "$CLAUDE_NOTIFY" ]]; then
+  echo "Error: claude-notify not found at $CLAUDE_NOTIFY" >&2
+  exit 1
+fi
+
+# Find the most recent session file in the current project
+find_recent_session() {
+  local cwd="$PWD"
+
+  echo "Looking for git root from: $cwd" >&2
+
+  # Walk up to find git root
+  while [[ "$cwd" != "/" ]]; do
+    if [[ -d "$cwd/.git" ]]; then
+      echo "Found git root: $cwd" >&2
+      break
+    fi
+    cwd="$(dirname "$cwd")"
+  done
+
+  # Encode path (replace / with -)
+  local encoded_path="${cwd//\//-}"
+  local project_dir="$HOME/.claude/projects/$encoded_path"
+
+  echo "Looking in project directory: $project_dir" >&2
+
+  if [[ ! -d "$project_dir" ]]; then
+    echo "Error: Project directory not found: $project_dir" >&2
+    return 1
+  fi
+
+  # Find most recent .jsonl file
+  echo "Finding most recent session file..." >&2
+  local session_file=$(find "$project_dir" -name "*.jsonl" -type f -exec stat -f "%m %N" {} \; 2>/dev/null | \
+    sort -rn | \
+    head -1 | \
+    cut -d' ' -f2-)
+
+  echo "Found session file: $session_file" >&2
+  echo "$session_file"
+}
+
+# Find the session file
+echo "" >&2
+SESSION_FILE=$(find_recent_session)
+
+if [[ -z "$SESSION_FILE" ]]; then
+  echo "Error: No session file found" >&2
+  exit 1
+fi
+
+echo "" >&2
+echo "=== Preparing JSON input ===" >&2
+JSON_INPUT=$(cat <<EOF
+{
+  "hook_event_name": "$(if [[ "$NOTIFICATION_TYPE" == "stop" ]]; then echo "Stop"; else echo "Notification"; fi)",
+  "transcript_path": "$SESSION_FILE",
+  "notification_type": "$NOTIFICATION_TYPE",
+  "reason": "test",
+  "cwd": "$PWD",
+  "session_id": "test-session-$(basename "$SESSION_FILE" .jsonl)"
+}
+EOF
+)
+
+echo "JSON input:" >&2
+echo "$JSON_INPUT" >&2
+echo "" >&2
+
+echo "=== Calling claude-notify ===" >&2
+echo "Running: export CLAUDE_NOTIFY_DEBUG=1; echo \$JSON | $CLAUDE_NOTIFY $NOTIFICATION_TYPE" >&2
+echo "" >&2
+
+# Use timeout to prevent hanging, enable debug mode
+export CLAUDE_NOTIFY_DEBUG=1
+if ! echo "$JSON_INPUT" | timeout 5 "$CLAUDE_NOTIFY" "$NOTIFICATION_TYPE" 2>&1; then
+  echo "" >&2
+  echo "✗ Command failed or timed out after 5 seconds" >&2
+  exit 1
+fi
+
+echo "" >&2
+echo "✓ Notification sent!" >&2
