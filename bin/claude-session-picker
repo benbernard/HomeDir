@@ -7,7 +7,7 @@ set -euo pipefail
 
 # Configuration
 CLAUDE_PROJECTS_DIR="${HOME}/.claude/projects"
-CACHE_DIR="${HOME}/.config/claude-session-picker"
+CACHE_DIR="${HOME}/.config/claude-notify"
 CACHE_FILE="${CACHE_DIR}/summaries.json"
 RESUME_DIRECTLY=false
 DEBUG_MODE=false
