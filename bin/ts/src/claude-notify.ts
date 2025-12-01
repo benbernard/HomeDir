@@ -393,15 +393,23 @@ async function main() {
   // terminal-notifier requires escaping the first character if it's a bracket
   const escapedMessage = message.startsWith("[") ? `\\${message}` : message;
 
-  // Send notification using terminal-notifier with Claude icon
-  const notifyCommand = `terminal-notifier -message ${JSON.stringify(
+  // Build terminal-notifier arguments with Claude icon and optional group
+  const args = [
+    "-message",
     escapedMessage,
-  )} -sound ${JSON.stringify(sound)} -sender ${JSON.stringify(
+    "-sound",
+    sound,
+    "-sender",
     CLAUDE_ICON_BUNDLE,
-  )}`;
+  ];
+
+  // Use transcript path as group ID if available (for per-session notification grouping)
+  if (transcriptPath) {
+    args.push("-group", transcriptPath);
+  }
 
   if (debugMode) {
-    console.error(`[DEBUG] main: notification command = ${notifyCommand}`);
+    console.error(`[DEBUG] main: notification args = ${JSON.stringify(args)}`);
   }
 
   // Log the notification details
@@ -409,10 +417,10 @@ async function main() {
   logToFile(`Project context: ${projectContext || "(none)"}`);
   logToFile(`Session summary: ${sessionSummary || "(none)"}`);
   logToFile(`Final message: ${message}`);
-  logToFile(`Command: ${notifyCommand}`);
+  logToFile(`Args: ${JSON.stringify(args)}`);
 
   try {
-    execSync(notifyCommand, { stdio: "ignore" });
+    await $`terminal-notifier ${args}`;
     console.error("[TRACE] main: Notification sent successfully");
     logToFile("Result: Success");
   } catch (err) {

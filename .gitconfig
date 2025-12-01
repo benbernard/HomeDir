@@ -166,5 +166,3 @@
 	insteadOf = https://github.com
 [safe]
 	directory = /var/app
-	directory = /var/app
-	directory = /var/app
