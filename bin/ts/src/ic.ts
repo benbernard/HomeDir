@@ -717,9 +717,10 @@ async function workspaceStartCommand(name?: string): Promise<CommandResult> {
   return { exitCode: 0 };
 }
 
-async function symlinkShowCommand(): Promise<CommandResult> {
+async function symlinkShowCommand(all: boolean): Promise<CommandResult> {
   const home = homedir();
   const currentDir = process.cwd();
+  const reposDir = getReposDir();
 
   // Try to find git root
   let gitRoot: string | null = null;
@@ -750,8 +751,13 @@ async function symlinkShowCommand(): Promise<CommandResult> {
           resolvedTarget = target; // Broken link, use raw target
         }
 
+        // Skip unless --all or points into repos directory
+        if (!all && !resolvedTarget.startsWith(reposDir)) {
+          continue;
+        }
+
         const isCurrent = gitRoot !== null && resolvedTarget === gitRoot;
-        symlinks.push({ name: item, target, isCurrent });
+        symlinks.push({ name: item, target: resolvedTarget, isCurrent });
       }
     } catch {
       // Skip items we can't read
@@ -760,17 +766,33 @@ async function symlinkShowCommand(): Promise<CommandResult> {
   }
 
   if (symlinks.length === 0) {
-    console.log("No symlinks found in home directory");
+    if (all) {
+      console.log("No symlinks found in home directory");
+    } else {
+      console.log(`No symlinks found pointing to ${reposDir}`);
+    }
     return { exitCode: 0 };
   }
 
   // Sort symlinks alphabetically
   symlinks.sort((a, b) => a.name.localeCompare(b.name));
 
+  // Calculate column widths for table formatting
+  const maxNameLen = Math.max(...symlinks.map((s) => s.name.length));
+  const nameWidth = Math.max(maxNameLen, 8); // Minimum 8 for "SYMLINK" header
+
+  // Print header
+  console.log(
+    `${chalk.bold("SYMLINK".padEnd(nameWidth))}  ${chalk.bold("TARGET")}`,
+  );
+
   // Print symlinks
   for (const { name, target, isCurrent } of symlinks) {
-    const suffix = isCurrent ? chalk.green(" (current repo)") : "";
-    console.log(`${name} -> ${target}${suffix}`);
+    const nameCol = isCurrent
+      ? chalk.green(name.padEnd(nameWidth))
+      : name.padEnd(nameWidth);
+    const marker = isCurrent ? chalk.green(" *") : "";
+    console.log(`${nameCol}  ${target}${marker}`);
   }
 
   return { exitCode: 0 };
@@ -877,7 +899,7 @@ function showHelp(): void {
       ic clone|c <repo> [-w <workspace>]       Clone repo (defaults to instacart/<repo>)
       ic clone|c <github-url> [-w <workspace>] Clone from GitHub URL (HTTPS or SSH)
       ic attach|a [--force] [--cwd]            Attach to nested tmux session (create if needed)
-      ic symlink|s [show]                      Show symlink status for current repo (default)
+      ic symlink|s [show] [--all]              Show repo symlinks (or all with --all)
       ic symlink|s create [--force]            Create ~/REPO symlink to current repo
       ic workspace start [name]                Create a new workspace directory
       ic ws start [name]                       Alias for workspace start
@@ -893,7 +915,8 @@ function showHelp(): void {
       ic a                               # Attach to nested tmux (create if needed)
       ic a --force                       # Detach other clients and attach
       ic a --cwd                         # Use current directory (deprecated, always implied)
-      ic s                               # Show symlink info for current repo
+      ic s                               # Show symlinks pointing to repos
+      ic s --all                         # Show all symlinks in home directory
       ic s create                        # Create ~/myrepo -> /path/to/myrepo symlink
       ic s create --force                # Update symlink without confirmation
   `);
@@ -961,6 +984,11 @@ async function main() {
             choices: ["show", "create"],
             default: "show",
           })
+          .option("all", {
+            type: "boolean",
+            description: "Show all symlinks in home directory (for show)",
+            default: false,
+          })
           .option("force", {
             type: "boolean",
             description: "Skip confirmation prompts (for create)",
@@ -1000,7 +1028,7 @@ async function main() {
     const symlinkSubcommand = (argv.subcommand as string) || "show";
 
     if (symlinkSubcommand === "show") {
-      result = await symlinkShowCommand();
+      result = await symlinkShowCommand(argv.all as boolean);
     } else if (symlinkSubcommand === "create") {
       result = await symlinkCreateCommand(argv.force as boolean);
     } else {
