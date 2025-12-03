@@ -718,8 +718,8 @@ async function workspaceStartCommand(name?: string): Promise<CommandResult> {
 }
 
 async function symlinkShowCommand(): Promise<CommandResult> {
-  const currentDir = process.cwd();
   const home = homedir();
+  const currentDir = process.cwd();
 
   // Try to find git root
   let gitRoot: string | null = null;
@@ -729,61 +729,48 @@ async function symlinkShowCommand(): Promise<CommandResult> {
       cwd: currentDir,
     }).trim();
   } catch {
-    logError("Not in a git repository");
-    logError(
-      "The symlink command must be run from within a git repository directory",
-    );
-    return { exitCode: 1 };
+    // Not in a git repository - that's ok, we'll show all symlinks without marking current
   }
 
-  // Get repo name from git root
-  const repoName = basename(gitRoot);
-  const symlinkPath = join(home, repoName);
+  // Get all items in home directory
+  const items = readdirSync(home);
+  const symlinks: Array<{ name: string; target: string; isCurrent: boolean }> =
+    [];
 
-  console.log(dedent`
-    Repository: ${repoName}
-    Repository location: ${gitRoot}
-    Expected symlink: ~/${repoName}
-  `);
+  for (const item of items) {
+    const itemPath = join(home, item);
+    try {
+      const stats = lstatSync(itemPath);
+      if (stats.isSymbolicLink()) {
+        const target = readlinkSync(itemPath);
+        let resolvedTarget: string;
+        try {
+          resolvedTarget = realpathSync(itemPath);
+        } catch {
+          resolvedTarget = target; // Broken link, use raw target
+        }
 
-  // Check if symlink path exists
-  if (!existsSync(symlinkPath)) {
-    logInfo(`Symlink ~/${repoName} does not exist`);
+        const isCurrent = gitRoot !== null && resolvedTarget === gitRoot;
+        symlinks.push({ name: item, target, isCurrent });
+      }
+    } catch {
+      // Skip items we can't read
+      continue;
+    }
+  }
+
+  if (symlinks.length === 0) {
+    console.log("No symlinks found in home directory");
     return { exitCode: 0 };
   }
 
-  const stats = lstatSync(symlinkPath);
+  // Sort symlinks alphabetically
+  symlinks.sort((a, b) => a.name.localeCompare(b.name));
 
-  if (stats.isSymbolicLink()) {
-    // It's a symlink
-    const currentTarget = readlinkSync(symlinkPath);
-    let resolvedTarget: string;
-    try {
-      resolvedTarget = realpathSync(symlinkPath);
-    } catch {
-      resolvedTarget = "<broken link>";
-    }
-
-    const output = [`Symlink exists: ~/${repoName} -> ${currentTarget}`];
-    if (resolvedTarget !== currentTarget) {
-      output.push(`Resolved to: ${resolvedTarget}`);
-    }
-    console.log(output.join("\n"));
-
-    if (resolvedTarget === gitRoot) {
-      logSuccess("Symlink points to current repository");
-    } else if (resolvedTarget === "<broken link>") {
-      logError("Symlink is broken");
-    } else {
-      logInfo(`Symlink points to a different location`);
-    }
-  } else {
-    // It's a regular file or directory
-    logError(
-      `~/${repoName} exists as a regular ${
-        stats.isDirectory() ? "directory" : "file"
-      }, not a symlink`,
-    );
+  // Print symlinks
+  for (const { name, target, isCurrent } of symlinks) {
+    const suffix = isCurrent ? chalk.green(" (current repo)") : "";
+    console.log(`${name} -> ${target}${suffix}`);
   }
 
   return { exitCode: 0 };
