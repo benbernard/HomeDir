@@ -4,9 +4,13 @@ import { execSync } from "child_process";
 import {
   appendFileSync,
   existsSync,
+  lstatSync,
   readFileSync,
+  readlinkSync,
   readdirSync,
   realpathSync,
+  symlinkSync,
+  unlinkSync,
   writeFileSync,
 } from "fs";
 import { homedir } from "os";
@@ -713,56 +717,199 @@ async function workspaceStartCommand(name?: string): Promise<CommandResult> {
   return { exitCode: 0 };
 }
 
+async function symlinkShowCommand(): Promise<CommandResult> {
+  const currentDir = process.cwd();
+  const home = homedir();
+
+  // Try to find git root
+  let gitRoot: string | null = null;
+  try {
+    gitRoot = execSync("git rev-parse --show-toplevel", {
+      encoding: "utf-8",
+      cwd: currentDir,
+    }).trim();
+  } catch {
+    logError("Not in a git repository");
+    logError(
+      "The symlink command must be run from within a git repository directory",
+    );
+    return { exitCode: 1 };
+  }
+
+  // Get repo name from git root
+  const repoName = basename(gitRoot);
+  const symlinkPath = join(home, repoName);
+
+  console.log(dedent`
+    Repository: ${repoName}
+    Repository location: ${gitRoot}
+    Expected symlink: ~/${repoName}
+  `);
+
+  // Check if symlink path exists
+  if (!existsSync(symlinkPath)) {
+    logInfo(`Symlink ~/${repoName} does not exist`);
+    return { exitCode: 0 };
+  }
+
+  const stats = lstatSync(symlinkPath);
+
+  if (stats.isSymbolicLink()) {
+    // It's a symlink
+    const currentTarget = readlinkSync(symlinkPath);
+    let resolvedTarget: string;
+    try {
+      resolvedTarget = realpathSync(symlinkPath);
+    } catch {
+      resolvedTarget = "<broken link>";
+    }
+
+    const output = [`Symlink exists: ~/${repoName} -> ${currentTarget}`];
+    if (resolvedTarget !== currentTarget) {
+      output.push(`Resolved to: ${resolvedTarget}`);
+    }
+    console.log(output.join("\n"));
+
+    if (resolvedTarget === gitRoot) {
+      logSuccess("Symlink points to current repository");
+    } else if (resolvedTarget === "<broken link>") {
+      logError("Symlink is broken");
+    } else {
+      logInfo(`Symlink points to a different location`);
+    }
+  } else {
+    // It's a regular file or directory
+    logError(
+      `~/${repoName} exists as a regular ${
+        stats.isDirectory() ? "directory" : "file"
+      }, not a symlink`,
+    );
+  }
+
+  return { exitCode: 0 };
+}
+
+async function symlinkCreateCommand(force: boolean): Promise<CommandResult> {
+  const currentDir = process.cwd();
+  const home = homedir();
+
+  // Try to find git root
+  let gitRoot: string | null = null;
+  try {
+    gitRoot = execSync("git rev-parse --show-toplevel", {
+      encoding: "utf-8",
+      cwd: currentDir,
+    }).trim();
+  } catch {
+    logError("Not in a git repository");
+    logError(
+      "The symlink command must be run from within a git repository directory",
+    );
+    return { exitCode: 1 };
+  }
+
+  // Get repo name from git root
+  const repoName = basename(gitRoot);
+  const symlinkPath = join(home, repoName);
+
+  // Check if symlink path already exists
+  if (existsSync(symlinkPath)) {
+    const stats = lstatSync(symlinkPath);
+
+    if (stats.isSymbolicLink()) {
+      // It's a symlink, check where it points
+      const currentTarget = readlinkSync(symlinkPath);
+      const resolvedTarget = realpathSync(symlinkPath);
+
+      if (resolvedTarget === gitRoot) {
+        logInfo(
+          `Symlink ~/${repoName} already points to ${gitRoot}. Nothing to do.`,
+        );
+        return { exitCode: 0 };
+      }
+
+      // Symlink exists but points elsewhere
+      if (!force) {
+        const response = await prompt(
+          `Symlink ~/${repoName} exists pointing to ${currentTarget}. Update to ${gitRoot}? [y/N]`,
+          "N",
+        );
+
+        const choice = response.toUpperCase().trim();
+        if (choice !== "Y" && choice !== "YES") {
+          logInfo("Aborted");
+          return { exitCode: 0 };
+        }
+      } else {
+        logInfo(
+          `Updating symlink ~/${repoName} from ${currentTarget} to ${gitRoot}...`,
+        );
+      }
+
+      // Remove old symlink and create new one
+      try {
+        unlinkSync(symlinkPath);
+        symlinkSync(gitRoot, symlinkPath);
+        logSuccess(`Updated symlink ~/${repoName} -> ${gitRoot}`);
+        return { exitCode: 0 };
+      } catch (error) {
+        logError(`Failed to update symlink: ${error}`);
+        return { exitCode: 1 };
+      }
+    } else {
+      // It's a regular file or directory
+      logError(
+        `~/${repoName} exists as a regular ${
+          stats.isDirectory() ? "directory" : "file"
+        }, not a symlink`,
+      );
+      logError(
+        "Cannot create symlink. Please remove or rename the existing item first",
+      );
+      return { exitCode: 1 };
+    }
+  }
+
+  // Symlink doesn't exist, create it
+  try {
+    symlinkSync(gitRoot, symlinkPath);
+    logSuccess(`Created symlink ~/${repoName} -> ${gitRoot}`);
+    return { exitCode: 0 };
+  } catch (error) {
+    logError(`Failed to create symlink: ${error}`);
+    return { exitCode: 1 };
+  }
+}
+
 function showHelp(): void {
-  console.log("IC - Simple Git Clone & Attach Manager");
-  console.log("");
-  console.log("Usage:");
-  console.log(
-    "  ic clone|c <user/repo> [-w <workspace>]  Clone repo to ~/repos with SSH",
-  );
-  console.log(
-    "  ic clone|c <repo> [-w <workspace>]       Clone repo (defaults to instacart/<repo>)",
-  );
-  console.log(
-    "  ic clone|c <github-url> [-w <workspace>] Clone from GitHub URL (HTTPS or SSH)",
-  );
-  console.log(
-    "  ic attach|a [--force] [--cwd]            Attach to nested tmux session (create if needed)",
-  );
-  console.log(
-    "  ic workspace start [name]                Create a new workspace directory",
-  );
-  console.log(
-    "  ic ws start [name]                       Alias for workspace start",
-  );
-  console.log(
-    "  ic --help|-h|help                        Show this help message",
-  );
-  console.log("");
-  console.log("Examples:");
-  console.log(
-    "  ic c user/repo                     # Clone git@github.com:user/repo.git",
-  );
-  console.log(
-    "  ic c myrepo                        # Clone git@github.com:instacart/myrepo.git",
-  );
-  console.log(
-    "  ic c myrepo -w myFeature           # Clone into ~/repos/myFeature/myrepo",
-  );
-  console.log("  ic c https://github.com/user/repo     # Clone from HTTPS URL");
-  console.log("  ic c git@github.com:user/repo.git     # Clone from SSH URL");
-  console.log(
-    "  ic ws start myFeature              # Create workspace ~/repos/myFeature",
-  );
-  console.log(
-    "  ic a                               # Attach to nested tmux (create if needed)",
-  );
-  console.log(
-    "  ic a --force                       # Detach other clients and attach",
-  );
-  console.log(
-    "  ic a --cwd                         # Use current directory (deprecated, always implied)",
-  );
+  console.log(dedent`
+    IC - Simple Git Clone & Attach Manager
+
+    Usage:
+      ic clone|c <user/repo> [-w <workspace>]  Clone repo to ~/repos with SSH
+      ic clone|c <repo> [-w <workspace>]       Clone repo (defaults to instacart/<repo>)
+      ic clone|c <github-url> [-w <workspace>] Clone from GitHub URL (HTTPS or SSH)
+      ic attach|a [--force] [--cwd]            Attach to nested tmux session (create if needed)
+      ic symlink|s [show]                      Show symlink status for current repo (default)
+      ic symlink|s create [--force]            Create ~/REPO symlink to current repo
+      ic workspace start [name]                Create a new workspace directory
+      ic ws start [name]                       Alias for workspace start
+      ic --help|-h|help                        Show this help message
+
+    Examples:
+      ic c user/repo                     # Clone git@github.com:user/repo.git
+      ic c myrepo                        # Clone git@github.com:instacart/myrepo.git
+      ic c myrepo -w myFeature           # Clone into ~/repos/myFeature/myrepo
+      ic c https://github.com/user/repo     # Clone from HTTPS URL
+      ic c git@github.com:user/repo.git     # Clone from SSH URL
+      ic ws start myFeature              # Create workspace ~/repos/myFeature
+      ic a                               # Attach to nested tmux (create if needed)
+      ic a --force                       # Detach other clients and attach
+      ic a --cwd                         # Use current directory (deprecated, always implied)
+      ic s                               # Show symlink info for current repo
+      ic s create                        # Create ~/myrepo -> /path/to/myrepo symlink
+      ic s create --force                # Update symlink without confirmation
+  `);
 }
 
 async function main() {
@@ -816,6 +963,24 @@ async function main() {
         });
       },
     )
+    .command(
+      ["symlink [subcommand]", "s [subcommand]"],
+      "Manage symlinks for current repo",
+      (yargs) => {
+        return yargs
+          .positional("subcommand", {
+            describe: "Subcommand to run (show or create)",
+            type: "string",
+            choices: ["show", "create"],
+            default: "show",
+          })
+          .option("force", {
+            type: "boolean",
+            description: "Skip confirmation prompts (for create)",
+            default: false,
+          });
+      },
+    )
     .command(["help", "--help", "-h"], "Show help message")
     .help(false)
     .version(false)
@@ -843,6 +1008,19 @@ async function main() {
     subcommand === "start"
   ) {
     result = await workspaceStartCommand(argv.name as string | undefined);
+  } else if (command === "symlink" || command === "s") {
+    // Get subcommand from argv (yargs will default to 'show')
+    const symlinkSubcommand = (argv.subcommand as string) || "show";
+
+    if (symlinkSubcommand === "show") {
+      result = await symlinkShowCommand();
+    } else if (symlinkSubcommand === "create") {
+      result = await symlinkCreateCommand(argv.force as boolean);
+    } else {
+      logError(`Unknown symlink subcommand: ${symlinkSubcommand}`);
+      logError("Available subcommands: show, create");
+      result = { exitCode: 1 };
+    }
   } else if (command === "help" || argv.help) {
     showHelp();
     result = { exitCode: 0 };
