@@ -14,7 +14,6 @@ if [[ $? != 0 ]]; then;
   }
 fi
 
-FAST_SYNTAX_PATH=$(submodule fast-syntax-highlighting)/fast-syntax-highlighting.plugin.zsh
-if [[ -e ${FAST_SYNTAX_PATH} ]]; then
-  source ${FAST_SYNTAX_PATH}
-fi
+# Syntax highlighting moved to end of .zshrc (after compinit) to avoid
+# "unhandled ZLE widget '_complete_debug'" warning
+# See bottom of ~/.zshrc for where it's now loaded

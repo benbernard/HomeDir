@@ -38,11 +38,9 @@ if [[ "$ZSH_CMD_LOGGING" == "1" ]]; then
   setopt XTRACE
 fi
 
-# Load completion functions
-autoload -Uz compinit
-
-# Fuck it, disable compaudit
-ZSH_DISABLE_COMPFIX=true
+# compinit is deferred and called at the end (see lines 99-115)
+# autoload -Uz compinit  # Commented out - loaded later
+# ZSH_DISABLE_COMPFIX=true  # Not needed with deferred compinit approach
 
 # Disable prompt to update oh my zsh
 DISABLE_UPDATE_PROMPT=true
@@ -98,11 +96,27 @@ fi
 
 # Perform compinit after everything has loaded.  Only do a full compinit if
 # zcompdump file is older than 24 hours
+# First, undefine the no-op compinit wrapper from 00_oh_my_zsh.zsh
+unfunction compinit 2>/dev/null
+unfunction compdef 2>/dev/null
+autoload -Uz compinit
 if [[ -n ${ZDOTDIR}/.zcompdump(#qN.mh+24) ]]; then
 	compinit -u;
 else
 	compinit -C -u;
 fi;
+
+# Replay queued compdef calls
+for _compdef_call in "${_compdef_queue[@]}"; do
+  compdef ${=_compdef_call}
+done
+unset _compdef_queue _compdef_call
+
+# Load syntax highlighting AFTER compinit to avoid "unhandled ZLE widget" warnings
+FAST_SYNTAX_PATH=$(submodule fast-syntax-highlighting)/fast-syntax-highlighting.plugin.zsh
+if [[ -e ${FAST_SYNTAX_PATH} ]]; then
+  source ${FAST_SYNTAX_PATH}
+fi
 
 ### BEGIN--Instacart Shell Settings. (Updated: Wed Jul 14 13:32:34 PDT 2021. [Script Version 1.3.16]) NO-TOUCH
 ### END--Instacart Shell Settings.

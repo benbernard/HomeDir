@@ -212,12 +212,12 @@ export function parseGitHubInput(
 }
 
 /**
- * Detect if the given path is within a workspace directory structure.
- * Returns the workspace name if detected, null otherwise.
+ * Detect if the given path is within a workspace/project directory structure.
+ * Returns the workspace/project name if detected, null otherwise.
  *
  * Examples:
  *   ~/repos/myFeature/ava -> "myFeature"
- *   ~/repos/myFeature -> "myFeature" (if it contains subdirectories)
+ *   ~/repos/myFeature -> "myFeature" (if it contains .ic_project or .workspace file)
  *   ~/repos/standalone-repo -> null
  */
 export function detectWorkspace(path: string): string | null {
@@ -239,26 +239,47 @@ export function detectWorkspace(path: string): string | null {
 
   if (parts.length >= 2) {
     // We're in a subdirectory like ~/repos/myFeature/ava
-    // First part is the workspace name
-    return parts[0];
+    // Check if parent directory has project marker
+    const potentialProject = join(reposDir, parts[0]);
+    const hasProjectMarker =
+      existsSync(join(potentialProject, ".ic_project")) ||
+      existsSync(join(potentialProject, ".workspace"));
+
+    if (hasProjectMarker) {
+      return parts[0];
+    }
+
+    // Fallback: if no marker but parent has no .git, assume it's a project
+    const gitDir = join(potentialProject, ".git");
+    if (!existsSync(gitDir)) {
+      return parts[0];
+    }
   }
 
   if (parts.length === 1) {
     // We're at ~/repos/something
-    // Check if this directory is a workspace (no .git) or a standalone repo (has .git)
-    const potentialWorkspace = join(reposDir, parts[0]);
+    const potentialProject = join(reposDir, parts[0]);
 
-    if (!existsSync(potentialWorkspace)) {
+    if (!existsSync(potentialProject)) {
       return null;
     }
 
-    // If it has a .git directory, it's a standalone repo, not a workspace
-    const gitDir = join(potentialWorkspace, ".git");
+    // Check for project marker files
+    const hasProjectMarker =
+      existsSync(join(potentialProject, ".ic_project")) ||
+      existsSync(join(potentialProject, ".workspace"));
+
+    if (hasProjectMarker) {
+      return parts[0];
+    }
+
+    // If it has a .git directory, it's a standalone repo, not a project
+    const gitDir = join(potentialProject, ".git");
     if (existsSync(gitDir)) {
       return null;
     }
 
-    // No .git directory means it's a workspace
+    // No .git directory and no marker - could be a project without marker yet
     return parts[0];
   }
 
@@ -285,7 +306,7 @@ function isWorkspaceDir(path: string): boolean {
 
 async function cloneCommand(
   input: string,
-  workspaceFlag?: string,
+  projectFlag?: string,
 ): Promise<CommandResult> {
   if (!input) {
     logError("Usage: ic clone <user/repo> or <repo> or <github-url>");
@@ -302,38 +323,53 @@ async function cloneCommand(
 
   const { user, repo } = parsed;
 
-  // Determine workspace context
+  // Determine project context
   const currentDir = process.cwd();
-  const currentWorkspace = detectWorkspace(currentDir);
-  let targetWorkspace: string | null = null;
+  const currentProject = detectWorkspace(currentDir);
+  let targetProject: string | null = null;
 
-  if (workspaceFlag) {
-    // Explicit workspace flag provided
-    targetWorkspace = workspaceFlag;
-  } else if (currentWorkspace) {
-    // We're in a workspace directory, prompt for choice
+  if (projectFlag) {
+    // Explicit project flag provided
+    targetProject = projectFlag;
+  } else if (currentProject) {
+    // We're in a project directory, prompt for choice
     const response = await prompt(
-      `Clone into workspace '${currentWorkspace}' or globally? [workspace/GLOBAL]`,
+      `Clone into project '${currentProject}' or globally? [project/GLOBAL]`,
       "GLOBAL",
     );
 
     const choice = response.toUpperCase().trim();
-    if (choice === "WORKSPACE" || choice === "W") {
-      targetWorkspace = currentWorkspace;
+    if (choice === "PROJECT" || choice === "P") {
+      targetProject = currentProject;
     }
-    // Otherwise targetWorkspace stays null (global clone)
+    // Otherwise targetProject stays null (global clone)
   }
 
   const repoUrl = `git@github.com:${user}/${repo}.git`;
   const reposDir = getReposDir();
   let repoDir: string;
+  let projectDir: string | null = null;
 
-  if (targetWorkspace) {
-    // Clone into workspace
-    repoDir = join(reposDir, targetWorkspace, repo);
+  if (targetProject) {
+    // Clone into project
+    projectDir = join(reposDir, targetProject);
+    repoDir = join(projectDir, repo);
   } else {
     // Clone globally to ~/repos
     repoDir = join(reposDir, repo);
+  }
+
+  // Create project directory and marker file if needed
+  if (projectDir && !existsSync(projectDir)) {
+    try {
+      execSync(`mkdir -p "${projectDir}"`, { stdio: "inherit" });
+      const projectMarkerFile = join(projectDir, ".ic_project");
+      writeFileSync(projectMarkerFile, "", { encoding: "utf-8" });
+      logSuccess(`Created project directory: ${projectDir}`);
+    } catch (error) {
+      logError(`Failed to create project directory: ${error}`);
+      return { exitCode: 1 };
+    }
   }
 
   // Handle directory collision with prompt
@@ -345,7 +381,11 @@ async function cloneCommand(
     );
 
     const newName = suffix ? `${repo}-${suffix}` : `${repo}-`;
-    repoDir = join(reposDir, newName);
+    if (targetProject) {
+      repoDir = join(projectDir!, newName);
+    } else {
+      repoDir = join(reposDir, newName);
+    }
 
     // Check again if the new directory exists
     if (existsSync(repoDir)) {
@@ -368,10 +408,8 @@ async function cloneCommand(
     return { exitCode: 1 };
   }
 
-  if (targetWorkspace) {
-    logSuccess(
-      `Successfully cloned to workspace '${targetWorkspace}': ${repoDir}`,
-    );
+  if (targetProject) {
+    logSuccess(`Successfully cloned to project '${targetProject}': ${repoDir}`);
   } else {
     logSuccess(`Successfully cloned to ${repoDir}`);
   }
@@ -930,9 +968,9 @@ function showHelp(): void {
     IC - Simple Git Clone & Attach Manager
 
     Usage:
-      ic clone|c <user/repo> [-w <workspace>]  Clone repo to ~/repos with SSH
-      ic clone|c <repo> [-w <workspace>]       Clone repo (defaults to instacart/<repo>)
-      ic clone|c <github-url> [-w <workspace>] Clone from GitHub URL (HTTPS or SSH)
+      ic clone|c <user/repo> [-p <project>]   Clone repo to ~/repos with SSH
+      ic clone|c <repo> [-p <project>]        Clone repo (defaults to instacart/<repo>)
+      ic clone|c <github-url> [-p <project>]  Clone from GitHub URL (HTTPS or SSH)
       ic attach|a [--force] [--cwd]            Attach to nested tmux session (create if needed)
       ic symlink|s [show] [--all]              Show repo symlinks (or all with --all)
       ic symlink|s create|c [-f|--force]       Create ~/REPO symlink to current repo
@@ -943,7 +981,8 @@ function showHelp(): void {
     Examples:
       ic c user/repo                     # Clone git@github.com:user/repo.git
       ic c myrepo                        # Clone git@github.com:instacart/myrepo.git
-      ic c myrepo -w myFeature           # Clone into ~/repos/myFeature/myrepo
+      ic c myrepo -p myFeature           # Clone into ~/repos/myFeature/myrepo
+      ic c myrepo --project myFeature    # Same as above
       ic c https://github.com/user/repo     # Clone from HTTPS URL
       ic c git@github.com:user/repo.git     # Clone from SSH URL
       ic ws start myFeature              # Create workspace ~/repos/myFeature
@@ -999,10 +1038,16 @@ async function main() {
             describe: "Repository in format user/repo or just repo",
             type: "string",
           })
+          .option("project", {
+            alias: "p",
+            type: "string",
+            description: "Clone into a project directory",
+          })
           .option("workspace", {
             alias: "w",
             type: "string",
-            description: "Clone into a workspace directory",
+            description:
+              "Clone into a workspace directory (alias for --project)",
           });
       },
     )
@@ -1043,14 +1088,18 @@ async function main() {
             default: false,
           });
         })
-        .command(["create", "c"], "Create symlink for current repo", (yargs) => {
-          return yargs.option("force", {
-            alias: "f",
-            type: "boolean",
-            description: "Skip confirmation prompts",
-            default: false,
-          });
-        })
+        .command(
+          ["create", "c"],
+          "Create symlink for current repo",
+          (yargs) => {
+            return yargs.option("force", {
+              alias: "f",
+              type: "boolean",
+              description: "Skip confirmation prompts",
+              default: false,
+            });
+          },
+        )
         .demandCommand(1, "");
     })
     .showHelpOnFail(false)
@@ -1069,10 +1118,11 @@ async function main() {
   let result: CommandResult;
 
   if (command === "clone" || command === "c") {
-    result = await cloneCommand(
-      argv.repo as string,
-      argv.workspace as string | undefined,
-    );
+    // Prefer --project over --workspace for backward compatibility
+    const projectOrWorkspace =
+      (argv.project as string | undefined) ||
+      (argv.workspace as string | undefined);
+    result = await cloneCommand(argv.repo as string, projectOrWorkspace);
   } else if (command === "attach" || command === "a") {
     result = await attachCommand(argv.force as boolean, argv.cwd as boolean);
   } else if (

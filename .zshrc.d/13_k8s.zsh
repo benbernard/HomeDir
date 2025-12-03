@@ -18,7 +18,8 @@ kcdp() {
   kcd pod "$@"
 }
 
-unalias kcp
+# Only unalias if it exists (kubectl plugin used to create this alias)
+[[ $(type -w kcp 2>/dev/null) == "kcp: alias" ]] && unalias kcp
 kcp () {
   NAME=$1
   PATTERN="^"

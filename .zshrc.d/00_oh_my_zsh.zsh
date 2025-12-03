@@ -1,6 +1,18 @@
 # Path to your oh-my-zsh configuration.
 ZSH=$HOME/.oh-my-zsh
 
+# Defer compinit until after all .zshrc.d files load
+autoload -Uz compinit
+_compdef_queue=()
+compinit() {
+  # No-op: the real compinit will be called at the end of .zshrc
+  :
+}
+compdef() {
+  # Queue compdef calls to replay after real compinit runs
+  _compdef_queue+=("${(j: :)@}")
+}
+
 # Set name of the theme to load.
 # Look in ~/.oh-my-zsh/themes/
 # Optionally, if you set this to "random", it'll load a random theme each
@@ -25,7 +37,8 @@ COMPLETION_WAITING_DOTS="true"
 # Which plugins would you like to load? (plugins can be found in ~/.oh-my-zsh/plugins/*)
 # Example format: plugins=(rails git textmate ruby lighthouse)
 #plugins=(git ruby github nyan python perl vi-mode django)
-plugins=(git ruby python perl vi-mode frontend-search npm heroku kubectl)
+# Reduced to essentials for faster startup (was: git ruby python perl vi-mode frontend-search npm heroku kubectl)
+plugins=(git vi-mode)
 
 source $ZSH/oh-my-zsh.sh
 
