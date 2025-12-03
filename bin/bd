@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+# Wrapper for beads (bd) that prevents accidentally using home directory's .beads
+# from projects under ~/repos/
+
+set -euo pipefail
+
+# Check for the real bd command at known location
+BD_CMD="/Users/benbernard/.nvm/versions/node/v23.11.1/bin/bd"
+if [[ ! -x "$BD_CMD" ]]; then
+    echo "Error: bd command not found at $BD_CMD" >&2
+    echo "Please install beads: npm install -g @beads/bd" >&2
+    exit 1
+fi
+
+# Find .beads directory by walking up the directory tree
+find_beads_dir() {
+    local dir="$PWD"
+    while [[ "$dir" != "/" ]]; do
+        if [[ -d "$dir/.beads" ]]; then
+            echo "$dir"
+            return 0
+        fi
+        dir=$(dirname "$dir")
+    done
+    return 1
+}
+
+# Safety check: prevent using home .beads from repos/ subdirectories
+HOME_DIR="$HOME"
+BEADS_DIR=$(find_beads_dir) || true
+
+if [[ -n "$BEADS_DIR" && "$BEADS_DIR" == "$HOME_DIR" ]]; then
+    # .beads is in home directory
+    if [[ "$PWD" == "$HOME_DIR/repos/"* ]]; then
+        # Error: we're under repos/ trying to use home .beads
+        echo "Error: Cannot use home directory's .beads from $HOME/repos/" >&2
+        echo "Current directory: $PWD" >&2
+        echo ".beads found at: $BEADS_DIR/.beads" >&2
+        echo "Please run 'bd init' in your project directory." >&2
+        exit 1
+    fi
+fi
+
+# All checks passed - delegate to real bd command
+exec "$BD_CMD" "$@"
