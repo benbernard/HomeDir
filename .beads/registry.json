@@ -1,0 +1,10 @@
+[
+  {
+    "workspace_path": "/Users/benbernard",
+    "socket_path": "/Users/benbernard/.beads/bd.sock",
+    "database_path": "/Users/benbernard/.beads/beads.db",
+    "pid": 22464,
+    "version": "0.28.0",
+    "started_at": "2025-12-03T10:32:08.814765-08:00"
+  }
+]

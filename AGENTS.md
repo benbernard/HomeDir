@@ -26,16 +26,17 @@ Since configuration files are source-controlled, never commit:
 **CRITICAL WARNING**: Generic file searches in this directory will have severe performance issues.
 
 ### The Problem
-- `repos/` contains numerous project subdirectories
-- Each project under `repos/` has its own `node_modules/` directory
-- Recursive searches will scan thousands of dependency files
+- `repos/` contains numerous project subdirectories, each with its own `node_modules/` directory
+- `bin/ts/` has its own `node_modules/` directory with hundreds of dependencies
+- Recursive searches will scan thousands of dependency files causing severe slowdowns
 - This makes glob patterns and grep searches extremely slow
-- Other paths like bin/ts and some submodules also contain lots of library code
-  that should not be searched
+- Other paths like some submodules also contain lots of library code that should not be searched
+
+**⚠️  CRITICAL: NEVER run recursive searches in `repos/` or `bin/ts/` without excluding `node_modules/`**
 
 ### Solutions
 
-**Option 1: Search Only Git-Tracked Files (RECOMMENDED)**
+**✅ Option 1: Search Only Git-Tracked Files (RECOMMENDED)**
 ```bash
 # Use git ls-files to limit search scope
 git ls-files | grep pattern
@@ -45,6 +46,8 @@ git ls-files | xargs grep search-term
 # Use Grep with path: /Users/benbernard and avoid repos/ subdirectory
 ```
 
+**This is the BEST approach** - it automatically excludes `repos/`, `bin/ts/node_modules/`, and other untracked files.
+
 **Option 2: Explicitly Exclude node_modules**
 ```bash
 # With find
@@ -52,15 +55,42 @@ find . -name node_modules -prune -o -name "*.ts" -print
 
 # With grep/rg
 grep -r --exclude-dir=node_modules pattern .
+rg --glob '!node_modules' pattern .
+
+# With Glob tool - avoid these patterns:
+# ❌ Glob(pattern='**/*.ts')  # BAD - searches ALL of repos/
+# ✅ Glob(pattern='bin/ts/src/**/*.ts')  # GOOD - specific directory
 ```
 
 **Option 3: Search Specific Directories**
 Limit searches to known source-controlled directories:
-- `bin/ts/src/` (TypeScript modules)
-- `.config/` (configuration files)
-- `.claude/` (Claude Code settings)
-- `bin/` (DO NOT DO THIS ONE, includes bin/ts/node_modules)
-- Root-level dotfiles (`.tmux.conf`, `.bash_profile`, etc.)
+- ✅ `bin/ts/src/` (TypeScript modules - safe)
+- ✅ `.config/` (configuration files)
+- ✅ `.claude/` (Claude Code settings)
+- ✅ `.zshrc.d/` (zsh configuration)
+- ✅ Root-level dotfiles (`.tmux.conf`, `.bash_profile`, etc.)
+- ❌ `bin/` (DO NOT - includes `bin/ts/node_modules/`)
+- ❌ `repos/` (DO NOT - contains many `node_modules/` directories)
+
+### Examples of What NOT to Do
+
+```bash
+# ❌ BAD - Searches all of home directory including repos/ and bin/ts/node_modules/
+Glob(pattern='**/*.ts')
+Grep(pattern='function', path='/Users/benbernard')
+find . -name '*.ts'
+
+# ❌ BAD - Will hit bin/ts/node_modules/
+Glob(pattern='bin/**/*.ts')
+
+# ❌ BAD - Will scan all projects under repos/
+Grep(pattern='TODO', path='/Users/benbernard/repos')
+
+# ✅ GOOD - Specific to source files only
+Glob(pattern='bin/ts/src/**/*.ts')
+Grep(pattern='function', path='/Users/benbernard/bin/ts/src')
+git ls-files | grep pattern
+```
 
 ## Key Directories
 
@@ -178,9 +208,14 @@ This setup uses a "dotfiles in home directory" approach:
 - May have site-specific overrides in `site/tmux.conf`
 
 ### Shell Configuration
+- **Primary shell**: zsh
+- **Configuration convention**: Use `~/.zshrc.d/` for shell configuration, NOT `~/.zshrc` directly
+  - Files in `~/.zshrc.d/` are automatically sourced by `~/.zshrc` (sorted alphabetically)
+  - Prefix with numbers for ordering (e.g., `00_`, `01_`, `02_`, etc.)
+  - Examples: `04_nvm_lazy.zsh`, `04_pyenv_cached.zsh`, `05_ic.zsh`
+  - This keeps configuration modular and organized
+  - When adding new shell features, create a new file in `~/.zshrc.d/`, don't edit `~/.zshrc`
 - Check `site/` for job-specific environment variables or aliases
-- I use zsh for my shell.  You can see my .d directory in ~/.zshrc.d which is
-  where different types of settings should go rather than .zshrc
 
 ## Search Strategy Recommendations
 
@@ -192,11 +227,154 @@ When you need to find something:
 4. **For TypeScript code**: Search specifically in `bin/ts/src/`
 5. **For configs**: Search in `.config/` or root-level dotfiles
 
+## Issue Tracking with bd (beads)
+
+**IMPORTANT**: This project uses **bd (beads)** for ALL issue tracking. Do NOT use markdown TODOs, task lists, or other tracking methods.
+
+### Why bd?
+
+- Dependency-aware: Track blockers and relationships between issues
+- Git-friendly: Auto-syncs to JSONL for version control
+- Agent-optimized: JSON output, ready work detection, discovered-from links
+- Prevents duplicate tracking systems and confusion
+
+### Quick Start
+
+**Check for ready work:**
+```bash
+bd ready --json
+```
+
+**Create new issues:**
+```bash
+bd create "Issue title" -t bug|feature|task -p 0-4 --json
+bd create "Issue title" -p 1 --deps discovered-from:bd-123 --json
+bd create "Subtask" --parent <epic-id> --json  # Hierarchical subtask (gets ID like epic-id.1)
+```
+
+**Claim and update:**
+```bash
+bd update bd-42 --status in_progress --json
+bd update bd-42 --priority 1 --json
+```
+
+**Complete work:**
+```bash
+bd close bd-42 --reason "Completed" --json
+```
+
+### Issue Types
+
+- `bug` - Something broken
+- `feature` - New functionality
+- `task` - Work item (tests, docs, refactoring)
+- `epic` - Large feature with subtasks
+- `chore` - Maintenance (dependencies, tooling)
+
+### Priorities
+
+- `0` - Critical (security, data loss, broken builds)
+- `1` - High (major features, important bugs)
+- `2` - Medium (default, nice-to-have)
+- `3` - Low (polish, optimization)
+- `4` - Backlog (future ideas)
+
+### Workflow for AI Agents
+
+1. **Check ready work**: `bd ready` shows unblocked issues
+2. **Claim your task**: `bd update <id> --status in_progress`
+3. **Work on it**: Implement, test, document
+4. **Discover new work?** Create linked issue:
+   - `bd create "Found bug" -p 1 --deps discovered-from:<parent-id>`
+5. **Complete**: `bd close <id> --reason "Done"`
+6. **Commit together**: Always commit the `.beads/issues.jsonl` file together with the code changes so issue state stays in sync with code state
+
+### Auto-Sync
+
+bd automatically syncs with git:
+- Exports to `.beads/issues.jsonl` after changes (5s debounce)
+- Imports from JSONL when newer (e.g., after `git pull`)
+- No manual export/import needed!
+
+### GitHub Copilot Integration
+
+If using GitHub Copilot, also create `.github/copilot-instructions.md` for automatic instruction loading.
+Run `bd onboard` to get the content, or see step 2 of the onboard instructions.
+
+### MCP Server (Recommended)
+
+If using Claude or MCP-compatible clients, install the beads MCP server:
+
+```bash
+pip install beads-mcp
+```
+
+Add to MCP config (e.g., `~/.config/claude/config.json`):
+```json
+{
+  "beads": {
+    "command": "beads-mcp",
+    "args": []
+  }
+}
+```
+
+Then use `mcp__beads__*` functions instead of CLI commands.
+
+### Managing AI-Generated Planning Documents
+
+AI assistants often create planning and design documents during development:
+- PLAN.md, IMPLEMENTATION.md, ARCHITECTURE.md
+- DESIGN.md, CODEBASE_SUMMARY.md, INTEGRATION_PLAN.md
+- TESTING_GUIDE.md, TECHNICAL_DESIGN.md, and similar files
+
+**Best Practice: Use a dedicated directory for these ephemeral files**
+
+**Recommended approach:**
+- Create a `history/` directory in the project root
+- Store ALL AI-generated planning/design docs in `history/`
+- Keep the repository root clean and focused on permanent project files
+- Only access `history/` when explicitly asked to review past planning
+
+**Example .gitignore entry (optional):**
+```
+# AI planning documents (ephemeral)
+history/
+```
+
+**Benefits:**
+- ✅ Clean repository root
+- ✅ Clear separation between ephemeral and permanent documentation
+- ✅ Easy to exclude from version control if desired
+- ✅ Preserves planning history for archeological research
+- ✅ Reduces noise when browsing the project
+
+### CLI Help
+
+Run `bd <command> --help` to see all available flags for any command.
+For example: `bd create --help` shows `--parent`, `--deps`, `--assignee`, etc.
+
+### Important Rules
+
+- ✅ Use bd for ALL task tracking
+- ✅ Always use `--json` flag for programmatic use
+- ✅ Link discovered work with `discovered-from` dependencies
+- ✅ Check `bd ready` before asking "what should I work on?"
+- ✅ Store AI planning docs in `history/` directory
+- ✅ Run `bd <cmd> --help` to discover available flags
+- ❌ Do NOT create markdown TODO lists
+- ❌ Do NOT use external issue trackers
+- ❌ Do NOT duplicate tracking systems
+- ❌ Do NOT clutter repo root with planning documents
+
+For more details, see README.md and QUICKSTART.md.
+
 ## Summary
 
 - ✅ Home directory is source-controlled
 - ❌ `repos/` is NOT source-controlled (separate projects)
 - ⚠️  `site/` is separate repo with job-specific configs
-- 🚨 ALWAYS avoid recursive searches that include `repos/` and `node_modules/`
+- 🚨 **NEVER run recursive searches in `repos/` or `bin/ts/` without excluding `node_modules/`**
 - 🔒 Be careful not to commit secrets from source-controlled configs
-- 🔍 Prefer `git ls-files` or targeted searches over broad recursive searches
+- 🔍 **ALWAYS prefer `git ls-files` or targeted searches over broad recursive searches**
+- ⚡ Search `bin/ts/src/` for TypeScript code, NOT `bin/ts/` (which includes node_modules)

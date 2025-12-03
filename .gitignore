@@ -420,3 +420,4 @@ cookbook
 .claude/.credentials.json
 .claude/plans
 .config/claude-notify
+.claude/plugins/
