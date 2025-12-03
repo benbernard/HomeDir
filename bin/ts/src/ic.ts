@@ -923,7 +923,14 @@ function showHelp(): void {
 }
 
 async function main() {
-  const argv = await yargs(hideBin(process.argv))
+  // Check for help flag early - before yargs processes it
+  const args = hideBin(process.argv);
+  if (args.includes("--help") || args.includes("-h") || args.includes("help")) {
+    showHelp();
+    process.exit(0);
+  }
+
+  const argv = await yargs(args)
     .option("shell-integration-script", {
       type: "string",
       description: "File path for shell integration script",
@@ -973,29 +980,24 @@ async function main() {
         });
       },
     )
-    .command(
-      ["symlink [subcommand]", "s [subcommand]"],
-      "Manage symlinks for current repo",
-      (yargs) => {
-        return yargs
-          .positional("subcommand", {
-            describe: "Subcommand to run (show or create)",
-            type: "string",
-            choices: ["show", "create"],
-            default: "show",
-          })
-          .option("all", {
+    .command(["symlink", "s"], "Manage symlinks for current repo", (yargs) => {
+      return yargs
+        .command(["show", "$0"], "Show repo symlinks", (yargs) => {
+          return yargs.option("all", {
             type: "boolean",
-            description: "Show all symlinks in home directory (for show)",
-            default: false,
-          })
-          .option("force", {
-            type: "boolean",
-            description: "Skip confirmation prompts (for create)",
+            description: "Show all symlinks in home directory",
             default: false,
           });
-      },
-    )
+        })
+        .command("create", "Create symlink for current repo", (yargs) => {
+          return yargs.option("force", {
+            type: "boolean",
+            description: "Skip confirmation prompts",
+            default: false,
+          });
+        })
+        .demandCommand(1, "");
+    })
     .command(["help", "--help", "-h"], "Show help message")
     .help(false)
     .version(false)
@@ -1011,7 +1013,11 @@ async function main() {
 
   let result: CommandResult;
 
-  if (command === "clone" || command === "c") {
+  // Check for help flag or help command
+  if (command === "help" || argv.help) {
+    showHelp();
+    result = { exitCode: 0 };
+  } else if (command === "clone" || command === "c") {
     result = await cloneCommand(
       argv.repo as string,
       argv.workspace as string | undefined,
@@ -1024,8 +1030,8 @@ async function main() {
   ) {
     result = await workspaceStartCommand(argv.name as string | undefined);
   } else if (command === "symlink" || command === "s") {
-    // Get subcommand from argv (yargs will default to 'show')
-    const symlinkSubcommand = (argv.subcommand as string) || "show";
+    // Subcommand is in argv._[1], defaults to 'show' via yargs $0
+    const symlinkSubcommand = subcommand || "show";
 
     if (symlinkSubcommand === "show") {
       result = await symlinkShowCommand(argv.all as boolean);
@@ -1036,9 +1042,6 @@ async function main() {
       logError("Available subcommands: show, create");
       result = { exitCode: 1 };
     }
-  } else if (command === "help" || argv.help) {
-    showHelp();
-    result = { exitCode: 0 };
   } else {
     logError("No command specified");
     showHelp();
