@@ -836,8 +836,24 @@ async function symlinkCreateCommand(force: boolean): Promise<CommandResult> {
     return { exitCode: 1 };
   }
 
-  // Get repo name from git root
-  const repoName = basename(gitRoot);
+  // Get repo name from git remote URL (falls back to directory basename)
+  let repoName = basename(gitRoot);
+  try {
+    const remoteUrl = execSync("git remote get-url origin", {
+      encoding: "utf-8",
+      cwd: gitRoot,
+    }).trim();
+
+    // Extract repo name from URL
+    // Handles: git@github.com:user/repo.git, https://github.com/user/repo, etc.
+    const match = remoteUrl.match(/\/([^\/]+?)(\.git)?$/);
+    if (match) {
+      repoName = match[1];
+    }
+  } catch {
+    // No remote or error - use directory basename
+  }
+
   const symlinkPath = join(home, repoName);
 
   // Check if symlink path already exists
@@ -919,7 +935,7 @@ function showHelp(): void {
       ic clone|c <github-url> [-w <workspace>] Clone from GitHub URL (HTTPS or SSH)
       ic attach|a [--force] [--cwd]            Attach to nested tmux session (create if needed)
       ic symlink|s [show] [--all]              Show repo symlinks (or all with --all)
-      ic symlink|s create [--force]            Create ~/REPO symlink to current repo
+      ic symlink|s create|c [-f|--force]       Create ~/REPO symlink to current repo
       ic workspace start [name]                Create a new workspace directory
       ic ws start [name]                       Alias for workspace start
       ic --help|-h|help                        Show this help message
@@ -936,8 +952,8 @@ function showHelp(): void {
       ic a --cwd                         # Use current directory (deprecated, always implied)
       ic s                               # Show symlinks pointing to repos
       ic s --all                         # Show all symlinks in home directory
-      ic s create                        # Create ~/myrepo -> /path/to/myrepo symlink
-      ic s create --force                # Update symlink without confirmation
+      ic s c                             # Create ~/myrepo -> /path/to/myrepo symlink
+      ic s c -f                          # Update symlink without confirmation
   `);
 }
 
@@ -1027,8 +1043,9 @@ async function main() {
             default: false,
           });
         })
-        .command("create", "Create symlink for current repo", (yargs) => {
+        .command(["create", "c"], "Create symlink for current repo", (yargs) => {
           return yargs.option("force", {
+            alias: "f",
             type: "boolean",
             description: "Skip confirmation prompts",
             default: false,
@@ -1069,7 +1086,7 @@ async function main() {
 
     if (symlinkSubcommand === "show") {
       result = await symlinkShowCommand(argv.all as boolean);
-    } else if (symlinkSubcommand === "create") {
+    } else if (symlinkSubcommand === "create" || symlinkSubcommand === "c") {
       result = await symlinkCreateCommand(argv.force as boolean);
     } else {
       logError(`Unknown symlink subcommand: ${symlinkSubcommand}`);
