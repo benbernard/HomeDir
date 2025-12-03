@@ -791,7 +791,7 @@ async function symlinkShowCommand(all: boolean): Promise<CommandResult> {
     const nameCol = isCurrent
       ? chalk.green(name.padEnd(nameWidth))
       : name.padEnd(nameWidth);
-    const marker = isCurrent ? chalk.green(" *") : "";
+    const marker = isCurrent ? chalk.green(" *current") : "";
     console.log(`${nameCol}  ${target}${marker}`);
   }
 
