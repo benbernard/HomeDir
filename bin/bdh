@@ -5,7 +5,7 @@
 set -euo pipefail
 
 # Check for the real bd command at known location
-BD_CMD="/Users/benbernard/.nvm/versions/node/v23.11.1/bin/bd"
+BD_CMD="/usr/local/bin/bd"
 if [[ ! -x "$BD_CMD" ]]; then
     echo "Error: bd command not found at $BD_CMD" >&2
     echo "Please install beads: npm install -g @beads/bd" >&2
