@@ -791,8 +791,27 @@ async function symlinkShowCommand(all: boolean): Promise<CommandResult> {
     const nameCol = isCurrent
       ? chalk.green(name.padEnd(nameWidth))
       : name.padEnd(nameWidth);
+
+    // Format target: truncate to ~/repos/... and highlight last path element
+    let displayTarget = target;
+    if (target.startsWith(reposDir)) {
+      // Show as ~/repos/...
+      displayTarget = target.replace(reposDir, "~/repos");
+    } else if (target.startsWith(home)) {
+      // Show as ~/...
+      displayTarget = target.replace(home, "~");
+    }
+
+    // Highlight the last path element (basename)
+    const lastSlash = displayTarget.lastIndexOf("/");
+    const formattedTarget =
+      lastSlash >= 0
+        ? displayTarget.slice(0, lastSlash + 1) +
+          chalk.bold(displayTarget.slice(lastSlash + 1))
+        : chalk.bold(displayTarget);
+
     const marker = isCurrent ? chalk.green(" *current") : "";
-    console.log(`${nameCol}  ${target}${marker}`);
+    console.log(`${nameCol}  ${formattedTarget}${marker}`);
   }
 
   return { exitCode: 0 };
@@ -923,9 +942,28 @@ function showHelp(): void {
 }
 
 async function main() {
-  // Check for help flag early - before yargs processes it
+  // Intercept top-level help only (no command specified)
   const args = hideBin(process.argv);
-  if (args.includes("--help") || args.includes("-h") || args.includes("help")) {
+
+  // Filter out shell integration args to find real user args
+  const userArgs = args.filter((arg) => !arg.startsWith("--shell-integration"));
+  // Skip the arg after --shell-integration-script (the file path)
+  const filteredArgs: string[] = [];
+  for (let i = 0; i < args.length; i++) {
+    if (args[i] === "--shell-integration-script") {
+      i++; // Skip next arg (the file path)
+    } else {
+      filteredArgs.push(args[i]);
+    }
+  }
+
+  const shouldShowCustomHelp =
+    filteredArgs.length === 0 ||
+    filteredArgs[0] === "--help" ||
+    filteredArgs[0] === "-h" ||
+    filteredArgs[0] === "help";
+
+  if (shouldShowCustomHelp) {
     showHelp();
     process.exit(0);
   }
@@ -998,8 +1036,8 @@ async function main() {
         })
         .demandCommand(1, "");
     })
-    .command(["help", "--help", "-h"], "Show help message")
-    .help(false)
+    .showHelpOnFail(false)
+    .help()
     .version(false)
     .parse();
 
@@ -1013,11 +1051,7 @@ async function main() {
 
   let result: CommandResult;
 
-  // Check for help flag or help command
-  if (command === "help" || argv.help) {
-    showHelp();
-    result = { exitCode: 0 };
-  } else if (command === "clone" || command === "c") {
+  if (command === "clone" || command === "c") {
     result = await cloneCommand(
       argv.repo as string,
       argv.workspace as string | undefined,
