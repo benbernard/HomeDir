@@ -16,12 +16,8 @@ path=(
   $(submodule fzf)/bin # Fzf is first, because some systems have an old fzf installed
   /usr/local/bin # Local bin ahead of path so it can override
   $(submodule tmux)
-  $HOME/homebrew/bin
-  $PATH
+  ${path[@]}  # Preserve existing path array (NOT $PATH which is colon-separated)
   $HOME/bin
-  /usr/local/symlinks
-  /usr/local/scripts
-  /usr/local/buildtools/java/jdk/bin
   /usr/local/sbin
   /usr/local/bin
   /usr/sbin
@@ -36,7 +32,6 @@ path=(
   $HOME/.yarn/bin
   ${HOME}/.config/yarn/global/bin
   ${HOME}/.local/bin
-  ${HOME}/.paths/nvm
 )
 
 export VIM_TEMP="/var/tmp/$USER/vim-temp"
@@ -59,16 +54,6 @@ watch=(notme root)
 
 # Fix backspace ... sigh...
 # stty erase 
-
-# These were added to make local perl libs a thing, probably added by a program
-export PERL_LOCAL_LIB_ROOT="/Users/bernard/perl5:$PERL_LOCAL_LIB_ROOT";
-export PERL_MB_OPT="--install_base "/Users/bernard/perl5"";
-export PERL_MM_OPT="INSTALL_BASE=/Users/bernard/perl5";
-export PERL5LIB="/Users/bernard/perl5/lib/perl5:$PERL5LIB";
-export PATH="/Users/bernard/perl5/bin:$PATH";
-
-### Added by the Heroku Toolbelt
-export PATH="/usr/local/heroku/bin:$PATH"
 
 # Setup fzf
 # Use ag for searching (uses .agignore)
