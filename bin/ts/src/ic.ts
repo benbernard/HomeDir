@@ -1319,59 +1319,140 @@ async function symlinkProjectCommand(force: boolean): Promise<CommandResult> {
   return { exitCode: 0 };
 }
 
+/**
+ * Check if a given path is inside a project directory.
+ * Returns the project name if it is, null otherwise.
+ */
+function getProjectFromPath(path: string): string | null {
+  const reposDir = getReposDir();
+
+  if (!path.startsWith(reposDir)) {
+    return null;
+  }
+
+  const relativePath = path.slice(reposDir.length + 1);
+  const parts = relativePath.split("/").filter((p) => p.length > 0);
+
+  // Need at least 2 parts for a project repo: <project>/<repo>
+  if (parts.length < 2) {
+    return null;
+  }
+
+  const potentialProject = join(reposDir, parts[0]);
+
+  // Check for project marker files
+  const hasProjectMarker =
+    existsSync(join(potentialProject, ".ic_project")) ||
+    existsSync(join(potentialProject, ".workspace"));
+
+  if (hasProjectMarker) {
+    return parts[0];
+  }
+
+  // If no marker but no .git directory at that level, assume it's a project
+  const gitDir = join(potentialProject, ".git");
+  if (!existsSync(gitDir)) {
+    return parts[0];
+  }
+
+  return null;
+}
+
 async function symlinkUnlinkProjectCommand(
   force: boolean,
 ): Promise<CommandResult> {
   const currentDir = process.cwd();
   const workspace = detectWorkspace(currentDir);
-
-  if (!workspace) {
-    logError("Not in a project/workspace");
-    logError(
-      "The 'ic symlink unlink-project' command must be run from within a project directory",
-    );
-    return { exitCode: 1 };
-  }
-
   const reposDir = getReposDir();
-  const projectDir = join(reposDir, workspace);
   const home = homedir();
 
-  logInfo(`Scanning project repos to unlink from project '${workspace}'...`);
+  let projectRepos: string[];
 
-  // Find all git repositories in the project directory
-  let items: string[];
-  try {
-    items = readdirSync(projectDir);
-  } catch (error) {
-    logError(`Failed to read project directory ${projectDir}: ${error}`);
-    return { exitCode: 1 };
-  }
+  if (workspace) {
+    // Inside a project - use current behavior (scan that project's repos)
+    const projectDir = join(reposDir, workspace);
+    logInfo(`Scanning project repos to unlink from project '${workspace}'...`);
 
-  const repos: string[] = [];
-  for (const item of items) {
-    const itemPath = join(projectDir, item);
-    const gitDir = join(itemPath, ".git");
-
+    // Find all git repositories in the project directory
+    let items: string[];
     try {
-      const stats = lstatSync(itemPath);
-      if (stats.isDirectory() && existsSync(gitDir)) {
-        repos.push(itemPath);
-      }
-    } catch {
-      // Skip items we can't read
+      items = readdirSync(projectDir);
+    } catch (error) {
+      logError(`Failed to read project directory ${projectDir}: ${error}`);
+      return { exitCode: 1 };
     }
-  }
 
-  if (repos.length === 0) {
-    logInfo(`No git repositories found in project '${workspace}'`);
-    return { exitCode: 0 };
+    projectRepos = [];
+    for (const item of items) {
+      const itemPath = join(projectDir, item);
+      const gitDir = join(itemPath, ".git");
+
+      try {
+        const stats = lstatSync(itemPath);
+        if (stats.isDirectory() && existsSync(gitDir)) {
+          projectRepos.push(itemPath);
+        }
+      } catch {
+        // Skip items we can't read
+      }
+    }
+
+    if (projectRepos.length === 0) {
+      logInfo(`No git repositories found in project '${workspace}'`);
+      return { exitCode: 0 };
+    }
+  } else {
+    // Outside a project - scan all symlinks in home directory
+    logInfo("Scanning all symlinks for project repos to unlink...");
+
+    // Get all symlinks in home directory
+    let homeItems: string[];
+    try {
+      homeItems = readdirSync(home);
+    } catch (error) {
+      logError(`Failed to read home directory: ${error}`);
+      return { exitCode: 1 };
+    }
+
+    projectRepos = [];
+    for (const item of homeItems) {
+      const itemPath = join(home, item);
+
+      try {
+        const stats = lstatSync(itemPath);
+        if (!stats.isSymbolicLink()) {
+          continue;
+        }
+
+        // Get the resolved target
+        let target: string;
+        try {
+          target = realpathSync(itemPath);
+        } catch {
+          // Broken symlink, skip
+          continue;
+        }
+
+        // Check if target is inside a project
+        const project = getProjectFromPath(target);
+        if (project) {
+          projectRepos.push(target);
+        }
+      } catch {
+        // Skip items we can't read
+      }
+    }
+
+    if (projectRepos.length === 0) {
+      logInfo("No symlinks found pointing to project repos");
+      return { exitCode: 0 };
+    }
   }
 
   // Check what actions are needed for each repo
   const actions: SymlinkAction[] = [];
 
-  for (const projectRepoDir of repos) {
+  for (const projectRepoDir of projectRepos) {
     const repoName = getRepoName(projectRepoDir);
     const symlinkPath = join(home, repoName);
     const globalRepoDir = join(reposDir, repoName);
@@ -1450,9 +1531,13 @@ async function symlinkUnlinkProjectCommand(
 
   // Display planned changes
   console.log();
-  logInfo(
-    `Found ${actions.length} symlink(s) pointing to project '${workspace}'`,
-  );
+  if (workspace) {
+    logInfo(
+      `Found ${actions.length} symlink(s) pointing to project '${workspace}'`,
+    );
+  } else {
+    logInfo(`Found ${actions.length} symlink(s) pointing to project repos`);
+  }
   console.log();
 
   if (toUpdate.length > 0) {
@@ -1952,6 +2037,10 @@ async function main() {
               .example(
                 "$0 s up",
                 "Unlink project, point symlinks to ~/repos/{repo}",
+              )
+              .example(
+                "$0 s up (outside project)",
+                "Unlink ALL project symlinks to global repos",
               )
               .example("$0 s up -f", "Unlink without confirmation");
           },
