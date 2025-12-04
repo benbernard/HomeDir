@@ -1527,6 +1527,143 @@ async function symlinkUnlinkProjectCommand(
   return { exitCode: 0 };
 }
 
+async function tmuxRenumberCommand(dryRun: boolean): Promise<CommandResult> {
+  // Check if in tmux
+  if (!process.env.TMUX) {
+    logError("Not in a tmux session");
+    return { exitCode: 1 };
+  }
+
+  // Get current session info to detect if we're in nested tmux
+  let sessionName: string;
+  let windowName = "";
+  let paneTitle = "";
+  try {
+    const tmuxInfo = execSync(
+      'tmux display-message -p "#{session_name}|#{pane_title}|#{window_name}"',
+      {
+        encoding: "utf-8",
+      },
+    ).trim();
+
+    [sessionName, paneTitle, windowName] = tmuxInfo.split("|");
+  } catch {
+    logError("Failed to get current tmux session information");
+    return { exitCode: 1 };
+  }
+
+  // Detect nested tmux by checking window/pane titles
+  const isNested =
+    windowName.startsWith("nt:") ||
+    windowName.startsWith("ic:") ||
+    paneTitle.startsWith("nt:") ||
+    paneTitle.startsWith("ic:") ||
+    paneTitle.includes("Nested TM");
+
+  // Get list of windows with their indices
+  let windowListOutput: string;
+  try {
+    if (isNested) {
+      windowListOutput = execNestedTmux(
+        'list-windows -t "${sessionName}" -F "#{window_index}:#{window_name}"',
+        { encoding: "utf-8" },
+      ) as string;
+    } else {
+      windowListOutput = execSync(
+        `tmux list-windows -t "${sessionName}" -F "#{window_index}:#{window_name}"`,
+        { encoding: "utf-8" },
+      ) as string;
+    }
+  } catch (error) {
+    logError(`Failed to list windows: ${error}`);
+    return { exitCode: 1 };
+  }
+
+  // Parse window indices
+  const windows = windowListOutput
+    .trim()
+    .split("\n")
+    .map((line) => {
+      const [indexStr, name] = line.split(":");
+      return { index: parseInt(indexStr, 10), name };
+    })
+    .sort((a, b) => a.index - b.index);
+
+  if (windows.length === 0) {
+    logInfo("No windows found in current session");
+    return { exitCode: 0 };
+  }
+
+  // Check if renumbering is needed
+  let needsRenumbering = false;
+  const renumberOps: Array<{
+    oldIndex: number;
+    newIndex: number;
+    name: string;
+  }> = [];
+
+  for (let i = 0; i < windows.length; i++) {
+    if (windows[i].index !== i) {
+      needsRenumbering = true;
+      renumberOps.push({
+        oldIndex: windows[i].index,
+        newIndex: i,
+        name: windows[i].name,
+      });
+    }
+  }
+
+  if (!needsRenumbering) {
+    logInfo(
+      "Windows are already numbered sequentially (0,1,2,...). No action needed.",
+    );
+    return { exitCode: 0 };
+  }
+
+  // Display what will be done
+  console.log();
+  logInfo(
+    `Session '${sessionName}' ${isNested ? "(nested)" : ""} has ${
+      windows.length
+    } windows with gaps:`,
+  );
+  console.log();
+
+  console.log(chalk.bold("Current window indices:"));
+  console.log(`  ${windows.map((w) => w.index).join(", ")}`);
+  console.log();
+
+  console.log(chalk.bold("Will renumber to:"));
+  for (const op of renumberOps) {
+    console.log(
+      `  Window ${chalk.yellow(op.oldIndex.toString())} (${
+        op.name
+      }) -> ${chalk.green(op.newIndex.toString())}`,
+    );
+  }
+  console.log();
+
+  if (dryRun) {
+    logInfo("Dry run complete. Use without --dry-run to apply changes.");
+    return { exitCode: 0 };
+  }
+
+  // Execute renumbering using tmux's built-in move-window -r command
+  try {
+    if (isNested) {
+      execNestedTmux(`move-window -r -t "${sessionName}"`, { stdio: "pipe" });
+    } else {
+      execSync(`tmux move-window -r -t "${sessionName}"`, { stdio: "pipe" });
+    }
+    logSuccess(`Renumbered ${renumberOps.length} window(s)`);
+  } catch (error) {
+    logError(`Failed to renumber windows: ${error}`);
+    return { exitCode: 1 };
+  }
+
+  return { exitCode: 0 };
+}
+
 async function attachDirsCommand(
   targetDir?: string,
   includeDotdirs = false,
@@ -1719,6 +1856,25 @@ async function main() {
           );
       },
     )
+    .command(["tmux", "t"], "Tmux window management", (yargs) => {
+      return yargs
+        .command(
+          ["renumber", "rn"],
+          "Renumber tmux windows to remove gaps (0,1,2,3...)",
+          (yargs) => {
+            return yargs
+              .option("dry-run", {
+                type: "boolean",
+                description: "Show what would be done without making changes",
+                default: false,
+              })
+              .example("$0 t rn", "Renumber windows to 0,1,2,3...")
+              .example("$0 t rn --dry-run", "Show what would be renumbered")
+              .example("$0 tmux renumber", "Full command to renumber windows");
+          },
+        )
+        .demandCommand(1, "");
+    })
     .command(
       ["workspace start [name]", "ws start [name]"],
       "Create a new workspace directory",
@@ -1833,6 +1989,17 @@ async function main() {
       argv.dir as string | undefined,
       argv["include-dotdirs"] as boolean,
     );
+  } else if (command === "tmux" || command === "t") {
+    // Subcommand is in argv._[1]
+    const tmuxSubcommand = subcommand;
+
+    if (tmuxSubcommand === "renumber" || tmuxSubcommand === "rn") {
+      result = await tmuxRenumberCommand(argv["dry-run"] as boolean);
+    } else {
+      logError(`Unknown tmux subcommand: ${tmuxSubcommand}`);
+      logError("Available subcommands: renumber (rn)");
+      result = { exitCode: 1 };
+    }
   } else if (
     (command === "workspace" || command === "ws") &&
     subcommand === "start"
