@@ -28,7 +28,11 @@ Analyze the current working tree and create logical commits from the staged and 
 1. First, check the current state:
    - Run `git status` to see all changes
    - Check the current branch - NEVER commit directly to master
-   - If on master, ask the user what branch to use (you can suggest a descriptive branch name)
+   - If on master, automatically create a feature branch:
+     ```bash
+     git checkout -b feature/<descriptive-name>
+     ```
+     Use a short descriptive name based on the changes (e.g., `feature/fix-cache`, `feature/add-logging`)
    - Run `git diff` for unstaged changes
    - Run `git diff --staged` for staged changes
    - Review recent commits to understand the style
