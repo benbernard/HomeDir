@@ -304,6 +304,85 @@ function isWorkspaceDir(path: string): boolean {
   return parts.length === 1;
 }
 
+/**
+ * Initialize a project directory with git repo, .gitignore, and .ic_project marker
+ */
+function initProjectDirectory(projectDir: string): void {
+  // Create directory
+  execSync(`mkdir -p "${projectDir}"`, { stdio: "inherit" });
+
+  // Initialize git repo
+  execSync("git init", { cwd: projectDir, stdio: "pipe" });
+
+  // Create .gitignore with header
+  const gitignorePath = join(projectDir, ".gitignore");
+  const gitignoreContent = `# Project repos - managed by ic
+# Each cloned repo is added here automatically
+
+`;
+  writeFileSync(gitignorePath, gitignoreContent, { encoding: "utf-8" });
+
+  // Create .ic_project marker
+  const projectMarkerFile = join(projectDir, ".ic_project");
+  writeFileSync(projectMarkerFile, "", { encoding: "utf-8" });
+
+  // Stage the initial files
+  execSync("git add .gitignore .ic_project", {
+    cwd: projectDir,
+    stdio: "pipe",
+  });
+  execSync('git commit -m "Initialize project"', {
+    cwd: projectDir,
+    stdio: "pipe",
+  });
+
+  logSuccess(`Initialized project directory: ${projectDir}`);
+}
+
+/**
+ * Add a repo directory to the project's .gitignore file
+ */
+function addRepoToProjectGitignore(
+  projectDir: string,
+  repoDirName: string,
+): void {
+  const gitignorePath = join(projectDir, ".gitignore");
+
+  // Read current .gitignore
+  let gitignoreContent = "";
+  if (existsSync(gitignorePath)) {
+    gitignoreContent = readFileSync(gitignorePath, "utf-8");
+  }
+
+  // Check if repo is already in .gitignore
+  const lines = gitignoreContent.split("\n");
+  const repoPattern = `/${repoDirName}`;
+  if (lines.includes(repoPattern)) {
+    // Already in .gitignore
+    return;
+  }
+
+  // Add repo to .gitignore
+  if (!gitignoreContent.endsWith("\n") && gitignoreContent.length > 0) {
+    gitignoreContent += "\n";
+  }
+  gitignoreContent += `${repoPattern}\n`;
+  writeFileSync(gitignorePath, gitignoreContent, { encoding: "utf-8" });
+
+  // Commit the change
+  try {
+    execSync(
+      `git add .gitignore && git commit -m "Add ${repoDirName} to gitignore"`,
+      {
+        cwd: projectDir,
+        stdio: "pipe",
+      },
+    );
+  } catch {
+    // If commit fails (e.g., no changes), that's okay
+  }
+}
+
 async function cloneCommand(
   input: string,
   projectFlag?: string,
@@ -341,6 +420,7 @@ async function cloneCommand(
   const reposDir = getReposDir();
   let repoDir: string;
   let projectDir: string | null = null;
+  let repoDirName = repo; // Track the actual directory name (may change with suffix)
 
   if (targetProject) {
     // Clone into project
@@ -351,15 +431,12 @@ async function cloneCommand(
     repoDir = join(reposDir, repo);
   }
 
-  // Create project directory and marker file if needed
+  // Create project directory if needed
   if (projectDir && !existsSync(projectDir)) {
     try {
-      execSync(`mkdir -p "${projectDir}"`, { stdio: "inherit" });
-      const projectMarkerFile = join(projectDir, ".ic_project");
-      writeFileSync(projectMarkerFile, "", { encoding: "utf-8" });
-      logSuccess(`Created project directory: ${projectDir}`);
+      initProjectDirectory(projectDir);
     } catch (error) {
-      logError(`Failed to create project directory: ${error}`);
+      logError(`Failed to initialize project directory: ${error}`);
       return { exitCode: 1 };
     }
   }
@@ -373,6 +450,7 @@ async function cloneCommand(
     );
 
     const newName = suffix ? `${repo}-${suffix}` : `${repo}-`;
+    repoDirName = newName; // Update the tracked directory name
     if (projectDir) {
       repoDir = join(projectDir, newName);
     } else {
@@ -402,6 +480,10 @@ async function cloneCommand(
 
   if (targetProject) {
     logSuccess(`Successfully cloned to project '${targetProject}': ${repoDir}`);
+    // Add repo to project's .gitignore
+    if (projectDir) {
+      addRepoToProjectGitignore(projectDir, repoDirName);
+    }
   } else {
     logSuccess(`Successfully cloned to ${repoDir}`);
   }
@@ -706,10 +788,16 @@ async function workspaceStartCommand(name?: string): Promise<CommandResult> {
 
   // Check if directory exists
   if (!existsSync(workspaceDir)) {
-    // Create the workspace directory
+    // Create and initialize the workspace directory
     try {
-      execSync(`mkdir -p "${workspaceDir}"`, { stdio: "inherit" });
-      logSuccess(`Created workspace directory: ${workspaceDir}`);
+      initProjectDirectory(workspaceDir);
+      // Also create .workspace marker for backward compatibility
+      const workspaceFile = join(workspaceDir, ".workspace");
+      writeFileSync(workspaceFile, "", { encoding: "utf-8" });
+      execSync("git add .workspace && git commit --amend --no-edit", {
+        cwd: workspaceDir,
+        stdio: "pipe",
+      });
     } catch (error) {
       logError(`Failed to create workspace directory: ${error}`);
       return { exitCode: 1 };
@@ -717,6 +805,14 @@ async function workspaceStartCommand(name?: string): Promise<CommandResult> {
   } else {
     // Directory exists, check if it's already a workspace or a repo
     const gitDir = join(workspaceDir, ".git");
+    const workspaceFile = join(workspaceDir, ".workspace");
+    const icProjectFile = join(workspaceDir, ".ic_project");
+
+    if (existsSync(workspaceFile) || existsSync(icProjectFile)) {
+      logInfo(`Workspace '${workspaceName}' already exists at ${workspaceDir}`);
+      return { exitCode: 0 };
+    }
+
     if (existsSync(gitDir)) {
       logError(
         `Directory ${workspaceDir} is a git repository, not a workspace`,
@@ -724,20 +820,9 @@ async function workspaceStartCommand(name?: string): Promise<CommandResult> {
       return { exitCode: 1 };
     }
 
-    const workspaceFile = join(workspaceDir, ".workspace");
-    if (existsSync(workspaceFile)) {
-      logInfo(`Workspace '${workspaceName}' already exists at ${workspaceDir}`);
-      return { exitCode: 0 };
-    }
-  }
-
-  // Create .workspace file
-  const workspaceFile = join(workspaceDir, ".workspace");
-  try {
-    writeFileSync(workspaceFile, "", { encoding: "utf-8" });
-    logSuccess(`Created workspace '${workspaceName}' at ${workspaceDir}`);
-  } catch (error) {
-    logError(`Failed to create .workspace file: ${error}`);
+    logError(
+      `Directory ${workspaceDir} exists but is not a workspace or git repo`,
+    );
     return { exitCode: 1 };
   }
 
@@ -1442,78 +1527,111 @@ async function symlinkUnlinkProjectCommand(
   return { exitCode: 0 };
 }
 
-function showHelp(): void {
-  console.log(dedent`
-    IC - Simple Git Clone & Attach Manager
+async function attachDirsCommand(
+  targetDir?: string,
+  includeDotdirs = false,
+): Promise<CommandResult> {
+  // Check if in tmux
+  if (!process.env.TMUX) {
+    logError("Not in a tmux session");
+    return { exitCode: 1 };
+  }
 
-    Usage:
-      ic clone|c <user/repo> [-p <project>]   Clone repo to ~/repos with SSH
-      ic clone|c <repo> [-p <project>]        Clone repo (defaults to instacart/<repo>)
-      ic clone|c <github-url> [-p <project>]  Clone from GitHub URL (HTTPS or SSH)
-      ic attach|a [--force] [--cwd]            Attach to nested tmux session (create if needed)
-      ic symlink|s [show] [--all]              Show repo symlinks (or all with --all)
-      ic symlink|s create|c [-f|--force]       Create ~/REPO symlink to current repo
-      ic symlink|s project|p [-f|--force]      Create symlinks for all repos in current project
-      ic symlink|s unlink-project|up [-f]      Unlink project, point symlinks to global repos
-      ic workspace start [name]                Create a new workspace directory
-      ic ws start [name]                       Alias for workspace start
-      ic --help|-h|help                        Show this help message
+  // Get the target directory (default to current directory)
+  const dir = targetDir || process.cwd();
 
-    Note:
-      When running 'ic clone' from within a project directory, the repo will be
-      automatically cloned into that project. Use explicit -p flag to override.
+  // Check if directory exists
+  if (!existsSync(dir)) {
+    logError(`Directory does not exist: ${dir}`);
+    return { exitCode: 1 };
+  }
 
-    Examples:
-      ic c user/repo                     # Clone git@github.com:user/repo.git
-      ic c myrepo                        # Clone git@github.com:instacart/myrepo.git
-      ic c myrepo -p myFeature           # Clone into ~/repos/myFeature/myrepo
-      ic c myrepo --project myFeature    # Same as above
-      cd ~/repos/myFeature && ic c myrepo   # Auto-clones into myFeature project
-      ic c https://github.com/user/repo     # Clone from HTTPS URL
-      ic c git@github.com:user/repo.git     # Clone from SSH URL
-      ic ws start myFeature              # Create workspace ~/repos/myFeature
-      ic a                               # Attach to nested tmux (create if needed)
-      ic a --force                       # Detach other clients and attach
-      ic a --cwd                         # Use current directory (deprecated, always implied)
-      ic s                               # Show symlinks pointing to repos
-      ic s --all                         # Show all symlinks in home directory
-      ic s c                             # Create ~/myrepo -> /path/to/myrepo symlink
-      ic s c -f                          # Update symlink without confirmation
-      ic s p                             # Create symlinks for all repos in current project
-      ic s p -f                          # Create project symlinks without confirmation
-      ic s up                            # Unlink project, point symlinks to ~/repos/{repo}
-      ic s up -f                         # Unlink without confirmation
-  `);
-}
+  // Get current session name
+  let sessionName: string;
+  try {
+    sessionName = execSync('tmux display-message -p "#{session_name}"', {
+      encoding: "utf-8",
+    }).trim();
+  } catch {
+    logError("Failed to get current tmux session name");
+    return { exitCode: 1 };
+  }
 
-async function main() {
-  // Intercept top-level help only (no command specified)
-  const args = hideBin(process.argv);
+  logInfo(`Creating windows for subdirectories in: ${dir}`);
 
-  // Filter out shell integration args to find real user args
-  const userArgs = args.filter((arg) => !arg.startsWith("--shell-integration"));
-  // Skip the arg after --shell-integration-script (the file path)
-  const filteredArgs: string[] = [];
-  for (let i = 0; i < args.length; i++) {
-    if (args[i] === "--shell-integration-script") {
-      i++; // Skip next arg (the file path)
-    } else {
-      filteredArgs.push(args[i]);
+  // Get all subdirectories
+  let items: string[];
+  try {
+    items = readdirSync(dir);
+  } catch (error) {
+    logError(`Failed to read directory ${dir}: ${error}`);
+    return { exitCode: 1 };
+  }
+
+  const subdirs: string[] = [];
+  for (const item of items) {
+    // Skip dot-prefixed directories unless --include-dotdirs is set
+    if (!includeDotdirs && item.startsWith(".")) {
+      continue;
+    }
+
+    const itemPath = join(dir, item);
+    try {
+      const stats = lstatSync(itemPath);
+      if (stats.isDirectory()) {
+        subdirs.push(itemPath);
+      }
+    } catch {
+      // Skip items we can't read
     }
   }
 
-  const shouldShowCustomHelp =
-    filteredArgs.length === 0 ||
-    filteredArgs[0] === "--help" ||
-    filteredArgs[0] === "-h" ||
-    filteredArgs[0] === "help";
-
-  if (shouldShowCustomHelp) {
-    showHelp();
-    process.exit(0);
+  if (subdirs.length === 0) {
+    logInfo(`No subdirectories found in ${dir}`);
+    return { exitCode: 0 };
   }
 
+  logInfo(`Found ${subdirs.length} subdirectories`);
+
+  // Create a window for each subdirectory
+  let successCount = 0;
+  for (const subdirPath of subdirs) {
+    const windowName = basename(subdirPath);
+
+    try {
+      execSync(
+        `tmux new-window -t "${sessionName}" -n "${windowName}" -c "${subdirPath}"`,
+        {
+          stdio: "pipe",
+        },
+      );
+      logSuccess(`Created window '${windowName}' in ${subdirPath}`);
+      successCount++;
+    } catch (error) {
+      logError(`Failed to create window for ${windowName}: ${error}`);
+    }
+  }
+
+  console.log();
+  logSuccess(
+    `Created ${successCount}/${subdirs.length} windows in session '${sessionName}'`,
+  );
+
+  return { exitCode: 0 };
+}
+
+async function main() {
+  const args = hideBin(process.argv);
+
   const argv = await yargs(args)
+    .scriptName("ic")
+    .usage("$0 <command> [options]")
+    .example("$0 c user/repo", "Clone a GitHub repo")
+    .example("$0 a", "Attach to nested tmux session")
+    .example("$0 s", "Show repo symlinks")
+    .epilog(
+      "Note: When running 'ic clone' from within a project directory, the repo will be automatically cloned into that project.",
+    )
     .option("shell-integration-script", {
       type: "string",
       description: "File path for shell integration script",
@@ -1538,7 +1656,17 @@ async function main() {
             type: "string",
             description:
               "Clone into a workspace directory (alias for --project)",
-          });
+          })
+          .example("$0 c user/repo", "Clone git@github.com:user/repo.git")
+          .example(
+            "$0 c myrepo",
+            "Clone git@github.com:instacart/myrepo.git (defaults to instacart)",
+          )
+          .example(
+            "$0 c myrepo -p myFeature",
+            "Clone into ~/repos/myFeature/myrepo",
+          )
+          .example("$0 c https://github.com/user/repo", "Clone from HTTPS URL");
       },
     )
     .command(
@@ -1556,68 +1684,129 @@ async function main() {
             description:
               "Use current working directory (deprecated, always implied)",
             default: true,
-          });
+          })
+          .example("$0 a", "Attach to nested tmux (create if needed)")
+          .example("$0 a --force", "Detach other clients and attach");
+      },
+    )
+    .command(
+      ["attach-dirs [dir]", "ad [dir]"],
+      "Create tmux window for each subdirectory",
+      (yargs) => {
+        return yargs
+          .positional("dir", {
+            describe:
+              "Directory to scan for subdirectories (defaults to current directory)",
+            type: "string",
+          })
+          .option("include-dotdirs", {
+            type: "boolean",
+            description:
+              "Include dot-prefixed directories (like .git, .vscode)",
+            default: false,
+          })
+          .example(
+            "$0 ad",
+            "Create windows for all subdirectories in current dir",
+          )
+          .example(
+            "$0 ad ~/repos/myproject",
+            "Create windows for all subdirectories in specified dir",
+          )
+          .example(
+            "$0 ad --include-dotdirs",
+            "Include dot-prefixed directories like .git",
+          );
       },
     )
     .command(
       ["workspace start [name]", "ws start [name]"],
       "Create a new workspace directory",
       (yargs) => {
-        return yargs.positional("name", {
-          describe: "Workspace name",
-          type: "string",
-        });
+        return yargs
+          .positional("name", {
+            describe: "Workspace name",
+            type: "string",
+          })
+          .example(
+            "$0 ws start myFeature",
+            "Create workspace ~/repos/myFeature",
+          );
       },
     )
     .command(["symlink", "s"], "Manage symlinks for current repo", (yargs) => {
       return yargs
         .command(["show", "$0"], "Show repo symlinks", (yargs) => {
-          return yargs.option("all", {
-            type: "boolean",
-            description: "Show all symlinks in home directory",
-            default: false,
-          });
+          return yargs
+            .option("all", {
+              type: "boolean",
+              description: "Show all symlinks in home directory",
+              default: false,
+            })
+            .example("$0 s", "Show symlinks pointing to repos")
+            .example("$0 s --all", "Show all symlinks in home directory");
         })
         .command(
           ["create", "c"],
           "Create symlink for current repo",
           (yargs) => {
-            return yargs.option("force", {
-              alias: "f",
-              type: "boolean",
-              description: "Skip confirmation prompts",
-              default: false,
-            });
+            return yargs
+              .option("force", {
+                alias: "f",
+                type: "boolean",
+                description: "Skip confirmation prompts",
+                default: false,
+              })
+              .example("$0 s c", "Create ~/myrepo -> /path/to/myrepo symlink")
+              .example("$0 s c -f", "Update symlink without confirmation");
           },
         )
         .command(
           ["project", "p"],
           "Create symlinks for all repos in current project",
           (yargs) => {
-            return yargs.option("force", {
-              alias: "f",
-              type: "boolean",
-              description: "Skip confirmation prompts",
-              default: false,
-            });
+            return yargs
+              .option("force", {
+                alias: "f",
+                type: "boolean",
+                description: "Skip confirmation prompts",
+                default: false,
+              })
+              .example(
+                "$0 s p",
+                "Create symlinks for all repos in current project",
+              )
+              .example(
+                "$0 s p -f",
+                "Create project symlinks without confirmation",
+              );
           },
         )
         .command(
           ["unlink-project", "up"],
           "Unlink project repos, point symlinks back to global repos",
           (yargs) => {
-            return yargs.option("force", {
-              alias: "f",
-              type: "boolean",
-              description: "Skip confirmation prompts",
-              default: false,
-            });
+            return yargs
+              .option("force", {
+                alias: "f",
+                type: "boolean",
+                description: "Skip confirmation prompts",
+                default: false,
+              })
+              .example(
+                "$0 s up",
+                "Unlink project, point symlinks to ~/repos/{repo}",
+              )
+              .example("$0 s up -f", "Unlink without confirmation");
           },
         )
         .demandCommand(1, "");
     })
-    .showHelpOnFail(false)
+    .demandCommand(1, "You must provide a command")
+    .recommendCommands()
+    .strict()
     .help()
+    .alias("help", "h")
     .version(false)
     .parse();
 
@@ -1639,6 +1828,11 @@ async function main() {
     result = await cloneCommand(argv.repo as string, projectOrWorkspace);
   } else if (command === "attach" || command === "a") {
     result = await attachCommand(argv.force as boolean, argv.cwd as boolean);
+  } else if (command === "attach-dirs" || command === "ad") {
+    result = await attachDirsCommand(
+      argv.dir as string | undefined,
+      argv["include-dotdirs"] as boolean,
+    );
   } else if (
     (command === "workspace" || command === "ws") &&
     subcommand === "start"
@@ -1665,8 +1859,8 @@ async function main() {
       result = { exitCode: 1 };
     }
   } else {
-    logError("No command specified");
-    showHelp();
+    // This should never happen due to .demandCommand(), but just in case
+    logError("Unknown command");
     result = { exitCode: 1 };
   }
 
