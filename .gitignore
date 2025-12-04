@@ -421,3 +421,5 @@ cookbook
 .claude/plans
 .config/claude-notify
 .claude/plugins/
+olive-cli
+olive-reviewer

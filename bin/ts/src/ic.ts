@@ -6,8 +6,8 @@ import {
   existsSync,
   lstatSync,
   readFileSync,
-  readlinkSync,
   readdirSync,
+  readlinkSync,
   realpathSync,
   symlinkSync,
   unlinkSync,
@@ -332,17 +332,9 @@ async function cloneCommand(
     // Explicit project flag provided
     targetProject = projectFlag;
   } else if (currentProject) {
-    // We're in a project directory, prompt for choice
-    const response = await prompt(
-      `Clone into project '${currentProject}' or globally? [project/GLOBAL]`,
-      "GLOBAL",
-    );
-
-    const choice = response.toUpperCase().trim();
-    if (choice === "PROJECT" || choice === "P") {
-      targetProject = currentProject;
-    }
-    // Otherwise targetProject stays null (global clone)
+    // We're in a project directory, automatically use it
+    targetProject = currentProject;
+    logInfo(`Auto-detected project '${currentProject}', cloning into it`);
   }
 
   const repoUrl = `git@github.com:${user}/${repo}.git`;
@@ -381,8 +373,8 @@ async function cloneCommand(
     );
 
     const newName = suffix ? `${repo}-${suffix}` : `${repo}-`;
-    if (targetProject) {
-      repoDir = join(projectDir!, newName);
+    if (projectDir) {
+      repoDir = join(projectDir, newName);
     } else {
       repoDir = join(reposDir, newName);
     }
@@ -799,7 +791,6 @@ async function symlinkShowCommand(all: boolean): Promise<CommandResult> {
       }
     } catch {
       // Skip items we can't read
-      continue;
     }
   }
 
@@ -855,9 +846,118 @@ async function symlinkShowCommand(all: boolean): Promise<CommandResult> {
   return { exitCode: 0 };
 }
 
+/**
+ * Get repo name from git remote URL or fall back to directory basename
+ */
+function getRepoName(repoDir: string): string {
+  let repoName = basename(repoDir);
+  try {
+    const remoteUrl = execSync("git remote get-url origin", {
+      encoding: "utf-8",
+      cwd: repoDir,
+    }).trim();
+
+    // Extract repo name from URL
+    // Handles: git@github.com:user/repo.git, https://github.com/user/repo, etc.
+    const match = remoteUrl.match(/\/([^\/]+?)(\.git)?$/);
+    if (match) {
+      repoName = match[1];
+    }
+  } catch {
+    // No remote or error - use directory basename
+  }
+  return repoName;
+}
+
+/**
+ * Create or update a symlink for a specific repo
+ * Returns true if symlink was created/updated, false if skipped or error
+ */
+async function createRepoSymlink(
+  repoDir: string,
+  force: boolean,
+): Promise<boolean> {
+  const home = homedir();
+  const repoName = getRepoName(repoDir);
+  const symlinkPath = join(home, repoName);
+
+  // Check if symlink path already exists
+  if (existsSync(symlinkPath)) {
+    const stats = lstatSync(symlinkPath);
+
+    if (stats.isSymbolicLink()) {
+      // It's a symlink, check where it points
+      const currentTarget = readlinkSync(symlinkPath);
+      let resolvedTarget: string;
+      try {
+        resolvedTarget = realpathSync(symlinkPath);
+      } catch {
+        // Broken symlink
+        resolvedTarget = currentTarget;
+      }
+
+      if (resolvedTarget === repoDir) {
+        logInfo(
+          `Symlink ~/${repoName} already points to ${repoDir}. Skipping.`,
+        );
+        return false;
+      }
+
+      // Symlink exists but points elsewhere
+      if (!force) {
+        const response = await prompt(
+          `Symlink ~/${repoName} exists pointing to ${currentTarget}. Update to ${repoDir}? [y/N]`,
+          "N",
+        );
+
+        const choice = response.toUpperCase().trim();
+        if (choice !== "Y" && choice !== "YES") {
+          logInfo("Skipped");
+          return false;
+        }
+      } else {
+        logInfo(
+          `Updating symlink ~/${repoName} from ${currentTarget} to ${repoDir}...`,
+        );
+      }
+
+      // Remove old symlink and create new one
+      try {
+        unlinkSync(symlinkPath);
+        symlinkSync(repoDir, symlinkPath);
+        logSuccess(`Updated symlink ~/${repoName} -> ${repoDir}`);
+        return true;
+      } catch (error) {
+        logError(`Failed to update symlink: ${error}`);
+        return false;
+      }
+    } else {
+      // It's a regular file or directory
+      logError(
+        `~/${repoName} exists as a regular ${
+          stats.isDirectory() ? "directory" : "file"
+        }, not a symlink`,
+      );
+      logError(
+        "Cannot create symlink. Please remove or rename the existing item first",
+      );
+      return false;
+    }
+  }
+
+  // Symlink doesn't exist, create it
+  try {
+    symlinkSync(repoDir, symlinkPath);
+    logSuccess(`Created symlink ~/${repoName} -> ${repoDir}`);
+    return true;
+  } catch (error) {
+    logError(`Failed to create symlink: ${error}`);
+    return false;
+  }
+}
+
 async function symlinkCreateCommand(force: boolean): Promise<CommandResult> {
   const currentDir = process.cwd();
-  const home = homedir();
 
   // Try to find git root
   let gitRoot: string | null = null;
@@ -874,24 +974,26 @@ async function symlinkCreateCommand(force: boolean): Promise<CommandResult> {
     return { exitCode: 1 };
   }
 
-  // Get repo name from git remote URL (falls back to directory basename)
-  let repoName = basename(gitRoot);
-  try {
-    const remoteUrl = execSync("git remote get-url origin", {
-      encoding: "utf-8",
-      cwd: gitRoot,
-    }).trim();
+  await createRepoSymlink(gitRoot, force);
+  return { exitCode: 0 };
+}
 
-    // Extract repo name from URL
-    // Handles: git@github.com:user/repo.git, https://github.com/user/repo, etc.
-    const match = remoteUrl.match(/\/([^\/]+?)(\.git)?$/);
-    if (match) {
-      repoName = match[1];
-    }
-  } catch {
-    // No remote or error - use directory basename
-  }
+interface SymlinkAction {
+  repoDir: string;
+  repoName: string;
+  symlinkPath: string;
+  action: "create" | "update" | "skip" | "error" | "warning";
+  currentTarget?: string;
+  errorMessage?: string;
+  warningMessage?: string;
+}
 
+/**
+ * Check what action would be needed for a symlink without creating it
+ */
+function checkSymlinkAction(repoDir: string): SymlinkAction {
+  const home = homedir();
+  const repoName = getRepoName(repoDir);
   const symlinkPath = join(home, repoName);
 
   // Check if symlink path already exists
@@ -901,66 +1003,443 @@ async function symlinkCreateCommand(force: boolean): Promise<CommandResult> {
     if (stats.isSymbolicLink()) {
       // It's a symlink, check where it points
       const currentTarget = readlinkSync(symlinkPath);
-      const resolvedTarget = realpathSync(symlinkPath);
+      let resolvedTarget: string;
+      try {
+        resolvedTarget = realpathSync(symlinkPath);
+      } catch {
+        // Broken symlink
+        resolvedTarget = currentTarget;
+      }
 
-      if (resolvedTarget === gitRoot) {
-        logInfo(
-          `Symlink ~/${repoName} already points to ${gitRoot}. Nothing to do.`,
-        );
-        return { exitCode: 0 };
+      if (resolvedTarget === repoDir) {
+        return {
+          repoDir,
+          repoName,
+          symlinkPath,
+          action: "skip",
+          currentTarget: resolvedTarget,
+        };
       }
 
       // Symlink exists but points elsewhere
-      if (!force) {
-        const response = await prompt(
-          `Symlink ~/${repoName} exists pointing to ${currentTarget}. Update to ${gitRoot}? [y/N]`,
-          "N",
-        );
+      return {
+        repoDir,
+        repoName,
+        symlinkPath,
+        action: "update",
+        currentTarget: resolvedTarget,
+      };
+    }
 
-        const choice = response.toUpperCase().trim();
-        if (choice !== "Y" && choice !== "YES") {
-          logInfo("Aborted");
-          return { exitCode: 0 };
-        }
-      } else {
-        logInfo(
-          `Updating symlink ~/${repoName} from ${currentTarget} to ${gitRoot}...`,
-        );
-      }
+    // It's a regular file or directory
+    return {
+      repoDir,
+      repoName,
+      symlinkPath,
+      action: "error",
+      errorMessage: `~/${repoName} exists as a regular ${
+        stats.isDirectory() ? "directory" : "file"
+      }, not a symlink`,
+    };
+  }
 
-      // Remove old symlink and create new one
-      try {
-        unlinkSync(symlinkPath);
-        symlinkSync(gitRoot, symlinkPath);
-        logSuccess(`Updated symlink ~/${repoName} -> ${gitRoot}`);
-        return { exitCode: 0 };
-      } catch (error) {
-        logError(`Failed to update symlink: ${error}`);
-        return { exitCode: 1 };
+  // Symlink doesn't exist, will create it
+  return {
+    repoDir,
+    repoName,
+    symlinkPath,
+    action: "create",
+  };
+}
+
+/**
+ * Execute a symlink action (create or update)
+ */
+function executeSymlinkAction(action: SymlinkAction): boolean {
+  try {
+    if (action.action === "update") {
+      // Remove old symlink
+      unlinkSync(action.symlinkPath);
+    }
+    // Create new symlink
+    symlinkSync(action.repoDir, action.symlinkPath);
+    return true;
+  } catch (error) {
+    logError(`Failed to ${action.action} symlink: ${error}`);
+    return false;
+  }
+}
+
+async function symlinkProjectCommand(force: boolean): Promise<CommandResult> {
+  const currentDir = process.cwd();
+  const workspace = detectWorkspace(currentDir);
+
+  if (!workspace) {
+    logError("Not in a project/workspace");
+    logError(
+      "The 'ic symlink --project' command must be run from within a project directory",
+    );
+    return { exitCode: 1 };
+  }
+
+  const reposDir = getReposDir();
+  const projectDir = join(reposDir, workspace);
+
+  logInfo(`Scanning repos in project '${workspace}'...`);
+
+  // Find all git repositories in the project directory
+  let items: string[];
+  try {
+    items = readdirSync(projectDir);
+  } catch (error) {
+    logError(`Failed to read project directory ${projectDir}: ${error}`);
+    return { exitCode: 1 };
+  }
+
+  const repos: string[] = [];
+  for (const item of items) {
+    const itemPath = join(projectDir, item);
+    const gitDir = join(itemPath, ".git");
+
+    try {
+      const stats = lstatSync(itemPath);
+      if (stats.isDirectory() && existsSync(gitDir)) {
+        repos.push(itemPath);
       }
-    } else {
-      // It's a regular file or directory
-      logError(
-        `~/${repoName} exists as a regular ${
-          stats.isDirectory() ? "directory" : "file"
-        }, not a symlink`,
-      );
-      logError(
-        "Cannot create symlink. Please remove or rename the existing item first",
-      );
-      return { exitCode: 1 };
+    } catch {
+      // Skip items we can't read
     }
   }
 
-  // Symlink doesn't exist, create it
-  try {
-    symlinkSync(gitRoot, symlinkPath);
-    logSuccess(`Created symlink ~/${repoName} -> ${gitRoot}`);
+  if (repos.length === 0) {
+    logInfo(`No git repositories found in project '${workspace}'`);
     return { exitCode: 0 };
-  } catch (error) {
-    logError(`Failed to create symlink: ${error}`);
+  }
+
+  // Check what actions are needed for each repo
+  const actions: SymlinkAction[] = repos.map((repoDir) =>
+    checkSymlinkAction(repoDir),
+  );
+
+  // Categorize actions
+  const toCreate = actions.filter((a) => a.action === "create");
+  const toUpdate = actions.filter((a) => a.action === "update");
+  const toSkip = actions.filter((a) => a.action === "skip");
+  const errors = actions.filter((a) => a.action === "error");
+
+  // Display planned changes
+  console.log();
+  logInfo(`Found ${repos.length} repositories in project '${workspace}'`);
+  console.log();
+
+  if (toCreate.length > 0) {
+    console.log(chalk.bold("Will create:"));
+    for (const action of toCreate) {
+      console.log(
+        `  ${chalk.green("+")} ~/${action.repoName} -> ${action.repoDir}`,
+      );
+    }
+    console.log();
+  }
+
+  if (toUpdate.length > 0) {
+    console.log(chalk.bold("Will update:"));
+    for (const action of toUpdate) {
+      console.log(`  ${chalk.yellow("~")} ~/${action.repoName}`);
+      console.log(`    ${chalk.dim("from:")} ${action.currentTarget}`);
+      console.log(`    ${chalk.dim("to:")}   ${action.repoDir}`);
+    }
+    console.log();
+  }
+
+  if (toSkip.length > 0) {
+    console.log(chalk.bold("Already correct (will skip):"));
+    for (const action of toSkip) {
+      console.log(
+        `  ${chalk.dim("=")} ~/${action.repoName} -> ${action.repoDir}`,
+      );
+    }
+    console.log();
+  }
+
+  if (errors.length > 0) {
+    console.log(chalk.bold.red("Errors (cannot create):"));
+    for (const action of errors) {
+      console.log(
+        `  ${chalk.red("✗")} ~/${action.repoName}: ${action.errorMessage}`,
+      );
+    }
+    console.log();
+  }
+
+  const totalChanges = toCreate.length + toUpdate.length;
+
+  if (totalChanges === 0) {
+    if (errors.length > 0) {
+      logError("No symlinks can be created due to errors above");
+      return { exitCode: 1 };
+    }
+    logInfo("All symlinks are already correct. Nothing to do.");
+    return { exitCode: 0 };
+  }
+
+  // Ask for confirmation unless --force
+  if (!force) {
+    const response = await prompt(
+      `Create/update ${totalChanges} symlink(s)? [Y/n]`,
+      "Y",
+    );
+
+    const choice = response.toUpperCase().trim();
+    if (choice === "N" || choice === "NO") {
+      logInfo("Aborted");
+      return { exitCode: 0 };
+    }
+  }
+
+  // Execute all actions
+  console.log();
+  logInfo("Creating/updating symlinks...");
+
+  let successCount = 0;
+  const actionsToExecute = [...toCreate, ...toUpdate];
+
+  for (const action of actionsToExecute) {
+    const success = executeSymlinkAction(action);
+    if (success) {
+      successCount++;
+      if (action.action === "create") {
+        logSuccess(`Created ~/${action.repoName} -> ${action.repoDir}`);
+      } else {
+        logSuccess(`Updated ~/${action.repoName} -> ${action.repoDir}`);
+      }
+    }
+  }
+
+  console.log();
+  logSuccess(
+    `Completed: ${successCount}/${totalChanges} symlink(s) ${
+      force ? "created/updated" : "processed"
+    }`,
+  );
+
+  if (errors.length > 0) {
+    console.log(
+      chalk.yellow(
+        `Note: ${errors.length} symlink(s) could not be created due to conflicts`,
+      ),
+    );
+  }
+
+  return { exitCode: 0 };
+}
+
+async function symlinkUnlinkProjectCommand(
+  force: boolean,
+): Promise<CommandResult> {
+  const currentDir = process.cwd();
+  const workspace = detectWorkspace(currentDir);
+
+  if (!workspace) {
+    logError("Not in a project/workspace");
+    logError(
+      "The 'ic symlink unlink-project' command must be run from within a project directory",
+    );
     return { exitCode: 1 };
   }
+
+  const reposDir = getReposDir();
+  const projectDir = join(reposDir, workspace);
+  const home = homedir();
+
+  logInfo(`Scanning project repos to unlink from project '${workspace}'...`);
+
+  // Find all git repositories in the project directory
+  let items: string[];
+  try {
+    items = readdirSync(projectDir);
+  } catch (error) {
+    logError(`Failed to read project directory ${projectDir}: ${error}`);
+    return { exitCode: 1 };
+  }
+
+  const repos: string[] = [];
+  for (const item of items) {
+    const itemPath = join(projectDir, item);
+    const gitDir = join(itemPath, ".git");
+
+    try {
+      const stats = lstatSync(itemPath);
+      if (stats.isDirectory() && existsSync(gitDir)) {
+        repos.push(itemPath);
+      }
+    } catch {
+      // Skip items we can't read
+    }
+  }
+
+  if (repos.length === 0) {
+    logInfo(`No git repositories found in project '${workspace}'`);
+    return { exitCode: 0 };
+  }
+
+  // Check what actions are needed for each repo
+  const actions: SymlinkAction[] = [];
+
+  for (const projectRepoDir of repos) {
+    const repoName = getRepoName(projectRepoDir);
+    const symlinkPath = join(home, repoName);
+    const globalRepoDir = join(reposDir, repoName);
+
+    // Check if symlink exists and points to project repo
+    if (!existsSync(symlinkPath)) {
+      // No symlink exists, skip
+      continue;
+    }
+
+    const stats = lstatSync(symlinkPath);
+    if (!stats.isSymbolicLink()) {
+      // Not a symlink, skip
+      continue;
+    }
+
+    let currentTarget: string;
+    try {
+      currentTarget = realpathSync(symlinkPath);
+    } catch {
+      // Broken symlink, skip
+      continue;
+    }
+
+    // Only process if symlink currently points to project repo
+    if (currentTarget !== projectRepoDir) {
+      // Symlink doesn't point to project repo, skip
+      continue;
+    }
+
+    // Check if global version exists
+    if (!existsSync(globalRepoDir)) {
+      actions.push({
+        repoDir: globalRepoDir,
+        repoName,
+        symlinkPath,
+        action: "warning",
+        currentTarget,
+        warningMessage: `Global version ~/repos/${repoName} does not exist`,
+      });
+      continue;
+    }
+
+    // Check if global version is a git repo
+    const globalGitDir = join(globalRepoDir, ".git");
+    if (!existsSync(globalGitDir)) {
+      actions.push({
+        repoDir: globalRepoDir,
+        repoName,
+        symlinkPath,
+        action: "warning",
+        currentTarget,
+        warningMessage: `~/repos/${repoName} exists but is not a git repository`,
+      });
+      continue;
+    }
+
+    // Can update symlink to point to global version
+    actions.push({
+      repoDir: globalRepoDir,
+      repoName,
+      symlinkPath,
+      action: "update",
+      currentTarget,
+    });
+  }
+
+  if (actions.length === 0) {
+    logInfo("No project symlinks found to unlink");
+    return { exitCode: 0 };
+  }
+
+  // Categorize actions
+  const toUpdate = actions.filter((a) => a.action === "update");
+  const warnings = actions.filter((a) => a.action === "warning");
+
+  // Display planned changes
+  console.log();
+  logInfo(
+    `Found ${actions.length} symlink(s) pointing to project '${workspace}'`,
+  );
+  console.log();
+
+  if (toUpdate.length > 0) {
+    console.log(chalk.bold("Will unlink (point to global repos):"));
+    for (const action of toUpdate) {
+      console.log(`  ${chalk.yellow("~")} ~/${action.repoName}`);
+      console.log(`    ${chalk.dim("from:")} ${action.currentTarget}`);
+      console.log(`    ${chalk.dim("to:")}   ${action.repoDir}`);
+    }
+    console.log();
+  }
+
+  if (warnings.length > 0) {
+    console.log(chalk.bold.yellow("Warnings (cannot unlink):"));
+    for (const action of warnings) {
+      console.log(
+        `  ${chalk.yellow("!")} ~/${action.repoName}: ${action.warningMessage}`,
+      );
+      console.log(`    ${chalk.dim("currently:")} ${action.currentTarget}`);
+    }
+    console.log();
+  }
+
+  if (toUpdate.length === 0) {
+    logError(
+      "No symlinks can be unlinked. All project repos lack global counterparts.",
+    );
+    return { exitCode: 1 };
+  }
+
+  // Ask for confirmation unless --force
+  if (!force) {
+    const response = await prompt(
+      `Unlink ${toUpdate.length} symlink(s) from project? [Y/n]`,
+      "Y",
+    );
+
+    const choice = response.toUpperCase().trim();
+    if (choice === "N" || choice === "NO") {
+      logInfo("Aborted");
+      return { exitCode: 0 };
+    }
+  }
+
+  // Execute all actions
+  console.log();
+  logInfo("Unlinking symlinks from project...");
+
+  let successCount = 0;
+
+  for (const action of toUpdate) {
+    const success = executeSymlinkAction(action);
+    if (success) {
+      successCount++;
+      logSuccess(`Updated ~/${action.repoName} -> ${action.repoDir}`);
+    }
+  }
+
+  console.log();
+  logSuccess(
+    `Completed: ${successCount}/${toUpdate.length} symlink(s) unlinked from project`,
+  );
+
+  if (warnings.length > 0) {
+    console.log(
+      chalk.yellow(
+        `Note: ${warnings.length} symlink(s) could not be unlinked (no global version exists)`,
+      ),
+    );
+  }
+
+  return { exitCode: 0 };
 }
 
 function showHelp(): void {
@@ -974,15 +1453,22 @@ function showHelp(): void {
       ic attach|a [--force] [--cwd]            Attach to nested tmux session (create if needed)
       ic symlink|s [show] [--all]              Show repo symlinks (or all with --all)
       ic symlink|s create|c [-f|--force]       Create ~/REPO symlink to current repo
+      ic symlink|s project|p [-f|--force]      Create symlinks for all repos in current project
+      ic symlink|s unlink-project|up [-f]      Unlink project, point symlinks to global repos
       ic workspace start [name]                Create a new workspace directory
       ic ws start [name]                       Alias for workspace start
       ic --help|-h|help                        Show this help message
+
+    Note:
+      When running 'ic clone' from within a project directory, the repo will be
+      automatically cloned into that project. Use explicit -p flag to override.
 
     Examples:
       ic c user/repo                     # Clone git@github.com:user/repo.git
       ic c myrepo                        # Clone git@github.com:instacart/myrepo.git
       ic c myrepo -p myFeature           # Clone into ~/repos/myFeature/myrepo
       ic c myrepo --project myFeature    # Same as above
+      cd ~/repos/myFeature && ic c myrepo   # Auto-clones into myFeature project
       ic c https://github.com/user/repo     # Clone from HTTPS URL
       ic c git@github.com:user/repo.git     # Clone from SSH URL
       ic ws start myFeature              # Create workspace ~/repos/myFeature
@@ -993,6 +1479,10 @@ function showHelp(): void {
       ic s --all                         # Show all symlinks in home directory
       ic s c                             # Create ~/myrepo -> /path/to/myrepo symlink
       ic s c -f                          # Update symlink without confirmation
+      ic s p                             # Create symlinks for all repos in current project
+      ic s p -f                          # Create project symlinks without confirmation
+      ic s up                            # Unlink project, point symlinks to ~/repos/{repo}
+      ic s up -f                         # Unlink without confirmation
   `);
 }
 
@@ -1100,6 +1590,30 @@ async function main() {
             });
           },
         )
+        .command(
+          ["project", "p"],
+          "Create symlinks for all repos in current project",
+          (yargs) => {
+            return yargs.option("force", {
+              alias: "f",
+              type: "boolean",
+              description: "Skip confirmation prompts",
+              default: false,
+            });
+          },
+        )
+        .command(
+          ["unlink-project", "up"],
+          "Unlink project repos, point symlinks back to global repos",
+          (yargs) => {
+            return yargs.option("force", {
+              alias: "f",
+              type: "boolean",
+              description: "Skip confirmation prompts",
+              default: false,
+            });
+          },
+        )
         .demandCommand(1, "");
     })
     .showHelpOnFail(false)
@@ -1138,9 +1652,16 @@ async function main() {
       result = await symlinkShowCommand(argv.all as boolean);
     } else if (symlinkSubcommand === "create" || symlinkSubcommand === "c") {
       result = await symlinkCreateCommand(argv.force as boolean);
+    } else if (symlinkSubcommand === "project" || symlinkSubcommand === "p") {
+      result = await symlinkProjectCommand(argv.force as boolean);
+    } else if (
+      symlinkSubcommand === "unlink-project" ||
+      symlinkSubcommand === "up"
+    ) {
+      result = await symlinkUnlinkProjectCommand(argv.force as boolean);
     } else {
       logError(`Unknown symlink subcommand: ${symlinkSubcommand}`);
-      logError("Available subcommands: show, create");
+      logError("Available subcommands: show, create, project, unlink-project");
       result = { exitCode: 1 };
     }
   } else {
