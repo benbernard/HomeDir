@@ -8,7 +8,7 @@ Create a pull request with a concise, well-formatted description.
 
 ## Workflow
 
-1. **Verify branch**: Ensure you're NOT on master branch
+1. **Verify branch**: If on master, automatically create a feature branch
 2. **Push to origin**: Always push to `origin` from the current branch
 3. **Create PR**: Use `gh pr create` with concise description
 4. **Format description**: Small bullet points, derived from conversation and commits
@@ -52,7 +52,11 @@ Keep it **very concise**. Use this structure:
 ## Instructions
 
 1. Check current branch: `git branch --show-current`
-   - If on master, stop and ask user to create a feature branch
+   - If on master, automatically create a feature branch:
+     ```bash
+     git checkout -b feature/<descriptive-name>
+     ```
+     Use a short descriptive name based on the changes (e.g., `feature/fix-cache`, `feature/add-logging`)
 
 2. Review changes:
    - Run `git status` to see what's committed
