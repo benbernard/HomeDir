@@ -423,8 +423,6 @@ cookbook
 .claude/plugins/
 olive-cli
 olive-reviewer
-
-# Repo symlinks managed by ic (should not be tracked)
 olive
 olive-server
 blueberry
