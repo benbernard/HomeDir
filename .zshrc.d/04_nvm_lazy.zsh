@@ -6,7 +6,10 @@
 lazy_load_nvm() {
   unset -f node npm npx nvm pnpm yarn
   [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-  [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+  # Skip bash_completion - it tries to run compinit again which causes conflicts
+  # [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+  # Enable corepack to make yarn/pnpm available
+  command -v corepack >/dev/null 2>&1 && corepack enable 2>/dev/null
 }
 
 # Create wrapper functions that lazy-load nvm on first use
