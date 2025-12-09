@@ -991,8 +991,8 @@ async function createRepoSymlink(
       // Symlink exists but points elsewhere
       if (!force) {
         const response = await prompt(
-          `Symlink ~/${repoName} exists pointing to ${currentTarget}. Update to ${repoDir}? [y/N]`,
-          "N",
+          `Symlink ~/${repoName} exists pointing to ${currentTarget}. Update to ${repoDir}? [Y/n]`,
+          "Y",
         );
 
         const choice = response.toUpperCase().trim();
