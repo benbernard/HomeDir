@@ -1,6 +1,7 @@
 {
   "name": "bin-ben",
   "version": "1.0.0",
+  "type": "module",
   "main": "index.js",
   "bin": {
     "s3upload": "./dist/s3upload.js",
