@@ -32,3 +32,19 @@ Thumbs.db
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Auto-generated symlinks (do not edit this section)
+src/analyze-by-file
+src/analyze-zsh-startup
+src/ben-scripts
+src/claude-notify
+src/close-prs
+src/converter
+src/downloader
+src/git-cleanup
+src/git-prune-old
+src/ic
+src/read-tree
+src/s3upload
+src/wt
+# End auto-generated symlinks

@@ -15,8 +15,8 @@
   },
   "scripts": {
     "prebuild": "biome check --apply-unsafe .",
-    "build": "tsc --noEmit && node scripts/build.js",
-    "build:watch": "concurrently \"tsc --noEmit --watch --preserveWatchOutput\" \"node scripts/build.js --watch\"",
+    "build": "tsc --noEmit && tsx scripts/build.ts",
+    "build:watch": "concurrently \"tsc --noEmit --watch --preserveWatchOutput\" \"tsx scripts/build.ts --watch\"",
     "format": "biome format --write .",
     "lint": "biome lint .",
     "check": "biome check .",

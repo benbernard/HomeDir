@@ -1,8 +1,8 @@
 #!/usr/bin/env tsx
 
-import { readFileSync } from 'fs';
-import yargs from 'yargs';
-import { hideBin } from 'yargs/helpers';
+import { readFileSync } from "fs";
+import yargs from "yargs";
+import { hideBin } from "yargs/helpers";
 
 interface LogEntry {
   timestamp: number;
@@ -12,30 +12,29 @@ interface LogEntry {
 
 async function main() {
   const argv = await yargs(hideBin(process.argv))
-    .usage('Usage: $0 <logfile>')
-    .option('threshold', {
-      alias: 't',
-      type: 'number',
-      description: 'Only show entries taking more than N milliseconds',
+    .usage("Usage: $0 <logfile>")
+    .option("threshold", {
+      alias: "t",
+      type: "number",
+      description: "Only show entries taking more than N milliseconds",
       default: 10,
     })
-    .option('top', {
-      alias: 'n',
-      type: 'number',
-      description: 'Show top N slowest entries',
+    .option("top", {
+      alias: "n",
+      type: "number",
+      description: "Show top N slowest entries",
       default: 20,
     })
-    .demandCommand(1, 'Please provide a log file to analyze')
+    .demandCommand(1, "Please provide a log file to analyze")
     .help()
-    .alias('help', 'h')
-    .example('$0 zsh_profile.xyz', 'Analyze zsh startup log file')
-    .argv;
+    .alias("help", "h")
+    .example("$0 zsh_profile.xyz", "Analyze zsh startup log file").argv;
 
   const logFile = argv._[0] as string;
 
   try {
-    const content = readFileSync(logFile, 'utf-8');
-    const lines = content.split('\n');
+    const content = readFileSync(logFile, "utf-8");
+    const lines = content.split("\n");
 
     const entries: LogEntry[] = [];
 
@@ -53,7 +52,9 @@ async function main() {
     }
 
     if (entries.length === 0) {
-      console.error('No log entries found. Make sure the file is a ZSH_CMD_LOGGING output.');
+      console.error(
+        "No log entries found. Make sure the file is a ZSH_CMD_LOGGING output.",
+      );
       process.exit(1);
     }
 
@@ -80,7 +81,7 @@ async function main() {
     }
 
     // Filter by threshold
-    const filtered = timedEntries.filter(e => e.duration >= argv.threshold);
+    const filtered = timedEntries.filter((e) => e.duration >= argv.threshold);
 
     // Sort by duration (descending)
     filtered.sort((a, b) => b.duration - a.duration);
@@ -88,9 +89,11 @@ async function main() {
     // Take top N
     const topN = filtered.slice(0, argv.top);
 
-    console.log(`\nTop ${topN.length} slowest operations (threshold: ${argv.threshold}ms):\n`);
-    console.log('Duration (ms) | Location | Command');
-    console.log('-'.repeat(80));
+    console.log(
+      `\nTop ${topN.length} slowest operations (threshold: ${argv.threshold}ms):\n`,
+    );
+    console.log("Duration (ms) | Location | Command");
+    console.log("-".repeat(80));
 
     for (const entry of topN) {
       const durationStr = entry.duration.toFixed(2).padStart(12);
@@ -103,7 +106,7 @@ async function main() {
     const byFile = new Map<string, number>();
     for (const entry of filtered) {
       // Extract file from location (e.g., "/path/file.zsh:23" -> "/path/file.zsh")
-      const file = entry.location.split(':')[0];
+      const file = entry.location.split(":")[0];
       byFile.set(file, (byFile.get(file) || 0) + entry.duration);
     }
 
@@ -111,18 +114,18 @@ async function main() {
       .sort((a, b) => b[1] - a[1])
       .slice(0, 10);
 
-    console.log(`\n\nTop 10 files by total time:\n`);
-    console.log('Total Time (ms) | File');
-    console.log('-'.repeat(80));
+    console.log("\n\nTop 10 files by total time:\n");
+    console.log("Total Time (ms) | File");
+    console.log("-".repeat(80));
 
     for (const [file, time] of sortedByFile) {
       const timeStr = time.toFixed(2).padStart(15);
       console.log(`${timeStr} | ${file}`);
     }
 
-    const totalTime = (entries[entries.length - 1].timestamp - entries[0].timestamp) * 1000;
+    const totalTime =
+      (entries[entries.length - 1].timestamp - entries[0].timestamp) * 1000;
     console.log(`\n\nTotal startup time: ${totalTime.toFixed(2)}ms`);
-
   } catch (error) {
     console.error(`Error reading log file: ${error}`);
     process.exit(1);
