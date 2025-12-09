@@ -424,7 +424,7 @@ async function main() {
 
   // Display filter criteria
   console.log(chalk.bold(`\nRepository: ${chalk.cyan(repoDisplay)}`));
-  console.log(chalk.gray(`Filters:`));
+  console.log(chalk.gray("Filters:"));
   console.log(
     chalk.gray(
       `  • Status: ${

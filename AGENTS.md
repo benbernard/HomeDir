@@ -146,10 +146,35 @@ When creating a new script:
 3. Use `yargs` for CLI argument parsing (already in dependencies)
 4. For scripts that interact heavily with shell commands, use the `zx` library (already in dependencies)
 5. Make the file executable: `chmod +x bin/ts/src/your-script.ts`
-6. Create a symlink without the `.ts` extension: `ln -sf your-script.ts your-script`
-7. The script is now available as `your-script` in your PATH - **no compilation needed!**
+6. **Add an entry to `bin/ts/manifest.ts`** with the command name and description
+7. Run `npm run build` in `bin/ts/` to generate symlinks
+8. The script is now available as `your-script` in your PATH
 
 **Note**: Scripts run directly using `tsx` which compiles TypeScript on-the-fly. The `bin/ts/src/` directory is on PATH via `~/.zshrc.d/01_bin_ts.zsh`, along with `bin/ts/node_modules/.bin/` for accessing `tsx`.
+
+### Script Manifest System
+
+Scripts are managed through `bin/ts/src/manifest.ts`:
+- **Manifest location**: `bin/ts/src/manifest.ts`
+- **Purpose**: Defines all executable scripts with their descriptions
+- **Symlinks**: The build process auto-generates symlinks in both `src/` and `dist/`
+- **List all scripts**: Run `ben-scripts` to see all available scripts with descriptions
+
+**DO NOT manually create symlinks** - they are auto-generated from the manifest.
+
+To add a new script to the manifest:
+```typescript
+// In bin/ts/src/manifest.ts
+export const scripts: Record<string, ScriptEntry> = {
+  // ... existing scripts ...
+  "your-script": {
+    file: "your-script.ts",
+    description: "What your script does",
+  },
+};
+```
+
+For library modules (non-executable code), add them to `excludedFiles` in the manifest.
 
 ### Example Script Structure
 
@@ -190,7 +215,8 @@ main();
 5. All executable scripts have:
    - Shebang: `#!/usr/bin/env tsx`
    - Execute permission: `chmod +x`
-   - Symlink without `.ts` extension for clean command names
+   - Entry in `bin/ts/manifest.ts` with description
+   - Auto-generated symlink (created by `npm run build`)
 
 ## Configuration Management
 
