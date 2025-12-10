@@ -1,9 +1,25 @@
 #!/usr/bin/env tsx
 
+// Only emit verbose traces when explicitly enabled
+const debugMode = process.env.CLAUDE_NOTIFY_DEBUG === "1";
+const originalConsoleError = console.error.bind(console);
+if (!debugMode) {
+  console.error = (...args: unknown[]) => {
+    const first = args[0];
+    if (
+      typeof first === "string" &&
+      (first.startsWith("[TRACE]") || first.startsWith("[DEBUG]"))
+    ) {
+      return;
+    }
+    return originalConsoleError(...args);
+  };
+}
+
 console.error("[TRACE] claude-notify.ts: Script started");
 
 import { execSync } from "child_process";
-import { existsSync, readFileSync, writeFileSync } from "fs";
+import { appendFileSync, existsSync, readFileSync, writeFileSync } from "fs";
 import { homedir } from "os";
 import { join } from "path";
 
@@ -40,13 +56,110 @@ interface HookInput {
   [key: string]: unknown; // Allow additional fields
 }
 
-const CLAUDE_ICON_BUNDLE = "com.anthropic.claudefordesktop";
 const STATE_DIR = join(homedir(), ".claude");
 const CACHE_DIR = join(homedir(), ".config", "claude-notify");
 const CACHE_FILE = join(CACHE_DIR, "summaries.json");
 const CLAUDE_PROJECTS_DIR = join(homedir(), ".claude", "projects");
 const LOG_FILE = join(CACHE_DIR, "notifications.log");
 
+const CLAUDE_ICON_BUNDLE = "com.anthropic.claudefordesktop";
+const CODEX_SENDER_IDS = ["com.openai.chat"]; // ChatGPT bundle id on macOS
+const CHATGPT_APP_ICON_PATHS = [
+  "/Applications/ChatGPT.app/Contents/Resources/AppIcon.icns",
+  join(
+    homedir(),
+    "Applications",
+    "ChatGPT.app",
+    "Contents",
+    "Resources",
+    "AppIcon.icns",
+  ),
+];
+const CHATGPT_PNG_CACHE = join(CACHE_DIR, "chatgpt-icon.png");
+const NEUTRAL_SENDER = "com.apple.Terminal";
+
+function ensureChatGptPngIcon(): string | null {
+  if (existsSync(CHATGPT_PNG_CACHE)) {
+    return CHATGPT_PNG_CACHE;
+  }
+
+  const icnsPath = CHATGPT_APP_ICON_PATHS.find((p) => {
+    try {
+      return existsSync(p);
+    } catch {
+      return false;
+    }
+  });
+
+  if (!icnsPath) return null;
+
+  try {
+    // Ensure cache dir exists
+    if (!existsSync(CACHE_DIR)) {
+      execSync(`mkdir -p "${CACHE_DIR}"`, { stdio: "ignore" });
+    }
+    // Convert icns to png (sips is available on macOS)
+    execSync(
+      `/usr/bin/sips -s format png "${icnsPath}" --out "${CHATGPT_PNG_CACHE}" >/dev/null`,
+      { stdio: "ignore" },
+    );
+    if (existsSync(CHATGPT_PNG_CACHE)) return CHATGPT_PNG_CACHE;
+  } catch {
+    // ignore conversion failures
+  }
+  return null;
+}
+
+function getLastUserMessageFromSession(sessionFile: string): string | null {
+  try {
+    const content = readFileSync(sessionFile, "utf-8");
+    const lines = content.split("\n").filter((line) => line.trim());
+
+    for (let i = lines.length - 1; i >= 0; i--) {
+      const line = lines[i];
+      try {
+        const entry = JSON.parse(line);
+        if (
+          entry.type === "user" &&
+          !entry.isSidechain &&
+          !entry.isMeta &&
+          entry.message?.role === "user"
+        ) {
+          const messageContent = entry.message.content;
+
+          if (typeof messageContent === "string") {
+            if (
+              messageContent.startsWith("<command-name>") ||
+              messageContent.startsWith("<local-command-")
+            ) {
+              continue;
+            }
+            return messageContent;
+          }
+
+          if (Array.isArray(messageContent)) {
+            const textParts = messageContent
+              .filter((part: { type?: string }) => part.type === "text")
+              .map((part: { text?: string }) => part.text);
+            const text = textParts.join(" ");
+            if (
+              text.startsWith("<command-name>") ||
+              text.startsWith("<local-command-")
+            ) {
+              continue;
+            }
+            return text;
+          }
+        }
+      } catch {
+        // Parse error, skip this line
+      }
+    }
+  } catch {
+    // ignore errors
+  }
+  return null;
+}
 function logToFile(message: string): void {
   try {
     // Ensure cache directory exists
@@ -58,10 +171,12 @@ function logToFile(message: string): void {
     const logEntry = `[${timestamp}] ${message}\n`;
 
     // Append to log file
-    const fs = require("fs");
-    fs.appendFileSync(LOG_FILE, logEntry);
-  } catch {
-    // Ignore logging errors
+    appendFileSync(LOG_FILE, logEntry);
+  } catch (err) {
+    // Surface logging errors in debug mode
+    if (debugMode) {
+      console.error("[DEBUG] logToFile error:", err);
+    }
   }
 }
 
@@ -180,56 +295,116 @@ async function readStdinJson(): Promise<HookInput | null> {
 async function main() {
   console.error("[TRACE] main: Entered main function");
 
-  const debugMode = process.env.CLAUDE_NOTIFY_DEBUG === "1";
+  const cliArgs = process.argv.slice(2);
+  const codexMode = cliArgs.includes("--codex");
+  const filteredArgs = cliArgs.filter((arg) => arg !== "--codex");
+
+  const tryParseJson = (raw: string | undefined): HookInput | null => {
+    if (!raw) return null;
+    const trimmed = raw.trim();
+    if (!trimmed.startsWith("{") && !trimmed.startsWith("[")) return null;
+    try {
+      return JSON.parse(trimmed) as HookInput;
+    } catch {
+      return null;
+    }
+  };
 
   console.error(`[TRACE] main: debugMode = ${debugMode}`);
 
   if (debugMode) console.error("[DEBUG] main: Starting claude-notify");
   if (debugMode)
-    console.error(`[DEBUG] main: argv = ${JSON.stringify(process.argv)}`);
+    console.error(
+      `[DEBUG] main: argv = ${JSON.stringify(
+        process.argv,
+      )}, codexMode=${codexMode}`,
+    );
   if (debugMode)
     console.error(`[DEBUG] main: stdin.isTTY = ${process.stdin.isTTY}`);
 
-  // Try to read hook input from stdin first (preferred method)
-  console.error("[TRACE] main: About to call readStdinJson()");
-  const hookInput = await readStdinJson();
-  console.error("[TRACE] main: readStdinJson() returned");
+  // In Codex mode, the payload is passed as a CLI arg (JSON string).
+  // If that isn't present, also try stdin (some Codex hooks may still pipe JSON).
+  // Otherwise, prefer stdin JSON (Claude desktop hook style).
+  console.error("[TRACE] main: About to read hook input");
+  let mergedHookInput: HookInput | null = null;
+  if (codexMode) {
+    mergedHookInput = tryParseJson(filteredArgs[0]) || null;
+    if (mergedHookInput) {
+      filteredArgs.shift();
+    }
+    if (!mergedHookInput) {
+      mergedHookInput = await readStdinJson();
+    }
+  } else {
+    mergedHookInput = await readStdinJson();
+  }
 
   if (debugMode)
-    console.error(`[DEBUG] main: hookInput = ${JSON.stringify(hookInput)}`);
+    console.error(
+      `[DEBUG] main: hookInput = ${JSON.stringify(mergedHookInput)}`,
+    );
+
+  // If no stdin payload and no positional type, nothing to do
+  if (!mergedHookInput && filteredArgs.length === 0) {
+    logToFile("No hook input or notification type supplied; exiting.");
+    return;
+  }
 
   // Log hook input to file
   logToFile("=== New notification ===");
-  logToFile(`Hook input: ${JSON.stringify(hookInput, null, 2)}`);
+  logToFile(
+    `Hook input (${codexMode ? "codex-cli" : "stdin"}): ${JSON.stringify(
+      mergedHookInput,
+      null,
+      2,
+    )}`,
+  );
   logToFile(`argv: ${JSON.stringify(process.argv)}`);
 
   // Log all available fields in hookInput
-  if (debugMode && hookInput) {
+  if (debugMode && mergedHookInput) {
     console.error("[DEBUG] main: hookInput fields:");
-    for (const key of Object.keys(hookInput)) {
+    for (const key of Object.keys(mergedHookInput)) {
       console.error(
-        `[DEBUG] main:   ${key} = ${JSON.stringify(hookInput[key])}`,
+        `[DEBUG] main:   ${key} = ${JSON.stringify(mergedHookInput[key])}`,
       );
     }
   }
 
   // Determine notification type from stdin or argv
-  const notificationType =
-    hookInput?.notification_type ||
-    hookInput?.hook_event_name ||
-    process.argv[2] ||
+  const notificationTypeRaw =
+    mergedHookInput?.notification_type ||
+    mergedHookInput?.hook_event_name ||
+    // Codex notify may send a top-level event/type field
+    (mergedHookInput as { event?: unknown })?.event ||
+    (mergedHookInput as { type?: unknown })?.type ||
+    filteredArgs[0] ||
     "unknown";
+  const notificationType =
+    typeof notificationTypeRaw === "string"
+      ? notificationTypeRaw.toLowerCase()
+      : notificationTypeRaw?.toString().toLowerCase() || "unknown";
 
   // Get transcript path and cwd from stdin if available
-  const transcriptPath = hookInput?.transcript_path;
-  const workingDir = hookInput?.cwd || process.cwd();
+  const transcriptPath =
+    mergedHookInput?.transcript_path ||
+    (mergedHookInput as { transcript?: { path?: string } })?.transcript?.path ||
+    (mergedHookInput as { session?: { transcript_path?: string } })?.session
+      ?.transcript_path;
+  const workingDir =
+    mergedHookInput?.cwd ||
+    (mergedHookInput as { workspace?: { current_dir?: string } })?.workspace
+      ?.current_dir ||
+    process.cwd();
 
   console.error("[TRACE] main: Determining notification type and paths");
   console.error(`[TRACE] main: workingDir = ${workingDir}`);
 
   // Get session identifier for per-session state tracking
   const sessionId =
-    hookInput?.session_id ||
+    mergedHookInput?.session_id ||
+    (mergedHookInput as { sessionId?: string })?.sessionId ||
+    (mergedHookInput as { session?: { id?: string } })?.session?.id ||
     process.env.CLAUDE_SESSION_ID ||
     process.ppid?.toString() ||
     "default";
@@ -324,7 +499,7 @@ async function main() {
       console.error(`[TRACE] main: Error getting session summary: ${err}`);
       // Ignore errors
     }
-  } else if (sessionId && sessionId !== "default") {
+  } else if (!codexMode && sessionId && sessionId !== "default") {
     // Fall back to finding the session file
     console.error("[TRACE] main: Falling back to finding session file");
     try {
@@ -345,7 +520,7 @@ async function main() {
 
   // Read last notification state
   const lastState = await readState(stateFile, lockFile);
-  const lastType = lastState.last_type || "none";
+  const lastType = (lastState.last_type || "none").toLowerCase();
 
   console.error(`[TRACE] main: lastType = ${lastType}`);
 
@@ -364,27 +539,94 @@ async function main() {
   // Prepare notification message and sound based on type
   let message: string;
   let sound: string;
+  const originLabel = codexMode ? "Codex" : "Claude";
 
+  // Prefer the last user message in Codex agent turn payloads
+  // Note: steve tried to use String() on an object here, which gives "[object Object]"
+  // because apparently steve doesn't understand JavaScript type coercion. Fixed.
+  const inputMessages = (mergedHookInput as { "input-messages"?: unknown })?.[
+    "input-messages"
+  ];
+  const lastUserMessage =
+    Array.isArray(inputMessages) && inputMessages.length > 0
+      ? typeof inputMessages[inputMessages.length - 1] === "string"
+        ? inputMessages[inputMessages.length - 1]
+        : (inputMessages[inputMessages.length - 1] as { content?: string })
+            ?.content ||
+          (inputMessages[inputMessages.length - 1] as { text?: string })
+            ?.text ||
+          null
+      : null;
+  const lastTranscriptUser =
+    transcriptPath && sessionId !== "default"
+      ? getLastUserMessageFromSession(transcriptPath)
+      : null;
+
+  const inlineMessage =
+    mergedHookInput?.message ||
+    mergedHookInput?.prompt ||
+    (mergedHookInput as { body?: string })?.body ||
+    (mergedHookInput as { title?: string })?.title ||
+    (mergedHookInput as { notification?: { message?: string; body?: string } })
+      ?.notification?.message ||
+    (mergedHookInput as { notification?: { message?: string; body?: string } })
+      ?.notification?.body ||
+    (mergedHookInput as { reason?: string })?.reason ||
+    lastUserMessage ||
+    lastTranscriptUser;
+
+  const cleanedInline =
+    typeof inlineMessage === "string"
+      ? inlineMessage.replace(/\s+/g, " ").trim()
+      : null;
+  const bestInline = cleanedInline || lastTranscriptUser || null;
+
+  const isCodexTurnComplete =
+    codexMode &&
+    ((mergedHookInput as { type?: string })?.type || "").toLowerCase() ===
+      "agent-turn-complete";
+
+  // steve had this backwards - we WANT to show the user's message, not bury it behind sessionSummary
+  // Now with context prefixes so the user knows what's happening
   switch (notificationType) {
     case "idle_prompt":
-      message = sessionSummary
-        ? `${sessionSummary} waiting`
-        : "Claude waiting for input";
+      if (bestInline) {
+        message = `Waiting: ${bestInline}`;
+      } else if (sessionSummary) {
+        message = `${sessionSummary} waiting`;
+      } else {
+        message = `${originLabel} waiting for input`;
+      }
       sound = "Basso";
       break;
     case "stop":
-      message = sessionSummary ? `${sessionSummary} stopped` : "Claude stopped";
+      if (bestInline) {
+        message = `Stopped: ${bestInline}`;
+      } else if (sessionSummary) {
+        message = `${sessionSummary} stopped`;
+      } else {
+        message = `${originLabel} stopped`;
+      }
       sound = "Glass";
       break;
     default:
-      message = sessionSummary ? sessionSummary : "Claude notification";
+      if (isCodexTurnComplete) {
+        message = bestInline
+          ? `Complete: ${bestInline}`
+          : `${originLabel} turn complete`;
+      } else {
+        message =
+          bestInline ||
+          (notificationType && notificationType !== "unknown"
+            ? `${originLabel} ${notificationType}`
+            : `${originLabel} notification`);
+      }
       sound = "Basso";
   }
 
-  // Add project context to message if available
-  if (projectContext) {
-    message = `[${projectContext}] ${message}`;
-  }
+  // Add project context and origin label
+  const projectLabel = projectContext ? `[${projectContext}] ` : "";
+  message = `${originLabel} · ${projectLabel}${message}`;
 
   console.error(`[TRACE] main: Final message = ${message}`);
   console.error("[TRACE] main: Sending notification");
@@ -393,26 +635,53 @@ async function main() {
   // terminal-notifier requires escaping the first character if it's a bracket
   const escapedMessage = message.startsWith("[") ? `\\${message}` : message;
 
-  // Build terminal-notifier arguments with Claude icon and optional group
+  // Build terminal-notifier arguments with icon and sender
+  // For Codex: use Terminal sender (NEUTRAL_SENDER) with ChatGPT icon
+  // For Claude: use Claude bundle as sender
+  const appIcon =
+    codexMode &&
+    CHATGPT_APP_ICON_PATHS.find((p) => {
+      try {
+        return existsSync(p);
+      } catch {
+        return false;
+      }
+    });
+
+  const pngIcon = codexMode ? ensureChatGptPngIcon() : null;
+  const contentImage = appIcon ? null : pngIcon;
+
   const args = [
     "-message",
     escapedMessage,
     "-sound",
     sound,
-    "-sender",
-    CLAUDE_ICON_BUNDLE,
+    "-title",
+    originLabel,
   ];
+
+  if (appIcon) {
+    args.push("-appIcon", appIcon);
+  } else if (contentImage) {
+    args.push("-appIcon", contentImage);
+    args.push("-contentImage", contentImage);
+  }
 
   // Use transcript path as group ID if available (for per-session notification grouping)
   if (transcriptPath) {
     args.push("-group", transcriptPath);
   }
 
+  // steve added a triple-nested retry loop with 2s timeouts per attempt.
+  // That's 6 seconds of delay if all fail. For notifications. NOTIFICATIONS.
+  // Notifications should be fast. This isn't a distributed transaction, steve.
+  const sender = codexMode ? NEUTRAL_SENDER : CLAUDE_ICON_BUNDLE;
+  args.push("-sender", sender);
+
   if (debugMode) {
     console.error(`[DEBUG] main: notification args = ${JSON.stringify(args)}`);
   }
 
-  // Log the notification details
   logToFile(`Notification type: ${notificationType}`);
   logToFile(`Project context: ${projectContext || "(none)"}`);
   logToFile(`Session summary: ${sessionSummary || "(none)"}`);
@@ -480,7 +749,8 @@ async function isClaudeInActiveWindow(): Promise<boolean> {
         outerWindowName = envOuterWindow;
       } else {
         try {
-          const result = await $`tmux show-environment -g OUTER_TMUX_WINDOW`;
+          const result =
+            await $`tmux show-environment -g OUTER_TMUX_WINDOW 2>/dev/null`;
           const match = result.stdout.match(/^OUTER_TMUX_WINDOW=(.+)$/m);
           if (match) {
             outerWindowName = match[1];
