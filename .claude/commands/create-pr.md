@@ -81,6 +81,12 @@ Keep it **very concise**. Use this structure:
 
 5. Return the PR URL to the user
 
+6. Open the PR in the browser:
+   ```bash
+   open <PR_URL>
+   ```
+   Replace `<PR_URL>` with the actual PR URL returned from `gh pr create`
+
 ## Key principles
 
 - **Be concise**: Each bullet should be one line
