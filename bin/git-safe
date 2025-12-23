@@ -1,0 +1,30 @@
+#!/bin/bash
+
+# Git wrapper that prevents bypassing hooks with --no-verify
+# This enforces code quality by ensuring hooks always run
+
+cmd="$1"
+
+# Resolve alias to real command
+resolved=$(/usr/bin/git config --get "alias.$cmd" 2>/dev/null || echo "$cmd")
+
+# Check if it resolves to a commit operation
+if [[ "$resolved" =~ ^commit ]] || [[ "$cmd" == "commit" ]]; then
+  for arg in "$@"; do
+    if [[ "$arg" == "--no-verify" || "$arg" == "-n" ]]; then
+      echo "ERROR: Agents should never commit with --no-verify." >&2
+      echo "Figure out what is wrong and fix it (often by doing a dependency install) or ask the user what you should do." >&2
+      exit 1
+    fi
+  done
+
+  # Also check if the alias itself contains --no-verify
+  if [[ "$resolved" =~ --no-verify ]] || [[ "$resolved" =~ -n[[:space:]] ]]; then
+    echo "ERROR: Agents should never commit with --no-verify." >&2
+    echo "This alias uses --no-verify. Figure out what is wrong and fix it (often by doing a dependency install) or ask the user what you should do." >&2
+    exit 1
+  fi
+fi
+
+# Call the real git command
+exec /usr/bin/git "$@"
