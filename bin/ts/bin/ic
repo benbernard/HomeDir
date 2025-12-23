@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# Auto-generated wrapper for ic
+# Checks if source is newer than binary and rebuilds if needed
+
+SOURCE="/Users/benbernard/bin/ts/src/ic.ts"
+BINARY="/Users/benbernard/bin/ts/dist/ic"
+BUILD_SCRIPT="/Users/benbernard/bin/ts/scripts/build.ts"
+
+# Check if source is newer than binary
+if [[ "$SOURCE" -nt "$BINARY" ]]; then
+  echo "Source changed, rebuilding ic..." >&2
+  cd "/Users/benbernard/bin/ts" && bun run "${BUILD_SCRIPT}" --single "ic.ts" >/dev/null 2>&1 || {
+    echo "Build failed for ic" >&2
+    exit 1
+  }
+fi
+
+# Execute the binary
+exec "${BINARY}" "$@"

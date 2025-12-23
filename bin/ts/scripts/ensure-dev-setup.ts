@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env bun
 
 import { spawnSync } from "node:child_process";
 import { existsSync } from "node:fs";
@@ -17,27 +17,15 @@ function runCommand(command: string, args: string[]) {
 }
 
 // Ensure dist directory exists and is up to date
-runCommand("npm", ["run", "build"]);
+runCommand("bun", ["run", "build"]);
 
 // Check if package is globally installed
-const isGloballyInstalled =
-  spawnSync("npm", ["list", "-g", "bin-ben"]).status === 0;
+const isGloballyInstalled = spawnSync("bun", ["pm", "ls", "-g"])
+  .stdout?.toString()
+  .includes("bin-ben");
 if (!isGloballyInstalled) {
   console.log("Package not found globally, running link...");
-  runCommand("npm", ["link"]);
-}
-
-// Check if package is properly linked
-const nodeModulesPath = join(
-  homedir(),
-  ".nvm/versions/node",
-  process.version,
-  "lib/node_modules/bin-ben",
-);
-
-if (!existsSync(nodeModulesPath)) {
-  console.log("Package link not found, re-linking...");
-  runCommand("npm", ["link"]);
+  runCommand("bun", ["link"]);
 }
 
 console.log("Development environment ready!");

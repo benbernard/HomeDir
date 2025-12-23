@@ -1,35 +1,60 @@
 # bin/ts - Personal TypeScript Utilities
 
-A collection of TypeScript utility scripts for managing git repositories, uploads, and notifications.
+A collection of TypeScript utility scripts compiled to standalone executables using Bun, with automatic rebuild on source changes.
 
 ## Scripts
 
+Run `ben-scripts` to see all available scripts with descriptions.
+
+Key scripts:
 - **ic**: Interactive Container/Session Manager - Clone GitHub repos and manage nested tmux sessions
+- **wt**: Git worktree manager for efficient branch management
 - **s3upload**: Upload files to S3 with automatic configuration
+- **downloader**: Queue-based download manager with DynamoDB backend
 - **git-cleanup**: Clean up merged and gone git branches
 - **git-prune-old**: Delete branches older than specified days
 - **claude-notify**: Smart notification system for Claude Code with tmux awareness
-- **downloader**: Queue-based download manager with DynamoDB backend
-- **wt**: Git worktree manager for efficient branch management
+- **close-prs**: Bulk close GitHub PRs with filters
 - **read-tree**: Recursive file tree scanner
+- **analyze-zsh-startup**: Analyze zsh startup timing
+- **converter**: Convert maildir email format to mbox
+
+## Architecture
+
+This project compiles TypeScript scripts to standalone Bun executables with intelligent wrapper scripts:
+
+```
+bin/ts/
+├── src/              # TypeScript source files
+├── bin/              # Wrapper scripts (auto-rebuild on change)
+├── dist/             # Compiled Bun executables (~57MB each)
+└── scripts/          # Build scripts
+```
+
+### How It Works
+
+1. **Source files** (`src/*.ts`) - Your TypeScript code
+2. **Build process** - Compiles to standalone executables in `dist/`
+3. **Wrapper scripts** (`bin/*`) - Smart wrappers that:
+   - Check if source is newer than binary
+   - Auto-rebuild if needed (~0.9s)
+   - Execute the compiled binary
+
+The `bin/` directory is on PATH, so changes to source files are automatically picked up on next run.
 
 ## Development
 
 ### Running Scripts
 
-All scripts run directly using `tsx` (no compilation needed):
-
-```bash
-./src/ic.ts clone user/repo
-./src/s3upload.ts file.txt
-```
-
-The `src/` directory is on PATH, so you can also run:
+Scripts are available directly in your PATH:
 
 ```bash
 ic clone user/repo
 s3upload file.txt
+wt list
 ```
+
+When you edit a source file, the wrapper automatically rebuilds it on next execution.
 
 ### Testing
 
@@ -39,16 +64,16 @@ This project uses [Vitest](https://vitest.dev/) for testing.
 
 ```bash
 # Run all tests
-npm test
+bun test
 
 # Run tests in watch mode (re-runs on file changes)
-npm run test:watch
+bun run test:watch
 
 # Run tests with UI (interactive test explorer)
-npm run test:ui
+bun run test:ui
 
 # Run tests with coverage report
-npm run test:coverage
+bun run test:coverage
 ```
 
 #### Test Structure
@@ -81,29 +106,37 @@ Coverage reports are generated in `coverage/` directory (not tracked in git).
 ### Code Quality
 
 ```bash
+# Type checking only
+bun run typecheck
+
 # Format code
-npm run format
+bun run format
 
 # Run linter
-npm run lint
+bun run lint
 
 # Run all checks (format + lint)
-npm run check
+bun run check
 ```
 
 ### Building
 
-While scripts run directly with `tsx`, you can build compiled versions:
+Build all scripts to standalone executables:
 
 ```bash
 # Build once
-npm run build
+bun run build
 
-# Build and watch for changes
-npm run build:watch
+# Build and watch for changes (development mode)
+bun run build:watch
+
+# Or use the dev command (ensures setup + watch)
+bun run dev
 ```
 
-Compiled files go to `dist/` directory.
+Compiled executables go to `dist/`, wrapper scripts are generated in `bin/`.
+
+**Note**: You don't need to manually rebuild during development - the wrapper scripts auto-rebuild when you run them.
 
 ## Shared Utilities
 
@@ -124,15 +157,45 @@ bin/ts/
 │   │   ├── logger.ts
 │   │   ├── prompts.ts
 │   │   └── testing/   # Test mocks and helpers
+│   ├── manifest.ts    # Script registry
 │   ├── ic.ts          # Main scripts
-│   ├── s3upload.ts
+│   ├── wt.ts
 │   ├── *.test.ts      # Test files
 │   └── ...
-├── scripts/           # Build scripts
-├── dist/              # Compiled output (not tracked)
+├── bin/               # Wrapper scripts with auto-rebuild
+├── scripts/
+│   └── build.ts       # Build script using Bun
+├── dist/              # Compiled Bun executables (not tracked)
 ├── coverage/          # Test coverage reports (not tracked)
 ├── package.json
 ├── tsconfig.json
 ├── vitest.config.ts
+├── biome.json         # Code formatting/linting config
 └── README.md
 ```
+
+## Adding New Scripts
+
+To add a new script:
+
+1. Create your TypeScript file in `src/` (e.g., `src/my-script.ts`)
+2. Add an entry to `src/manifest.ts`:
+   ```typescript
+   export const scripts: Record<string, ScriptEntry> = {
+     "my-script": {
+       file: "my-script.ts",
+       description: "What my script does",
+     },
+     // ... existing scripts
+   };
+   ```
+3. Run `bun run build` to generate the executable and wrapper
+4. The script is now available as `my-script` in your PATH
+
+## Technology Stack
+
+- **Runtime**: [Bun](https://bun.sh) - Fast JavaScript runtime and bundler
+- **Language**: TypeScript
+- **Testing**: [Vitest](https://vitest.dev)
+- **Linting/Formatting**: [Biome](https://biomejs.dev)
+- **Build**: Bun's `--compile` for standalone executables

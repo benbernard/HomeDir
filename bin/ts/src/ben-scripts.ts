@@ -12,19 +12,36 @@ import { excludedFiles, scripts } from "./manifest";
 const srcDir = dirname(fileURLToPath(import.meta.url));
 
 /**
+ * Check if we're running as a compiled Bun executable
+ */
+function isCompiledExecutable(): boolean {
+  return srcDir.includes("$bunfs");
+}
+
+/**
  * Get all .ts files in src that are not in the manifest and not excluded
  */
 function getUnlistedFiles(): string[] {
-  const allTsFiles = readdirSync(srcDir).filter(
-    (file) => file.endsWith(".ts") && !file.endsWith(".test.ts"),
-  );
+  // Skip this check if running as compiled executable
+  if (isCompiledExecutable()) {
+    return [];
+  }
 
-  const manifestFiles = new Set(Object.values(scripts).map((s) => s.file));
-  const excludedSet = new Set(excludedFiles);
+  try {
+    const allTsFiles = readdirSync(srcDir).filter(
+      (file) => file.endsWith(".ts") && !file.endsWith(".test.ts"),
+    );
 
-  return allTsFiles.filter(
-    (file) => !manifestFiles.has(file) && !excludedSet.has(file),
-  );
+    const manifestFiles = new Set(Object.values(scripts).map((s) => s.file));
+    const excludedSet = new Set(excludedFiles);
+
+    return allTsFiles.filter(
+      (file) => !manifestFiles.has(file) && !excludedSet.has(file),
+    );
+  } catch {
+    // If we can't read the directory, return empty array
+    return [];
+  }
 }
 
 async function main(): Promise<void> {

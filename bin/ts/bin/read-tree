@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# Auto-generated wrapper for read-tree
+# Checks if source is newer than binary and rebuilds if needed
+
+SOURCE="/Users/benbernard/bin/ts/src/read-tree.ts"
+BINARY="/Users/benbernard/bin/ts/dist/read-tree"
+BUILD_SCRIPT="/Users/benbernard/bin/ts/scripts/build.ts"
+
+# Check if source is newer than binary
+if [[ "$SOURCE" -nt "$BINARY" ]]; then
+  echo "Source changed, rebuilding read-tree..." >&2
+  cd "/Users/benbernard/bin/ts" && bun run "${BUILD_SCRIPT}" --single "read-tree.ts" >/dev/null 2>&1 || {
+    echo "Build failed for read-tree" >&2
+    exit 1
+  }
+fi
+
+# Execute the binary
+exec "${BINARY}" "$@"
