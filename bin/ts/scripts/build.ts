@@ -1,4 +1,4 @@
-#!/usr/bin/env tsx
+#!/usr/bin/env bun
 
 import {
   chmodSync,
@@ -13,29 +13,26 @@ import {
   writeFileSync,
 } from "fs";
 import { join } from "path";
-import { type BuildOptions, build, context } from "esbuild";
 import { excludedFiles, scripts } from "../src/manifest";
 
 const rootDir = join(import.meta.dirname, "..");
 const srcDir = join(rootDir, "src");
 const distDir = join(rootDir, "dist");
+const binDir = join(rootDir, "bin");
 const gitignorePath = join(rootDir, ".gitignore");
 
-// Get all .ts files in src directory
-const entryPoints = readdirSync(srcDir)
-  .filter((file) => file.endsWith(".ts"))
-  .map((file) => join(srcDir, file));
-
 const isWatch = process.argv.includes("--watch");
+const singleFileIndex = process.argv.indexOf("--single");
+const singleFile =
+  singleFileIndex !== -1 ? process.argv[singleFileIndex + 1] : null;
 
-const buildOptions: BuildOptions = {
-  entryPoints,
-  bundle: false,
-  platform: "node",
-  target: "node18",
-  outdir: distDir,
-  format: "cjs",
-};
+/**
+ * Get entry points from manifest (only files that should be executable)
+ */
+function getEntryPoints(): string[] {
+  const manifestFiles = new Set(Object.values(scripts).map((s) => s.file));
+  return Array.from(manifestFiles).map((file) => join(srcDir, file));
+}
 
 /**
  * Get all .ts files in src that are not in the manifest and not excluded
@@ -177,7 +174,7 @@ function createSrcSymlinks(): void {
 }
 
 /**
- * Rename .js files to command names and make executable in dist/
+ * Rename compiled binaries to command names and make executable in dist/
  * Only processes files that are in the manifest
  */
 function processDistFiles(): void {
@@ -196,38 +193,166 @@ function processDistFiles(): void {
   const processedNames = new Set<string>();
 
   for (const file of files) {
-    if (file.endsWith(".js")) {
-      const baseName = file.replace(/\.js$/, "");
-      const commandName = manifestFileToName.get(baseName);
+    // Bun --compile creates files without extension or with the source name
+    // Check if this file corresponds to a manifest entry
+    const baseName = file.replace(/\.js$/, ""); // In case there are any .js files
+    const commandName = manifestFileToName.get(baseName);
 
-      if (commandName) {
-        const oldPath = join(distDir, file);
-        const newPath = join(distDir, commandName);
+    if (commandName && commandName !== file) {
+      const oldPath = join(distDir, file);
+      const newPath = join(distDir, commandName);
 
-        // Remove existing file if it exists
-        if (existsSync(newPath) && newPath !== oldPath) {
-          unlinkSync(newPath);
-        }
-
-        renameSync(oldPath, newPath);
-        chmodSync(newPath, 0o755);
-        processedNames.add(commandName);
-      } else {
-        // Not in manifest - remove the .js extension anyway for consistency
-        // but don't create a command symlink
-        const oldPath = join(distDir, file);
-        const newPath = join(distDir, baseName);
-        if (existsSync(newPath) && newPath !== oldPath) {
-          unlinkSync(newPath);
-        }
-        renameSync(oldPath, newPath);
-        chmodSync(newPath, 0o755);
+      // Remove existing file if it exists
+      if (existsSync(newPath) && newPath !== oldPath) {
+        unlinkSync(newPath);
       }
+
+      renameSync(oldPath, newPath);
+      chmodSync(newPath, 0o755);
+      processedNames.add(commandName);
+    } else if (existsSync(join(distDir, file))) {
+      // Make sure file is executable
+      chmodSync(join(distDir, file), 0o755);
     }
   }
 }
 
+/**
+ * Build a single entry point using Bun CLI with --compile
+ */
+async function buildEntry(entryPoint: string): Promise<void> {
+  const fileName = entryPoint.split("/").pop()?.replace(/\.ts$/, "") ?? "";
+  const outfile = join(distDir, fileName);
+
+  // Use Bun CLI directly since the API doesn't respect outfile with compile
+  const proc = Bun.spawn(
+    [
+      "bun",
+      "build",
+      entryPoint,
+      "--compile",
+      "--outfile",
+      outfile,
+      "--target",
+      "bun-darwin-arm64",
+    ],
+    {
+      cwd: rootDir,
+      stdout: "pipe",
+      stderr: "pipe",
+    },
+  );
+
+  const exitCode = await proc.exited;
+
+  if (exitCode !== 0) {
+    const stderr = await new Response(proc.stderr).text();
+    console.error(`Failed to build ${fileName}:`);
+    console.error(stderr);
+    throw new Error(`Build failed for ${fileName}`);
+  }
+
+  // Make executable
+  chmodSync(outfile, 0o755);
+}
+
+/**
+ * Generate wrapper scripts that check timestamps and rebuild if needed
+ */
+function generateWrappers(): void {
+  // Ensure bin directory exists
+  if (!existsSync(binDir)) {
+    console.log("Creating bin/ directory...");
+    const { mkdirSync } = require("fs");
+    mkdirSync(binDir, { recursive: true });
+  }
+
+  // Clean up old wrappers that aren't in the manifest
+  if (existsSync(binDir)) {
+    const validNames = new Set(Object.keys(scripts));
+    const files = readdirSync(binDir);
+    for (const file of files) {
+      const filePath = join(binDir, file);
+      try {
+        const stat = lstatSync(filePath);
+        // Remove files that aren't directories and aren't in manifest
+        if (stat.isFile() && !validNames.has(file)) {
+          console.log(`Removing stale wrapper: ${file}`);
+          unlinkSync(filePath);
+        }
+      } catch {
+        // Ignore errors
+      }
+    }
+  }
+
+  console.log("Generating wrapper scripts in bin/...");
+
+  for (const [name, entry] of Object.entries(scripts)) {
+    const wrapperPath = join(binDir, name);
+    const sourceFile = entry.file;
+    const sourcePath = join(srcDir, sourceFile);
+    const binaryPath = join(distDir, name);
+
+    const wrapperContent = `#!/usr/bin/env bash
+# Auto-generated wrapper for ${name}
+# Checks if source is newer than binary and rebuilds if needed
+
+SOURCE="${sourcePath}"
+BINARY="${binaryPath}"
+BUILD_SCRIPT="${join(rootDir, "scripts/build.ts")}"
+
+# Check if source is newer than binary
+if [[ "$SOURCE" -nt "$BINARY" ]]; then
+  echo "Source changed, rebuilding ${name}..." >&2
+  cd "${rootDir}" && bun run "\${BUILD_SCRIPT}" --single "${sourceFile}" >/dev/null 2>&1 || {
+    echo "Build failed for ${name}" >&2
+    exit 1
+  }
+fi
+
+# Execute the binary
+exec "\${BINARY}" "$@"
+`;
+
+    writeFileSync(wrapperPath, wrapperContent);
+    chmodSync(wrapperPath, 0o755);
+  }
+}
+
+/**
+ * Build all entry points
+ */
+async function buildAll(): Promise<void> {
+  const entryPoints = getEntryPoints();
+  console.log(`Building ${entryPoints.length} scripts...`);
+
+  // Ensure dist directory exists
+  if (!existsSync(distDir)) {
+    const { mkdirSync } = require("fs");
+    mkdirSync(distDir, { recursive: true });
+  }
+
+  // Build in parallel for speed
+  await Promise.all(entryPoints.map((entry) => buildEntry(entry)));
+
+  processDistFiles();
+  generateWrappers();
+}
+
 async function main(): Promise<void> {
+  // Handle single file build
+  if (singleFile) {
+    const entryPoint = join(srcDir, singleFile);
+    if (!existsSync(entryPoint)) {
+      console.error(`File not found: ${entryPoint}`);
+      process.exit(1);
+    }
+    await buildEntry(entryPoint);
+    processDistFiles();
+    return;
+  }
+
   // Warn about unlisted files at the start
   warnAboutUnlistedFiles();
 
@@ -239,51 +364,52 @@ async function main(): Promise<void> {
   updateGitignore();
 
   if (isWatch) {
-    const ctx = await context(buildOptions);
-
     // Do initial build
-    await ctx.rebuild();
-    processDistFiles();
+    await buildAll();
     console.log("Initial build complete. Watching for changes...");
 
-    // Start watching
-    await ctx.watch();
-
-    // Watch for changes and process
+    // Watch for changes and rebuild
     const chokidar = await import("chokidar");
 
-    // Watch both dist/*.js and manifest.ts for changes
-    const watcher = chokidar.default.watch(
-      [join(distDir, "*.js"), join(import.meta.dirname, "../manifest.ts")],
-      { ignoreInitial: true },
-    );
+    // Get list of files to watch from manifest
+    const entryPoints = getEntryPoints();
+    const watchPaths = [...entryPoints, join(srcDir, "manifest.ts")];
 
-    watcher.on("add", (path) => {
-      if (path.endsWith(".js")) {
-        setTimeout(() => {
-          try {
-            processDistFiles();
-            console.log("Rebuild complete");
-          } catch {
-            // Ignore errors during processing
-          }
-        }, 100);
-      }
-    });
+    const watcher = chokidar.default.watch(watchPaths, { ignoreInitial: true });
 
-    watcher.on("change", (path) => {
+    let rebuildTimer: Timer | null = null;
+
+    watcher.on("change", async (path) => {
       if (path.endsWith("manifest.ts")) {
         console.log("Manifest changed, regenerating symlinks...");
-        // Note: In watch mode, manifest changes require restart to take effect
-        // because the module is already cached. This is a limitation.
         console.log(
           "Note: Manifest changes require restarting build:watch to take effect.",
         );
+        return;
       }
+
+      // Debounce rebuilds
+      if (rebuildTimer) {
+        clearTimeout(rebuildTimer);
+      }
+
+      rebuildTimer = setTimeout(async () => {
+        try {
+          const fileName = path.split("/").pop() || "";
+          console.log(`Rebuilding ${fileName}...`);
+          await buildEntry(path);
+          processDistFiles();
+          console.log("Rebuild complete");
+        } catch (err) {
+          console.error("Rebuild failed:", err);
+        }
+      }, 100);
     });
+
+    // Keep process alive
+    process.stdin.resume();
   } else {
-    await build(buildOptions);
-    processDistFiles();
+    await buildAll();
     warnAboutUnlistedFiles();
     console.log("Build complete");
   }

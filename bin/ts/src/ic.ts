@@ -2127,6 +2127,12 @@ async function main() {
 // Use realpathSync to handle symlinks and macOS /private prefix
 function isEntryPoint(): boolean {
   try {
+    // In compiled Bun executables, import.meta.url includes $bunfs
+    // which means we're in a compiled binary and should run
+    if (import.meta.url.includes("$bunfs")) {
+      return true;
+    }
+
     const importPath = new URL(import.meta.url).pathname;
     const argvPath = process.argv[1];
     // Resolve both paths to handle symlinks and /private prefix on macOS

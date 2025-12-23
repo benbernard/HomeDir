@@ -5,10 +5,11 @@
 ### Source-Controlled Areas
 - **Root home directory**: The home directory itself (`/Users/benbernard`) is under source control (git)
 - **bin/ts**: Contains TypeScript modules that are source-controlled. This includes:
-  - TypeScript source files in `bin/ts/src/` (executable with `tsx`)
+  - TypeScript source files in `bin/ts/src/` (compiled to standalone executables)
   - Configuration files (package.json, tsconfig.json, biome.json, etc.)
-  - Symlinks in `bin/ts/src/` for command names without `.ts` extension
-  - Note: `node_modules/` and `dist/` (if present) are not tracked
+  - Build scripts in `bin/ts/scripts/`
+  - Symlinks in `bin/ts/src/` for development (auto-generated)
+  - Note: `node_modules/`, `dist/` (compiled executables), and `bin/` (wrapper scripts) are NOT tracked
 - **Configuration files**: Most dotfiles and `.config/` subdirectories are tracked
 
 ### NOT Source-Controlled
@@ -106,17 +107,20 @@ git ls-files | grep pattern
 - Contains compiled binaries and one-off scripts
 
 ### bin/ts/
-- TypeScript project with custom CLI utilities
-- Source files in `bin/ts/src/` (executable TypeScript files)
-- **No compilation needed** - runs directly using `tsx`
+- TypeScript project with custom CLI utilities built as standalone executables
+- Source files in `bin/ts/src/` (TypeScript source code)
+- **Compiled to standalone Bun executables** in `bin/ts/dist/` (~57MB each, includes runtime)
+- **Wrapper scripts** in `bin/ts/bin/` provide auto-rebuild when source changes
 - Includes utilities like:
   - `ic` (interactive container/session management - wrapped by shell function)
   - `wt` (worktree management - wrapped by shell function)
   - `read-tree` (file tree scanner)
   - `git-cleanup`, `git-prune-old` (git utilities)
-  - And more
+  - `claude-notify` (Claude Code notification hook)
+  - And more (run `ben-scripts` to see all)
 - Has its own package.json, tsconfig.json, and node_modules (not tracked)
-- `bin/ts/src/` is on PATH via `~/.zshrc.d/01_bin_ts.zsh`
+- `bin/ts/bin/` is on PATH via `~/.zshrc.d/01_bin_ts.zsh` (wrapper scripts with auto-rebuild)
+- `dist/` directory (compiled executables) is NOT tracked in git
 
 ### .config/
 - Standard XDG config directory
@@ -142,25 +146,35 @@ git ls-files | grep pattern
 
 When creating a new script:
 1. Write the TypeScript source in `bin/ts/src/your-script.ts`
-2. Start with the shebang: `#!/usr/bin/env tsx`
+2. Start with the shebang: `#!/usr/bin/env tsx` (for development compatibility)
 3. Use `yargs` for CLI argument parsing (already in dependencies)
 4. For scripts that interact heavily with shell commands, use the `zx` library (already in dependencies)
-5. Make the file executable: `chmod +x bin/ts/src/your-script.ts`
-6. **Add an entry to `bin/ts/manifest.ts`** with the command name and description
-7. Run `npm run build` in `bin/ts/` to generate symlinks
-8. The script is now available as `your-script` in your PATH
+5. **Add an entry to `bin/ts/manifest.ts`** with the command name and description
+6. Run `bun run build` in `bin/ts/` to:
+   - Compile to standalone executable in `dist/`
+   - Generate wrapper script in `bin/` with auto-rebuild
+   - Create symlink in `src/` for development
+7. The script is now available as `your-script` in your PATH
 
-**Note**: Scripts run directly using `tsx` which compiles TypeScript on-the-fly. The `bin/ts/src/` directory is on PATH via `~/.zshrc.d/01_bin_ts.zsh`, along with `bin/ts/node_modules/.bin/` for accessing `tsx`.
+**How It Works**:
+- **Source** (`src/*.ts`): Your TypeScript code
+- **Build**: Bun compiles to standalone executables (~57MB each, includes runtime)
+- **Wrappers** (`bin/*`): Smart bash scripts that check timestamps and auto-rebuild if source is newer
+- **PATH**: `bin/ts/bin/` is on PATH, so wrapper scripts are what you run
+- **Auto-rebuild**: When you edit source, next execution auto-rebuilds (~0.9s) then runs
 
 ### Script Manifest System
 
 Scripts are managed through `bin/ts/src/manifest.ts`:
 - **Manifest location**: `bin/ts/src/manifest.ts`
 - **Purpose**: Defines all executable scripts with their descriptions
-- **Symlinks**: The build process auto-generates symlinks in both `src/` and `dist/`
+- **Build artifacts**: The build process auto-generates:
+  - Compiled executables in `dist/`
+  - Wrapper scripts in `bin/` with auto-rebuild capability
+  - Symlinks in `src/` for development
 - **List all scripts**: Run `ben-scripts` to see all available scripts with descriptions
 
-**DO NOT manually create symlinks** - they are auto-generated from the manifest.
+**DO NOT manually create these files** - they are auto-generated from the manifest.
 
 To add a new script to the manifest:
 ```typescript
@@ -174,7 +188,7 @@ export const scripts: Record<string, ScriptEntry> = {
 };
 ```
 
-For library modules (non-executable code), add them to `excludedFiles` in the manifest.
+For library modules (non-executable code), add them to `excludedFiles` in the manifest to avoid "missing from manifest" warnings.
 
 ### Example Script Structure
 
@@ -209,14 +223,19 @@ main();
 ### Modifying Existing TypeScript Utilities
 
 1. Source files are in `bin/ts/src/`
-2. Edit the `.ts` file directly - changes take effect immediately (no build step required!)
+2. Edit the `.ts` file directly - **next execution will auto-rebuild** (~0.9s)
 3. The module has its own dependencies in `bin/ts/node_modules/`
-4. For development with type checking: `npm run build:watch` in `bin/ts/` (optional - runs TypeScript type checker in watch mode)
+4. Development workflow options:
+   - **Recommended**: Just edit and run - wrappers auto-rebuild on demand
+   - **Alternative**: `bun run build:watch` for continuous rebuilds during active development
+   - **Type checking**: `bun run typecheck` (or as part of build)
 5. All executable scripts have:
-   - Shebang: `#!/usr/bin/env tsx`
-   - Execute permission: `chmod +x`
+   - Shebang: `#!/usr/bin/env tsx` (for development compatibility)
    - Entry in `bin/ts/manifest.ts` with description
-   - Auto-generated symlink (created by `npm run build`)
+   - Auto-generated artifacts (created by `bun run build`):
+     - Compiled executable in `dist/`
+     - Wrapper script in `bin/` with auto-rebuild
+     - Symlink in `src/` for development
 
 ## Configuration Management
 

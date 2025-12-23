@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# Auto-generated wrapper for git-prune-old
+# Checks if source is newer than binary and rebuilds if needed
+
+SOURCE="/Users/benbernard/bin/ts/src/git-prune-old.ts"
+BINARY="/Users/benbernard/bin/ts/dist/git-prune-old"
+BUILD_SCRIPT="/Users/benbernard/bin/ts/scripts/build.ts"
+
+# Check if source is newer than binary
+if [[ "$SOURCE" -nt "$BINARY" ]]; then
+  echo "Source changed, rebuilding git-prune-old..." >&2
+  cd "/Users/benbernard/bin/ts" && bun run "${BUILD_SCRIPT}" --single "git-prune-old.ts" >/dev/null 2>&1 || {
+    echo "Build failed for git-prune-old" >&2
+    exit 1
+  }
+fi
+
+# Execute the binary
+exec "${BINARY}" "$@"

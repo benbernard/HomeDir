@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# Auto-generated wrapper for analyze-zsh-startup
+# Checks if source is newer than binary and rebuilds if needed
+
+SOURCE="/Users/benbernard/bin/ts/src/analyze-zsh-startup.ts"
+BINARY="/Users/benbernard/bin/ts/dist/analyze-zsh-startup"
+BUILD_SCRIPT="/Users/benbernard/bin/ts/scripts/build.ts"
+
+# Check if source is newer than binary
+if [[ "$SOURCE" -nt "$BINARY" ]]; then
+  echo "Source changed, rebuilding analyze-zsh-startup..." >&2
+  cd "/Users/benbernard/bin/ts" && bun run "${BUILD_SCRIPT}" --single "analyze-zsh-startup.ts" >/dev/null 2>&1 || {
+    echo "Build failed for analyze-zsh-startup" >&2
+    exit 1
+  }
+fi
+
+# Execute the binary
+exec "${BINARY}" "$@"
