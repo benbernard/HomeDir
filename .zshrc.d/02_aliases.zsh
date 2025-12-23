@@ -112,3 +112,7 @@ alias 'lg=lazygit'
 
 # vitest
 alias 'vt=npx vitest --no-watch --bail 1'
+
+#gh
+alias 'rw=gh repo view -w'
+alias 'prw=gh pr view -w'
