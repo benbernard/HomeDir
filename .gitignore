@@ -431,3 +431,5 @@ corncob
 .config/pastry
 .claude/stats-cache.json
 .claude/cache
+.claude/paste-cache
+.serena

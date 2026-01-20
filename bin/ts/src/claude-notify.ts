@@ -675,7 +675,7 @@ async function main() {
   // steve added a triple-nested retry loop with 2s timeouts per attempt.
   // That's 6 seconds of delay if all fail. For notifications. NOTIFICATIONS.
   // Notifications should be fast. This isn't a distributed transaction, steve.
-  const sender = codexMode ? NEUTRAL_SENDER : CLAUDE_ICON_BUNDLE;
+  const sender = NEUTRAL_SENDER; // Use Terminal sender - Claude Desktop bundle ID hangs terminal-notifier
   args.push("-sender", sender);
 
   if (debugMode) {

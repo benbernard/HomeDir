@@ -68,7 +68,19 @@
   "enabledPlugins": {
     "code-review@claude-code-plugins": true,
     "commit-commands@claude-code-plugins": true,
-    "pr-review-toolkit@claude-code-plugins": true
+    "pr-review-toolkit@claude-code-plugins": true,
+    "annual-reviews@instacart-claude-marketplace": true,
+    "annual-reviews@instacart": true,
+    "serena@claude-plugins-official": false,
+    "frontend-design@claude-plugins-official": false
+  },
+  "extraKnownMarketplaces": {
+    "instacart": {
+      "source": {
+        "source": "github",
+        "repo": "instacart/claude-marketplace"
+      }
+    }
   },
   "alwaysThinkingEnabled": true
 }
