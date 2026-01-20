@@ -48,4 +48,4 @@ if [[ "$ignore" == "true" ]]; then
 fi
 
 # Execute fd and output the file list
-exec fd "${FD_ARGS[@]}"
+exec fd "${FD_ARGS[@]}" --exclude .git --exclude node_modules
