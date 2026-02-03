@@ -386,6 +386,7 @@ function addRepoToProjectGitignore(
 async function cloneCommand(
   input: string,
   projectFlag?: string,
+  skipHooks?: boolean,
 ): Promise<CommandResult> {
   if (!input) {
     logError("Usage: ic clone <user/repo> or <repo> or <github-url>");
@@ -490,28 +491,32 @@ async function cloneCommand(
     logSuccess(`Successfully cloned to ${repoDir}`);
   }
 
-  // Run setup hooks
-  const config = loadIcConfig();
-  const detectedFiles = detectRepoFiles(repoDir);
-  const repoIdentifier = `${user}/${repo}`;
-  const hooks = resolveSetupHooks(config, repoIdentifier, detectedFiles);
+  // Run setup hooks (unless --quick flag is set)
+  if (!skipHooks) {
+    const config = loadIcConfig();
+    const detectedFiles = detectRepoFiles(repoDir);
+    const repoIdentifier = `${user}/${repo}`;
+    const hooks = resolveSetupHooks(config, repoIdentifier, detectedFiles);
 
-  if (hooks.length > 0) {
-    logInfo(`Running setup hooks for ${repoIdentifier}...`);
-    for (const command of hooks) {
-      logInfo(`Running: ${command}`);
-      try {
-        execSync(command, {
-          cwd: repoDir,
-          stdio: "inherit",
-        });
-        logSuccess(`Completed: ${command}`);
-      } catch (error) {
-        logError(`Failed to run: ${command}`);
-        // Continue with remaining hooks and don't abort
+    if (hooks.length > 0) {
+      logInfo(`Running setup hooks for ${repoIdentifier}...`);
+      for (const command of hooks) {
+        logInfo(`Running: ${command}`);
+        try {
+          execSync(command, {
+            cwd: repoDir,
+            stdio: "inherit",
+          });
+          logSuccess(`Completed: ${command}`);
+        } catch (error) {
+          logError(`Failed to run: ${command}`);
+          // Continue with remaining hooks and don't abort
+        }
       }
+      logSuccess("Setup hooks completed");
     }
-    logSuccess("Setup hooks completed");
+  } else {
+    logInfo("Skipping setup hooks (--quick mode)");
   }
 
   outputCommand(`cd "${repoDir}"`);
@@ -1881,6 +1886,12 @@ async function main() {
             description:
               "Clone into a workspace directory (alias for --project)",
           })
+          .option("quick", {
+            alias: "q",
+            type: "boolean",
+            description: "Skip setup hooks (npm install, etc.)",
+            default: false,
+          })
           .example("$0 c user/repo", "Clone git@github.com:user/repo.git")
           .example(
             "$0 c myrepo",
@@ -1890,7 +1901,8 @@ async function main() {
             "$0 c myrepo -p myFeature",
             "Clone into ~/repos/myFeature/myrepo",
           )
-          .example("$0 c https://github.com/user/repo", "Clone from HTTPS URL");
+          .example("$0 c https://github.com/user/repo", "Clone from HTTPS URL")
+          .example("$0 c myrepo -q", "Clone without running npm install, etc.");
       },
     )
     .command(
@@ -2072,7 +2084,11 @@ async function main() {
     const projectOrWorkspace =
       (argv.project as string | undefined) ||
       (argv.workspace as string | undefined);
-    result = await cloneCommand(argv.repo as string, projectOrWorkspace);
+    result = await cloneCommand(
+      argv.repo as string,
+      projectOrWorkspace,
+      argv.quick as boolean,
+    );
   } else if (command === "attach" || command === "a") {
     result = await attachCommand(argv.force as boolean, argv.cwd as boolean);
   } else if (command === "attach-dirs" || command === "ad") {
