@@ -433,3 +433,6 @@ corncob
 .claude/cache
 .claude/paste-cache
 .serena
+.claude/tasks
+.claude/image-cache
+.config/ava-cli
