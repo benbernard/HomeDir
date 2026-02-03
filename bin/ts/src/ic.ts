@@ -449,7 +449,9 @@ async function cloneCommand(
       "",
     );
 
-    const newName = suffix ? `${repo}-${suffix}` : `${repo}-`;
+    // Trim leading dashes from suffix since we add one
+    const trimmedSuffix = suffix.replace(/^-+/, "");
+    const newName = trimmedSuffix ? `${repo}-${trimmedSuffix}` : `${repo}-`;
     repoDirName = newName; // Update the tracked directory name
     if (projectDir) {
       repoDir = join(projectDir, newName);
