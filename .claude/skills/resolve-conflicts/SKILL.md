@@ -1,4 +1,5 @@
 ---
+name: resolve-conflicts
 description: Resolve git merge/rebase conflicts
 ---
 
