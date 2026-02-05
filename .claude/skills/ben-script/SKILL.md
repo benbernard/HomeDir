@@ -1,3 +1,8 @@
+---
+name: ben-script
+description: Create a new TypeScript utility script in the `~/bin/ts` project that will be compiled to a standalone executable with auto-rebuild capability.
+---
+
 # Create New bin/ts Script
 
 Create a new TypeScript utility script in the `~/bin/ts` project that will be compiled to a standalone executable with auto-rebuild capability.

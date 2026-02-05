@@ -140,6 +140,12 @@ git ls-files | grep pattern
 
 ## Working with TypeScript Modules (bin/ts)
 
+### Quality Checks
+
+- Lint/typecheck expectations apply to the `bin/ts` TypeScript project (and other codebases that define tooling).
+- For non-code changes (dotfiles, markdown, skills, configs), do **not** run lints/typechecks unless explicitly requested.
+- If working inside `repos/` or other separate projects, follow that repo's own tooling and instructions.
+
 ### Creating New Scripts
 
 **IMPORTANT**: All new utility scripts should be written in TypeScript in `bin/ts/src/`.

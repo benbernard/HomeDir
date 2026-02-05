@@ -1,3 +1,8 @@
+---
+name: create-tickets-from-outline
+description: You are helping the user convert a hierarchical markdown outline into structured Linear tickets with proper parent-child relationships.
+---
+
 # Create Linear Tickets From Outline
 
 You are helping the user convert a hierarchical markdown outline into structured Linear tickets with proper parent-child relationships.

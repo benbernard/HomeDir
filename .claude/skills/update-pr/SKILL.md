@@ -1,4 +1,5 @@
 ---
+name: update-pr
 description: Update existing pull request with new commits
 ---
 

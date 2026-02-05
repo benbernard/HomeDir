@@ -37,6 +37,7 @@
     "ask": [],
     "defaultMode": "acceptEdits"
   },
+  "model": "us.anthropic.claude-opus-4-5-20251101-v1:0",
   "hooks": {
     "Notification": [
       {
@@ -69,10 +70,10 @@
     "code-review@claude-code-plugins": true,
     "commit-commands@claude-code-plugins": true,
     "pr-review-toolkit@claude-code-plugins": true,
-    "annual-reviews@instacart-claude-marketplace": true,
-    "annual-reviews@instacart": true,
     "serena@claude-plugins-official": false,
-    "frontend-design@claude-plugins-official": false
+    "frontend-design@claude-plugins-official": false,
+    "annual-reviews@instacart": true,
+    "buildkite@instacart": true
   },
   "extraKnownMarketplaces": {
     "instacart": {
@@ -82,6 +83,5 @@
       }
     }
   },
-  "alwaysThinkingEnabled": true,
-  "model": "us.anthropic.claude-opus-4-5-20251101-v1:0"
+  "alwaysThinkingEnabled": true
 }

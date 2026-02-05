@@ -1,4 +1,5 @@
 ---
+name: create-pr
 description: Create pull requests with concise descriptions
 ---
 
