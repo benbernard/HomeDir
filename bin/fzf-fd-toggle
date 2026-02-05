@@ -5,6 +5,7 @@ set -euo pipefail
 
 PANE_ID="$1"
 TOGGLE_TYPE="$2"  # either "hidden" or "ignore"
+FD_TYPE="${3:-f}" # "f" (files) or "d" (directories)
 
 STATE_FILE="/tmp/fzf-fd-state-${PANE_ID}"
 
@@ -37,7 +38,11 @@ echo "hidden=$hidden" > "$STATE_FILE"
 echo "ignore=$ignore" >> "$STATE_FILE"
 
 # Build fd command based on current state
-FD_ARGS=(--type f)
+if [[ "$FD_TYPE" != "f" && "$FD_TYPE" != "d" ]]; then
+    FD_TYPE="f"
+fi
+
+FD_ARGS=(--type "$FD_TYPE")
 
 if [[ "$hidden" == "true" ]]; then
     FD_ARGS+=(--hidden)

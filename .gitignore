@@ -436,3 +436,4 @@ corncob
 .claude/tasks
 .claude/image-cache
 .config/ava-cli
+.claude/usage-data
