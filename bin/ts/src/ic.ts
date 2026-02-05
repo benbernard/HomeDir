@@ -1626,13 +1626,26 @@ async function tmuxRenumberCommand(dryRun: boolean): Promise<CommandResult> {
     return { exitCode: 1 };
   }
 
+  const tmuxSocketPath = process.env.TMUX.split(",")[0];
+  const tmuxCmd = tmuxSocketPath
+    ? `tmux -S "${tmuxSocketPath}"`
+    : "tmux";
+  const displayMessage = (message: string): void => {
+    const escaped = message.replace(/"/g, '\\"');
+    try {
+      execSync(`${tmuxCmd} display-message "${escaped}"`, { stdio: "ignore" });
+    } catch {
+      logError(message);
+    }
+  };
+
   // Get current session info to detect if we're in nested tmux
   let sessionName: string;
   let windowName = "";
   let paneTitle = "";
   try {
     const tmuxInfo = execSync(
-      'tmux display-message -p "#{session_name}|#{pane_title}|#{window_name}"',
+      `${tmuxCmd} display-message -p "#{session_name}|#{pane_title}|#{window_name}"`,
       {
         encoding: "utf-8",
       },
@@ -1640,34 +1653,22 @@ async function tmuxRenumberCommand(dryRun: boolean): Promise<CommandResult> {
 
     [sessionName, paneTitle, windowName] = tmuxInfo.split("|");
   } catch {
-    logError("Failed to get current tmux session information");
+    displayMessage("Failed to get current tmux session information");
     return { exitCode: 1 };
   }
 
-  // Detect nested tmux by checking window/pane titles
-  const isNested =
-    windowName.startsWith("nt:") ||
-    windowName.startsWith("ic:") ||
-    paneTitle.startsWith("nt:") ||
-    paneTitle.startsWith("ic:") ||
-    paneTitle.includes("Nested TM");
+  // Detect nested tmux: prefer socket name (more reliable than window title)
+  const isNested = basename(tmuxSocketPath) === "nested";
 
   // Get list of windows with their indices
   let windowListOutput: string;
   try {
-    if (isNested) {
-      windowListOutput = execNestedTmux(
-        'list-windows -t "${sessionName}" -F "#{window_index}:#{window_name}"',
-        { encoding: "utf-8" },
-      ) as string;
-    } else {
-      windowListOutput = execSync(
-        `tmux list-windows -t "${sessionName}" -F "#{window_index}:#{window_name}"`,
-        { encoding: "utf-8" },
-      ) as string;
-    }
+    windowListOutput = execSync(
+      `${tmuxCmd} list-windows -t "${sessionName}" -F "#{window_index}:#{window_name}"`,
+      { encoding: "utf-8" },
+    ) as string;
   } catch (error) {
-    logError(`Failed to list windows: ${error}`);
+    displayMessage("Failed to list windows");
     return { exitCode: 1 };
   }
 
@@ -1682,7 +1683,7 @@ async function tmuxRenumberCommand(dryRun: boolean): Promise<CommandResult> {
     .sort((a, b) => a.index - b.index);
 
   if (windows.length === 0) {
-    logInfo("No windows found in current session");
+    displayMessage("No windows found in current session");
     return { exitCode: 0 };
   }
 
@@ -1706,50 +1707,23 @@ async function tmuxRenumberCommand(dryRun: boolean): Promise<CommandResult> {
   }
 
   if (!needsRenumbering) {
-    logInfo(
-      "Windows are already numbered sequentially (0,1,2,...). No action needed.",
-    );
+    displayMessage("Windows already sequential (0,1,2,...)");
     return { exitCode: 0 };
   }
 
-  // Display what will be done
-  console.log();
-  logInfo(
-    `Session '${sessionName}' ${isNested ? "(nested)" : ""} has ${
-      windows.length
-    } windows with gaps:`,
-  );
-  console.log();
-
-  console.log(chalk.bold("Current window indices:"));
-  console.log(`  ${windows.map((w) => w.index).join(", ")}`);
-  console.log();
-
-  console.log(chalk.bold("Will renumber to:"));
-  for (const op of renumberOps) {
-    console.log(
-      `  Window ${chalk.yellow(op.oldIndex.toString())} (${
-        op.name
-      }) -> ${chalk.green(op.newIndex.toString())}`,
-    );
-  }
-  console.log();
-
   if (dryRun) {
-    logInfo("Dry run complete. Use without --dry-run to apply changes.");
+    displayMessage("Dry run complete. Use without --dry-run to apply changes.");
     return { exitCode: 0 };
   }
 
   // Execute renumbering using tmux's built-in move-window -r command
   try {
-    if (isNested) {
-      execNestedTmux(`move-window -r -t "${sessionName}"`, { stdio: "pipe" });
-    } else {
-      execSync(`tmux move-window -r -t "${sessionName}"`, { stdio: "pipe" });
-    }
-    logSuccess(`Renumbered ${renumberOps.length} window(s)`);
+    execSync(`${tmuxCmd} move-window -r -t "${sessionName}"`, {
+      stdio: "pipe",
+    });
+    displayMessage(`Renumbered ${renumberOps.length} window(s)`);
   } catch (error) {
-    logError(`Failed to renumber windows: ${error}`);
+    displayMessage("Failed to renumber windows");
     return { exitCode: 1 };
   }
 
