@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# Auto-generated wrapper for tmux-fzf-picker
+# Checks if source is newer than binary and rebuilds if needed
+
+SOURCE="/Users/benbernard/bin/ts/src/tmux-fzf-picker.ts"
+BINARY="/Users/benbernard/bin/ts/dist/tmux-fzf-picker"
+BUILD_SCRIPT="/Users/benbernard/bin/ts/scripts/build.ts"
+
+# Check if source is newer than binary
+if [[ "$SOURCE" -nt "$BINARY" ]]; then
+  echo "Source changed, rebuilding tmux-fzf-picker..." >&2
+  cd "/Users/benbernard/bin/ts" && bun run "${BUILD_SCRIPT}" --single "tmux-fzf-picker.ts" >/dev/null 2>&1 || {
+    echo "Build failed for tmux-fzf-picker" >&2
+    exit 1
+  }
+fi
+
+# Execute the binary
+exec "${BINARY}" "$@"

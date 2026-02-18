@@ -1627,9 +1627,7 @@ async function tmuxRenumberCommand(dryRun: boolean): Promise<CommandResult> {
   }
 
   const tmuxSocketPath = process.env.TMUX.split(",")[0];
-  const tmuxCmd = tmuxSocketPath
-    ? `tmux -S "${tmuxSocketPath}"`
-    : "tmux";
+  const tmuxCmd = tmuxSocketPath ? `tmux -S "${tmuxSocketPath}"` : "tmux";
   const displayMessage = (message: string): void => {
     const escaped = message.replace(/"/g, '\\"');
     try {

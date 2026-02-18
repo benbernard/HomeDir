@@ -87,6 +87,13 @@ export const scripts: Record<string, ScriptEntry> = {
     description: "Convert maildir email format to mbox format",
   },
 
+  // Tmux integration
+  "tmux-fzf-picker": {
+    file: "tmux-fzf-picker.ts",
+    description:
+      "Fzf file/directory picker for tmux popups with toggle support",
+  },
+
   // Meta
   "ben-scripts": {
     file: "ben-scripts.ts",
