@@ -168,15 +168,14 @@ export PATH="$HOME/bin:$PATH"
 [[ "$-" == *i* ]] && printf 'P$f{"hook": "SourcedRcFileForWarp", "value": { "shell": "zsh", "uname": "Linux" }}�'
 
 export PATH="$PATH:${HOME}/.config/gohan/bin"
-
-# >>> gohan setup, do not edit this section <<<
-# !! Contents within this block are managed by gohan !!
-[ -f "/Users/benbernard/.config/gohan/gohan.sh" ] && source "/Users/benbernard/.config/gohan/gohan.sh"
-# <<< gohan setup end <<<
-
 # bun completions
 [ -s "/Users/benbernard/.bun/_bun" ] && source "/Users/benbernard/.bun/_bun"
 
 # bun
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
+
+# >>> gohan setup, do not edit this section <<<
+# !! Contents within this block are managed by gohan !!
+[ -f "/Users/benbernard/.config/gohan/gohan.sh" ] && source "/Users/benbernard/.config/gohan/gohan.sh"
+# <<< gohan setup end <<<

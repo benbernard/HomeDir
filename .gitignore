@@ -437,3 +437,9 @@ corncob
 .claude/image-cache
 .config/ava-cli
 .claude/usage-data
+.claude/hooks/crumbs-*
+.claude/session-env
+.claude/skills/crumbs
+.claude/tune
+.config/md2doc
+.claude.json.backup.*
