@@ -46,5 +46,6 @@ src/git-prune-old
 src/ic
 src/read-tree
 src/s3upload
+src/tmux-fzf-picker
 src/wt
 # End auto-generated symlinks
