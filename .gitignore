@@ -443,3 +443,4 @@ corncob
 .claude/tune
 .config/md2doc
 .claude.json.backup.*
+VoiceInk-Dependencies/whisper.cpp
