@@ -444,3 +444,4 @@ corncob
 .config/md2doc
 .claude.json.backup.*
 VoiceInk-Dependencies/whisper.cpp
+.claude/mcp-needs-auth-cache.json
