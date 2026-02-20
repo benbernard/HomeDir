@@ -61,6 +61,15 @@
             "command": "/Users/benbernard/bin/ts/src/claude-notify stop"
           }
         ]
+      },
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/benbernard/.claude/hooks/clean-gitconfig.sh"
+          }
+        ]
       }
     ],
     "SessionStart": [
@@ -99,7 +108,8 @@
     "tune@instacart": true,
     "sous@instacart": true,
     "ast-grep@instacart": true,
-    "claude-hud@claude-hud": true
+    "claude-hud@claude-hud": true,
+    "isc@instacart": true
   },
   "extraKnownMarketplaces": {
     "instacart": {
