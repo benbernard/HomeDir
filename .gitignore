@@ -440,6 +440,9 @@ corncob
 .claude/hooks/crumbs-*
 .claude/session-env
 .claude/skills/crumbs
+.claude/skills/create-service
+.claude/skills/instacart-tools
+.claude/skills/create-tickets-from-outline
 .claude/tune
 .config/md2doc
 .claude.json.backup.*
