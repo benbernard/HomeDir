@@ -36,52 +36,32 @@ fzf_get_ref() {
   #   xargs echo
   # )
 
-  # Get the common git directory
-  local git_common_dir=$(git rev-parse --git-common-dir 2>/dev/null)
-
-  # First, get all current branches from worktrees (so we don't miss newly created ones)
+  # Get current branches from worktrees (so we don't miss newly created ones)
   local current_branches=$(git worktree list --porcelain | awk '/^branch / {sub(/^refs\/heads\//, "", $2); print $2}')
 
-  # Combine HEAD reflogs from all worktrees
-  # Each worktree has its own HEAD reflog, we want to merge them all by timestamp
-  local all_reflogs=""
+  # Collect checkout history from all worktrees using git reflog (formatted output,
+  # already in reverse chronological order, reliable field positions)
+  local reflog_branches=""
 
-  # Get current worktree's HEAD reflog (if it exists)
-  if [[ -f "$git_common_dir/logs/HEAD" ]]; then
-    all_reflogs+=$(cat "$git_common_dir/logs/HEAD")$'\n'
-  fi
-
-  # Get all worktrees' HEAD reflogs using git worktree list to find them
+  # Get worktree paths
   local worktree_paths=$(git worktree list --porcelain | awk '/^worktree / {print substr($0, 10)}')
   while IFS= read -r wt_path; do
-    local wt_head_log="$wt_path/.git/logs/HEAD"
-    # In bare repo worktree setup, .git is a file, need to parse it
-    if [[ -f "$wt_path/.git" ]] && ! [[ -d "$wt_path/.git" ]]; then
-      local gitdir=$(grep '^gitdir:' "$wt_path/.git" | cut -d' ' -f2)
-      wt_head_log="$gitdir/logs/HEAD"
-    fi
-    if [[ -f "$wt_head_log" ]]; then
-      all_reflogs+=$(cat "$wt_head_log")$'\n'
+    [[ -z "$wt_path" ]] && continue
+    local wt_branches=$(
+      git -C "$wt_path" reflog HEAD 2>/dev/null |
+      grep 'checkout: moving from' |
+      cut -d' ' -f 8 |
+      grep -v -E '^HEAD|^[0-9a-f]{7,}$'
+    )
+    if [[ -n "$wt_branches" ]]; then
+      reflog_branches+="$wt_branches"$'\n'
     fi
   done <<< "$worktree_paths"
-
-  # Get branches from reflog
-  local reflog_branches=$(
-    echo "$all_reflogs" |
-    grep -E 'checkout: moving from|reset: moving to|branch: Created from' |
-    # Sort by timestamp (field 5 is the unix timestamp)
-    sort -t' ' -k5 -rn |
-    # Extract the target branch (last field)
-    awk '{print $NF}' |
-    # Remove duplicates while preserving order
-    awk '!seen[$0]++' |
-    # Filter out HEAD references
-    grep -v '^HEAD$'
-  )
 
   # Combine current branches (at top) with reflog branches, remove duplicates
   result=$(
     (echo "$current_branches"; echo "$reflog_branches") |
+    grep -v '^$' |
     awk '!seen[$0]++' |
     fzf --tiebreak=index -m --ansi \
       --preview 'git log -$LINES --pretty=oneline --abbrev-commit --color=always {}'
