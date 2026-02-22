@@ -7,3 +7,8 @@ keybind = ctrl+alt+shift+arrow_left=text:\x1b[1;8D
 keybind = ctrl+alt+shift+arrow_right=text:\x1b[1;8C
 keybind = ctrl+alt+shift+arrow_up=text:\x1b[1;8A
 keybind = ctrl+alt+shift+arrow_down=text:\x1b[1;8B
+
+# Cmd+C: send a unique CSI sequence so tmux can handle copy in copy-mode
+# Falls back to copy_to_clipboard if there's a terminal selection,
+# otherwise sends the CSI sequence for tmux to handle
+keybind = super+c=text:\x1b[99;9~
