@@ -448,3 +448,8 @@ corncob
 .claude.json.backup.*
 VoiceInk-Dependencies/whisper.cpp
 .claude/mcp-needs-auth-cache.json
+.agents/skills/opentui
+.agents/skills/find-skills
+.claude/skills/opentui
+.claude/teams
+.config/recs

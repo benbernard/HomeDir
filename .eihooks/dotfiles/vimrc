@@ -170,17 +170,45 @@ if (v:version >= 700)
 endif
 
 "When editing a file, make screen display the name of the file you are editing
+" Also saves the original tmux title on first call so we can restore it on exit.
+" We save here (not VimEnter) because BufEnter fires before VimEnter.
+let s:saved_title = ''
+let s:saved_auto_rename = ''
+let s:title_saved = 0
+
 function! SetTitle()
-  if $TERM =~ "^screen"
+  call writefile(['[SetTitle] called, TERM=' . $TERM . ', bufname=' . expand('%:t') . ', title_saved=' . s:title_saved], '/tmp/vim-title-debug.log', 'a')
+  if $TERM =~ '^screen\|^tmux'
+    " On the first call, save the current tmux title before we overwrite it
+    if !s:title_saved
+      let s:title_saved = 1
+      let s:saved_title = substitute(system('tmux display-message -p "#W"'), '\n\+$', '', '')
+      let s:saved_auto_rename = substitute(system('tmux show-window-option -v automatic-rename'), '\n\+$', '', '')
+      call writefile(['[save] title=' . s:saved_title . ' auto_rename=' . s:saved_auto_rename], '/tmp/vim-title-debug.log', 'a')
+    endif
+
     let l:title = 'vi: ' . expand('%:t')
 
     if (l:title != 'vi: __Tag_List__')
       let l:truncTitle = strpart(l:title, 0, 15)
-      " silent exe '!echo -e -n "\033k' . l:truncTitle . '\033\\"'
       silent exe '!tmux rename-window "' . l:truncTitle . '"'
+      call writefile(['[rename] set to: ' . l:truncTitle], '/tmp/vim-title-debug.log', 'a')
     endif
   endif
 endfunction
 
 " Run it every time we change buffers
 autocmd BufEnter,BufFilePost * call SetTitle()
+
+function! RestoreTmuxTitle()
+  if $TERM =~ '^screen\|^tmux'
+    call writefile(['[restore] title=' . s:saved_title . ' auto_rename=' . s:saved_auto_rename], '/tmp/vim-title-debug.log', 'a')
+    if s:saved_auto_rename == 'on'
+      silent call system('tmux set-option -w automatic-rename on')
+    elseif s:saved_title != ''
+      silent call system('tmux rename-window "' . s:saved_title . '"')
+    endif
+  endif
+endfunction
+
+autocmd VimLeavePre * call RestoreTmuxTitle()
