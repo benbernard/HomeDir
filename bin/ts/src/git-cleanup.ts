@@ -63,13 +63,7 @@ function getDefaultBranch(remote: string): string {
     return result.stdout.replace(`refs/remotes/${remote}/`, "");
   }
 
-  // Fallback: check git config
-  const configResult = execGitSafe(["config", "--get", "init.defaultBranch"]);
-  if (configResult.status === 0 && configResult.stdout) {
-    return configResult.stdout;
-  }
-
-  // Final fallback: use 'main' if it exists, otherwise 'master'
+  // Fallback: check which standard default branch exists locally
   const branches = execGitSafe(["branch", "--list", "main", "master"]);
   if (branches.stdout.includes("main")) {
     return "main";
