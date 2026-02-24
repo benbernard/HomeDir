@@ -10,7 +10,8 @@
     "OTEL_METRICS_EXPORTER": "otlp",
     "OTEL_RESOURCE_ATTRIBUTES": "service.name=claude-code-cli,user.email=ben.bernard@instacart.com",
     "CLAUDE_CODE_ATTRIBUTION_HEADER": "0",
-    "ANTHROPIC_DEFAULT_OPUS_MODEL": "us.anthropic.claude-opus-4-6-v1"
+    "ANTHROPIC_DEFAULT_OPUS_MODEL": "us.anthropic.claude-opus-4-6-v1",
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
   },
   "permissions": {
     "allow": [
@@ -109,7 +110,9 @@
     "sous@instacart": true,
     "ast-grep@instacart": true,
     "claude-hud@claude-hud": true,
-    "isc@instacart": true
+    "isc@instacart": true,
+    "gopls-lsp@claude-plugins-official": true,
+    "swift-lsp@claude-plugins-official": true
   },
   "extraKnownMarketplaces": {
     "instacart": {

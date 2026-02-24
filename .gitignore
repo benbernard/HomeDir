@@ -453,3 +453,6 @@ VoiceInk-Dependencies/whisper.cpp
 .claude/skills/opentui
 .claude/teams
 .config/recs
+.gt
+.dolt
+.config/recs-explorer/
