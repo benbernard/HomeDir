@@ -22,7 +22,6 @@ export default defineConfig({
         "src/downloader.ts", // User requested: don't test
         "src/converter.ts", // User requested: don't test
         "src/read-tree.ts", // User requested: don't test
-        "src/wt.ts", // User requested: don't test
         "src/s3upload.ts", // Mostly AWS I/O, minimal business logic
         "src/git-cleanup.ts", // Mostly git I/O wrappers
         "src/git-prune-old.ts", // Mostly git I/O wrappers

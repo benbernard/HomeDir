@@ -29,11 +29,6 @@ export const scripts: Record<string, ScriptEntry> = {
     description:
       "Tmux session manager with project detection and shell integration",
   },
-  wt: {
-    file: "wt.ts",
-    description: "Git worktree manager for parallel branch development",
-  },
-
   // Git utilities
   "git-cleanup": {
     file: "git-cleanup.ts",
