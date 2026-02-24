@@ -113,7 +113,6 @@ git ls-files | grep pattern
 - **Wrapper scripts** in `bin/ts/bin/` provide auto-rebuild when source changes
 - Includes utilities like:
   - `ic` (interactive container/session management - wrapped by shell function)
-  - `wt` (worktree management - wrapped by shell function)
   - `read-tree` (file tree scanner)
   - `git-cleanup`, `git-prune-old` (git utilities)
   - `claude-notify` (Claude Code notification hook)
@@ -254,8 +253,9 @@ This setup uses a "dotfiles in home directory" approach:
 ## Common Patterns
 
 ### Tmux Configuration
-- Base config: `.tmux.conf`
-- Nested tmux config: `.tmux.nested.conf` (sources base config, then overrides)
+- Shared config: `.tmux.shared.conf` (sourced by both outer and nested)
+- Outer config: `.tmux.conf` (sources shared, adds outer-only bindings and green styling)
+- Nested config: `.tmux.nested.conf` (sources shared, adds nested-only bindings and blue styling)
 - May have site-specific overrides in `site/tmux.conf`
 
 ### Shell Configuration

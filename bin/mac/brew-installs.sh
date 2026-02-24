@@ -1,5 +1,4 @@
-brew install reattach-to-user-namespace \
- git-delta \
+brew install git-delta \
  rcs \
  neovim \
  python3 \
