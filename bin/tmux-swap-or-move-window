@@ -1,14 +1,25 @@
 #!/bin/sh
 
-# Get current window index and ID
-current_idx=$(tmux display-message -p '#{window_index}')
-current_window=$(tmux display-message -p '#{window_id}')
+# Usage: tmux-swap-or-move-window <direction> [pane_id]
+# direction: :-1 (left), :+1 (right), or absolute window index
+# pane_id: optional tmux pane ID (e.g., %5) to target the correct session/window.
+#          Without this, bare tmux commands resolve to the client's current session
+#          which may differ from the session where the keybinding was triggered.
 
-# Get all window indices, sorted
-all_windows=$(tmux list-windows -F '#{window_index}' | sort -n)
-
-# Parse direction (:-1 = left, :+1 = right)
 direction="$1"
+pane_id="$2"
+
+if [ -n "$pane_id" ]; then
+    # Use -t to target the specific pane's session and window
+    current_idx=$(tmux display-message -t "$pane_id" -p '#{window_index}')
+    all_windows=$(tmux list-windows -t "$pane_id" -F '#{window_index}' | sort -n)
+    session_target="$pane_id"
+else
+    # Fallback: use default client context (works when called from the active session)
+    current_idx=$(tmux display-message -p '#{window_index}')
+    all_windows=$(tmux list-windows -F '#{window_index}' | sort -n)
+    session_target=""
+fi
 
 if [ "$direction" = ":-1" ]; then
     # Moving LEFT: find the window immediately to our left and swap with it
@@ -50,7 +61,18 @@ else
     target_idx="$1"
 fi
 
+# Build the -t prefix for swap/select commands
+if [ -n "$session_target" ]; then
+    # Extract session from pane_id by querying tmux
+    session_name=$(tmux display-message -t "$pane_id" -p '#{session_name}')
+    swap_src="${session_name}:${current_idx}"
+    swap_dst="${session_name}:${target_idx}"
+else
+    swap_src="$current_idx"
+    swap_dst="$target_idx"
+fi
+
 # Swap windows and keep focus on our window
-tmux swap-window -s "$current_idx" -t "$target_idx"
+tmux swap-window -s "$swap_src" -t "$swap_dst"
 # After swap, our content is now at target_idx, so select it
-tmux select-window -t "$target_idx"
+tmux select-window -t "$swap_dst"
