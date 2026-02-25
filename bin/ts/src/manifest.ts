@@ -83,6 +83,10 @@ export const scripts: Record<string, ScriptEntry> = {
   },
 
   // Tmux integration
+  "tmux-health-check": {
+    file: "tmux-health-check.ts",
+    description: "Verify nested tmux keybinding chain and config health",
+  },
   "tmux-fzf-picker": {
     file: "tmux-fzf-picker.ts",
     description:
