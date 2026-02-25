@@ -178,9 +178,12 @@ The shared config sets `set-option -s extended-keys always` to ensure modifier c
 
 `bin/tmux-swap-or-move-window` handles window reordering:
 - Takes a direction (`:-1` for left, `:+1` for right) or an absolute index
+- Accepts an optional `pane_id` parameter (e.g., `%5`) to target the correct session
+- When `pane_id` is provided, uses `tmux display-message -t $pane_id` to resolve the session/window context — critical for multi-session nested tmux
 - Finds the adjacent window by iterating sorted window indices
 - Swaps the two windows and follows focus to the moved window
-- Called by outer (`C-M-Arrow`) and inner (`C-M-S-Arrow`) configs
+- Called by outer (`C-M-Arrow`) and inner (`C-M-S-Arrow`) configs, both passing `#{pane_id}`
+- Also called by `prefix m` (move to absolute index), which also passes `#{pane_id}`
 
 ## FZF File Picker (`tmux-fzf-picker`)
 
@@ -322,6 +325,12 @@ Always use explicit sockets: `tmux -L default` for outer, `tmux -L nested` for n
 
 `tmux source-file` is additive — it adds/overrides bindings but never removes them. Both `.tmux.conf` and `.tmux.nested.conf` include explicit `unbind-key` lines to clean up keys that belong to the other layer. Without these, stale bindings from old configs persist indefinitely and silently intercept keys. Run `tmux-health-check` to detect this.
 
+### 11. `run-shell` Session Context
+
+tmux's `run-shell` executes in the context of the **client's currently-active session**, not the session where the keybinding was triggered. In nested tmux with multiple sessions (e.g., `ic_benbernard`, `ic_RecordStream`), pressing `C-M-S-Arrow` in one session could move a window in a *different* session if the client's focus had shifted.
+
+All bindings that call `tmux-swap-or-move-window` pass `#{pane_id}` so the script can use `-t $pane_id` to resolve the correct session. Without this, the script falls back to bare `tmux display-message -p` which uses the client's current session — often wrong in multi-session setups.
+
 ---
 
 ## Historical Issues (Resolved)
@@ -331,3 +340,4 @@ Always use explicit sockets: `tmux -L default` for outer, `tmux -L nested` for n
 - **Duplicated `wta` implementation (removed)**: `wta` was defined in both `03_git_worktree.zsh` and `04_git_worktree_ts.zsh` with hardcoded DEBUG output and socket inconsistencies (used default socket instead of `-L nested`). The `wt`/`wta` system has been removed entirely.
 - **`sychronize-panes` typo (removed)**: The old `.tmux.conf` had a typo `sychronize-panes` (missing 'n') on a duplicate binding that silently did nothing. Removed during the config split.
 - **Stale C-M-S-Arrow bindings in outer tmux (fixed)**: The outer tmux had `C-M-S-Arrow` bindings left over from the old config, intercepting keys meant for nested tmux. Fixed by adding explicit `unbind-key` lines in both configs and the `tmux-health-check` diagnostic tool.
+- **`run-shell` session context bug (fixed)**: `tmux-swap-or-move-window` used bare `tmux display-message -p '#{window_index}'` which resolves to the client's currently-active session, not the session where the keybinding was pressed. In multi-session nested tmux, this caused `C-M-S-Arrow` to silently move windows in the wrong session (or fail when the window index didn't exist). Fixed by passing `#{pane_id}` from all bindings and using `-t $pane_id` in the script.
