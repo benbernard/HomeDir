@@ -3,6 +3,7 @@ node_modules/
 
 # Build output
 dist/
+bin/
 
 # Test coverage
 coverage/
@@ -47,5 +48,5 @@ src/ic
 src/read-tree
 src/s3upload
 src/tmux-fzf-picker
-src/wt
+src/tmux-health-check
 # End auto-generated symlinks

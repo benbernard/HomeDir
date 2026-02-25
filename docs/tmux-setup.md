@@ -40,6 +40,7 @@ Ghostty Terminal
 | `bin/ts/src/ic.ts` | `ic` TypeScript binary: clone, attach, tmux renumber, symlinks |
 | `bin/tmux-swap-or-move-window` | Shell script: swap two tmux windows by index |
 | `bin/ts/src/tmux-fzf-picker.ts` | FZF file/directory picker in a tmux popup |
+| `bin/ts/src/tmux-health-check.ts` | Verify nested tmux keybinding chain and config health |
 | `bin/tmux-sub-session-window.sh` | Create a "mini session" linked to an existing session |
 | `bin/startupServerScreen.sh` | Legacy startup script for server-like windows |
 | `submodules/tmux` | Custom tmux build (amling fork), on PATH |
@@ -207,6 +208,21 @@ Renumbers tmux windows to remove gaps (e.g., 0,2,5 -> 0,1,2). Bound to `prefix R
 
 Creates one tmux window per subdirectory of the current (or specified) directory. Useful for quickly setting up windows for multiple repos in a project.
 
+## `tmux-health-check`
+
+Diagnostic tool that verifies the entire nested tmux keybinding chain is healthy. Run it anytime `C-M-S-Arrow` window movement stops working in nested tmux, or after making config changes.
+
+**What it checks:**
+1. **Config files** -- All three configs exist, source the right files, nested doesn't source outer, outer has explicit unbinds
+2. **Outer tmux server** -- Has `C-M-Arrow` bindings, does NOT have `C-M-S-Arrow` (stale binding detection), has `C-o send-prefix`, extended-keys enabled
+3. **Nested tmux server** -- Has `C-M-S-Arrow` bindings, does NOT have `C-M-Arrow` or `C-o send-prefix` (stale binding detection), extended-keys enabled
+4. **Tools on PATH** -- `tmux-swap-or-move-window`, `tmux-fzf-picker`, `ic`
+5. **Ghostty config** -- All `C-M-S-Arrow` keybinds and `Super+C` present
+
+**Important:** The script always uses explicit socket names (`-L default` for outer, `-L nested` for nested) rather than bare `tmux`. This is critical because bare `tmux` inherits `$TMUX`, which points to whichever server the current pane belongs to — running it from inside a nested pane would check the nested server twice and the outer server never.
+
+**Common failure scenario:** After a config change, `tmux source-file` (reload) is additive — it adds new bindings but never removes old ones. If the outer tmux previously had `C-M-S-Arrow` bindings, they persist as stale bindings that intercept keys meant for nested tmux. The explicit `unbind-key` lines in both configs prevent this, but if stale bindings are detected, a full server restart is needed: `tmux -L default kill-server && tmux -L nested kill-server`.
+
 ## Visual Theming
 
 Both layers use **Catppuccin Macchiato** with different accent colors:
@@ -294,6 +310,18 @@ Using amling's fork of tmux (`submodules/tmux`) means configuration options may 
 
 TPM is initialized at the bottom of `~/.tmux.shared.conf`. Since both outer and nested configs source the shared config, TPM runs once per layer. The plugins (tmux-yank, tmux-copycat) load independently in each layer, which is the desired behavior but means plugin config changes need to be verified in both layers.
 
+### 9. `$TMUX` Socket Inheritance
+
+When running inside a nested pane, `$TMUX` points to the nested socket (`/tmp/tmux-*/nested`). Bare `tmux` commands (without `-L`) inherit this and target the nested server. This means:
+- `tmux source-file ~/.tmux.conf` from a nested pane reloads into the **nested** server, not the outer
+- `tmux list-keys` shows nested bindings, not outer
+
+Always use explicit sockets: `tmux -L default` for outer, `tmux -L nested` for nested. The `tmux-health-check` script handles this correctly.
+
+### 10. Stale Bindings After Config Reload
+
+`tmux source-file` is additive — it adds/overrides bindings but never removes them. Both `.tmux.conf` and `.tmux.nested.conf` include explicit `unbind-key` lines to clean up keys that belong to the other layer. Without these, stale bindings from old configs persist indefinitely and silently intercept keys. Run `tmux-health-check` to detect this.
+
 ---
 
 ## Historical Issues (Resolved)
@@ -302,3 +330,4 @@ TPM is initialized at the bottom of `~/.tmux.shared.conf`. Since both outer and 
 - **Nested config sourced entire outer config (fixed)**: The nested config used to `source-file ~/.tmux.conf`, inheriting outer-only bindings like `C-M-Arrow` and `C-S-Arrow`. Fixed by extracting shared settings into `~/.tmux.shared.conf` -- both configs now source only the shared file.
 - **Duplicated `wta` implementation (removed)**: `wta` was defined in both `03_git_worktree.zsh` and `04_git_worktree_ts.zsh` with hardcoded DEBUG output and socket inconsistencies (used default socket instead of `-L nested`). The `wt`/`wta` system has been removed entirely.
 - **`sychronize-panes` typo (removed)**: The old `.tmux.conf` had a typo `sychronize-panes` (missing 'n') on a duplicate binding that silently did nothing. Removed during the config split.
+- **Stale C-M-S-Arrow bindings in outer tmux (fixed)**: The outer tmux had `C-M-S-Arrow` bindings left over from the old config, intercepting keys meant for nested tmux. Fixed by adding explicit `unbind-key` lines in both configs and the `tmux-health-check` diagnostic tool.
