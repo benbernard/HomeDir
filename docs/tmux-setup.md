@@ -60,7 +60,8 @@ Ghostty Terminal
 ~/.tmux.conf (outer)          <-- Sources shared, then adds:
   ├── C-M-Arrow window movement (intercepted before nested)
   ├── C-o send-prefix (sends C-x to nested tmux)
-  ├── MouseDragEnd1Pane → stop-selection (keep selection visible)
+  ├── MouseDragEnd1Pane → copy-pipe-and-cancel "pbcopy" (auto-copy)
+  ├── DoubleClick/TripleClick1Pane → select + copy-pipe-and-cancel "pbcopy"
   ├── FZF file/dir pickers (M-p, M-P, M-h, M-H, M-r, M-R)
   ├── Green accent styling (#a6da95)
   └── Site-specific overrides (~/site/tmux.conf)
@@ -69,6 +70,7 @@ Ghostty Terminal
   ├── C-M-S-Arrow window movement (via Ghostty escape sequences)
   ├── Copy mode: Enter/y → copy-pipe-and-cancel "pbcopy"
   ├── MouseDragEnd1Pane → copy-pipe-and-cancel "pbcopy" (auto-copy)
+  ├── DoubleClick/TripleClick1Pane → select + copy-pipe-and-cancel "pbcopy"
   ├── OUTER_TMUX_WINDOW environment variable tracking
   ├── Blue accent styling (#8aadf4)
   └── Double status bar with rainbow separator + "NESTED" label
@@ -254,8 +256,8 @@ Multiple layers cooperate for clipboard:
 2. **Tmux shared config** registers this as `User0`:
    - In copy-mode-vi: `copy-pipe-and-cancel "pbcopy"`
    - In root (normal): sends `C-c` (interrupt)
-3. **Mouse drag** in outer tmux: `stop-selection` (keeps selection, doesn't auto-copy)
-4. **Mouse drag** in inner tmux: `copy-pipe-and-cancel "pbcopy"` (auto-copies)
+3. **Mouse drag** in both layers: `copy-pipe-and-cancel "pbcopy"` (auto-copies on mouse-up)
+4. **Double-click/triple-click** in both layers: select word/line and `copy-pipe-and-cancel "pbcopy"`
 5. **vi copy-mode keys** (inner tmux): `y`, `Enter` -> `copy-pipe-and-cancel "pbcopy"`
 6. **tmux-yank plugin** (shared): Uses `pbcopy`, mouse selection to clipboard
 
@@ -280,9 +282,9 @@ The `C-M-S-Arrow` keybindings for nested window movement require:
 
 If any of these break (e.g., different terminal, tmux version change), the nested window movement stops working silently.
 
-### 2. Mouse Behavior Difference Between Layers
+### 2. OSC 52 Clipboard Passthrough Doesn't Work Nested
 
-The outer config sets `MouseDragEnd1Pane` to `stop-selection` (keeps selection visible), while the nested config overrides this to `copy-pipe-and-cancel "pbcopy"` (auto-copies on mouse up). This is intentional but can be confusing if you forget which layer you're in.
+Tmux's default `copy-pipe-and-cancel` (without a pipe command) relies on OSC 52 (`set-clipboard external`) to reach the system clipboard. This works in the outer tmux (OSC 52 → Ghostty), but fails in nested tmux because the outer tmux doesn't pass OSC 52 through. All mouse copy bindings (`MouseDragEnd1Pane`, `DoubleClick1Pane`, `TripleClick1Pane`) in both configs explicitly pipe to `pbcopy` to avoid this. If new copy bindings are added, they must also use explicit `pbcopy`.
 
 ### 3. `escape-time 0` in Shared Config
 
