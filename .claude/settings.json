@@ -16,7 +16,8 @@
     "CLAUDE_CODE_DISABLE_1M_CONTEXT": "1",
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
     "OTEL_LOG_TOOL_DETAILS": "1",
-    "OTEL_METRICS_INCLUDE_VERSION": "true"
+    "OTEL_METRICS_INCLUDE_VERSION": "true",
+    "ENABLE_TOOL_SEARCH": "true"
   },
   "permissions": {
     "allow": [
@@ -102,9 +103,9 @@
     "command": "bash -c '\"/Users/benbernard/.bun/bin/bun\" \"/Users/benbernard/repos/claude-hud/src/index.ts\"'"
   },
   "enabledPlugins": {
-    "code-review@claude-code-plugins": true,
+    "code-review@claude-code-plugins": false,
     "commit-commands@claude-code-plugins": true,
-    "pr-review-toolkit@claude-code-plugins": true,
+    "pr-review-toolkit@claude-code-plugins": false,
     "serena@claude-plugins-official": false,
     "frontend-design@claude-plugins-official": false,
     "annual-reviews@instacart": true,

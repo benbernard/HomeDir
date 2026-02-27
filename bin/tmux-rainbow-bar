@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
-"""Racing rainbow gradient bar for tmux nested status line.
+"""Rainbow gradient bar for tmux nested status line.
 
-Generates a smooth HSV rainbow of box-drawing characters that shifts
-over time, creating a racing/sliding animation when called repeatedly
-by tmux's status-interval.
+Generates a smooth HSV rainbow of box-drawing characters.
+Accepts optional width argument (passed from tmux as #{client_width}).
 """
 import sys
 import time
@@ -22,8 +21,8 @@ def hsv_to_rgb(h, s, v):
     return int((r + m) * 255), int((g + m) * 255), int((b + m) * 255)
 
 
-BG = "#1e2030"       # Catppuccin Macchiato Mantle
-WIDTH = 300           # chars to generate (tmux truncates to fit)
+# Width comes from tmux #{client_width} or defaults to 500
+WIDTH = int(sys.argv[1]) if len(sys.argv) > 1 else 500
 SPEED = 0             # positions shifted per second (0 = static)
 CYCLES = 2.0          # rainbow repetitions across the bar
 SATURATION = 0.8
@@ -31,10 +30,13 @@ VALUE = 0.9
 
 offset = time.time() * SPEED
 
+# bg is omitted — status-style bg=#1e2030 already sets the background,
+# which cuts format string size by ~40% and reduces rendering load
+# through the outer tmux's VT100 emulator.
 parts = []
 for i in range(WIDTH):
     hue = ((i + offset) * CYCLES * 360.0 / WIDTH) % 360
     r, g, b = hsv_to_rgb(hue, SATURATION, VALUE)
-    parts.append(f"#[fg=#{r:02x}{g:02x}{b:02x},bg={BG}]\u2501")
+    parts.append(f"#[fg=#{r:02x}{g:02x}{b:02x}]\u2501")
 
 sys.stdout.write("".join(parts))
