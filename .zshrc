@@ -156,10 +156,7 @@ export PATH="/Users/benbernard/.codeium/windsurf/bin:$PATH"
 # Added by Windsurf
 export PATH="/Users/benbernard/.codeium/windsurf/bin:$PATH"
 
-export NVM_DIR="$HOME/.nvm"
-# NVM lazy-loading is now in ~/.zshrc.d/04_nvm_lazy.zsh
-# [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-# [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+# NVM_DIR and default node PATH are set in ~/.zshrc.d/04_nvm_lazy.zsh
 
 # Ensure ~/bin comes before nvm in PATH (for bd wrapper and other custom scripts)
 export PATH="$HOME/bin:$PATH"
