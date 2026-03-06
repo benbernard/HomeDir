@@ -3,9 +3,15 @@
 
 Generates a smooth HSV rainbow of box-drawing characters.
 Accepts optional width argument (passed from tmux as #{client_width}).
+
+Caches output to a temp file keyed by width, since SPEED=0 means the
+rainbow is identical for the same width. This avoids regenerating ~500
+color-coded characters every status-interval (1s), reducing the data
+pushed through the outer tmux's VT100 emulator and mitigating ghost
+status line artifacts.
 """
+import os
 import sys
-import time
 
 
 def hsv_to_rgb(h, s, v):
@@ -21,22 +27,40 @@ def hsv_to_rgb(h, s, v):
     return int((r + m) * 255), int((g + m) * 255), int((b + m) * 255)
 
 
-# Width comes from tmux #{client_width} or defaults to 500
 WIDTH = int(sys.argv[1]) if len(sys.argv) > 1 else 500
-SPEED = 0             # positions shifted per second (0 = static)
 CYCLES = 2.0          # rainbow repetitions across the bar
 SATURATION = 0.8
 VALUE = 0.9
 
-offset = time.time() * SPEED
+cache_path = f"/tmp/tmux-rainbow-bar-{os.getuid()}-{WIDTH}"
 
+# Return cached output if it exists for this width
+try:
+    with open(cache_path, "r") as f:
+        sys.stdout.write(f.read())
+        sys.exit(0)
+except (FileNotFoundError, OSError):
+    pass
+
+# Generate and cache
 # bg is omitted — status-style bg=#1e2030 already sets the background,
 # which cuts format string size by ~40% and reduces rendering load
 # through the outer tmux's VT100 emulator.
 parts = []
 for i in range(WIDTH):
-    hue = ((i + offset) * CYCLES * 360.0 / WIDTH) % 360
+    hue = (i * CYCLES * 360.0 / WIDTH) % 360
     r, g, b = hsv_to_rgb(hue, SATURATION, VALUE)
     parts.append(f"#[fg=#{r:02x}{g:02x}{b:02x}]\u2501")
 
-sys.stdout.write("".join(parts))
+result = "".join(parts)
+
+# Write cache atomically
+tmp = cache_path + ".tmp"
+try:
+    with open(tmp, "w") as f:
+        f.write(result)
+    os.replace(tmp, cache_path)
+except OSError:
+    pass
+
+sys.stdout.write(result)
