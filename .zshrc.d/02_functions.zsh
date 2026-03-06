@@ -145,18 +145,6 @@ resetSwap () {
   popd
 }
 
-setNodeVersion () {
-  VERSION=$1
-
-  mkdir ${HOME}/.paths
-
-  pushd /usr/local/bin
-  sudo ln -sf ${HOME}/.nvm/versions/node/v${VERSION}/bin/node
-  sudo ln -sf ${HOME}/.nvm/versions/node/v${VERSION}/bin/npm
-  ln -sf ${HOME}/.nvm/versions/node/v${VERSION}/bin ${HOME}/.paths/nvm
-  popd
-}
-
 ppgrep() {
   pgrep "$@" | xargs ps -fp 2>/dev/null;
 }

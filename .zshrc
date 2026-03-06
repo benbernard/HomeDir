@@ -156,9 +156,9 @@ export PATH="/Users/benbernard/.codeium/windsurf/bin:$PATH"
 # Added by Windsurf
 export PATH="/Users/benbernard/.codeium/windsurf/bin:$PATH"
 
-# NVM_DIR and default node PATH are set in ~/.zshrc.d/04_nvm_lazy.zsh
+# Node PATH is managed by fnm in ~/.zshrc.d/04_fnm.zsh
 
-# Ensure ~/bin comes before nvm in PATH (for bd wrapper and other custom scripts)
+# Ensure ~/bin comes before fnm in PATH (for bd wrapper and other custom scripts)
 export PATH="$HOME/bin:$PATH"
 
 # Auto-Warpify
