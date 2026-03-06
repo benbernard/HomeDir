@@ -457,3 +457,4 @@ VoiceInk-Dependencies/whisper.cpp
 .dolt
 .config/recs-explorer/
 .bento/bento-daemon.port
+.config/uv
