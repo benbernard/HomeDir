@@ -17,7 +17,8 @@
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
     "OTEL_LOG_TOOL_DETAILS": "1",
     "OTEL_METRICS_INCLUDE_VERSION": "true",
-    "ENABLE_TOOL_SEARCH": "true"
+    "ENABLE_TOOL_SEARCH": "true",
+    "DISABLE_AUTOUPDATER": "1"
   },
   "permissions": {
     "allow": [
@@ -110,15 +111,18 @@
     "frontend-design@claude-plugins-official": false,
     "annual-reviews@instacart": true,
     "buildkite@instacart": true,
-    "md2doc@instacart": true,
-    "discounting@instacart": true,
+    "md2doc@instacart": false,
+    "discounting@instacart": false,
     "tune@instacart": true,
     "sous@instacart": true,
     "ast-grep@instacart": true,
     "claude-hud@claude-hud": true,
     "isc@instacart": true,
     "gopls-lsp@claude-plugins-official": true,
-    "swift-lsp@claude-plugins-official": true
+    "swift-lsp@claude-plugins-official": true,
+    "ralph-loop@claude-plugins-official": true,
+    "agent-party@instacart": true,
+    "awesome-agent@instacart": true
   },
   "extraKnownMarketplaces": {
     "instacart": {
