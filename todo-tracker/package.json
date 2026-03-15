@@ -1,0 +1,29 @@
+{
+  "name": "todo-tracker",
+  "version": "1.0.0",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --mac"
+  },
+  "devDependencies": {
+    "electron": "^35.0.0",
+    "electron-builder": "^26.0.0"
+  },
+  "build": {
+    "appId": "com.benbernard.todo-tracker",
+    "productName": "Todo Tracker",
+    "mac": {
+      "category": "public.app-category.productivity",
+      "icon": "icon.icns"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "index.html",
+      "!todo.json",
+      "!todo.md",
+      "!todo.html"
+    ]
+  }
+}

@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Todo</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f5f5f0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 48px 16px;
+      color: #1a1a1a;
+    }
+
+    .container { width: 100%; max-width: 560px; }
+
+    h1 { font-size: 22px; font-weight: 600; color: #111; margin-bottom: 4px; }
+
+    .meta { font-size: 13px; color: #aaa; margin-bottom: 28px; display: flex; align-items: center; gap: 10px; }
+
+    .connected-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: #bbb; display: inline-block; flex-shrink: 0;
+      transition: background 0.3s;
+    }
+    .connected-dot.live { background: #4caf50; }
+
+    /* Connect screen */
+    .connect-screen {
+      background: #fff;
+      border: 1.5px solid #eee;
+      border-radius: 12px;
+      padding: 36px 32px;
+      text-align: center;
+    }
+    .connect-screen h2 { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
+    .connect-screen p { font-size: 13px; color: #888; margin-bottom: 24px; line-height: 1.6; }
+    .connect-btn {
+      padding: 12px 24px;
+      background: #222;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .connect-btn:hover { background: #444; }
+    .connect-hint { font-size: 12px; color: #bbb; margin-top: 16px; }
+
+    /* Main app */
+    .app { display: none; }
+    .app.visible { display: block; }
+
+    .add-row { display: flex; gap: 8px; margin-bottom: 24px; align-items: flex-end; }
+    .add-row textarea {
+      flex: 1; padding: 11px 14px;
+      border: 1.5px solid #ddd; border-radius: 8px;
+      font-size: 14px; font-family: inherit; background: #fff; outline: none;
+      transition: border-color 0.15s;
+      resize: none; overflow: hidden;
+      field-sizing: content; min-height: 42px;
+    }
+    .add-row textarea:focus { border-color: #555; }
+    .add-row textarea::placeholder { color: #bbb; }
+    .add-btn {
+      padding: 11px 18px; background: #222; color: #fff;
+      border: none; border-radius: 8px; font-size: 14px;
+      font-weight: 500; cursor: pointer; transition: background 0.15s;
+    }
+    .add-btn:hover { background: #444; }
+
+    .stats { font-size: 12px; color: #aaa; margin-bottom: 20px; min-height: 16px; }
+
+    .section-label {
+      font-size: 11px; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.08em; color: #aaa; margin-bottom: 8px; padding-left: 2px;
+    }
+
+    .task-list { list-style: none; margin-bottom: 28px; }
+    .task-list.empty::after {
+      content: attr(data-empty);
+      display: block; font-size: 13px; color: #ccc; padding: 8px 2px;
+    }
+
+    .task-item {
+      display: flex; align-items: center; gap: 12px;
+      background: #fff; border: 1.5px solid #eee; border-radius: 8px;
+      padding: 12px 14px; margin-bottom: 6px;
+      transition: border-color 0.15s, opacity 0.2s;
+    }
+    .task-item:hover { border-color: #ccc; }
+    .task-item.done { opacity: 0.4; }
+
+    .drag-handle {
+      cursor: grab; color: #ccc; flex-shrink: 0;
+      display: flex; align-items: center; padding: 2px 0;
+      user-select: none; touch-action: none;
+    }
+    .drag-handle:active { cursor: grabbing; }
+    .task-item:hover .drag-handle { color: #999; }
+    .task-item.dragging { opacity: 0.3; }
+    .task-item.drag-over-above { border-top: 2px solid #222; margin-top: -1px; }
+    .task-item.drag-over-below { border-bottom: 2px solid #222; margin-bottom: -1px; }
+
+    .task-checkbox {
+      width: 18px; height: 18px; border: 2px solid #ccc;
+      border-radius: 5px; cursor: pointer; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      transition: border-color 0.15s, background 0.15s;
+      user-select: none;
+    }
+    .task-item.done .task-checkbox { background: #222; border-color: #222; }
+    .task-checkbox .check { display: none; }
+    .task-item.done .task-checkbox .check { display: block; }
+
+    .task-text {
+      flex: 1; font-size: 14px; line-height: 1.4;
+      border: 1.5px solid transparent; border-radius: 4px;
+      padding: 2px 6px; margin: -2px -6px;
+      cursor: text; outline: none;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .task-text:focus {
+      border-color: #ccc; background: #fafafa;
+    }
+    .task-text a { color: #2563eb; text-decoration: none; }
+    .task-text a:hover { text-decoration: underline; }
+    .task-item.done .task-text { text-decoration: line-through; color: #bbb; }
+    .task-item.done .task-text a { color: inherit; }
+
+    .task-delete {
+      width: 24px; height: 24px; border: none; background: none;
+      cursor: pointer; color: #ccc; border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; transition: opacity 0.15s, color 0.15s;
+      flex-shrink: 0; padding: 0;
+    }
+    .task-item:hover .task-delete { opacity: 1; }
+    .task-delete:hover { color: #e55; }
+
+    .error-bar {
+      background: #fff3f3; border: 1.5px solid #fcc;
+      border-radius: 8px; padding: 10px 14px;
+      font-size: 13px; color: #c44; margin-bottom: 16px;
+      display: none;
+    }
+    .error-bar.visible { display: block; }
+
+    .reconnect-btn {
+      background: none; border: none; color: #888;
+      font-size: 12px; cursor: pointer; text-decoration: underline;
+      padding: 0; margin-left: 4px;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>Todo</h1>
+  <p class="meta">
+    <span class="connected-dot" id="dot"></span>
+    <span id="meta-text">Not connected</span>
+    <button class="reconnect-btn" id="reconnect-btn" style="display:none" onclick="reconnectStored()">Reconnect</button>
+  </p>
+
+  <!-- Connect screen -->
+  <div class="connect-screen" id="connect-screen">
+    <h2>Connect to your todo file</h2>
+    <p>This app reads and writes directly to <strong>todo.json</strong> on disk,<br>so Claude can always see your latest list.</p>
+    <button class="connect-btn" onclick="connectFile()">Select todo.json</button>
+    <p class="connect-hint">You'll need to grant access once per browser session.</p>
+  </div>
+
+  <!-- Main app -->
+  <div class="app" id="app">
+    <div class="error-bar" id="error-bar"></div>
+
+    <div class="add-row">
+      <textarea id="new-task" rows="1" placeholder="Add a task… Enter to save, Shift+Enter for newline"></textarea>
+      <button class="add-btn" onclick="addTask()">Add</button>
+    </div>
+
+    <p class="stats" id="stats"></p>
+
+    <p class="section-label">Active</p>
+    <ul class="task-list" id="active-list" data-empty="Nothing here — you're all caught up!"></ul>
+
+    <p class="section-label">Completed</p>
+    <ul class="task-list" id="done-list" data-empty="Nothing completed yet."></ul>
+  </div>
+</div>
+
+<script>
+  // ── IndexedDB helpers ──────────────────────────────────────────
+  const DB_NAME = 'todo-fs', STORE = 'handles', KEY = 'file';
+
+  function openDB() {
+    return new Promise((res, rej) => {
+      const r = indexedDB.open(DB_NAME, 1);
+      r.onupgradeneeded = e => e.target.result.createObjectStore(STORE);
+      r.onsuccess = e => res(e.target.result);
+      r.onerror = rej;
+    });
+  }
+
+  async function storeHandle(h) {
+    const db = await openDB();
+    return new Promise((res, rej) => {
+      const tx = db.transaction(STORE, 'readwrite');
+      tx.objectStore(STORE).put(h, KEY);
+      tx.oncomplete = res; tx.onerror = rej;
+    });
+  }
+
+  async function retrieveHandle() {
+    const db = await openDB();
+    return new Promise((res, rej) => {
+      const tx = db.transaction(STORE, 'readonly');
+      const r = tx.objectStore(STORE).get(KEY);
+      r.onsuccess = e => res(e.target.result || null);
+      r.onerror = rej;
+    });
+  }
+
+  // ── File I/O ───────────────────────────────────────────────────
+  let fileHandle = null;
+
+  async function readData() {
+    const file = await fileHandle.getFile();
+    const text = await file.text();
+    return JSON.parse(text);
+  }
+
+  async function writeData(data) {
+    data.lastUpdated = new Date().toISOString().slice(0, 10);
+    const writable = await fileHandle.createWritable();
+    await writable.write(JSON.stringify(data, null, 2));
+    await writable.close();
+  }
+
+  // ── Connect ────────────────────────────────────────────────────
+  async function connectFile() {
+    try {
+      const [handle] = await window.showOpenFilePicker({
+        types: [{ description: 'JSON', accept: { 'application/json': ['.json'] } }],
+        multiple: false
+      });
+      fileHandle = handle;
+      await storeHandle(handle);
+      await initApp();
+    } catch (e) {
+      if (e.name !== 'AbortError') showError('Could not open file: ' + e.message);
+    }
+  }
+
+  async function tryReconnect() {
+    try {
+      const handle = await retrieveHandle();
+      if (!handle) return false;
+      // queryPermission doesn't need a gesture — check if already granted
+      const perm = await handle.queryPermission({ mode: 'readwrite' });
+      if (perm === 'granted') { fileHandle = handle; return true; }
+      // Store for later so reconnectStored can request with a user gesture
+      storedHandle = handle;
+      return false;
+    } catch (e) { return false; }
+  }
+
+  let storedHandle = null;
+
+  async function reconnectStored() {
+    try {
+      const handle = storedHandle || await retrieveHandle();
+      if (!handle) { connectFile(); return; }
+      const perm = await handle.requestPermission({ mode: 'readwrite' });
+      if (perm === 'granted') {
+        fileHandle = handle;
+        storedHandle = null;
+        await initApp();
+      } else {
+        connectFile();
+      }
+    } catch (e) {
+      connectFile();
+    }
+  }
+
+  // ── App state ──────────────────────────────────────────────────
+  let todos = [], nextId = 1;
+
+  async function initApp() {
+    const data = await readData();
+    todos = data.todos || [];
+    nextId = todos.length ? Math.max(...todos.map(t => t.id)) + 1 : 1;
+    showApp();
+    render();
+  }
+
+  function showApp() {
+    document.getElementById('connect-screen').style.display = 'none';
+    document.getElementById('app').classList.add('visible');
+    document.getElementById('dot').classList.add('live');
+    document.getElementById('meta-text').textContent = fileHandle.name;
+    document.getElementById('reconnect-btn').style.display = 'none';
+  }
+
+  function showError(msg) {
+    const el = document.getElementById('error-bar');
+    el.textContent = msg;
+    el.classList.add('visible');
+    setTimeout(() => el.classList.remove('visible'), 4000);
+  }
+
+  // ── CRUD ───────────────────────────────────────────────────────
+  async function save() {
+    try {
+      await writeData({ todos });
+    } catch (e) {
+      showError('Could not save: ' + e.message);
+    }
+  }
+
+  async function addTask() {
+    const input = document.getElementById('new-task');
+    const text = input.value.trim();
+    if (!text) return;
+    todos.push({ id: nextId++, text, done: false });
+    await save();
+    render();
+    input.value = '';
+    input.focus();
+  }
+
+  async function toggleDone(id) {
+    const t = todos.find(t => t.id === id);
+    if (t) { t.done = !t.done; await save(); render(); }
+  }
+
+  async function deleteTask(id) {
+    todos = todos.filter(t => t.id !== id);
+    await save(); render();
+  }
+
+  function getPlainText(el) {
+    // Convert contenteditable HTML to plain text preserving line breaks
+    let html = el.innerHTML;
+    html = html.replace(/<div><br\s*\/?><\/div>/gi, '\n');
+    html = html.replace(/<div>/gi, '\n');
+    html = html.replace(/<\/div>/gi, '');
+    html = html.replace(/<br\s*\/?>/gi, '\n');
+    const tmp = document.createElement('span');
+    tmp.innerHTML = html;
+    return tmp.textContent.trim();
+  }
+
+  async function editTask(el) {
+    const id = Number(el.dataset.id);
+    const newText = getPlainText(el);
+    const t = todos.find(t => t.id === id);
+    if (!t) return;
+    if (newText === t.text) { el.innerHTML = linkify(t.text); return; }
+    if (!newText) { el.innerHTML = linkify(t.text); return; }
+    t.text = newText;
+    await save();
+    el.innerHTML = linkify(newText);
+  }
+
+  function stripLinks(el) {
+    const t = todos.find(t => t.id === Number(el.dataset.id));
+    if (t) el.innerText = t.text;
+  }
+
+  function editKey(e, el) {
+    if (e.key === 'Enter' && !e.shiftKey && !e.altKey) { e.preventDefault(); el.blur(); }
+    if (e.key === 'Escape') {
+      const t = todos.find(t => t.id === Number(el.dataset.id));
+      if (t) el.innerHTML = linkify(t.text);
+      el.blur();
+    }
+  }
+
+  // ── Render ─────────────────────────────────────────────────────
+  function render() {
+    const activeList = document.getElementById('active-list');
+    const doneList   = document.getElementById('done-list');
+    activeList.innerHTML = '';
+    doneList.innerHTML   = '';
+
+    const active = todos.filter(t => !t.done);
+    const done   = todos.filter(t =>  t.done);
+
+    activeList.classList.toggle('empty', active.length === 0);
+    doneList.classList.toggle('empty',   done.length === 0);
+
+    [...active, ...done].forEach(todo => {
+      const li = document.createElement('li');
+      li.className = 'task-item' + (todo.done ? ' done' : '');
+      li.draggable = true;
+      li.dataset.id = todo.id;
+      li.innerHTML = `
+        <div class="drag-handle" title="Drag to reorder">
+          <svg width="8" height="14" viewBox="0 0 8 14" fill="currentColor">
+            <circle cx="2" cy="2" r="1.2"/><circle cx="6" cy="2" r="1.2"/>
+            <circle cx="2" cy="7" r="1.2"/><circle cx="6" cy="7" r="1.2"/>
+            <circle cx="2" cy="12" r="1.2"/><circle cx="6" cy="12" r="1.2"/>
+          </svg>
+        </div>
+        <div class="task-checkbox" onclick="toggleDone(${todo.id})">
+          <svg class="check" width="11" height="9" viewBox="0 0 11 9" fill="none">
+            <path d="M1 4L4 7.5L10 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <span class="task-text" contenteditable="true"
+              data-id="${todo.id}"
+              onblur="editTask(this)" onkeydown="editKey(event, this)"
+              onfocus="stripLinks(this)" data-text="${esc(todo.text)}">${linkify(todo.text)}</span>
+        <button class="task-delete" onclick="deleteTask(${todo.id})" title="Delete">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <path d="M1 1L11 11M11 1L1 11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+        </button>`;
+      (todo.done ? doneList : activeList).appendChild(li);
+    });
+
+    const remaining = active.length;
+    const total = todos.length;
+    document.getElementById('stats').textContent = total
+      ? `${remaining} remaining · ${done.length} completed`
+      : '';
+  }
+
+  function esc(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  const URL_RE = /(https?:\/\/[^\s<>"]+)/g;
+
+  function truncateUrl(url) {
+    try {
+      const u = new URL(url);
+      const parts = u.pathname.split('/').filter(Boolean);
+      if (parts.length <= 1 && !u.search && !u.hash) return url;
+      const first = parts.length ? '/' + parts[0] : '';
+      return u.origin + first + '/\u2026';
+    } catch { return url; }
+  }
+
+  function linkify(s) {
+    let result = '';
+    let last = 0;
+    for (const m of s.matchAll(URL_RE)) {
+      result += esc(s.slice(last, m.index));
+      const url = m[0];
+      const hrefAttr = url.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+      result += `<a href="${hrefAttr}" target="_blank" rel="noopener" title="${esc(url)}">${esc(truncateUrl(url))}</a>`;
+      last = m.index + url.length;
+    }
+    result += esc(s.slice(last));
+    return result.replace(/\n/g, '<br>');
+  }
+
+  // ── Link clicks inside contenteditable ────────────────────────
+  // Prevent contenteditable focus when clicking a link; let the <a> navigate normally
+  document.addEventListener('mousedown', e => {
+    const link = e.target.closest('.task-text a');
+    if (link) {
+      e.preventDefault();
+      window.open(link.href, '_blank', 'noopener');
+    }
+  }, true);
+
+  // ── Drag & drop ───────────────────────────────────────────────
+  let dragId = null;
+  let dragFromHandle = false;
+
+  // Track whether the mousedown started on a drag handle
+  document.addEventListener('mousedown', e => {
+    dragFromHandle = !!e.target.closest('.drag-handle');
+  });
+
+  document.addEventListener('dragstart', e => {
+    const item = e.target.closest('.task-item');
+    if (!item) return;
+    if (!dragFromHandle) { e.preventDefault(); return; }
+    dragId = Number(item.dataset.id);
+    item.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+  });
+
+  document.addEventListener('dragend', e => {
+    const item = e.target.closest('.task-item');
+    if (item) item.classList.remove('dragging');
+    clearDropIndicators();
+    dragId = null;
+  });
+
+  document.addEventListener('dragover', e => {
+    const item = e.target.closest('.task-item');
+    if (!item || Number(item.dataset.id) === dragId) { clearDropIndicators(); return; }
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    clearDropIndicators();
+    const rect = item.getBoundingClientRect();
+    const above = e.clientY < rect.top + rect.height / 2;
+    item.classList.add(above ? 'drag-over-above' : 'drag-over-below');
+  });
+
+  document.addEventListener('drop', async e => {
+    e.preventDefault();
+    const item = e.target.closest('.task-item');
+    if (!item || dragId == null) return;
+    const targetId = Number(item.dataset.id);
+    if (targetId === dragId) return;
+
+    const rect = item.getBoundingClientRect();
+    const above = e.clientY < rect.top + rect.height / 2;
+
+    // Reorder within the todos array
+    const fromIdx = todos.findIndex(t => t.id === dragId);
+    const [moved] = todos.splice(fromIdx, 1);
+    let toIdx = todos.findIndex(t => t.id === targetId);
+    if (!above) toIdx++;
+    todos.splice(toIdx, 0, moved);
+
+    clearDropIndicators();
+    await save();
+    render();
+  });
+
+  function clearDropIndicators() {
+    document.querySelectorAll('.drag-over-above, .drag-over-below').forEach(el => {
+      el.classList.remove('drag-over-above', 'drag-over-below');
+    });
+  }
+
+  // ── Keyboard ───────────────────────────────────────────────────
+  document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('new-task').addEventListener('keydown', e => {
+      if (e.key === 'Enter' && !e.shiftKey && !e.altKey) {
+        e.preventDefault();
+        addTask();
+      }
+    });
+  });
+
+  // ── Boot ───────────────────────────────────────────────────────
+  (async () => {
+    if (!window.showOpenFilePicker) {
+      document.getElementById('connect-screen').innerHTML = `
+        <h2>Browser not supported</h2>
+        <p>The File System Access API requires Chrome or Edge. Please open this file in Chrome.</p>`;
+      return;
+    }
+    const reconnected = await tryReconnect();
+    if (reconnected) {
+      await initApp();
+    } else {
+      document.getElementById('dot').style.background = '#bbb';
+      document.getElementById('reconnect-btn').style.display = 'inline';
+    }
+  })();
+</script>
+</body>
+</html>

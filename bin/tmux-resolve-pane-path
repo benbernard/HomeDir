@@ -1,0 +1,42 @@
+#!/bin/sh
+
+# Usage: tmux-resolve-pane-path <outer_pane_id>
+# Resolves the "real" current working directory for a tmux pane.
+# If the outer pane is running a nested tmux client, returns the
+# active pane's current path from the nested session.
+# Otherwise, returns the outer pane's current path.
+
+pane_id="$1"
+
+if [ -z "$pane_id" ]; then
+  echo "Usage: tmux-resolve-pane-path <pane_id>" >&2
+  exit 1
+fi
+
+# Get the outer pane's PID and current command
+pane_pid=$(tmux -L default display-message -t "$pane_id" -p '#{pane_pid}')
+pane_cmd=$(tmux -L default display-message -t "$pane_id" -p '#{pane_current_command}')
+
+if [ "$pane_cmd" = "tmux" ]; then
+  # Outer pane is running a tmux client — likely nested tmux
+  # Find the tmux child process of this pane's shell
+  child_pid=$(pgrep -P "$pane_pid" 2>/dev/null | head -1)
+
+  if [ -n "$child_pid" ]; then
+    # Match child PID against nested tmux clients to find the session
+    nested_session=$(tmux -L nested list-clients -F '#{client_pid} #{client_session}' 2>/dev/null \
+      | awk -v cpid="$child_pid" '$1 == cpid {print $2}')
+
+    if [ -n "$nested_session" ]; then
+      # Get the active pane's current path from the nested session
+      nested_path=$(tmux -L nested display-message -t "$nested_session" -p '#{pane_current_path}' 2>/dev/null)
+      if [ -n "$nested_path" ]; then
+        echo "$nested_path"
+        exit 0
+      fi
+    fi
+  fi
+fi
+
+# Fallback: use the outer pane's path
+tmux -L default display-message -t "$pane_id" -p '#{pane_current_path}'
