@@ -91,6 +91,10 @@ module.exports = {
       },
     },
     {
+      match: /crabanddog\.com/,
+      browser: HOME_CHROME,
+    },
+    {
       match: /youtube.com/,
       browser: HOME_CHROME,
     },
