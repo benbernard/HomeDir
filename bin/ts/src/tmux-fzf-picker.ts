@@ -41,6 +41,8 @@ function handlePick(args: {
   exclude: string[];
   noToggles: boolean;
   prefix: string;
+  maxDepth: number | undefined;
+  listCommand: string | undefined;
 }): void {
   const dir = expandHome(args.dir);
   const dirLabel = shortenPath(dir);
@@ -53,6 +55,8 @@ function handlePick(args: {
   const hidden = true;
   const showIgnored = args.showIgnored;
 
+  const maxDepth = args.maxDepth;
+
   // State file uses absolute dir — tracks current working directory
   const stateLines = [
     `type=${args.type}`,
@@ -60,6 +64,8 @@ function handlePick(args: {
     `ignore=${showIgnored ? 1 : 0}`,
     `exclude="${excludes.join(" ")}"`,
     `dir="${dir}"`,
+    `maxdepth=${maxDepth ?? 0}`,
+    `listcmd="${args.listCommand ?? ""}"`,
     "help=0",
   ];
   writeFileSync(statePath, `${stateLines.join("\n")}\n`, "utf-8");
@@ -72,6 +78,7 @@ function handlePick(args: {
     "  alt-p / alt-P  Pick in cwd (files / dirs)",
     "  alt-h / alt-H  Pick in $HOME (files / dirs)",
     "  alt-r / alt-R  Pick in ~/repos (dirs / files)",
+    "  alt-d          Pick in ~/Downloads (newest first)",
     "",
     "  Picker Shortcuts",
     "  ────────────────────────────",
@@ -124,26 +131,34 @@ function handlePick(args: {
     '  cd "$dir" || exit 1',
     '  if [ -d "$2" ]; then',
     '    ls -la "$2"',
+    '  elif file --brief --mime "$2" 2>/dev/null | grep -qv "^text/\\|^application/json\\|^application/xml\\|^application/csv\\|^inode/"; then',
+    '    file --brief "$2"',
+    '    echo ""',
+    '    ls -lh "$2" | tail -1',
     "  else",
     '    bat --color=always --style=numbers --line-range=:500 "$2"',
     "  fi",
     "  exit 0",
     "fi",
     "",
-    '# "run" mode: cd to current dir and run fd',
+    '# "run" mode: cd to current dir and run fd (or custom list command)',
     'if [ "$1" = "run" ]; then',
     '  cd "$dir" || exit 1',
+    '  if [ -n "$listcmd" ]; then',
+    '    exec sh -c "$listcmd"',
+    "  fi",
     '  set -- --type "$type"',
     '  [ "$hidden" = 1 ] && set -- "$@" --hidden',
     '  [ "$ignore" = 1 ] && set -- "$@" --no-ignore',
+    '  [ "$maxdepth" -gt 0 ] 2>/dev/null && set -- "$@" --max-depth "$maxdepth"',
     '  for e in $exclude; do set -- "$@" --exclude "$e"; done',
     '  exec fd "$@"',
     "fi",
     "",
     '# "actions" mode: mutate state, output fzf actions',
     "save_state() {",
-    '  printf \'type=%s\\nhidden=%s\\nignore=%s\\nexclude="%s"\\ndir="%s"\\nhelp=%s\\n\' ' +
-      '"$type" "$hidden" "$ignore" "$exclude" "$dir" "$help" > "$SF"',
+    '  printf \'type=%s\\nhidden=%s\\nignore=%s\\nexclude="%s"\\ndir="%s"\\nmaxdepth=%s\\nlistcmd="%s"\\nhelp=%s\\n\' ' +
+      '"$type" "$hidden" "$ignore" "$exclude" "$dir" "$maxdepth" "$listcmd" "$help" > "$SF"',
     "}",
     "",
     "# Help toggle: swap preview, no reload needed",
@@ -170,9 +185,11 @@ function handlePick(args: {
     '    elif [ -n "$target" ] && [ -f "$dir/$target" ]; then',
     '      dir=$(cd "$dir/$(dirname "$target")" && pwd)',
     "    fi",
+    "    maxdepth=0",
     "    ;;",
     "  up)",
     '    dir=$(cd "$dir/.." && pwd)',
+    "    maxdepth=0",
     "    ;;",
     "  goto)",
     '    target="$3"',
@@ -184,6 +201,7 @@ function handlePick(args: {
     '    if [ -d "$target" ]; then',
     '      dir=$(cd "$target" && pwd)',
     "    fi",
+    "    maxdepth=0",
     "    ;;",
     "esac",
     "",
@@ -204,8 +222,8 @@ function handlePick(args: {
     'if [ "$was_help" = 1 ]; then',
     `  out=$(printf '%s+change-preview(${helperPath} preview {})' "$out")`,
     "fi",
-    "# Clear query after goto",
-    'if [ "$2" = "goto" ]; then',
+    "# Clear query after navigation actions",
+    'if [ "$2" = "goto" ] || [ "$2" = "cd" ] || [ "$2" = "up" ]; then',
     '  out="$out+clear-query"',
     "fi",
     "printf '%s' \"$out\"",
@@ -289,7 +307,7 @@ function handlePick(args: {
     )}`,
     "}",
     "trap cleanup EXIT INT TERM",
-    `selected=$(${fzfParts.join(" ")})`,
+    `selected=$(true | ${fzfParts.join(" ")})`,
     "ec=$?",
     'if [ $ec -eq 0 ] && [ -n "$selected" ]; then',
     '  . "$SF"',
@@ -382,6 +400,15 @@ async function main(): Promise<void> {
             type: "string",
             description: "Prefix to prepend to selected paths",
             default: "",
+          })
+          .option("max-depth", {
+            type: "number",
+            description: "Maximum directory depth for fd (0 = unlimited)",
+          })
+          .option("list-command", {
+            type: "string",
+            description:
+              "Custom shell command to list files (overrides fd, runs after cd to dir)",
           }),
       (argv) => {
         handlePick({
@@ -392,6 +419,8 @@ async function main(): Promise<void> {
           exclude: argv.exclude,
           noToggles: !argv.toggles,
           prefix: argv.prefix,
+          maxDepth: argv.maxDepth,
+          listCommand: argv.listCommand,
         });
       },
     )
