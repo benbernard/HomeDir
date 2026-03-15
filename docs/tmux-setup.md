@@ -39,6 +39,7 @@ Ghostty Terminal
 | `~/.zshrc.d/05_ic.zsh` | `ic` shell wrapper (sources output script from TS binary) |
 | `bin/ts/src/ic.ts` | `ic` TypeScript binary: clone, attach, tmux renumber, symlinks |
 | `bin/tmux-swap-or-move-window` | Shell script: swap two tmux windows by index |
+| `bin/tmux-resolve-pane-path` | Shell script: resolve pane's real cwd (follows into nested tmux) |
 | `bin/ts/src/tmux-fzf-picker.ts` | FZF file/directory picker in a tmux popup |
 | `bin/ts/src/tmux-health-check.ts` | Verify nested tmux keybinding chain and config health |
 | `bin/tmux-sub-session-window.sh` | Create a "mini session" linked to an existing session |
@@ -62,7 +63,7 @@ Ghostty Terminal
   ├── C-o send-prefix (sends C-x to nested tmux)
   ├── MouseDragEnd1Pane → copy-pipe-and-cancel "pbcopy" (auto-copy)
   ├── DoubleClick/TripleClick1Pane → select + copy-pipe-and-cancel "pbcopy"
-  ├── FZF file/dir pickers (M-p, M-P, M-h, M-H, M-r, M-R)
+  ├── FZF file/dir pickers (M-p, M-P, M-h, M-H, M-r, M-R, M-d)
   ├── Green accent styling (#a6da95)
   └── Site-specific overrides (~/site/tmux.conf)
 
@@ -165,7 +166,7 @@ The modifier key combinations are carefully partitioned between layers:
 | C-o | Outer tmux (no prefix) | Sends C-x (prefix) to inner tmux |
 | C-M-Arrow | Outer tmux (no prefix) | Move window in outer tmux |
 | C-M-S-Arrow | Inner tmux (no prefix) | Move window in inner tmux |
-| M-p, M-P, M-h, M-H, M-r, M-R | Outer tmux (no prefix) | FZF file/dir picker |
+| M-p, M-P, M-h, M-H, M-r, M-R, M-d | Outer tmux (no prefix) | FZF file/dir picker |
 | Super+C | Shared (Ghostty -> tmux) | Copy in copy-mode, or C-c in normal mode |
 
 **Ghostty's role:** Ghostty sends specific escape sequences that tmux can recognize:
@@ -191,9 +192,10 @@ The shared config sets `set-option -s extended-keys always` to ensure modifier c
 
 `bin/ts/src/tmux-fzf-picker.ts` provides a rich file/directory picker inside a tmux popup:
 
-- **M-p / M-P**: Pick files/dirs in current pane's directory
+- **M-p / M-P**: Pick files/dirs in current pane's directory (uses `tmux-resolve-pane-path` to follow into nested tmux)
 - **M-h / M-H**: Pick files/dirs in `$HOME` (excluding `repos/`)
 - **M-r / M-R**: Pick dirs/files in `~/repos/`
+- **M-d**: Pick files in `~/Downloads` (sorted newest first via `--list-command`)
 
 **How it works:**
 1. Writes a state file (tracks current dir, type, hidden/ignore toggles)
