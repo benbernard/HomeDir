@@ -1,0 +1,94 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Nuke all Claude Desktop app local settings and caches.
+# Does NOT touch ~/.claude (Claude Code config).
+
+DRY_RUN=true
+if [[ "${1:-}" == "--commit" ]]; then
+  DRY_RUN=false
+else
+  echo "=== DRY RUN MODE (pass --commit to actually delete) ==="
+  echo
+fi
+
+nuke() {
+  local path="$1"
+  if [[ -e "$path" ]]; then
+    local size
+    size=$(du -sh "$path" 2>/dev/null | cut -f1)
+    if $DRY_RUN; then
+      echo "Would remove: $path ($size)"
+    else
+      echo "Removing: $path ($size)"
+      rm -rf "$path"
+    fi
+  else
+    echo "Not found:  $path"
+  fi
+}
+
+echo "Claude Desktop App - Full Reset"
+echo "================================"
+echo
+
+# App Support (config, extensions, VM bundles, sessions, etc.)
+echo "--- Application Support ---"
+nuke "$HOME/Library/Application Support/Claude"
+
+# Preferences plist
+echo
+echo "--- Preferences ---"
+nuke "$HOME/Library/Preferences/com.anthropic.claudefordesktop.plist"
+nuke "$HOME/Library/Preferences/com.anthropic.claudefordesktop.helper.plist"
+
+# Caches
+echo
+echo "--- Caches ---"
+nuke "$HOME/Library/Caches/com.anthropic.claudefordesktop"
+nuke "$HOME/Library/Caches/com.anthropic.claudefordesktop.ShipIt"
+
+# Logs
+echo
+echo "--- Logs ---"
+nuke "$HOME/Library/Logs/Claude"
+
+# Saved Application State
+echo
+echo "--- Saved State ---"
+nuke "$HOME/Library/Saved Application State/com.anthropic.claudefordesktop.savedState"
+
+# WebKit/Electron storage
+echo
+echo "--- WebKit / Electron Storage ---"
+nuke "$HOME/Library/WebKit/com.anthropic.claudefordesktop"
+
+# Cookies
+echo
+echo "--- Cookies ---"
+nuke "$HOME/Library/Cookies/com.anthropic.claudefordesktop.binarycookies"
+
+# HTTP Storage (HSTS, etc.)
+echo
+echo "--- HTTP Storage ---"
+nuke "$HOME/Library/HTTPStorages/com.anthropic.claudefordesktop"
+
+# Group Containers (if any)
+echo
+echo "--- Group Containers ---"
+for d in "$HOME/Library/Group Containers/"*anthropic*; do
+  [[ -e "$d" ]] && nuke "$d"
+done
+
+# MCP Remote OAuth tokens
+echo
+echo "--- MCP Remote Auth ---"
+nuke "$HOME/.mcp-auth"
+
+echo
+if $DRY_RUN; then
+  echo "Done (dry run). Re-run with --commit to actually delete."
+else
+  echo "Done. Claude Desktop has been fully reset."
+  echo "You will need to re-authenticate and reconfigure after launching."
+fi

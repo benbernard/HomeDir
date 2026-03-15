@@ -23,7 +23,6 @@
   "permissions": {
     "allow": [
       "*",
-      "Bash",
       "Read",
       "Write",
       "Edit",
@@ -41,10 +40,37 @@
       "BashOutput",
       "KillShell",
       "mcp__playwright__*",
-      "mcp__chrome-devtools__*"
+      "mcp__chrome-devtools__*",
+      "mcp__glean__*"
     ],
-    "deny": [],
-    "ask": [],
+    "deny": [
+      "Edit(~/.ssh/**)",
+      "Read(**/.env*)",
+      "Read(**/*.pem)",
+      "Read(**/*.key)",
+      "Read(**/secrets/**)",
+      "Read(**/credentials/**)",
+      "Read(~/.isc/**)",
+      "Read(~/.bento/**)",
+      "Read(~/.ssh/**)",
+      "Read(~/.gnupg/**)",
+      "Read(~/.aws/**)",
+      "Read(~/.azure/**)",
+      "Read(~/.config/gh/**)",
+      "Read(~/.git-credentials)",
+      "Read(~/.docker/config.json)",
+      "Read(~/.kube/**)",
+      "Read(~/.npmrc)",
+      "Read(~/.npm/**)",
+      "Read(~/.pypirc)",
+      "Read(~/.gem/credentials)",
+      "Read(~/Library/Keychains/**)",
+      "Bash(sudo *)",
+      "Bash(mkfs *)",
+      "Bash(dd *)"
+    ],
+    "ask": [
+    ],
     "defaultMode": "acceptEdits"
   },
   "model": "opus",
@@ -109,26 +135,18 @@
     "pr-review-toolkit@claude-code-plugins": false,
     "serena@claude-plugins-official": false,
     "frontend-design@claude-plugins-official": false,
-    "annual-reviews@instacart": true,
-    "buildkite@instacart": true,
-    "md2doc@instacart": false,
-    "discounting@instacart": false,
-    "tune@instacart": true,
-    "sous@instacart": true,
-    "ast-grep@instacart": true,
     "claude-hud@claude-hud": true,
-    "isc@instacart": true,
     "gopls-lsp@claude-plugins-official": true,
     "swift-lsp@claude-plugins-official": true,
     "ralph-loop@claude-plugins-official": true,
-    "agent-party@instacart": true,
+    "annual-reviews@instacart": true,
     "awesome-agent@instacart": true
   },
   "extraKnownMarketplaces": {
     "instacart": {
       "source": {
-        "source": "github",
-        "repo": "instacart/claude-marketplace"
+        "source": "git",
+        "url": "https://claude-marketplace.instacart.tools/claude-marketplace.git"
       }
     }
   },

@@ -460,3 +460,8 @@ VoiceInk-Dependencies/whisper.cpp
 .config/uv
 .claude.home/debug
 .claude.home
+.claude/sessions
+.claude/skills/playwright-cli
+.claude/.marketplace-managed-permissions.json
+.config/opencode
+.mcp-remote-go-auth/
