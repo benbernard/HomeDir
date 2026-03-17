@@ -241,8 +241,15 @@ app.whenReady().then(async () => {
     console.log(`[Permissions] Camera: ${camStatus}, Microphone: ${micStatus}, Screen: ${screenStatus}`);
 
     if (screenStatus !== 'granted') {
-      console.log('[Permissions] Screen recording not granted.');
-      console.log('[Permissions]   Enable in: System Settings > Privacy & Security > Screen & System Audio Recording');
+      console.log('[Permissions] Screen recording not granted — triggering system prompt...');
+      // Calling desktopCapturer.getSources() triggers CGRequestScreenCaptureAccess()
+      // which adds the app to the Screen Recording list in System Settings and
+      // shows the permission prompt (on macOS 15+) or opens the settings pane.
+      try {
+        await desktopCapturer.getSources({ types: ['screen'], thumbnailSize: { width: 0, height: 0 } });
+      } catch (e) {
+        // Expected to fail or return empty if not granted — that's fine
+      }
     }
   }
 
@@ -285,27 +292,25 @@ app.whenReady().then(async () => {
   // On macOS 15+ with Electron 32+, useSystemPicker: true enables the native
   // macOS screen picker, which is the most reliable approach.
   meetSession.setDisplayMediaRequestHandler(async (request, callback) => {
-    console.log('[Screen Share] Display media requested');
+    console.log('[Screen Share] Display media requested (fallback handler)');
+    // This handler is only called if the system picker is unavailable.
+    // When useSystemPicker is true and working, Electron bypasses this entirely.
     try {
       const sources = await desktopCapturer.getSources({
         types: ['screen', 'window'],
-        thumbnailSize: { width: 0, height: 0 }, // Skip thumbnails for speed
+        thumbnailSize: { width: 0, height: 0 },
       });
       console.log(`[Screen Share] Found ${sources.length} sources`);
-
       if (sources.length > 0) {
-        // Provide the first screen source. The system picker (if enabled via
-        // useSystemPicker) will override this and show the native macOS picker.
         callback({ video: sources[0], audio: 'loopback' });
       } else {
-        console.warn('[Screen Share] No sources found — is Screen Recording permission granted?');
         callback({});
       }
     } catch (err) {
-      console.error('[Screen Share] Error getting sources:', err);
+      console.error('[Screen Share] Error:', err);
       callback({});
     }
-  }, { useSystemPicker: true }); // Use native macOS picker when available (macOS 15+)
+  }, { useSystemPicker: true });
 
   // ─── Load Ava extension ───
   const avaVersion = getLatestExtVersion(AVA_EXT_BASE);
