@@ -44,7 +44,7 @@ Ghostty Terminal
 | `bin/ts/src/tmux-health-check.ts` | Verify nested tmux keybinding chain and config health |
 | `bin/tmux-sub-session-window.sh` | Create a "mini session" linked to an existing session |
 | `bin/startupServerScreen.sh` | Legacy startup script for server-like windows |
-| `submodules/tmux` | Custom tmux build (amling fork), on PATH |
+| `/opt/homebrew/bin/tmux` | System tmux (3.4, installed via Homebrew) |
 | `.tmux/plugins/tpm` | Tmux Plugin Manager (submodule) |
 
 ## Config File Structure
@@ -263,9 +263,9 @@ Multiple layers cooperate for clipboard:
 5. **vi copy-mode keys** (inner tmux): `y`, `Enter` -> `copy-pipe-and-cancel "pbcopy"`
 6. **tmux-yank plugin** (shared): Uses `pbcopy`, mouse selection to clipboard
 
-## The Custom tmux Build
+## tmux Binary
 
-`submodules/tmux` points to `git@github.com:amling/tmux.git` (amling's fork). This is on PATH via `$(submodule tmux)` in `02_environment.zsh`. The fork may include custom features like `change-joinmode` (commented out in config).
+Using the standard Homebrew tmux (`/opt/homebrew/bin/tmux`, version 3.4). Previously used amling's fork (`submodules/tmux`) but that has been removed.
 
 ## Legacy / Startup Scripts
 
@@ -309,9 +309,9 @@ If any of these three components changes, Ctrl+Enter stops accepting autosuggest
 
 The `ic` tool uses `ic_<dirname>` for session names and `ic_ws_<workspace>` for workspace sessions. If directory names contain characters that tmux doesn't allow in session names (like `.` or `:`), session creation may fail. There's no sanitization of the session name.
 
-### 7. Custom tmux Binary Version Sensitivity
+### 7. tmux Version Sensitivity
 
-Using amling's fork of tmux (`submodules/tmux`) means configuration options may differ from upstream tmux. If the submodule is updated or the system tmux is accidentally used instead, features like `change-joinmode` or specific escape code handling could break.
+Using Homebrew tmux (currently 3.4). Upgrading tmux versions can change default bindings, escape code handling, or config syntax. Test after any `brew upgrade tmux`.
 
 ### 8. TPM Plugin Loading Runs Twice
 
