@@ -1,0 +1,42 @@
+{
+  "name": "g-meet",
+  "version": "1.0.0",
+  "description": "Dedicated Google Meet app",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --mac",
+    "postinstall": "electron-builder install-app-deps"
+  },
+  "build": {
+    "appId": "com.benbernard.meety",
+    "productName": "Meety",
+    "mac": {
+      "category": "public.app-category.video",
+      "target": ["dmg"],
+      "protocols": [
+        {
+          "name": "Google Meet",
+          "schemes": ["gmeet"]
+        }
+      ],
+      "extendInfo": {
+        "NSCameraUsageDescription": "Meety needs access to your camera for video calls.",
+        "NSMicrophoneUsageDescription": "Meety needs access to your microphone for audio calls.",
+        "NSScreenCaptureUsageDescription": "Meety needs screen capture for presenting your screen.",
+        "NSAudioCaptureUsageDescription": "Meety needs audio capture for sharing system audio during screen sharing."
+      }
+    },
+    "dmg": {
+      "title": "Meety",
+      "contents": [
+        { "x": 130, "y": 220 },
+        { "x": 410, "y": 220, "type": "link", "path": "/Applications" }
+      ]
+    }
+  },
+  "devDependencies": {
+    "electron": "^35.0.0",
+    "electron-builder": "^26.0.0"
+  }
+}
