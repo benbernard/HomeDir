@@ -279,8 +279,15 @@
   }
 
   // -- Watch for external changes --
+  let pendingExternalUpdate = false;
   window.todoAPI.onFileChanged(async () => {
     if (ignoreNextChange) return;
+    // If user is editing, defer the render until they blur
+    const activeEdit = document.activeElement?.closest('.task-text');
+    if (activeEdit) {
+      pendingExternalUpdate = true;
+      return;
+    }
     try {
       const data = await readData();
       todos = data.todos || [];
@@ -337,11 +344,23 @@
     const newText = getPlainText(el);
     const t = todos.find(t => t.id === id);
     if (!t) return;
-    if (newText === t.text) { el.innerHTML = linkify(t.text); return; }
-    if (!newText) { el.innerHTML = linkify(t.text); return; }
+    if (newText === t.text) { el.innerHTML = linkify(t.text); flushPending(); return; }
+    if (!newText) { el.innerHTML = linkify(t.text); flushPending(); return; }
     t.text = newText;
     await save();
     el.innerHTML = linkify(newText);
+    flushPending();
+  }
+
+  async function flushPending() {
+    if (!pendingExternalUpdate) return;
+    pendingExternalUpdate = false;
+    try {
+      const data = await readData();
+      todos = data.todos || [];
+      nextId = todos.length ? Math.max(...todos.map(t => t.id)) + 1 : 1;
+      render();
+    } catch (e) {}
   }
 
   function stripLinks(el) {

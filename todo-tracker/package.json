@@ -21,6 +21,7 @@
       "main.js",
       "preload.js",
       "index.html",
+      "app-icon.png",
       "!todo.json",
       "!todo.md",
       "!todo.html"
