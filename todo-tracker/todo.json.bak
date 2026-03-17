@@ -1,0 +1,125 @@
+{
+  "todos": [
+    {
+      "id": 1,
+      "text": "Review comms on rolling",
+      "done": true
+    },
+    {
+      "id": 2,
+      "text": "Create plan for escalation path for spend limits",
+      "done": true
+    },
+    {
+      "id": 3,
+      "text": "Draft excitement/direction section of standards doc (see Krisp transcript)",
+      "done": true
+    },
+    {
+      "id": 4,
+      "text": "Send feature request for user classes for usage limits",
+      "done": true
+    },
+    {
+      "id": 5,
+      "text": "Review Ryan doc",
+      "done": true
+    },
+    {
+      "id": 6,
+      "text": "add note to security to review internal website access",
+      "done": true
+    },
+    {
+      "id": 7,
+      "text": "ask anthropic git organizations that are enabled... other organization: eversight (polymortics) , rosie",
+      "done": true
+    },
+    {
+      "id": 9,
+      "text": "Ask Anthropic about Cowork and Claude.md, and manage settings.json and how all of that interacts with Cowork.",
+      "done": true
+    },
+    {
+      "id": 13,
+      "text": "follow up on working otel https://instacart.slack.com/archives/C0AL5BLNC85/p1773429717496329?thread_ts=1773361323.820699&cid=C0AL5BLNC85",
+      "done": true
+    },
+    {
+      "id": 12,
+      "text": "follow up on oltp settings https://instacart.slack.com/archives/C0AL5BLNC85/p1773429717496329?thread_ts=1773361323.820699&cid=C0AL5BLNC85",
+      "done": true
+    },
+    {
+      "id": 15,
+      "text": "follow up with anthropic on https://instacart.slack.com/archives/…",
+      "done": true
+    },
+    {
+      "id": 16,
+      "text": "update adoption dashboard to use claude not ait gateway tokens/cost stuff",
+      "done": true
+    },
+    {
+      "id": 17,
+      "text": "review this stuff in the IN space: From my end, just the cowork guide. https://instacart.atlassian.net/wiki/spaces/IN/pages/6407651376/Claude+Cowork+Guide\n\nThere's also this claude one but Mabelle owns it.\nhttps://instacart.atlassian.net/wiki/spaces/IN/pages/6402638022/Meet+Enterprise+Claude+Your+New+AI+Assistant\n\nfrom https://instacart.slack.com/archives/C0AL5BLNC85/p1773601962067329?thread_ts=1773600593.239129&cid=C0AL5BLNC85",
+      "done": true
+    },
+    {
+      "id": 18,
+      "text": "Get the terraform change merged",
+      "done": true
+    },
+    {
+      "id": 19,
+      "text": "Re-plan split ALB PR",
+      "done": true
+    },
+    {
+      "id": 11,
+      "text": "Look at 1m context pricing now that fully launched https://claude.com/blog/1m-context-ga follow up here: https://instacart.slack.com/archives/C08K9HQFGM6/p1773429044938989?thread_ts=1773428802.530639&cid=C08K9HQFGM6",
+      "done": true
+    },
+    {
+      "id": 20,
+      "text": "Add external docs to standards",
+      "done": true
+    },
+    {
+      "id": 21,
+      "text": "do agent-browser skill and things",
+      "done": true
+    },
+    {
+      "id": 22,
+      "text": "deprecate slack skill",
+      "done": true
+    },
+    {
+      "id": 23,
+      "text": "Ayo Oriola - follow up on OIG for claude code access for non-eng",
+      "done": false
+    },
+    {
+      "id": 24,
+      "text": "cowork enabled in okta",
+      "done": true
+    },
+    {
+      "id": 25,
+      "text": "template for ai dev environment standards scope doc needs expanding",
+      "done": true
+    },
+    {
+      "id": 26,
+      "text": "claude teams",
+      "done": true
+    },
+    {
+      "id": 27,
+      "text": "claude code transition to direct accounts",
+      "done": false
+    }
+  ],
+  "lastUpdated": "2026-03-16"
+}
