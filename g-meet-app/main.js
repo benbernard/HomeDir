@@ -14,6 +14,13 @@ let meetSession = null;
 let mainWindow = null;
 let pendingUrl = null;
 
+// ─── CRITICAL FIX 1: Chromium flags must be set BEFORE app is ready ───
+// These enable features that Google Meet checks for
+app.commandLine.appendSwitch('enable-features', 'WebRTCPipeWireCapturer');
+// Use the legacy screen-audio permission model if CoreAudio Tap causes issues (Electron 39+)
+// Uncomment the next line if desktop audio capture doesn't work on macOS 14.2+:
+// app.commandLine.appendSwitch('disable-features', 'MacCatapLoopbackAudioForScreenShare');
+
 // Register as handler for gmeet:// protocol (for dev mode)
 if (!app.isDefaultProtocolClient('gmeet')) {
   app.setAsDefaultProtocolClient('gmeet');
@@ -67,20 +74,40 @@ function createWindow(url) {
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
+      sandbox: false, // CRITICAL FIX 2: sandbox must be false for media permissions to flow correctly
       session: meetSession,
     },
   });
 
   // Handle new-window requests (popups) - allow all in-app with same session
   mainWindow.webContents.setWindowOpenHandler(({ url: targetUrl }) => {
-    return {
-      action: 'allow',
-      overrideBrowserWindowOptions: {
-        webPreferences: {
-          session: meetSession,
+    // Google auth popups and Meet-related URLs should open in-app
+    if (targetUrl.includes('google.com') || targetUrl.includes('accounts.google.com')) {
+      return {
+        action: 'allow',
+        overrideBrowserWindowOptions: {
+          webPreferences: {
+            session: meetSession,
+            sandbox: false,
+          },
         },
-      },
-    };
+      };
+    }
+    // Everything else opens in the default browser
+    shell.openExternal(targetUrl);
+    return { action: 'deny' };
+  });
+
+  // ─── CRITICAL FIX 3: Handle in-page permission requests via webContents ───
+  // Some permission requests come through the webContents directly
+  mainWindow.webContents.session.setPermissionRequestHandler((webContents, permission, callback, details) => {
+    console.log(`[Permission Request] ${permission}`, details?.mediaTypes || '');
+    callback(true);
+  });
+
+  mainWindow.webContents.session.setPermissionCheckHandler((webContents, permission, requestingOrigin, details) => {
+    console.log(`[Permission Check] ${permission} from ${requestingOrigin}`, details?.mediaType || '');
+    return true;
   });
 
   mainWindow.loadURL(url || MEET_HOME);
@@ -202,55 +229,96 @@ if (!gotLock) {
 }
 
 app.whenReady().then(async () => {
-  // Set up persistent session
+  // ─── macOS permissions: log status only ───
+  // Don't call askForMediaAccess() — in dev mode it attributes the request to
+  // the parent terminal (e.g. Ghostty) rather than the Electron app.
+  // Chromium itself will trigger the OS permission prompt when Meet calls
+  // getUserMedia(), correctly attributing it to the app binary.
+  if (process.platform === 'darwin') {
+    const camStatus = systemPreferences.getMediaAccessStatus('camera');
+    const micStatus = systemPreferences.getMediaAccessStatus('microphone');
+    const screenStatus = systemPreferences.getMediaAccessStatus('screen');
+    console.log(`[Permissions] Camera: ${camStatus}, Microphone: ${micStatus}, Screen: ${screenStatus}`);
+
+    if (screenStatus !== 'granted') {
+      console.log('[Permissions] Screen recording not granted.');
+      console.log('[Permissions]   Enable in: System Settings > Privacy & Security > Screen & System Audio Recording');
+    }
+  }
+
+  // ─── Set up persistent session ───
   meetSession = session.fromPartition('persist:meet');
 
-  // Strip Electron/AppName from UA so Google treats us as real Chrome
+  // ─── CRITICAL FIX 5: User-agent must perfectly mimic Chrome ───
+  // Google Meet checks the UA string and disables features (especially screen
+  // sharing) if it detects a non-Chrome browser. We need to strip both the
+  // "Electron/x.x.x" and the app name tokens.
   const defaultUA = meetSession.getUserAgent();
-  const cleanUA = defaultUA.replace(/\s*Electron\/[\S]+/, '').replace(/\s*g-meet\/[\S]+/, '');
+  const cleanUA = defaultUA
+    .replace(/\s*Electron\/[\S]+/, '')
+    .replace(/\s*g-meet\/[\S]+/, '')
+    .replace(/\s*Meety\/[\S]+/, '');
   meetSession.setUserAgent(cleanUA);
+  console.log(`[UA] Set user agent to: ${cleanUA}`);
 
-  // Grant ALL Chromium-level permission requests (this is a dedicated Meet app)
-  meetSession.setPermissionRequestHandler((webContents, permission, callback) => {
+  // ─── CRITICAL FIX 6: Permission handlers on the session object ───
+  // Both handlers MUST be set on the same session object used by the BrowserWindow.
+  // The permission REQUEST handler is called when a web page calls getUserMedia() etc.
+  // The permission CHECK handler is called when the page queries permissions.query().
+  meetSession.setPermissionRequestHandler((webContents, permission, callback, details) => {
+    console.log(`[Session Permission Request] ${permission}`, JSON.stringify(details || {}));
+    // Grant everything for meet.google.com
     callback(true);
   });
 
-  // Permission checks must also return true or Meet silently thinks permissions are denied
-  meetSession.setPermissionCheckHandler(() => true);
-
-  // Screen sharing: bridge getDisplayMedia to Electron's desktopCapturer
-  meetSession.setDisplayMediaRequestHandler((request, callback) => {
-    desktopCapturer.getSources({ types: ['screen', 'window'] }).then((sources) => {
-      if (sources.length > 0) {
-        callback({ video: sources[0], audio: 'loopback' });
-      } else {
-        callback({});
-      }
-    }).catch(() => callback({}));
+  meetSession.setPermissionCheckHandler((webContents, permission, requestingOrigin, details) => {
+    console.log(`[Session Permission Check] ${permission} from ${requestingOrigin}`);
+    // Return true for all permission checks
+    return true;
   });
 
-  // Request macOS system-level camera and microphone permissions
-  await systemPreferences.askForMediaAccess('camera');
-  await systemPreferences.askForMediaAccess('microphone');
+  // ─── CRITICAL FIX 7: Screen sharing with setDisplayMediaRequestHandler ───
+  // This is the ONLY way to make getDisplayMedia() work in Electron.
+  // Google Meet calls navigator.mediaDevices.getDisplayMedia() which Electron
+  // does NOT natively support — it must be bridged through desktopCapturer.
+  //
+  // On macOS 15+ with Electron 32+, useSystemPicker: true enables the native
+  // macOS screen picker, which is the most reliable approach.
+  meetSession.setDisplayMediaRequestHandler(async (request, callback) => {
+    console.log('[Screen Share] Display media requested');
+    try {
+      const sources = await desktopCapturer.getSources({
+        types: ['screen', 'window'],
+        thumbnailSize: { width: 0, height: 0 }, // Skip thumbnails for speed
+      });
+      console.log(`[Screen Share] Found ${sources.length} sources`);
 
-  // Screen capture: no programmatic prompt, but log status for debugging
-  const screenAccess = systemPreferences.getMediaAccessStatus('screen');
-  if (screenAccess !== 'granted') {
-    console.log('Screen recording not granted. Enable in System Settings > Privacy & Security > Screen & System Audio Recording.');
-  }
+      if (sources.length > 0) {
+        // Provide the first screen source. The system picker (if enabled via
+        // useSystemPicker) will override this and show the native macOS picker.
+        callback({ video: sources[0], audio: 'loopback' });
+      } else {
+        console.warn('[Screen Share] No sources found — is Screen Recording permission granted?');
+        callback({});
+      }
+    } catch (err) {
+      console.error('[Screen Share] Error getting sources:', err);
+      callback({});
+    }
+  }, { useSystemPicker: true }); // Use native macOS picker when available (macOS 15+)
 
-  // Load Ava extension
+  // ─── Load Ava extension ───
   const avaVersion = getLatestExtVersion(AVA_EXT_BASE);
   if (avaVersion) {
     const avaPath = path.join(AVA_EXT_BASE, avaVersion);
     try {
       await meetSession.loadExtension(avaPath);
-      console.log(`Loaded Ava extension v${avaVersion}`);
+      console.log(`[Extension] Loaded Ava extension v${avaVersion}`);
     } catch (err) {
-      console.error('Failed to load Ava extension:', err.message);
+      console.error('[Extension] Failed to load Ava extension:', err.message);
     }
   } else {
-    console.warn('Ava extension not found in Chrome profile');
+    console.warn('[Extension] Ava extension not found in Chrome profile');
   }
 
   buildMenu();
