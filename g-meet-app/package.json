@@ -20,6 +20,8 @@
           "schemes": ["gmeet"]
         }
       ],
+      "entitlements": "entitlements.mac.plist",
+      "entitlementsInherit": "entitlements.mac.plist",
       "extendInfo": {
         "NSCameraUsageDescription": "Meety needs access to your camera for video calls.",
         "NSMicrophoneUsageDescription": "Meety needs access to your microphone for audio calls.",
