@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #1a1a2e;
+    color: #e0e0e0;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    user-select: none;
+    overflow: hidden;
+  }
+  .header { padding: 24px 24px 0; text-align: center; }
+  h2 { font-size: 16px; font-weight: 500; color: #ccc; }
+
+  #choice-screen {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 20px; padding: 24px;
+  }
+  .choice-btn {
+    width: 280px; padding: 20px 24px; border-radius: 12px;
+    background: #16213e; border: 2px solid #333; cursor: pointer;
+    transition: all 0.15s; text-align: center;
+  }
+  .choice-btn:hover { border-color: #8ab4f8; background: #1a2744; transform: scale(1.03); }
+  .choice-btn .icon { font-size: 32px; margin-bottom: 8px; }
+  .choice-btn .title { font-size: 15px; font-weight: 600; }
+  .choice-btn .desc { font-size: 12px; color: #888; margin-top: 4px; }
+
+  #sources-panel {
+    display: none; flex: 1; flex-direction: column; overflow: hidden;
+  }
+  .back-row { display: flex; align-items: center; gap: 8px; padding: 12px 24px; }
+  .back-btn {
+    font-size: 13px; color: #8ab4f8; cursor: pointer;
+    padding: 4px 8px; border-radius: 4px;
+  }
+  .back-btn:hover { background: rgba(138,180,248,0.1); }
+  .sources-grid {
+    flex: 1; overflow-y: auto; padding: 8px 24px 24px;
+    display: flex; gap: 16px; flex-wrap: wrap;
+    justify-content: center; align-content: start;
+  }
+  .source {
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    padding: 10px 14px; border-radius: 10px; background: #16213e;
+    border: 2px solid #333; cursor: pointer; transition: all 0.15s; width: 200px;
+  }
+  .source:hover { border-color: #8ab4f8; background: #1a2744; transform: scale(1.03); }
+  .source img {
+    width: 170px; aspect-ratio: 16/9; object-fit: contain;
+    background: #000; border-radius: 4px;
+  }
+  .source .label {
+    font-size: 11px; font-weight: 500; text-align: center;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 100%;
+  }
+
+  .footer { padding: 12px 24px; text-align: center; }
+  .cancel {
+    font-size: 12px; color: #555; cursor: pointer;
+    padding: 6px 16px; display: inline-block;
+  }
+  .cancel:hover { color: #aaa; }
+  .loading { color: #555; text-align: center; padding: 40px; font-size: 13px; }
+</style>
+</head>
+<body>
+  <div class="header"><h2>What do you want to share?</h2></div>
+
+  <div id="choice-screen">
+    <div class="choice-btn" data-type="screen">
+      <div class="icon">&#x1F5A5;</div>
+      <div class="title">Entire Screen</div>
+      <div class="desc">Share everything on a display</div>
+    </div>
+    <div class="choice-btn" data-type="window">
+      <div class="icon">&#x25A3;</div>
+      <div class="title">Application Window</div>
+      <div class="desc">Share a single app window</div>
+    </div>
+  </div>
+
+  <div id="sources-panel">
+    <div class="back-row">
+      <div class="back-btn" id="back-btn">&larr; Back</div>
+    </div>
+    <div class="sources-grid" id="sources-grid">
+      <div class="loading">Loading...</div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="cancel" id="cancel">Cancel (Esc)</div>
+  </div>
+
+<script>
+  const choiceScreen = document.getElementById('choice-screen');
+  const sourcesPanel = document.getElementById('sources-panel');
+  const sourcesGrid = document.getElementById('sources-grid');
+
+  function showChoice() {
+    choiceScreen.style.display = 'flex';
+    sourcesPanel.style.display = 'none';
+  }
+
+  // Called from main process after sources are ready
+  window.showSources = function(sources) {
+    if (sources.length === 0) {
+      sourcesGrid.innerHTML = '<div class="loading">No sources found</div>';
+      return;
+    }
+    sourcesGrid.innerHTML = sources.map(s => `
+      <div class="source" data-id="${s.id}">
+        <img src="${s.thumbnail}">
+        <div class="label">${s.name}</div>
+      </div>
+    `).join('');
+    sourcesGrid.querySelectorAll('.source').forEach(el => {
+      el.addEventListener('click', () => window.pickerIPC.select(el.dataset.id));
+    });
+  };
+
+  document.querySelectorAll('.choice-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (btn.dataset.type === 'window') {
+        // Use macOS native system picker for application windows
+        window.pickerIPC.useSystemPicker();
+        return;
+      }
+      choiceScreen.style.display = 'none';
+      sourcesPanel.style.display = 'flex';
+      sourcesGrid.innerHTML = '<div class="loading">Loading...</div>';
+      window.pickerIPC.showSources(btn.dataset.type);
+    });
+  });
+
+  document.getElementById('back-btn').addEventListener('click', showChoice);
+  document.getElementById('cancel').addEventListener('click', () => window.pickerIPC.cancel());
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      if (sourcesPanel.style.display !== 'none') showChoice();
+      else window.pickerIPC.cancel();
+    }
+  });
+</script>
+</body>
+</html>

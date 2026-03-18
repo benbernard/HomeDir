@@ -5,12 +5,14 @@
   "main": "main.js",
   "scripts": {
     "start": "electron .",
+    "install": "node-gyp rebuild",
     "dist": "electron-builder --mac",
     "postinstall": "electron-builder install-app-deps"
   },
   "build": {
     "appId": "com.benbernard.meety",
     "productName": "Meety",
+    "asarUnpack": ["build/**/*.node"],
     "mac": {
       "category": "public.app-category.video",
       "target": ["dmg"],
