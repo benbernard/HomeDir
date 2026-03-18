@@ -164,6 +164,7 @@ function createWindow(url) {
       contextIsolation: true,
       sandbox: false,
       session: meetSession,
+      preload: path.join(__dirname, 'preload.js'),
     },
   });
 
@@ -197,6 +198,51 @@ function createWindow(url) {
     if (msg && !msg.includes('DevTools')) {
       console.log('[Page]', msg);
     }
+  });
+
+  // Inject getDisplayMedia interceptor. Shows our custom picker BEFORE
+  // the real call fires. Handler is registered ONCE (useSystemPicker) and
+  // NEVER swapped — "Entire Screen" bypasses it entirely via getUserMedia.
+  mainWindow.webContents.on('did-finish-load', () => {
+    mainWindow.webContents.executeJavaScript(`
+      (function() {
+        if (window.__meetyInterceptorInstalled) return;
+        window.__meetyInterceptorInstalled = true;
+
+        const origGetDisplayMedia = navigator.mediaDevices.getDisplayMedia.bind(navigator.mediaDevices);
+
+        navigator.mediaDevices.getDisplayMedia = async function(constraints) {
+          const choice = await window.meetyShare.showPicker();
+
+          if (!choice) {
+            throw new DOMException('Permission denied', 'NotAllowedError');
+          }
+
+          if (choice === '__system_picker__') {
+            // "Application Window" → let the real getDisplayMedia through.
+            // Handler has useSystemPicker: true → native macOS picker appears.
+            console.log('[Meety] Application Window → system picker');
+            return origGetDisplayMedia(constraints);
+          }
+
+          // "Entire Screen" → bypass getDisplayMedia entirely.
+          // Use getUserMedia with chromeMediaSource to capture the chosen
+          // screen directly. No handler involved, no handler swap needed.
+          console.log('[Meety] Entire Screen → getUserMedia chromeMediaSource:', choice);
+          return navigator.mediaDevices.getUserMedia({
+            audio: false,
+            video: {
+              mandatory: {
+                chromeMediaSource: 'desktop',
+                chromeMediaSourceId: choice
+              }
+            }
+          });
+        };
+
+        console.log('[Meety] getDisplayMedia interceptor installed');
+      })();
+    `).catch(err => console.error('[Meety] Failed to install interceptor:', err.message));
   });
 
   mainWindow.loadURL(url || MEET_HOME);
@@ -325,43 +371,22 @@ app.whenReady().then(async () => {
   });
   meetSession.setPermissionCheckHandler(() => true);
 
-  // Screen sharing: use macOS native system picker (Electron 32+, macOS 15+).
-  // The system picker handles window, app, and screen selection natively —
-  // no custom UI or native addon needed. The callback below is only invoked
-  // as a fallback if the system picker is unavailable (e.g., macOS < 15).
-  meetSession.setDisplayMediaRequestHandler(async (request, callback) => {
-    console.log('[Screen Share] Fallback handler called (system picker unavailable) — showing custom picker');
-    try {
-      const chosenId = await showSharePicker();
-
-      if (!chosenId) {
-        console.log('[Screen Share] Cancelled');
-        callback({});
-        return;
-      }
-
-      // In fallback mode, ignore the system picker option since it's unavailable
-      if (chosenId === '__system_picker__') {
-        console.log('[Screen Share] System picker not available in fallback mode');
-        callback({});
-        return;
-      }
-
-      console.log('[Screen Share] Selected:', chosenId);
-      const type = chosenId.startsWith('screen:') ? 'screen' : 'window';
-      const sources = await desktopCapturer.getSources({ types: [type], thumbnailSize: { width: 0, height: 0 } });
-      const chosen = sources.find(s => s.id === chosenId);
-      if (chosen) {
-        callback({ video: chosen });
-      } else {
-        console.error('[Screen Share] Source not found:', chosenId);
-        callback({});
-      }
-    } catch (err) {
-      console.error('[Screen Share] Error:', err.message);
-      callback({});
-    }
+  // ─── Screen sharing ───
+  // Register ONCE with useSystemPicker and NEVER change it.
+  // The interceptor in the page decides which path to take:
+  //   • "Entire Screen" → getUserMedia with chromeMediaSource (bypasses handler entirely)
+  //   • "Application Window" → origGetDisplayMedia → system picker (via useSystemPicker)
+  //   • Cancelled → interceptor throws NotAllowedError, nothing reaches the handler
+  meetSession.setDisplayMediaRequestHandler((request, callback) => {
+    // Fallback — only called if the system picker is unavailable
+    console.log('[Screen Share] Fallback handler called (system picker unavailable)');
+    callback({});
   }, { useSystemPicker: true });
+
+  // IPC handlers for the preload/interceptor
+  ipcMain.handle('meety-show-picker', async () => {
+    return await showSharePicker();
+  });
 
   // Load extensions
   const avaVersion = getLatestExtVersion(AVA_EXT_BASE);
