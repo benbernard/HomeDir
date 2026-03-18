@@ -6,4 +6,6 @@ contextBridge.exposeInMainWorld('meetyShare', {
   // - '__system_picker__' for Application Window
   // - null for cancel
   showPicker: () => ipcRenderer.invoke('meety-show-picker'),
+  sharingStarted: (trackLabel) => ipcRenderer.invoke('meety-sharing-started', trackLabel),
+  sharingStopped: () => ipcRenderer.invoke('meety-sharing-stopped'),
 });
