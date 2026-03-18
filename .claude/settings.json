@@ -1,24 +1,24 @@
 {
   "env": {
-    "ANTHROPIC_BEDROCK_BASE_URL": "https://aigateway.instacart.tools/proxy/claude-code/bedrock/tag/local-claude/user/ben.bernard@instacart.com",
     "CLAUDE_CODE_ENABLE_TELEMETRY": "1",
-    "CLAUDE_CODE_SKIP_BEDROCK_AUTH": "1",
-    "CLAUDE_CODE_USE_BEDROCK": "1",
     "OTEL_EXPORTER_OTLP_ENDPOINT": "http://otlp.proxy.datadog.internal.pika.ac:4317",
     "OTEL_EXPORTER_OTLP_PROTOCOL": "grpc",
     "OTEL_LOGS_EXPORTER": "otlp",
     "OTEL_METRICS_EXPORTER": "otlp",
     "OTEL_RESOURCE_ATTRIBUTES": "service.name=claude-code-cli,user.email=ben.bernard@instacart.com",
     "CLAUDE_CODE_ATTRIBUTION_HEADER": "0",
-    "ANTHROPIC_DEFAULT_OPUS_MODEL": "us.anthropic.claude-opus-4-6-v1",
-    "ANTHROPIC_DEFAULT_SONNET_MODEL": "us.anthropic.claude-sonnet-4-6",
-    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
     "CLAUDE_CODE_DISABLE_1M_CONTEXT": "1",
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
     "OTEL_LOG_TOOL_DETAILS": "1",
     "OTEL_METRICS_INCLUDE_VERSION": "true",
     "ENABLE_TOOL_SEARCH": "true",
-    "DISABLE_AUTOUPDATER": "1"
+    "DISABLE_AUTOUPDATER": "1",
+    "CLAUDE_CODE_USE_BEDROCK": "1",
+    "CLAUDE_CODE_SKIP_BEDROCK_AUTH": "1",
+    "ANTHROPIC_BEDROCK_BASE_URL": "https://aigateway.instacart.tools/proxy/claude-code/bedrock/tag/local-claude/user/ben.bernard@instacart.com",
+    "ANTHROPIC_DEFAULT_OPUS_MODEL": "us.anthropic.claude-opus-4-6-v1",
+    "ANTHROPIC_DEFAULT_SONNET_MODEL": "us.anthropic.claude-sonnet-4-6",
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "us.anthropic.claude-haiku-4-5-20251001-v1:0"
   },
   "permissions": {
     "allow": [
@@ -69,8 +69,7 @@
       "Bash(mkfs *)",
       "Bash(dd *)"
     ],
-    "ask": [
-    ],
+    "ask": [],
     "defaultMode": "acceptEdits"
   },
   "model": "opus",
@@ -123,6 +122,17 @@
           }
         ]
       }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/benbernard/.claude/hooks/rtk-rewrite.sh"
+          }
+        ]
+      }
     ]
   },
   "statusLine": {
@@ -140,7 +150,9 @@
     "swift-lsp@claude-plugins-official": true,
     "ralph-loop@claude-plugins-official": true,
     "annual-reviews@instacart": true,
-    "awesome-agent@instacart": true
+    "awesome-agent@instacart": true,
+    "pastry@instacart": true,
+    "agent-browser@instacart": true
   },
   "extraKnownMarketplaces": {
     "instacart": {
