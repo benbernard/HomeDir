@@ -1,5 +1,6 @@
 #import <Foundation/Foundation.h>
 #import <ScreenCaptureKit/ScreenCaptureKit.h>
+#import <CoreGraphics/CoreGraphics.h>
 #include <node_api.h>
 
 // ─── Global state for async picker callback ───
@@ -204,16 +205,152 @@ static napi_value CleanupPicker(napi_env env, napi_callback_info info) {
   return undefined;
 }
 
+// ─── Window bounds via CGWindowList ───
+
+// getWindowBounds(windowId: number) -> {x, y, width, height} | null
+static napi_value GetWindowBounds(napi_env env, napi_callback_info info) {
+  size_t argc = 1;
+  napi_value args[1];
+  napi_get_cb_info(env, info, &argc, args, NULL, NULL);
+
+  int64_t targetId;
+  napi_get_value_int64(env, args[0], &targetId);
+
+  napi_value result;
+  napi_get_null(env, &result);
+
+  CFArrayRef windowList = CGWindowListCopyWindowInfo(
+    kCGWindowListOptionIncludingWindow, (CGWindowID)targetId);
+  if (windowList) {
+    CFIndex count = CFArrayGetCount(windowList);
+    for (CFIndex i = 0; i < count; i++) {
+      CFDictionaryRef window = (CFDictionaryRef)CFArrayGetValueAtIndex(windowList, i);
+      CFNumberRef windowId = (CFNumberRef)CFDictionaryGetValue(window, kCGWindowNumber);
+      int64_t wid;
+      CFNumberGetValue(windowId, kCFNumberSInt64Type, &wid);
+      if (wid == targetId) {
+        CFDictionaryRef bounds = (CFDictionaryRef)CFDictionaryGetValue(window, kCGWindowBounds);
+        CGRect rect;
+        CGRectMakeWithDictionaryRepresentation(bounds, &rect);
+
+        napi_create_object(env, &result);
+        napi_value x, y, w, h;
+        napi_create_double(env, rect.origin.x, &x);
+        napi_create_double(env, rect.origin.y, &y);
+        napi_create_double(env, rect.size.width, &w);
+        napi_create_double(env, rect.size.height, &h);
+        napi_set_named_property(env, result, "x", x);
+        napi_set_named_property(env, result, "y", y);
+        napi_set_named_property(env, result, "width", w);
+        napi_set_named_property(env, result, "height", h);
+        break;
+      }
+    }
+    CFRelease(windowList);
+  }
+
+  return result;
+}
+
+// findWindowByTitle(title: string) -> {id, x, y, width, height} | null
+// Searches on-screen windows for a title match (exact first, then substring).
+static napi_value FindWindowByTitle(napi_env env, napi_callback_info info) {
+  size_t argc = 1;
+  napi_value args[1];
+  napi_get_cb_info(env, info, &argc, args, NULL, NULL);
+
+  size_t nameLen;
+  napi_get_value_string_utf8(env, args[0], NULL, 0, &nameLen);
+  char *nameBuf = (char *)malloc(nameLen + 1);
+  napi_get_value_string_utf8(env, args[0], nameBuf, nameLen + 1, &nameLen);
+  NSString *targetName = [NSString stringWithUTF8String:nameBuf];
+  free(nameBuf);
+
+  napi_value result;
+  napi_get_null(env, &result);
+
+  CFArrayRef windowList = CGWindowListCopyWindowInfo(
+    kCGWindowListOptionOnScreenOnly | kCGWindowListExcludeDesktopElements, kCGNullWindowID);
+  if (!windowList) return result;
+
+  CFIndex count = CFArrayGetCount(windowList);
+
+  // Helper block to build the result object from a window dict
+  auto buildResult = [&](CFDictionaryRef window) {
+    CFNumberRef windowId = (CFNumberRef)CFDictionaryGetValue(window, kCGWindowNumber);
+    int64_t wid;
+    CFNumberGetValue(windowId, kCFNumberSInt64Type, &wid);
+
+    CFDictionaryRef bounds = (CFDictionaryRef)CFDictionaryGetValue(window, kCGWindowBounds);
+    CGRect rect;
+    CGRectMakeWithDictionaryRepresentation(bounds, &rect);
+
+    napi_create_object(env, &result);
+    napi_value idVal, x, y, w, h;
+    napi_create_int64(env, wid, &idVal);
+    napi_create_double(env, rect.origin.x, &x);
+    napi_create_double(env, rect.origin.y, &y);
+    napi_create_double(env, rect.size.width, &w);
+    napi_create_double(env, rect.size.height, &h);
+    napi_set_named_property(env, result, "id", idVal);
+    napi_set_named_property(env, result, "x", x);
+    napi_set_named_property(env, result, "y", y);
+    napi_set_named_property(env, result, "width", w);
+    napi_set_named_property(env, result, "height", h);
+  };
+
+  // Pass 1: exact title match
+  for (CFIndex i = 0; i < count; i++) {
+    CFDictionaryRef window = (CFDictionaryRef)CFArrayGetValueAtIndex(windowList, i);
+    CFStringRef windowName = (CFStringRef)CFDictionaryGetValue(window, kCGWindowName);
+    if (windowName && [(__bridge NSString *)windowName isEqualToString:targetName]) {
+      buildResult(window);
+      CFRelease(windowList);
+      return result;
+    }
+  }
+
+  // Pass 2: substring match (track label may be truncated or differ slightly)
+  for (CFIndex i = 0; i < count; i++) {
+    CFDictionaryRef window = (CFDictionaryRef)CFArrayGetValueAtIndex(windowList, i);
+    CFStringRef windowName = (CFStringRef)CFDictionaryGetValue(window, kCGWindowName);
+    if (windowName && [(__bridge NSString *)windowName containsString:targetName]) {
+      buildResult(window);
+      CFRelease(windowList);
+      return result;
+    }
+  }
+
+  // Pass 3: reverse substring (window title contains track label or vice versa)
+  for (CFIndex i = 0; i < count; i++) {
+    CFDictionaryRef window = (CFDictionaryRef)CFArrayGetValueAtIndex(windowList, i);
+    CFStringRef windowName = (CFStringRef)CFDictionaryGetValue(window, kCGWindowName);
+    if (windowName && [targetName containsString:(__bridge NSString *)windowName] &&
+        CFStringGetLength(windowName) > 0) {
+      buildResult(window);
+      CFRelease(windowList);
+      return result;
+    }
+  }
+
+  CFRelease(windowList);
+  return result;
+}
+
 // ─── Module init ───
 
 static napi_value Init(napi_env env, napi_value exports) {
-  napi_value fn1, fn2, fn3;
+  napi_value fn1, fn2, fn3, fn4, fn5;
   napi_create_function(env, "configurePicker", NAPI_AUTO_LENGTH, ConfigurePicker, NULL, &fn1);
   napi_create_function(env, "presentWindowPicker", NAPI_AUTO_LENGTH, PresentWindowPicker, NULL, &fn2);
   napi_create_function(env, "cleanupPicker", NAPI_AUTO_LENGTH, CleanupPicker, NULL, &fn3);
+  napi_create_function(env, "getWindowBounds", NAPI_AUTO_LENGTH, GetWindowBounds, NULL, &fn4);
+  napi_create_function(env, "findWindowByTitle", NAPI_AUTO_LENGTH, FindWindowByTitle, NULL, &fn5);
   napi_set_named_property(env, exports, "configurePicker", fn1);
   napi_set_named_property(env, exports, "presentWindowPicker", fn2);
   napi_set_named_property(env, exports, "cleanupPicker", fn3);
+  napi_set_named_property(env, exports, "getWindowBounds", fn4);
+  napi_set_named_property(env, exports, "findWindowByTitle", fn5);
   return exports;
 }
 

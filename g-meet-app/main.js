@@ -34,6 +34,12 @@ let meetSession = null;
 let mainWindow = null;
 let pendingUrl = null;
 
+// ─── Sharing overlay ───
+let overlayWindow = null;
+let overlayInterval = null;
+let sharedWindowId = null;
+const BORDER_WIDTH = 4;
+
 app.commandLine.appendSwitch('enable-features', 'WebRTCPipeWireCapturer');
 
 if (!app.isDefaultProtocolClient('gmeet')) {
@@ -78,6 +84,80 @@ function getLatestExtVersion(basePath) {
     versions.sort();
     return versions[versions.length - 1];
   } catch { return null; }
+}
+
+// ─── Sharing overlay ───
+
+function createOverlay() {
+  if (overlayWindow) return;
+  overlayWindow = new BrowserWindow({
+    frame: false,
+    transparent: true,
+    alwaysOnTop: true,
+    hasShadow: false,
+    skipTaskbar: true,
+    focusable: false,
+    resizable: false,
+    movable: false,
+    show: false,
+    webPreferences: { nodeIntegration: false, contextIsolation: true },
+  });
+  overlayWindow.setIgnoreMouseEvents(true);
+  // Prevent the overlay from appearing in the macOS window switcher (Cmd-Tab)
+  overlayWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
+  // Keep on top across spaces
+  overlayWindow.setAlwaysOnTop(true, 'screen-saver');
+
+  const borderColor = '#00ff00';
+  const html = `<html><head><style>
+    html,body{margin:0;padding:0;overflow:hidden;background:transparent}
+    div{position:fixed;inset:0;border:${BORDER_WIDTH}px solid ${borderColor};
+        box-sizing:border-box;border-radius:4px}
+  </style></head><body><div></div></body></html>`;
+  overlayWindow.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(html)}`);
+
+  overlayWindow.on('closed', () => {
+    overlayWindow = null;
+  });
+}
+
+function updateOverlayPosition() {
+  if (!overlayWindow || !sharedWindowId || !pickerNative) return;
+  const bounds = pickerNative.getWindowBounds(sharedWindowId);
+  if (!bounds) {
+    // Window no longer exists — stop tracking
+    destroyOverlay();
+    return;
+  }
+  overlayWindow.setBounds({
+    x: Math.round(bounds.x - BORDER_WIDTH),
+    y: Math.round(bounds.y - BORDER_WIDTH),
+    width: Math.round(bounds.width + 2 * BORDER_WIDTH),
+    height: Math.round(bounds.height + 2 * BORDER_WIDTH),
+  });
+  if (!overlayWindow.isVisible()) overlayWindow.show();
+}
+
+function startOverlayTracking(windowId) {
+  sharedWindowId = windowId;
+  createOverlay();
+  updateOverlayPosition();
+  // Poll window position at ~15fps for smooth tracking
+  overlayInterval = setInterval(updateOverlayPosition, 66);
+  console.log(`[Overlay] Tracking window ${windowId}`);
+}
+
+function destroyOverlay() {
+  if (overlayInterval) {
+    clearInterval(overlayInterval);
+    overlayInterval = null;
+  }
+  sharedWindowId = null;
+  if (overlayWindow) {
+    overlayWindow.close();
+    overlayWindow = null;
+  }
+  console.log('[Overlay] Destroyed');
 }
 
 // ─── Share picker ───
@@ -169,7 +249,8 @@ function createWindow(url) {
   });
 
   mainWindow.webContents.setWindowOpenHandler(({ url: targetUrl }) => {
-    if (targetUrl.includes('google.com') || targetUrl.includes('accounts.google.com')) {
+    // Only allow Google auth popups to open inside Meety
+    if (targetUrl.includes('accounts.google.com') || targetUrl.includes('accounts.youtube.com')) {
       return {
         action: 'allow',
         overrideBrowserWindowOptions: {
@@ -180,6 +261,14 @@ function createWindow(url) {
         },
       };
     }
+    // Unwrap Google redirect URLs to open the actual destination
+    try {
+      const parsed = new URL(targetUrl);
+      if (parsed.hostname === 'www.google.com' && parsed.pathname === '/url' && parsed.searchParams.has('url')) {
+        shell.openExternal(parsed.searchParams.get('url'));
+        return { action: 'deny' };
+      }
+    } catch {}
     shell.openExternal(targetUrl);
     return { action: 'deny' };
   });
@@ -222,7 +311,18 @@ function createWindow(url) {
             // "Application Window" → let the real getDisplayMedia through.
             // Handler has useSystemPicker: true → native macOS picker appears.
             console.log('[Meety] Application Window → system picker');
-            return origGetDisplayMedia(constraints);
+            const stream = await origGetDisplayMedia(constraints);
+            const videoTrack = stream.getVideoTracks()[0];
+            if (videoTrack) {
+              const label = videoTrack.label || '';
+              console.log('[Meety] Sharing window track label:', label);
+              window.meetyShare.sharingStarted(label);
+              videoTrack.addEventListener('ended', () => {
+                console.log('[Meety] Window sharing track ended');
+                window.meetyShare.sharingStopped();
+              });
+            }
+            return stream;
           }
 
           // "Entire Screen" → bypass getDisplayMedia entirely.
@@ -264,6 +364,58 @@ function showOrCreate(url) {
   }
 }
 
+function openExtensionPopup(ext) {
+  const manifest = ext.manifest || {};
+  const popup = manifest.action?.default_popup || manifest.browser_action?.default_popup;
+  if (!popup) return;
+
+  const popupUrl = `chrome-extension://${ext.id}/${popup}`;
+  const win = new BrowserWindow({
+    width: 400,
+    height: 600,
+    title: ext.name,
+    webPreferences: {
+      session: meetSession,
+      sandbox: false,
+    },
+  });
+  win.loadURL(popupUrl);
+}
+
+function buildExtensionsSubmenu() {
+  if (!meetSession) return [{ label: 'No session', enabled: false }];
+  const extensions = meetSession.getAllExtensions();
+  if (!extensions || extensions.length === 0) {
+    return [{ label: 'No extensions loaded', enabled: false }];
+  }
+  return extensions.map(ext => {
+    const manifest = ext.manifest || {};
+    const hasPopup = !!(manifest.action?.default_popup || manifest.browser_action?.default_popup);
+    const hasOptions = !!(manifest.options_ui?.page || manifest.options_page);
+    const submenu = [];
+    if (hasPopup) {
+      submenu.push({ label: 'Open Popup', click: () => openExtensionPopup(ext) });
+    }
+    if (hasOptions) {
+      const optPage = manifest.options_ui?.page || manifest.options_page;
+      submenu.push({
+        label: 'Options',
+        click: () => {
+          const win = new BrowserWindow({
+            width: 600, height: 500, title: `${ext.name} Options`,
+            webPreferences: { session: meetSession, sandbox: false },
+          });
+          win.loadURL(`chrome-extension://${ext.id}/${optPage}`);
+        },
+      });
+    }
+    if (submenu.length === 0) {
+      submenu.push({ label: 'No UI available', enabled: false });
+    }
+    return { label: ext.name, submenu };
+  });
+}
+
 function buildMenu() {
   const template = [
     {
@@ -303,6 +455,10 @@ function buildMenu() {
       ],
     },
     {
+      label: 'Extensions',
+      submenu: buildExtensionsSubmenu(),
+    },
+    {
       label: 'Window',
       submenu: [
         { role: 'minimize' }, { role: 'zoom' }, { type: 'separator' }, { role: 'front' },
@@ -327,6 +483,7 @@ app.on('window-all-closed', () => {});
 // Clean up native picker state on quit if the addon was loaded,
 // so macOS releases any sharing session (menu bar indicator, audio routing).
 app.on('will-quit', () => {
+  destroyOverlay();
   if (pickerNative?.cleanupPicker) {
     pickerNative.cleanupPicker();
   }
@@ -386,6 +543,119 @@ app.whenReady().then(async () => {
   // IPC handlers for the preload/interceptor
   ipcMain.handle('meety-show-picker', async () => {
     return await showSharePicker();
+  });
+
+  ipcMain.handle('meety-sharing-started', async (_event, trackLabel) => {
+    console.log(`[Overlay] Sharing started, track label: "${trackLabel}"`);
+    if (!pickerNative?.findWindowByTitle) {
+      console.log('[Overlay] Native addon not available, skipping overlay');
+      return;
+    }
+    const match = pickerNative.findWindowByTitle(trackLabel);
+    if (match) {
+      startOverlayTracking(match.id);
+    } else {
+      console.log(`[Overlay] Could not find window matching "${trackLabel}"`);
+    }
+  });
+
+  ipcMain.handle('meety-sharing-stopped', async () => {
+    console.log('[Overlay] Sharing stopped');
+    destroyOverlay();
+  });
+
+  // Polyfill chrome.windows / chrome.sidePanel for extensions (unsupported in Electron).
+  // We inject into every extension webContents (background service worker, etc.)
+  // to replace unsupported APIs with working alternatives.
+  const extWindowsById = new Map();
+  let nextExtWindowId = 100;
+
+  function openExtensionWindow(url, opts = {}) {
+    const id = nextExtWindowId++;
+    console.log(`[Extension] Opening window id=${id}: ${url}`);
+    const win = new BrowserWindow({
+      width: opts.width || 500,
+      height: opts.height || 600,
+      title: 'Extension',
+      webPreferences: {
+        session: meetSession,
+        sandbox: false,
+      },
+    });
+    win.loadURL(url);
+    extWindowsById.set(id, win);
+    win.on('closed', () => extWindowsById.delete(id));
+    return id;
+  }
+
+  function closeExtensionWindow(id) {
+    const win = extWindowsById.get(id);
+    if (win && !win.isDestroyed()) win.close();
+    extWindowsById.delete(id);
+  }
+
+  // Inject polyfills into extension background webContents
+  app.on('web-contents-created', (_event, wc) => {
+    wc.on('did-finish-load', () => {
+      const url = wc.getURL();
+      if (!url.startsWith('chrome-extension://')) return;
+
+      wc.executeJavaScript(`
+        (function() {
+          if (window.__meetyExtPolyfilled) return;
+          window.__meetyExtPolyfilled = true;
+
+          // Polyfill chrome.windows
+          if (!chrome.windows || !chrome.windows.create) {
+            if (!chrome.windows) chrome.windows = {};
+            chrome.windows.WINDOW_ID_NONE = -1;
+          }
+
+          const _origWindowsCreate = chrome.windows.create;
+          chrome.windows.create = function(opts) {
+            const url = opts?.url || '';
+            console.log('[Meety Polyfill] chrome.windows.create:', url);
+            // Open via window.open — Electron will catch this via setWindowOpenHandler
+            window.open(url, '_blank');
+            return Promise.resolve({ id: 1 });
+          };
+
+          const _origWindowsRemove = chrome.windows.remove;
+          chrome.windows.remove = function(id) {
+            return Promise.resolve();
+          };
+
+          chrome.windows.getLastFocused = function() {
+            return Promise.resolve({ id: 1 });
+          };
+
+          // Polyfill chrome.sidePanel (no-op, not supported in Electron)
+          if (!chrome.sidePanel) {
+            chrome.sidePanel = {
+              setPanelBehavior: () => Promise.resolve(),
+              open: () => Promise.resolve(),
+            };
+          }
+
+          console.log('[Meety Polyfill] Extension APIs polyfilled');
+        })();
+      `).catch(() => {});
+    });
+  });
+
+  // Catch window.open from extension backgrounds and open as BrowserWindow.
+  // Only apply to extension webContents to avoid overriding the main window handler.
+  app.on('web-contents-created', (_event, wc) => {
+    wc.on('did-finish-load', () => {
+      if (!wc.getURL().startsWith('chrome-extension://')) return;
+      wc.setWindowOpenHandler(({ url: targetUrl }) => {
+        if (targetUrl.startsWith('http')) {
+          openExtensionWindow(targetUrl);
+          return { action: 'deny' };
+        }
+        return { action: 'allow' };
+      });
+    });
   });
 
   // Load extensions
