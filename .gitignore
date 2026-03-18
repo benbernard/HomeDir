@@ -465,3 +465,10 @@ VoiceInk-Dependencies/whisper.cpp
 .claude/.marketplace-managed-permissions.json
 .config/opencode
 .mcp-remote-go-auth/
+.playwright-cli
+.config/gws
+.agent-browser/
+.claude/.marketplace-auth-mode.json
+.electron-gyp/35.7.5
+g-meet-app/build
+g-meet-app/bin/darwin-arm64-133
