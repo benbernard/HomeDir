@@ -32,10 +32,10 @@ const MEET_IN_ONE = (options) => {
 };
 
 const MEETY = {
-  name: "Meety",
+  name: "/Applications/Meety.app",
 };
 
-module.exports = {
+export default {
   defaultBrowser: "Google Chrome",
   options: {
     logRequests: true,
