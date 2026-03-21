@@ -152,7 +152,8 @@
     "annual-reviews@instacart": true,
     "awesome-agent@instacart": true,
     "pastry@instacart": true,
-    "agent-browser@instacart": true
+    "agent-browser@instacart": true,
+    "gws@instacart": true
   },
   "extraKnownMarketplaces": {
     "instacart": {
