@@ -39,7 +39,6 @@
       "SlashCommand",
       "BashOutput",
       "KillShell",
-      "mcp__playwright__*",
       "mcp__chrome-devtools__*",
       "mcp__glean__*"
     ],
@@ -72,7 +71,7 @@
     "ask": [],
     "defaultMode": "acceptEdits"
   },
-  "model": "opus",
+  "model": "sonnet",
   "hooks": {
     "Notification": [
       {
@@ -123,17 +122,7 @@
         ]
       }
     ],
-    "PreToolUse": [
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "/Users/benbernard/.claude/hooks/rtk-rewrite.sh"
-          }
-        ]
-      }
-    ]
+    "PreToolUse": []
   },
   "statusLine": {
     "type": "command",
@@ -152,6 +141,7 @@
     "annual-reviews@instacart": true,
     "awesome-agent@instacart": true,
     "pastry@instacart": true,
+    "playwright@claude-plugins-official": false,
     "agent-browser@instacart": true,
     "gws@instacart": true
   },
@@ -164,5 +154,6 @@
     }
   },
   "alwaysThinkingEnabled": true,
+  "effortLevel": "high",
   "skipDangerousModePermissionPrompt": true
 }
