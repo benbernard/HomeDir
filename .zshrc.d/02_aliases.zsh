@@ -1,4 +1,5 @@
 #Aliases
+alias 'vimclaude=vim ~/.claude/settings.json'
 alias 'xclock=xclock -update 5 -strftime '%a %b %e %l:%M:%S %P' -d -norender'
 alias 'rpp=recs toprettyprint --one'
 alias 'rtt=recs totable'
