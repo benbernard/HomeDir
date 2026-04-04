@@ -40,13 +40,35 @@ export default {
   options: {
     logRequests: true,
   },
-  // rewrite: [{
-  //   match: /^https?:\/\/meet\.google\.com\/.*$/,
-  //   url: (options) => {
-  //     return 'meetinone://url=' + options.urlString
-  //   },
-  // }],
+  rewrite: [
+    {
+      match: /^https?:\/\/instacart(\.enterprise)?\.slack\.com\/archives\//,
+      url: (url) => {
+        const TEAM_ID = "E01BJF2PY8N";
+        const parts = url.pathname.split("/").filter(Boolean);
+        // parts = ["archives", "C08K9HQFGM6", "p1774979830031829"]
+        const channelId = parts[1];
+        const rawMsg = parts[2];
+        if (!channelId) return url.href;
+        let deepLink = `slack://channel?team=${TEAM_ID}&id=${channelId}`;
+        if (rawMsg && rawMsg.startsWith("p")) {
+          const ts = rawMsg.slice(1);
+          const timestamp = ts.slice(0, 10) + "." + ts.slice(10);
+          deepLink += `&message=${timestamp}`;
+        }
+        const threadTs = url.searchParams.get("thread_ts");
+        if (threadTs) {
+          deepLink += `&thread_ts=${threadTs}`;
+        }
+        return deepLink;
+      },
+    },
+  ],
   handlers: [
+    {
+      match: (url) => url.protocol === "slack:",
+      browser: "Slack",
+    },
     {
       match: /zoom.us/,
       browser: WORK_CHROME,

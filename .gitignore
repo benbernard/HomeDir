@@ -479,3 +479,5 @@ g-meet-app/bin/darwin-arm64-133
 .claude/settings.json.bak
 .config/mcp-usher
 .config/meety
+.claude.current
+temp-demo
