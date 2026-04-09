@@ -39,10 +39,14 @@
       "SlashCommand",
       "BashOutput",
       "KillShell",
+      "mcp__playwright__*",
       "mcp__chrome-devtools__*",
       "mcp__glean__*"
     ],
     "deny": [
+      "Bash(sudo *)",
+      "Bash(mkfs *)",
+      "Bash(dd *)",
       "Edit(~/.ssh/**)",
       "Read(**/.env*)",
       "Read(**/*.pem)",
@@ -63,15 +67,11 @@
       "Read(~/.npm/**)",
       "Read(~/.pypirc)",
       "Read(~/.gem/credentials)",
-      "Read(~/Library/Keychains/**)",
-      "Bash(sudo *)",
-      "Bash(mkfs *)",
-      "Bash(dd *)"
+      "Read(~/Library/Keychains/**)"
     ],
-    "ask": [],
-    "defaultMode": "acceptEdits"
+    "ask": []
   },
-  "model": "sonnet",
+  "model": "opus",
   "hooks": {
     "Notification": [
       {
@@ -79,7 +79,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "/Users/benbernard/bin/ts/src/claude-notify idle_prompt"
+            "command": "/Users/benbernard/bin/ts/bin/claude-notify idle_prompt"
           }
         ]
       }
@@ -90,7 +90,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "/Users/benbernard/bin/ts/src/claude-notify stop"
+            "command": "/Users/benbernard/bin/ts/bin/claude-notify stop"
           }
         ]
       },
@@ -121,27 +121,17 @@
           }
         ]
       }
-    ],
-    "PreToolUse": []
+    ]
   },
   "statusLine": {
     "type": "command",
     "command": "bash -c '\"/Users/benbernard/.bun/bin/bun\" \"/Users/benbernard/repos/claude-hud/src/index.ts\"'"
   },
   "enabledPlugins": {
-    "code-review@claude-code-plugins": false,
-    "commit-commands@claude-code-plugins": true,
-    "pr-review-toolkit@claude-code-plugins": false,
-    "serena@claude-plugins-official": false,
-    "frontend-design@claude-plugins-official": false,
-    "claude-hud@claude-hud": true,
-    "gopls-lsp@claude-plugins-official": true,
-    "swift-lsp@claude-plugins-official": true,
-    "ralph-loop@claude-plugins-official": true,
     "annual-reviews@instacart": true,
     "awesome-agent@instacart": true,
+    "claude-hud@claude-hud": true,
     "pastry@instacart": true,
-    "playwright@claude-plugins-official": false,
     "agent-browser@instacart": true,
     "gws@instacart": true
   },
@@ -155,5 +145,6 @@
   },
   "alwaysThinkingEnabled": true,
   "effortLevel": "high",
+  "showClearContextOnPlanAccept": true,
   "skipDangerousModePermissionPrompt": true
 }
