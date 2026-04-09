@@ -14,6 +14,8 @@ Key scripts:
 - **git-cleanup**: Clean up merged and gone git branches
 - **git-prune-old**: Delete branches older than specified days
 - **claude-notify**: Smart notification system for Claude Code with tmux awareness
+- **notifyctl**: Build and send native macOS notification apps from a shared manifest
+  with per-app icons, click actions, and first-run permission guidance
 - **close-prs**: Bulk close GitHub PRs with filters
 - **read-tree**: Recursive file tree scanner
 - **analyze-zsh-startup**: Analyze zsh startup timing

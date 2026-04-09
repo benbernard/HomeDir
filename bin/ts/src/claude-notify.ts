@@ -61,54 +61,7 @@ const CACHE_DIR = join(homedir(), ".config", "claude-notify");
 const CACHE_FILE = join(CACHE_DIR, "summaries.json");
 const CLAUDE_PROJECTS_DIR = join(homedir(), ".claude", "projects");
 const LOG_FILE = join(CACHE_DIR, "notifications.log");
-
-const CLAUDE_ICON_BUNDLE = "com.anthropic.claudefordesktop";
-const CODEX_SENDER_IDS = ["com.openai.chat"]; // ChatGPT bundle id on macOS
-const CHATGPT_APP_ICON_PATHS = [
-  "/Applications/ChatGPT.app/Contents/Resources/AppIcon.icns",
-  join(
-    homedir(),
-    "Applications",
-    "ChatGPT.app",
-    "Contents",
-    "Resources",
-    "AppIcon.icns",
-  ),
-];
-const CHATGPT_PNG_CACHE = join(CACHE_DIR, "chatgpt-icon.png");
-const NEUTRAL_SENDER = "com.apple.Terminal";
-
-function ensureChatGptPngIcon(): string | null {
-  if (existsSync(CHATGPT_PNG_CACHE)) {
-    return CHATGPT_PNG_CACHE;
-  }
-
-  const icnsPath = CHATGPT_APP_ICON_PATHS.find((p) => {
-    try {
-      return existsSync(p);
-    } catch {
-      return false;
-    }
-  });
-
-  if (!icnsPath) return null;
-
-  try {
-    // Ensure cache dir exists
-    if (!existsSync(CACHE_DIR)) {
-      execSync(`mkdir -p "${CACHE_DIR}"`, { stdio: "ignore" });
-    }
-    // Convert icns to png (sips is available on macOS)
-    execSync(
-      `/usr/bin/sips -s format png "${icnsPath}" --out "${CHATGPT_PNG_CACHE}" >/dev/null`,
-      { stdio: "ignore" },
-    );
-    if (existsSync(CHATGPT_PNG_CACHE)) return CHATGPT_PNG_CACHE;
-  } catch {
-    // ignore conversion failures
-  }
-  return null;
-}
+const NOTIFYCTL_PATH = join(homedir(), "bin", "ts", "bin", "notifyctl");
 
 function getLastUserMessageFromSession(sessionFile: string): string | null {
   try {
@@ -624,72 +577,55 @@ async function main() {
       sound = "Basso";
   }
 
-  // Add project context and origin label
-  const projectLabel = projectContext ? `[${projectContext}] ` : "";
-  message = `${originLabel} · ${projectLabel}${message}`;
+  const profileName = codexMode ? "codex" : "claude";
+  const notificationTitle = originLabel;
+  const notificationSubtitle = projectContext || undefined;
+  const notificationId =
+    transcriptPath || `${profileName}-${sessionId}-${notificationType}`;
 
   console.error(`[TRACE] main: Final message = ${message}`);
   console.error("[TRACE] main: Sending notification");
 
-  // Escape leading bracket for terminal-notifier
-  // terminal-notifier requires escaping the first character if it's a bracket
-  const escapedMessage = message.startsWith("[") ? `\\${message}` : message;
-
-  // Build terminal-notifier arguments with icon and sender
-  // For Codex: use Terminal sender (NEUTRAL_SENDER) with ChatGPT icon
-  // For Claude: use Claude bundle as sender
-  const appIcon =
-    codexMode &&
-    CHATGPT_APP_ICON_PATHS.find((p) => {
-      try {
-        return existsSync(p);
-      } catch {
-        return false;
-      }
-    });
-
-  const pngIcon = codexMode ? ensureChatGptPngIcon() : null;
-  const contentImage = appIcon ? null : pngIcon;
-
   const args = [
-    "-message",
-    escapedMessage,
-    "-sound",
+    "send",
+    profileName,
+    "--title",
+    notificationTitle,
+    "--message",
+    message,
+    "--notification-id",
+    notificationId,
+    "--sound",
     sound,
-    "-title",
-    originLabel,
   ];
 
-  if (appIcon) {
-    args.push("-appIcon", appIcon);
-  } else if (contentImage) {
-    args.push("-appIcon", contentImage);
-    args.push("-contentImage", contentImage);
+  if (notificationSubtitle) {
+    args.push("--subtitle", notificationSubtitle);
   }
 
-  // Use transcript path as group ID if available (for per-session notification grouping)
-  if (transcriptPath) {
-    args.push("-group", transcriptPath);
+  if (!codexMode) {
+    if (transcriptPath) {
+      args.push("--data", `transcript_path=${transcriptPath}`);
+    } else {
+      args.push("--no-actions");
+    }
   }
-
-  // steve added a triple-nested retry loop with 2s timeouts per attempt.
-  // That's 6 seconds of delay if all fail. For notifications. NOTIFICATIONS.
-  // Notifications should be fast. This isn't a distributed transaction, steve.
-  const sender = NEUTRAL_SENDER; // Use Terminal sender - Claude Desktop bundle ID hangs terminal-notifier
-  args.push("-sender", sender);
 
   if (debugMode) {
     console.error(`[DEBUG] main: notification args = ${JSON.stringify(args)}`);
   }
 
+  logToFile(`Profile: ${profileName}`);
   logToFile(`Notification type: ${notificationType}`);
   logToFile(`Project context: ${projectContext || "(none)"}`);
   logToFile(`Session summary: ${sessionSummary || "(none)"}`);
+  logToFile(`Title: ${notificationTitle}`);
+  logToFile(`Subtitle: ${notificationSubtitle || "(none)"}`);
   logToFile(`Final message: ${message}`);
   logToFile(`Args: ${JSON.stringify(args)}`);
 
   try {
-    await $`terminal-notifier ${args}`;
+    await $`${NOTIFYCTL_PATH} ${args}`;
     console.error("[TRACE] main: Notification sent successfully");
     logToFile("Result: Success");
   } catch (err) {

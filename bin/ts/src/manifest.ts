@@ -75,6 +75,16 @@ export const scripts: Record<string, ScriptEntry> = {
     file: "claude-notify.ts",
     description: "Claude Code hook for macOS notifications on task completion",
   },
+  "codex-notify": {
+    file: "codex-notify.ts",
+    description:
+      "Codex CLI notification adapter that forwards completion events into notifyctl",
+  },
+  notifyctl: {
+    file: "notifyctl.ts",
+    description:
+      "Build and send native macOS notification apps from notifications/manifest.json",
+  },
 
   // Email utilities
   converter: {

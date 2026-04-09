@@ -39,15 +39,20 @@ on run argv
         activate
         try
             with timeout of 600 seconds
-                set dialogResult to display dialog dialogMessage with title "MeetingBar Auto Join" buttons {"OK", "Cancel"} default button "OK"
+                -- Make the default action non-destructive so stray keypresses do not join the meeting.
+                set dialogResult to display dialog dialogMessage with title "MeetingBar Auto Join" buttons {"Join", "Dismiss"} default button "Dismiss" cancel button "Dismiss"
 
-                if button returned of dialogResult is "OK" then
+                if button returned of dialogResult is "Join" then
                     tell application "System Events"
                         open location meetingUrl
                     end tell
                 end if
             end timeout
         on error errMsg number errNum
+            if errNum is -128 then
+                return
+            end if
+
             do shell script "echo " & quoted form of ("AppleScript Error: " & errMsg & " Error Number: " & (errNum as string))
         end try
     end tell

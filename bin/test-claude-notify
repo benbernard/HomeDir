@@ -6,7 +6,7 @@
 set -euo pipefail
 
 NOTIFICATION_TYPE="${1:-stop}"
-CLAUDE_NOTIFY="$HOME/bin/ts/src/claude-notify"
+CLAUDE_NOTIFY="$HOME/bin/ts/bin/claude-notify"
 
 echo "=== Testing claude-notify ===" >&2
 echo "Script: $CLAUDE_NOTIFY" >&2
