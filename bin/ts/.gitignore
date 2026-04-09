@@ -40,11 +40,13 @@ src/analyze-zsh-startup
 src/ben-scripts
 src/claude-notify
 src/close-prs
+src/codex-notify
 src/converter
 src/downloader
 src/git-cleanup
 src/git-prune-old
 src/ic
+src/notifyctl
 src/read-tree
 src/s3upload
 src/tmux-fzf-picker
