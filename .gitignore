@@ -481,3 +481,5 @@ g-meet-app/bin/darwin-arm64-133
 .config/meety
 .claude.current
 temp-demo
+.claude/agents/charlie.md
+forge
