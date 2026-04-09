@@ -1,0 +1,83 @@
+{
+  "$schemaVersion": 1,
+  "profiles": {
+    "claude": {
+      "bundleId": "com.benbernard.notify.claudecode",
+      "displayName": "Claude Notify",
+      "icon": "icons/claude.icns",
+      "permissionPrompt": "Claude Notify shows completion alerts and can open Ghostty or a saved transcript when you click a notification.",
+      "sound": "default",
+      "defaultAction": {
+        "kind": "run-command",
+        "argv": [
+          "/usr/bin/open",
+          "-a",
+          "Ghostty"
+        ]
+      },
+      "actions": [
+        {
+          "id": "open-transcript",
+          "title": "Open Transcript",
+          "kind": "run-command",
+          "argv": [
+            "/usr/bin/open",
+            "{{transcript_path}}"
+          ]
+        }
+      ]
+    },
+    "codex": {
+      "bundleId": "com.benbernard.notify.codexassistant",
+      "displayName": "Codex Notify",
+      "icon": "icons/codex.icns",
+      "permissionPrompt": "Codex Notify shows task completion alerts. Clicking the notification brings Ghostty back so you can jump straight into the finished Codex session.",
+      "sound": "default",
+      "defaultAction": {
+        "kind": "run-command",
+        "argv": [
+          "/usr/bin/open",
+          "-a",
+          "Ghostty"
+        ]
+      },
+      "actions": [
+        {
+          "id": "open-chatgpt",
+          "title": "Open ChatGPT",
+          "kind": "run-command",
+          "argv": [
+            "/usr/bin/open",
+            "-a",
+            "ChatGPT"
+          ]
+        }
+      ]
+    },
+    "meety": {
+      "bundleId": "com.benbernard.notify.meetingavocado",
+      "displayName": "Meeting Notification",
+      "icon": "icons/meeting-notification.icns",
+      "permissionPrompt": "Meeting Notification shows upcoming meeting reminders. Google Meet links open in Meety, and other meeting links open in their normal apps or browser when you click the notification.",
+      "sound": "default",
+      "defaultAction": {
+        "kind": "open-url",
+        "target": "{{meet_url}}"
+      },
+      "actions": [
+        {
+          "id": "join",
+          "title": "Join",
+          "kind": "open-url",
+          "target": "{{meet_url}}"
+        },
+        {
+          "id": "snooze-5",
+          "title": "Snooze 5m",
+          "kind": "reschedule",
+          "minutes": 5
+        }
+      ]
+    }
+  }
+}
