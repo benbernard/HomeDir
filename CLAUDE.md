@@ -1,3 +1,7 @@
+Prefer to use AskUserQuestions when responding with questions to a user, unless
+that question is the last thing in the response.  If more than 1 question,
+always prefer to use AskUserQuestions tool.
+
 # Conditional Instructions
 
 ⚠️ **ONLY apply when working directory is `/Users/benbernard` (not subdirectories)**
