@@ -1,3 +1,5 @@
+# Added by ForgeCode installer
+export PATH="/Users/benbernard/.local/bin:$PATH"
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
 
 source <(bento completion bash)
