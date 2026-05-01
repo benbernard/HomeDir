@@ -100,6 +100,19 @@
       letter-spacing: 0.08em; color: #aaa; margin-bottom: 8px; padding-left: 2px;
     }
 
+    .section-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .section-header .section-label { margin-bottom: 0; }
+
+    .clear-btn {
+      font-size: 11px; color: #bbb; background: none; border: none;
+      cursor: pointer; padding: 0; transition: color 0.15s;
+      -webkit-app-region: no-drag;
+    }
+    .clear-btn:hover { color: #e55; }
+
     .task-list { list-style: none; margin-bottom: 28px; }
     .task-list.empty::after {
       content: attr(data-empty);
@@ -202,7 +215,10 @@
     <p class="section-label">Active</p>
     <ul class="task-list" id="active-list" data-empty="Nothing here -- you're all caught up!"></ul>
 
-    <p class="section-label">Completed</p>
+    <div class="section-header">
+      <p class="section-label">Completed</p>
+      <button class="clear-btn" id="clear-btn" onclick="clearCompleted()" style="display:none">Clear all</button>
+    </div>
     <ul class="task-list" id="done-list" data-empty="Nothing completed yet."></ul>
   </div>
 </div>
@@ -328,6 +344,11 @@
     await save(); render();
   }
 
+  async function clearCompleted() {
+    todos = todos.filter(t => !t.done);
+    await save(); render();
+  }
+
   function getPlainText(el) {
     let html = el.innerHTML;
     html = html.replace(/<div><br\s*\/?><\/div>/gi, '\n');
@@ -419,6 +440,8 @@
         </button>`;
       (todo.done ? doneList : activeList).appendChild(li);
     });
+
+    document.getElementById('clear-btn').style.display = done.length ? 'inline' : 'none';
 
     const remaining = active.length;
     document.getElementById('stats').textContent = todos.length
