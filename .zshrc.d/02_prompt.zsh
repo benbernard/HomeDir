@@ -61,11 +61,17 @@ if autoload +X url-quote-magic 2> /dev/null; then
 fi
 
 # powerlevel10k setup
-source $(submodule powerlevel10k)/powerlevel10k.zsh-theme
+if [[ -z "$FORGE_SIMPLE_ZSH" ]]; then
+  source $(submodule powerlevel10k)/powerlevel10k.zsh-theme
+else
+  PROMPT='%n@%m %1~ %# '
+  RPROMPT=
+fi
 # powerlevel10k config is in 03_p10k.zsh
 
-# only use autosuggest if not in VSCODE and not recording
-if [[ ${recording} != "true"  && -z "$VSCODE_IPC_HOOK_CLI" ]]; then
+# only use autosuggest if not in VSCODE, not recording, and not in the
+# simplified forge shell.
+if [[ -z "$FORGE_SIMPLE_ZSH" && ${recording} != "true"  && -z "$VSCODE_IPC_HOOK_CLI" ]]; then
   zmodload zsh/zpty 1>/dev/null 2>/dev/null
   if type zpty >/dev/null;
   then;

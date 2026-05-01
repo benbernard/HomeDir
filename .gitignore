@@ -483,3 +483,8 @@ g-meet-app/bin/darwin-arm64-133
 temp-demo
 .claude/agents/charlie.md
 forge
+.config/tally
+.claude/.caveman-active
+.cursor
+.mcp-auth/mcp-remote-0.1.37
+.semgrep
