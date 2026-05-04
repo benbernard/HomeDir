@@ -1,0 +1,49 @@
+#!/bin/bash
+# Toggle crumbs research caching on/off for Claude Code sessions
+#
+# Usage:
+#   crumbs-toggle          # flip current state
+#   crumbs-toggle on       # enable crumbs
+#   crumbs-toggle off      # disable crumbs
+#   crumbs-toggle status   # print state, exit 0=enabled 1=disabled
+
+STATE_FILE="$HOME/.crumbs-enabled"
+
+get_state() {
+  if [ ! -f "$STATE_FILE" ] || [ "$(cat "$STATE_FILE")" != "false" ]; then
+    echo "true"
+  else
+    echo "false"
+  fi
+}
+
+case "${1:-}" in
+  on)
+    echo "true" > "$STATE_FILE"
+    echo "crumbs: enabled (takes effect next Claude session)"
+    ;;
+  off)
+    echo "false" > "$STATE_FILE"
+    echo "crumbs: disabled (takes effect next Claude session)"
+    ;;
+  status)
+    state=$(get_state)
+    echo "crumbs: $state"
+    [ "$state" = "true" ]
+    exit $?
+    ;;
+  "")
+    current=$(get_state)
+    if [ "$current" = "true" ]; then
+      echo "false" > "$STATE_FILE"
+      echo "crumbs: disabled (takes effect next Claude session)"
+    else
+      echo "true" > "$STATE_FILE"
+      echo "crumbs: enabled (takes effect next Claude session)"
+    fi
+    ;;
+  *)
+    echo "Usage: crumbs-toggle [on|off|status]" >&2
+    exit 1
+    ;;
+esac
