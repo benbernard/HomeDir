@@ -488,3 +488,4 @@ forge
 .cursor
 .mcp-auth/mcp-remote-0.1.37
 .semgrep
+.claude/settings.genai-backup.json
