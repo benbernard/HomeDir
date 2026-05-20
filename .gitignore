@@ -490,3 +490,4 @@ forge
 .semgrep
 .claude/settings.genai-backup.json
 .crumbs-enabled
+.claude/.last-cleanup

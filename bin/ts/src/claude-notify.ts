@@ -248,6 +248,14 @@ async function readStdinJson(): Promise<HookInput | null> {
 async function main() {
   console.error("[TRACE] main: Entered main function");
 
+  // Skip notifications for Ralph-managed sessions
+  if (process.env.RALPH_PROJECT_NAME) {
+    console.error(
+      "[TRACE] main: Ralph session detected, skipping notification",
+    );
+    return;
+  }
+
   const cliArgs = process.argv.slice(2);
   const codexMode = cliArgs.includes("--codex");
   const filteredArgs = cliArgs.filter((arg) => arg !== "--codex");
