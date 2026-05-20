@@ -108,6 +108,12 @@ export const scripts: Record<string, ScriptEntry> = {
     file: "ben-scripts.ts",
     description: "List all available scripts with descriptions",
   },
+
+  // Config sync
+  "sync-claude-mcps": {
+    file: "sync-claude-mcps.ts",
+    description: "Sync MCP servers from Claude Code config into opencode",
+  },
 };
 
 /**
