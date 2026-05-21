@@ -491,3 +491,7 @@ forge
 .claude/settings.genai-backup.json
 .crumbs-enabled
 .claude/.last-cleanup
+.config/skillshare
+.vibecheck
+bin/meeting-overlay
+.claude/settings.json.backup*

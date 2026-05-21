@@ -82,7 +82,7 @@ function convertClaudeToOpencode(
   claude: ClaudeMcp,
   enabled: boolean,
 ): OpencodeMcp {
-    if (claude.type === "stdio") {
+  if (claude.type === "stdio") {
     const cmd = [claude.command, ...(claude.args ?? [])];
     // Add -y for npx if not present, to match common opencode patterns
     if (cmd[0] === "npx" && cmd[1] !== "-y") {
@@ -164,7 +164,12 @@ function syncMcps(
     added.push(name);
   }
 
-  if (opts.only && added.length === 0 && updated.length === 0 && unchanged.length === 0) {
+  if (
+    opts.only &&
+    added.length === 0 &&
+    updated.length === 0 &&
+    unchanged.length === 0
+  ) {
     throw new Error(`MCP server '${opts.only}' not found in Claude config`);
   }
 
@@ -241,15 +246,22 @@ async function main() {
     const hasGlobal = Object.keys(claude.mcpServers ?? {}).length > 0;
     if (!hasGlobal) {
       const projectsWithMcps = Object.entries(claude.projects ?? {}).filter(
-        ([, proj]) => proj.mcpServers && Object.keys(proj.mcpServers).length > 0,
+        ([, proj]) =>
+          proj.mcpServers && Object.keys(proj.mcpServers).length > 0,
       );
       if (projectsWithMcps.length > 0) {
         console.log("No global MCP servers found in Claude config.");
         console.log("\nProjects with MCP servers:");
         for (const [projPath, proj] of projectsWithMcps) {
-          console.log(`  --project ${projPath}  (${Object.keys(proj.mcpServers!).join(", ")})`);
+          console.log(
+            `  --project ${projPath}  (${Object.keys(proj.mcpServers!).join(
+              ", ",
+            )})`,
+          );
         }
-        console.log("\nRun with --project <path> to sync project-specific MCPs.");
+        console.log(
+          "\nRun with --project <path> to sync project-specific MCPs.",
+        );
       }
     }
   }
@@ -277,7 +289,9 @@ async function main() {
   }
 
   if (unchanged.length > 0) {
-    console.log(`Skipped ${unchanged.length} already existing (use --force to overwrite):`);
+    console.log(
+      `Skipped ${unchanged.length} already existing (use --force to overwrite):`,
+    );
     for (const name of unchanged) {
       console.log(`  = ${name}`);
     }

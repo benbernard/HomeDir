@@ -114,6 +114,10 @@ export const scripts: Record<string, ScriptEntry> = {
     file: "sync-claude-mcps.ts",
     description: "Sync MCP servers from Claude Code config into opencode",
   },
+  "sync-skills-to-opencode": {
+    file: "sync-skills-to-opencode.ts",
+    description: "Sync skillshare skills as slash commands into opencode.json",
+  },
 };
 
 /**
