@@ -121,6 +121,10 @@ git ls-files | grep pattern
 - `bin/ts/bin/` is on PATH via `~/.zshrc.d/01_bin_ts.zsh` (wrapper scripts with auto-rebuild)
 - `dist/` directory (compiled executables) is NOT tracked in git
 
+### Meeting Notification System
+- **Full architecture:** `docs/meeting-notification-architecture.md`
+- Look here when working on: the full-screen meeting overlay, native notification delivery (`notifyctl` / `NotifyAgent`), calendar-triggered scripts (`event-prompt.sh`), or the MeetingBar AppleScript hook.
+
 ### .config/
 - Standard XDG config directory
 - Contains configurations for:

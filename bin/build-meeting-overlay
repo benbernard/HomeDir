@@ -1,0 +1,9 @@
+#!/bin/bash
+set -e
+
+SRC="$HOME/bin/meeting-overlay.swift"
+OUT="$HOME/bin/meeting-overlay"
+
+echo "Compiling meeting-overlay..."
+swiftc -O "$SRC" -o "$OUT"
+echo "Done: $OUT"
