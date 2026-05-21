@@ -439,18 +439,12 @@ corncob
 .claude/usage-data
 .claude/hooks/crumbs-*
 .claude/session-env
-.claude/skills/crumbs
-.claude/skills/create-service
-.claude/skills/instacart-tools
-.claude/skills/create-tickets-from-outline
 .claude/tune
 .config/md2doc
 .claude.json.backup.*
 VoiceInk-Dependencies/whisper.cpp
 .claude/mcp-needs-auth-cache.json
-.agents/skills/opentui
-.agents/skills/find-skills
-.claude/skills/opentui
+
 .claude/teams
 .config/recs
 .gt
@@ -481,7 +475,6 @@ g-meet-app/bin/darwin-arm64-133
 .config/meety
 .claude.current
 temp-demo
-.claude/agents/charlie.md
 forge
 .config/tally
 .claude/.caveman-active
@@ -495,3 +488,11 @@ forge
 .vibecheck
 bin/meeting-overlay
 .claude/settings.json.backup*
+
+# Ignore all skillshare-managed symlinks; un-ignore real directories we own
+.claude/skills/*
+!.claude/skills/ben-script/
+!.claude/skills/resolve-conflicts/
+!.claude/skills/update-pr/
+.agents/skills/*
+.claude/agents/*
