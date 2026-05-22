@@ -50,9 +50,7 @@ interface OpencodeConfig {
 function readSkillsMetadata(): Record<string, SkillMetadata> {
   const metaFile = path.join(SKILLS_DIR, ".metadata.json");
   if (!fs.existsSync(metaFile)) return {};
-  const data = JSON.parse(
-    fs.readFileSync(metaFile, "utf-8"),
-  ) as SkillsMetadata;
+  const data = JSON.parse(fs.readFileSync(metaFile, "utf-8")) as SkillsMetadata;
   return data.entries ?? {};
 }
 
@@ -61,7 +59,9 @@ function isSourceBlacklisted(source: string | undefined): boolean {
   return BLACKLIST_SOURCES.some((s) => source.includes(s));
 }
 
-function parseFrontmatter(content: string): Omit<SkillFrontmatter, "blacklisted"> | null {
+function parseFrontmatter(
+  content: string,
+): Omit<SkillFrontmatter, "blacklisted"> | null {
   const match = content.match(/^---\n([\s\S]*?)\n---/);
   if (!match) return null;
 
@@ -166,7 +166,9 @@ async function main() {
       console.log(`  ${s.name.padEnd(35)} ${s.description}`);
     }
     if (blocked.length > 0) {
-      console.log(`\nBlacklisted (source matches: ${BLACKLIST_SOURCES.join(", ")}):`);
+      console.log(
+        `\nBlacklisted (source matches: ${BLACKLIST_SOURCES.join(", ")}):`,
+      );
       for (const s of blocked) console.log(`  ${s.name}`);
     }
     return;
