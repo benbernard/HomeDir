@@ -1,40 +1,52 @@
 #!/usr/bin/env osascript
 
 # Future Ben:
-# This is installed by going to 
-# ~Library/Application Scripts/leits.MeetingBar
+# This is installed by going to
+# ~/Library/Application Scripts/leits.MeetingBar
 # And creating a symlink to ~/bin/eventStartScript.scpt
-
-# the method to be called with the following parameters for the next meeting.
 #
-# 1. parameter - eventId (string) - unique identifier from apples eventkit implementation
-# 2. parameter - title (string) - the title of the event (event title can be null, although it makes no sense!)
-# 3. parameter - allday (bool) - true for allday events, false for non allday events
-# 4. parameter - startDate (date) - needs casting in apple script to output (e.g. startDate as text)
-# 5 .parameter - endDate (date) - needs casting in apple script to output (e.g. startDate as text)
-# 6. parameter - eventLocation (string) - if no location is set, the value will be "EMPTY"
-# 7. parameter - repeatingEvent (bool) - true if it is part of an repeating event, false for single event
-# 8. parameter - attendeeCount (int32) - number of attendees- 0 for events without attendees
-# 9. parameter - meetingUrl (string) - the url to the meeting found in notes, url or location - only one meeting url is supported - if no meeting url is set, the value will be "EMPTY"
-# 10. parameter - meetingService (string), e.g MS Teams or Zoom- if no meeting service is found, the meeting service value is "EMPTY"
-# 11. parameter - meetingNotes (string)- the complete notes of a meeting -  if no notes are set, value "EMPTY" will be used
+# This script is the bridge between MeetingBar and the meeting-notify binary.
+# Instead of passing 11 positional shell arguments (which breaks on quotes,
+# newlines, or spaces in event titles), we create a temporary plist file
+# with structured key-value pairs, then pass just the plist path.
+#
+# The meeting-notify binary reads the plist via `plutil -convert json`,
+# which handles all escaping automatically. The temp file is deleted by the
+# binary after reading.
+
+-- Helper: add a string field to a plist
+on addField(plistRef, fieldName, fieldValue)
+    tell application "System Events"
+        tell property list items of plistRef
+            make new property list item at end with properties {kind:string, name:fieldName, value:fieldValue}
+        end tell
+    end tell
+end addField
 
 on meetingStart(eventId, title, allday, startDate, endDate, eventLocation, repeatingEvent, attendeeCount, meetingUrl, meetingService, meetingNotes)
-    -- Convert all parameters to text
-    set eventId to eventId as text
-    set title to title as text
-    set allday to allday as text
-    set startDate to startDate as text
-    set endDate to endDate as text
-    set eventLocation to eventLocation as text
-    set repeatingEvent to repeatingEvent as text
-    set attendeeCount to attendeeCount as text
-    set meetingUrl to meetingUrl as text
-    set meetingService to meetingService as text
-    set meetingNotes to meetingNotes as text
+    -- Create a temporary plist file with the event data
+    set plistPath to "/tmp/meetingbar-event-" & (do shell script "date +%s%N") & ".plist"
 
-    -- Prepare the command to call the other script with all parameters
-    set command to "nohup ~/bin/event-prompt.sh " & eventId & " " & quoted form of title & " " & allday & " " & quoted form of startDate & " " & quoted form of endDate & " " & quoted form of eventLocation & " " & repeatingEvent & " " & attendeeCount & " " & quoted form of meetingUrl & " " & quoted form of meetingService & " " & quoted form of meetingNotes & " > /dev/null 2>&1 &"
+    tell application "System Events"
+        set thePlist to make new property list file with properties {name:plistPath}
+    end tell
+
+    -- Add all event fields to the plist
+    addField(thePlist, "eventId", eventId as text)
+    addField(thePlist, "title", title as text)
+    addField(thePlist, "allday", allday as text)
+    addField(thePlist, "startDate", startDate as text)
+    addField(thePlist, "endDate", endDate as text)
+    addField(thePlist, "eventLocation", eventLocation as text)
+    addField(thePlist, "repeatingEvent", repeatingEvent as text)
+    addField(thePlist, "attendeeCount", attendeeCount as text)
+    addField(thePlist, "meetingUrl", meetingUrl as text)
+    addField(thePlist, "meetingService", meetingService as text)
+    addField(thePlist, "meetingNotes", meetingNotes as text)
+
+    -- Call the compiled meeting-notify binary with the plist path.
+    -- nohup + & backgrounds it so MeetingBar's event loop isn't blocked.
+    set command to "nohup ~/bin/ts/bin/meeting-notify " & quoted form of plistPath & " > /dev/null 2>&1 &"
 
     -- Execute the command
     do shell script command
