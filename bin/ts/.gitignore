@@ -46,6 +46,7 @@ src/downloader
 src/git-cleanup
 src/git-prune-old
 src/ic
+src/meeting-notify
 src/notifyctl
 src/read-tree
 src/s3upload

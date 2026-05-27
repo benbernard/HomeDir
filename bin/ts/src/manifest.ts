@@ -103,6 +103,13 @@ export const scripts: Record<string, ScriptEntry> = {
       "Fzf file/directory picker for tmux popups with toggle support",
   },
 
+  // Meeting notifications
+  "meeting-notify": {
+    file: "meeting-notify.ts",
+    description:
+      "Meeting notification orchestrator: overlay + native notification from MeetingBar",
+  },
+
   // Meta
   "ben-scripts": {
     file: "ben-scripts.ts",
