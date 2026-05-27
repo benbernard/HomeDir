@@ -46,3 +46,6 @@
 [submodule "submodules/SpeedyMeet"]
 	path = submodules/SpeedyMeet
 	url = git@github.com:rexfm/SpeedyMeet.git
+[submodule "submodules/skillshare-skills"]
+	path = submodules/skillshare-skills
+	url = git@github.com:benbernard/skillshare-skills.git
