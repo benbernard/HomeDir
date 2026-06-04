@@ -2,6 +2,8 @@
 
 A collection of TypeScript utility scripts compiled to standalone executables using Bun, with automatic rebuild on source changes.
 
+For agent-specific edit rules, see `AGENTS.md` in this directory.
+
 ## Scripts
 
 Run `ben-scripts` to see all available scripts with descriptions.
@@ -43,6 +45,29 @@ bin/ts/
    - Execute the compiled binary
 
 The `bin/` directory is on PATH, so changes to source files are automatically picked up on next run.
+
+### Generated Files
+
+The build process owns these paths:
+
+- `bin/` - executable wrapper scripts that auto-rebuild stale binaries
+- `dist/` - standalone Bun executables
+- `src/<command>` - command-name symlinks that point at source files
+
+Do not edit those files directly. Edit `src/*.ts`, `src/lib/**/*.ts`,
+`scripts/*.ts`, and `src/manifest.ts`.
+
+### Manifest System
+
+`src/manifest.ts` is the source of truth for executable commands. Each entry maps
+a command name to its TypeScript source file and description. The build uses this
+manifest to decide which files become commands and which wrapper/symlink names to
+generate.
+
+Non-executable TypeScript files should be listed in `excludedFiles` if they live
+at the top level of `src/` and are not tests. This keeps the build warning useful:
+an unlisted file is either a missed command or a library file that should be
+explicitly excluded.
 
 ## Development
 
@@ -140,6 +165,10 @@ Compiled executables go to `dist/`, wrapper scripts are generated in `bin/`.
 
 **Note**: You don't need to manually rebuild during development - the wrapper scripts auto-rebuild when you run them.
 
+**Caution**: `bun run build` runs the `prebuild` script first. That script runs
+`biome check --apply-unsafe .`, so it can rewrite files. For validation without
+formatting changes, prefer `bun run typecheck`, `bun test`, and `bun run check`.
+
 ## Shared Utilities
 
 Common functionality has been extracted to `src/lib/`:
@@ -180,7 +209,10 @@ bin/ts/
 
 To add a new script:
 
-1. Create your TypeScript file in `src/` (e.g., `src/my-script.ts`)
+1. Create your TypeScript file in `src/` (e.g., `src/my-script.ts`) with:
+   ```typescript
+   #!/usr/bin/env tsx
+   ```
 2. Add an entry to `src/manifest.ts`:
    ```typescript
    export const scripts: Record<string, ScriptEntry> = {
@@ -193,6 +225,35 @@ To add a new script:
    ```
 3. Run `bun run build` to generate the executable and wrapper
 4. The script is now available as `my-script` in your PATH
+
+Use `yargs` for command-line parsing. Use `zx` when the script is primarily
+orchestrating shell commands. Add tests next to the source file when behavior is
+non-trivial or when the command handles filesystem, git, network, or process
+state.
+
+## Shell Integration Pattern
+
+Some commands need to alter the parent shell, which a normal child process cannot
+do. Those commands use a shell integration pattern:
+
+1. The zsh function creates a temp script path.
+2. The TypeScript command receives that path, writes shell code into it, and
+   exits.
+3. The zsh function sources the temp script and removes it.
+
+The main example is `ic`, whose wrapper lives in `~/.zshrc.d/05_ic.zsh`. Keep
+this pattern when parent shell state matters, such as changing directories,
+attaching tmux sessions, or exporting variables.
+
+## Agent Notes
+
+When working from the home repo, use `git ls-files` or targeted searches. Avoid
+searching all of `bin/ts/` because `node_modules/`, `dist/`, and generated
+wrappers are large or noisy. For code search, usually use:
+
+```bash
+rg 'pattern' src scripts
+```
 
 ## Technology Stack
 

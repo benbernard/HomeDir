@@ -53,24 +53,36 @@ if config.meetings.isEmpty {
 
 // MARK: - NSButton subclass to carry meeting URL
 
-class MeetingButton: NSButton {
+class OverlayButton: NSButton {
+    override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
+    override func performKeyEquivalent(with event: NSEvent) -> Bool { false }
+}
+
+class MeetingButton: OverlayButton {
     var meetingURL: String = ""
 }
 
 // MARK: - Window + View
 
 class OverlayWindow: NSWindow {
-    override var canBecomeKey: Bool { true }
-    override var canBecomeMain: Bool { true }
+    override var canBecomeKey: Bool { false }
+    override var canBecomeMain: Bool { false }
+    override func keyDown(with event: NSEvent) {}
+    override func performKeyEquivalent(with event: NSEvent) -> Bool { false }
 }
 
-class OverlayView: NSView {}
+class OverlayView: NSView {
+    override var acceptsFirstResponder: Bool { false }
+    override func keyDown(with event: NSEvent) {}
+}
 
 // MARK: - App Delegate
 
 class AppDelegate: NSObject, NSApplicationDelegate {
     var window: NSWindow!
     var snoozeTimer: Timer?
+    var clockTimer: Timer?
+    var clockLabel: NSTextField?
     let cfg: Config
 
     init(_ cfg: Config) { self.cfg = cfg }
@@ -97,8 +109,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let buttons = buildContent(in: overlay)
 
         window.contentView = overlay
-        window.makeKeyAndOrderFront(nil)
-        NSApp.activate(ignoringOtherApps: true)
+        window.orderFrontRegardless()
 
         for btn in buttons { btn.isEnabled = false; btn.alphaValue = 0.4 }
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
@@ -121,13 +132,17 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let rowW: CGFloat = min(b.width - 240, 1000)
         let rowH: CGFloat = isMulti ? 76 : 0   // single uses no row
         let rowGap: CGFloat = 10
+        let clockH: CGFloat = 88
         let headerH: CGFloat = isMulti ? 110 : 230
         let joinBtnH: CGFloat = isMulti ? 0 : 62   // single: standalone join btn
         let bottomH: CGFloat = 110
         let rowsH = CGFloat(count) * rowH + CGFloat(max(0, count - 1)) * rowGap
-        let totalH = headerH + rowsH + (isMulti ? 0 : joinBtnH + 20) + bottomH
+        let totalH = clockH + headerH + rowsH + (isMulti ? 0 : joinBtnH + 20) + bottomH
 
         var topY = b.height / 2 + totalH / 2
+
+        installClock(in: view, centerX: cx, topY: topY)
+        topY -= clockH
 
         // --- Header ---
         if isMulti {
@@ -186,7 +201,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             joinBtn.target = self; joinBtn.action = #selector(joinFromButton(_:))
             joinBtn.frame = NSRect(x: cx - 120, y: topY - joinBtnH, width: 240, height: joinBtnH)
             view.addSubview(joinBtn)
-            if hasURL { buttons.append(joinBtn) }
 
             topY -= joinBtnH + 20
         }
@@ -228,7 +242,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             joinBtn.target = self; joinBtn.action = #selector(joinFromButton(_:))
             joinBtn.frame = NSRect(x: rowW - joinBtnW - pad, y: (rowH - 40) / 2, width: joinBtnW, height: 40)
             card.addSubview(joinBtn)
-            if hasURL { buttons.append(joinBtn) }
 
             topY -= rowH + rowGap
         }
@@ -250,11 +263,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         topY -= bH + 10
 
         // Calendar button
-        let calBtn = btn("Open in Google Calendar", NSColor(white: 0.2, alpha: 1), 15)
+        let calBtn = btn("Google Calendar", NSColor(white: 0.2, alpha: 1), 15)
         calBtn.frame = NSRect(x: cx - totalBW / 2, y: topY - 38, width: totalBW, height: 38)
         calBtn.target = self; calBtn.action = #selector(openCalendar)
         view.addSubview(calBtn)
-        buttons.append(calBtn)
 
         return buttons
     }
@@ -271,7 +283,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func btn(_ title: String, _ color: NSColor, _ size: CGFloat) -> NSButton {
-        let b = NSButton()
+        let b = OverlayButton()
         styleBtn(b, title: title, size: size, color: color)
         return b
     }
@@ -285,6 +297,45 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         b.layer?.backgroundColor = color.cgColor
         b.layer?.cornerRadius = 11
         b.isBordered = false
+        b.keyEquivalent = ""
+        b.refusesFirstResponder = true
+    }
+
+    func installClock(in view: NSView, centerX: CGFloat, topY: CGFloat) {
+        clockTimer?.invalidate()
+
+        let panelW: CGFloat = 360
+        let panelH: CGFloat = 72
+        let panel = NSView(frame: NSRect(x: centerX - panelW / 2, y: topY - panelH, width: panelW, height: panelH))
+        panel.wantsLayer = true
+        panel.layer?.backgroundColor = NSColor(white: 1, alpha: 0.08).cgColor
+        panel.layer?.borderColor = NSColor(red: 0.95, green: 0.72, blue: 0.22, alpha: 0.85).cgColor
+        panel.layer?.borderWidth = 2
+        panel.layer?.cornerRadius = 12
+        view.addSubview(panel)
+
+        let title = lbl("CURRENT TIME", 13, true, NSColor(red: 0.95, green: 0.72, blue: 0.22, alpha: 1))
+        title.alignment = .center
+        title.frame = NSRect(x: 0, y: 43, width: panelW, height: 18)
+        panel.addSubview(title)
+
+        let label = lbl("", 34, true, .white)
+        label.alignment = .center
+        label.frame = NSRect(x: 0, y: 8, width: panelW, height: 38)
+        panel.addSubview(label)
+        clockLabel = label
+
+        updateClock()
+        clockTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
+            self?.updateClock()
+        }
+    }
+
+    func updateClock() {
+        let df = DateFormatter()
+        df.timeStyle = .short
+        df.dateStyle = .none
+        clockLabel?.stringValue = df.string(from: Date())
     }
 
     func formatTime(_ s: String) -> String {
@@ -329,6 +380,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     @objc func openCalendar() {
         if let u = cfg.calUrl.flatMap(URL.init(string:)) { NSWorkspace.shared.open(u) }
+        NSApp.terminate(nil)
     }
 }
 
