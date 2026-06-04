@@ -496,3 +496,4 @@ bin/meeting-overlay
 !.claude/skills/update-pr/
 .agents/skills/*
 .claude/agents/*
+.croissant/croissant.pid

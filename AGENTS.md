@@ -1,5 +1,29 @@
 # AGENTS.md
 
+Overall, don't spare my feelings and be bold with constructive criticism.
+
+## Docs Index
+
+```text
+docs/
+├── bootstrap-and-machine-setup.md
+├── browser-userscripts-and-small-apps.md
+├── development-workflows.md
+├── dotfiles-and-app-configs.md
+├── home-directory-map.md
+├── legacy-systems-index.md
+├── macos-notification-framework.md
+├── macos-url-routing.md
+├── meeting-notification-architecture.md
+├── meeting-notification-operations.md
+├── shell-startup.md
+└── tmux-setup.md
+
+bin/ts/
+├── AGENTS.md
+└── README.md
+```
+
 ## Repository Structure and Source Control
 
 ### Source-Controlled Areas
@@ -13,7 +37,7 @@
 - **Configuration files**: Most dotfiles and `.config/` subdirectories are tracked
 
 ### NOT Source-Controlled
-- **repos/** directory: Everything under `repos/` is NOT part of this repository
+- **repos/** directory: Everything under `repos/` is NOT part of this repository (each directory in there is generally its own git repo)
 - **site/** directory: Contains useful job-specific configurations but is in a SEPARATE repository (not part of the home directory repo)
 
 ### Critical: Be Careful With Secrets
@@ -24,7 +48,7 @@ Since configuration files are source-controlled, never commit:
 
 ## File Search Best Practices
 
-**CRITICAL WARNING**: Generic file searches in this directory will have severe performance issues.
+**CRITICAL WARNING**: Generic file searches in the home directory will have severe performance issues.
 
 ### The Problem
 - `repos/` contains numerous project subdirectories, each with its own `node_modules/` directory
@@ -33,65 +57,11 @@ Since configuration files are source-controlled, never commit:
 - This makes glob patterns and grep searches extremely slow
 - Other paths like some submodules also contain lots of library code that should not be searched
 
-**⚠️  CRITICAL: NEVER run recursive searches in `repos/` or `bin/ts/` without excluding `node_modules/`**
+**⚠️  CRITICAL: NEVER run recursive searches in `repos/` or `bin/ts/` without excluding `node_modules/`** (or in ~, etc)
 
 ### Solutions
 
-**✅ Option 1: Search Only Git-Tracked Files (RECOMMENDED)**
-```bash
-# Use git ls-files to limit search scope
-git ls-files | grep pattern
-git ls-files | xargs grep search-term
-
-# With Grep tool, specify the path to stay in source-controlled areas
-# Use Grep with path: /Users/benbernard and avoid repos/ subdirectory
-```
-
-**This is the BEST approach** - it automatically excludes `repos/`, `bin/ts/node_modules/`, and other untracked files.
-
-**Option 2: Explicitly Exclude node_modules**
-```bash
-# With find
-find . -name node_modules -prune -o -name "*.ts" -print
-
-# With grep/rg
-grep -r --exclude-dir=node_modules pattern .
-rg --glob '!node_modules' pattern .
-
-# With Glob tool - avoid these patterns:
-# ❌ Glob(pattern='**/*.ts')  # BAD - searches ALL of repos/
-# ✅ Glob(pattern='bin/ts/src/**/*.ts')  # GOOD - specific directory
-```
-
-**Option 3: Search Specific Directories**
-Limit searches to known source-controlled directories:
-- ✅ `bin/ts/src/` (TypeScript modules - safe)
-- ✅ `.config/` (configuration files)
-- ✅ `.claude/` (Claude Code settings)
-- ✅ `.zshrc.d/` (zsh configuration)
-- ✅ Root-level dotfiles (`.tmux.conf`, `.bash_profile`, etc.)
-- ❌ `bin/` (DO NOT - includes `bin/ts/node_modules/`)
-- ❌ `repos/` (DO NOT - contains many `node_modules/` directories)
-
-### Examples of What NOT to Do
-
-```bash
-# ❌ BAD - Searches all of home directory including repos/ and bin/ts/node_modules/
-Glob(pattern='**/*.ts')
-Grep(pattern='function', path='/Users/benbernard')
-find . -name '*.ts'
-
-# ❌ BAD - Will hit bin/ts/node_modules/
-Glob(pattern='bin/**/*.ts')
-
-# ❌ BAD - Will scan all projects under repos/
-Grep(pattern='TODO', path='/Users/benbernard/repos')
-
-# ✅ GOOD - Specific to source files only
-Glob(pattern='bin/ts/src/**/*.ts')
-Grep(pattern='function', path='/Users/benbernard/bin/ts/src')
-git ls-files | grep pattern
-```
+To work around this, use git ls-files or rg or similar tools
 
 ## Key Directories
 
@@ -133,7 +103,8 @@ git ls-files | grep pattern
   - git
   - ghostty (terminal)
   - Various other tools
-- Most files are source-controlled
+- Some files are source controlled, some are not, these are handled carefully
+  due to the likelyhook of having secret tokens in them
 
 ### repos/
 - Working directory for various projects
@@ -248,19 +219,12 @@ main();
 
 ## Configuration Management
 
-This setup uses a "dotfiles in home directory" approach:
-- Most configuration is directly in the home directory
-- Some tools use `.config/` (XDG Base Directory standard)
-- Site-specific overrides may exist in `site/`
-- Configurations are source-controlled for portability
-
-## Common Patterns
-
 ### Tmux Configuration
 - Shared config: `.tmux.shared.conf` (sourced by both outer and nested)
 - Outer config: `.tmux.conf` (sources shared, adds outer-only bindings and green styling)
 - Nested config: `.tmux.nested.conf` (sources shared, adds nested-only bindings and blue styling)
 - May have site-specific overrides in `site/tmux.conf`
+- see docs/tmux-setup.md for more information
 
 ### Shell Configuration
 - **Primary shell**: zsh
@@ -271,16 +235,6 @@ This setup uses a "dotfiles in home directory" approach:
   - This keeps configuration modular and organized
   - When adding new shell features, create a new file in `~/.zshrc.d/`, don't edit `~/.zshrc`
 - Check `site/` for job-specific environment variables or aliases
-
-## Search Strategy Recommendations
-
-When you need to find something:
-
-1. **For specific files**: Use `git ls-files | grep filename`
-2. **For code patterns**: Use `git grep` or `grep -r` with `--exclude-dir=node_modules`
-3. **For general exploration**: Start with `ls` in known directories rather than recursive searches
-4. **For TypeScript code**: Search specifically in `bin/ts/src/`
-5. **For configs**: Search in `.config/` or root-level dotfiles
 
 ## Summary
 

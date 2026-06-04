@@ -100,10 +100,10 @@ This is a compiled TypeScript binary that replaces the old `~/bin/event-prompt.s
 2. **Deletes the temp plist** immediately after reading
 3. **Logs everything** to `~/event-log.txt` (JSON structured logs)
 4. **Filters silent events** — hardcoded skip for `"Focus Time (via Clockwise)"` and `"Lunch (via Clockwise)"`
-5. **Fetches other upcoming meetings** from Google Calendar (via `gws` CLI) for the next 15 minutes
+5. **Fetches other upcoming meetings** from Google Calendar (via `gws` CLI) and explicitly keeps only timed events whose start time is within the next 15 minutes
 6. **Filters all-day events** — events with only `start.date` (no `start.dateTime`) are excluded. This prevents non-actionable events like "Home" or "Out of office" from appearing in the overlay
 7. **Builds meetings JSON** — triggered event + any other timed events starting soon
-8. **Launches the overlay** (if not `--dry-run`):
+8. **Replaces any active overlay and launches the new overlay** (if not `--dry-run`):
    ```bash
    ~/bin/meeting-overlay \
      --meetings-json '[{"title":"...","url":"...","time":"..."}]' \
@@ -145,14 +145,16 @@ This is a compiled TypeScript binary that replaces the old `~/bin/event-prompt.s
 ### What the overlay does
 
 - **Borderless, full-screen, always-on-top** Cocoa window (screen-saver window level)
+- **Non-activating display:** the overlay is ordered front without taking keyboard focus; buttons accept the first mouse click but refuse first responder, define no key equivalents, and any key events that reach the overlay are ignored
+- **Live current-time clock** in a centered, labeled "CURRENT TIME" block above the meeting content
 - **Single meeting mode:** Big 📅 icon, title, time, large green "Join" button
 - **Multi-meeting mode:** Warning banner "⚠️ N MEETINGS STARTING NOW", plus rows for each meeting with individual join buttons
 - **Bottom controls:**
   - **"Snooze 2 min"** — hides overlay, re-shows in 2 minutes
   - **"Dismiss"** — quits the app
-  - **"Open in Google Calendar"** — opens the day's calendar view
+  - **"Google Calendar"** — opens the day's calendar view in the default browser and dismisses the overlay
 - **Join behavior:** Clicking a Join button opens the meeting URL via `NSWorkspace.shared.open()` and immediately terminates the overlay app
-- **Safety delay:** Buttons are visually disabled for 1 second on show to prevent accidental clicks
+- **Safety delay:** Snooze and Dismiss are visually disabled for 1 second on show to prevent accidental clicks; Join and Google Calendar remain immediately available
 
 ---
 
@@ -194,7 +196,8 @@ On first `send` (or when manifest/runtime changes), `notifyctl`:
 
 1. `notifyctl` launches the built app with a **base64-encoded JSON payload**
 2. The app uses the `UserNotifications` framework to post a real native macOS banner/alert
-3. Clicking the notification or action buttons dispatches back through the agent to open URLs or run commands
+3. Meeting notifications use a stable active identifier (`meetingbar-active`), so a newer meeting alert removes and replaces any still-pending or delivered active meeting alert
+4. Clicking the notification or action buttons dispatches back through the agent to open URLs or run commands
 
 #### URL normalization
 
