@@ -23,7 +23,7 @@
  * start times and are not actionable meetings.
  */
 
-import { execSync, spawn } from "child_process";
+import { execFileSync, execSync, spawn } from "child_process";
 // spawn is used for launching the overlay process
 import { appendFileSync, existsSync, unlinkSync } from "fs";
 import { homedir } from "os";
@@ -56,6 +56,9 @@ const MEETING_PROMPT_LOG = join(homedir(), "meeting-prompt.log");
 const MEETING_OVERLAY = join(homedir(), "bin", "meeting-overlay");
 const NOTIFYCTL = join(homedir(), "bin", "ts", "bin", "notifyctl");
 const GWS_BIN = join(homedir(), ".config", "gohan", "bin", "gws");
+const UPCOMING_WINDOW_MS = 15 * 60 * 1000;
+const RECENT_START_GRACE_MS = 60 * 1000;
+const ACTIVE_MEETING_NOTIFICATION_ID = "meetingbar-active";
 
 function writeLog(entry: LogEntry): void {
   const line = JSON.stringify({
@@ -154,7 +157,7 @@ function fetchCalendarEvents(): MeetingInfo[] {
 
   try {
     const now = new Date();
-    const later = new Date(now.getTime() + 15 * 60 * 1000);
+    const later = new Date(now.getTime() + UPCOMING_WINDOW_MS);
 
     const timeMin = now.toISOString();
     const timeMax = later.toISOString();
@@ -199,7 +202,7 @@ function fetchCalendarEvents(): MeetingInfo[] {
         const start = (ev.start as Record<string, string>) || {};
         // All-day events only have start.date (no start.dateTime).
         // These are not actionable meetings (e.g. "Home", "Out of office").
-        return !!start.dateTime;
+        return !!start.dateTime && eventStartsSoon(start.dateTime, now, later);
       })
       .map((ev: Record<string, unknown>) => {
         const start = (ev.start as Record<string, string>) || {};
@@ -290,6 +293,28 @@ function normalizeUrl(raw: string): string {
     return raw.replace("http://", "gmeet://");
   }
   return raw;
+}
+
+function eventStartsSoon(startTime: string, now: Date, later: Date): boolean {
+  const startMs = Date.parse(startTime);
+  if (Number.isNaN(startMs)) {
+    return false;
+  }
+
+  return (
+    startMs >= now.getTime() - RECENT_START_GRACE_MS &&
+    startMs <= later.getTime()
+  );
+}
+
+function terminateExistingOverlay(): void {
+  try {
+    execFileSync("/usr/bin/pkill", ["-x", "meeting-overlay"], {
+      stdio: "ignore",
+    });
+  } catch {
+    // No existing overlay is fine.
+  }
 }
 
 function parseArgs(): { plistPath: string | null; isDryRun: boolean } {
@@ -407,6 +432,8 @@ async function main(): Promise<void> {
     });
 
     try {
+      terminateExistingOverlay();
+
       const overlayProcess = spawn(
         MEETING_OVERLAY,
         ["--meetings-json", meetingsJson, "--cal-url", calUrl],
@@ -480,7 +507,7 @@ async function main(): Promise<void> {
         "--message",
         notificationMessage,
         "--notification-id",
-        `meetingbar-${eventData.eventId}`,
+        ACTIVE_MEETING_NOTIFICATION_ID,
       ];
 
       if (targetUrl) {

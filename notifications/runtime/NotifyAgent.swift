@@ -248,6 +248,9 @@ final class NotificationAgentDelegate: NSObject, NSApplicationDelegate, UNUserNo
             }
         }
 
+        content.interruptionLevel = .timeSensitive
+        content.relevanceScore = 1.0
+        content.threadIdentifier = payload.notificationId
         content.categoryIdentifier = categoryIdentifier(for: payload)
 
         if let payloadData = try? encoder.encode(payload),
@@ -265,6 +268,8 @@ final class NotificationAgentDelegate: NSObject, NSApplicationDelegate, UNUserNo
             trigger: trigger
         )
 
+        center.removePendingNotificationRequests(withIdentifiers: [payload.notificationId])
+        center.removeDeliveredNotifications(withIdentifiers: [payload.notificationId])
         center.add(request) { error in
             DispatchQueue.main.async {
                 if let error {
