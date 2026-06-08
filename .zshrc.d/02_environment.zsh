@@ -24,7 +24,6 @@ path=(
   /usr/bin
   /sbin
   /bin
-  $HOME/RecordStream/bin
   $(submodule GitScripts)/bin
   $GOPATH/bin
   $HOME/.cargo/bin
@@ -45,9 +44,6 @@ if [[ ! -d $VIM_TEMP ]]; then
 fi
 
 ulimit -n 10240 1>/dev/null 2>/dev/null # More file descriptors for the stingy mac, helps with grunt watch
-
-# Add setup for Recs and GitScripts
-export PERL5LIB=~/RecordStream/lib
 
 #watch for logins who are not me
 watch=(notme root)

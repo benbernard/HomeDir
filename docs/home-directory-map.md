@@ -2,8 +2,8 @@
 
 This repository is the source-controlled portion of `/Users/benbernard`. It is
 not a normal single-purpose application repo. It contains shell startup files,
-dotfiles, personal scripts, small apps, submodules, and a few active local
-systems.
+dotfiles, personal scripts, standalone projects, small apps, submodules, and a
+few active local systems.
 
 For agent work, start with this map, then follow the subsystem docs linked from
 the relevant section.
@@ -20,7 +20,8 @@ Tracked here:
 - Personal scripts in `bin/`.
 - TypeScript utilities in `bin/ts/`.
 - Native notification definitions in `notifications/`.
-- Small local apps and helper projects such as `todo-tracker/` and
+- Standalone local projects in `projects/`.
+- Small local apps and browser scripts such as `todo-tracker/` and
   `userScripts/`.
 - Submodule entries under `submodules/` and a few legacy submodule paths.
 
@@ -91,6 +92,14 @@ usually be written in `bin/ts/src/` instead of adding more one-off scripts.
 executables and generated wrapper scripts.
 
 See `bin/ts/README.md` and `bin/ts/AGENTS.md`.
+
+### Projects
+
+`projects/` is for standalone personal projects and app source that belong in
+the tracked home repository, but are larger than one-off scripts. Current
+project-style submodules include `projects/RecordStream`,
+`projects/BOWQuotes`, `projects/commentTracker`, and `projects/SpeedyMeet`.
+New local app projects such as `fzf-palette` should also start here.
 
 ### Notifications And Meeting Alerts
 

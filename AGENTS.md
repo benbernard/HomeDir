@@ -34,6 +34,7 @@ bin/ts/
   - Build scripts in `bin/ts/scripts/`
   - Symlinks in `bin/ts/src/` for development (auto-generated)
   - Note: `node_modules/`, `dist/` (compiled executables), and `bin/` (wrapper scripts) are NOT tracked
+- **projects/**: Standalone local projects and app source that are tracked in this home repo, including some project-like submodules
 - **Configuration files**: Most dotfiles and `.config/` subdirectories are tracked
 
 ### NOT Source-Controlled
@@ -111,6 +112,11 @@ To work around this, use git ls-files or rg or similar tools
 - NOT part of the home directory repository
 - Each subdirectory is typically its own git repository
 - Avoid searching here unless specifically needed
+
+### projects/
+- Source-controlled standalone local projects and app source
+- Use this for projects that belong to the tracked home repo but are larger than one-off `bin/` scripts
+- Follow each project’s own tooling when editing inside it
 
 ## Working with TypeScript Modules (bin/ts)
 
