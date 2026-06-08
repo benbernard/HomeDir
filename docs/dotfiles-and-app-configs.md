@@ -13,8 +13,8 @@ search `repos/`, `bin/ts/node_modules/`, or other dependency trees.
 - Edit modular shell behavior in `.zshrc.d/`, not directly in `.zshrc`, unless
   the startup framework itself is changing.
 - `.zshrc.d/02_environment.zsh` owns core environment and PATH setup, including
-  `~/bin`, `~/bin/ts/bin`, `~/RecordStream/bin`, submodule tools, ripgrep config,
-  fzf defaults, and language-manager paths.
+  `~/bin`, `~/bin/ts/bin`, submodule tools, ripgrep config, fzf defaults, and
+  language-manager paths.
 - `.zshrc.d/02_aliases.zsh` and `.zshrc.d/02_functions.zsh` contain the broad
   interactive surface.
 - `.zshrc.d/05_ic.zsh` wraps the TypeScript `ic` command so it can emit and
@@ -115,6 +115,9 @@ artifacts.
 
 ## Small App Projects
 
+- `projects/` contains standalone local project/app source, including
+  `projects/RecordStream`, `projects/BOWQuotes`, `projects/commentTracker`, and
+  `projects/SpeedyMeet`.
 - `todo-tracker/` is a tracked Electron-style local todo app.
 - `notifications/` is source for native notification apps, not the built apps.
 
