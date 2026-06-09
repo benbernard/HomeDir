@@ -1,0 +1,5 @@
+src/FzfPaletteApp/AppDelegate.swift
+src/FzfPaletteCore/Profile.swift
+docs/performance.md
+docs/testing.md
+hello world.txt
