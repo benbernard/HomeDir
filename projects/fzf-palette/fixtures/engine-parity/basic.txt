@@ -1,0 +1,4 @@
+palette.swift
+docs/palette.md
+panel.swift
+project.swift

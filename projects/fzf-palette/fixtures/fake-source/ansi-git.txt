@@ -1,0 +1,3 @@
+M	Sources/FzfPaletteCore/Profile.swift
+A	Sources/FzfPaletteApp/AppDelegate.swift
+??	docs/testing.md
