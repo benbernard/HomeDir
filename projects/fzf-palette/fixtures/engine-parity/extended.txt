@@ -1,0 +1,5 @@
+music/alpha.mp3
+music/fire.mp3
+music/alpha.flac
+docs/alpha.mp3
+music/beta.mp3

@@ -190,7 +190,7 @@ The shared config sets `set-option -s extended-keys always` to ensure modifier c
 
 ## FZF File Picker (`tmux-fzf-picker`)
 
-`bin/ts/src/tmux-fzf-picker.ts` provides a rich file/directory picker inside a tmux popup:
+`bin/ts/src/tmux-fzf-picker.ts` provides a rich file/directory picker inside a tmux popup. The picker core is shared with `bin/ts/src/gui-fzf-picker.ts`, which is meant for Alfred hotkeys that paste the selected path text into GUI apps.
 
 - **M-p / M-P**: Pick files/dirs in current pane's directory (uses `tmux-resolve-pane-path` to follow into nested tmux)
 - **M-h / M-H**: Pick files/dirs in `$HOME` (excluding `repos/`)

@@ -4,7 +4,7 @@
   color = auto
   rename = copy
   colorMoved = default
-  mnemonicprefix = true
+	mnemonicprefix = true
 
 [pager]
   color = true
@@ -22,9 +22,11 @@
   whitespace = red reverse
 
 [core]
-  whitespace = fix,-indent-with-non-tab,trailing-space,cr-at-eol,space-before-tab
+	whitespace = trailing-space,space-before-tab
   # pager = delta
   excludesfile = ~/.gitignore_global
+	untrackedCache = true
+	sparseCheckoutCone = true
 	# hooksPath = /Users/benbernard/.git/hooks
 
 [alias]
@@ -121,6 +123,7 @@
 	sort = -committerdate
 [fetch]
   prune = true
+	writeCommitGraph = true
 
 # Always use ssh for github urls
 # This doesn't work with cargo, disabling
@@ -149,10 +152,10 @@
 
 # Stuff from insta-setup.sh
 [http]
-  postBuffer = 524288000
+	postBuffer = 524288000
 
 [credential]
-  helper = osxkeychain
+	helper = osxkeychain
 
 [url "git@github.com:"]
   insteadOf = https://github.com/
@@ -161,8 +164,14 @@
   email = ben.bernard@instacart.com
 
 [feature]
-  manyFiles = 1
+	manyFiles = 1
 [url "ssh://git@github.com"]
 	insteadOf = https://github.com
+[maintenance]
+	repo = /Users/benbernard/repos/carrot
+[index]
+	sparse = true
+[rerere]
+	enabled = true
 [safe]
 	directory = /var/app
