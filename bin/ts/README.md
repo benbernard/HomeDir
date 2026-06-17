@@ -20,6 +20,8 @@ Key scripts:
   with per-app icons, click actions, and first-run permission guidance
 - **close-prs**: Bulk close GitHub PRs with filters
 - **read-tree**: Recursive file tree scanner
+- **gui-fzf-picker**: Terminal-hosted FZF picker for Alfred hotkeys that prints
+  paste-ready path text
 - **analyze-zsh-startup**: Analyze zsh startup timing
 - **converter**: Convert maildir email format to mbox
 

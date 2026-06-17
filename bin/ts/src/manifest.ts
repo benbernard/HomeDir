@@ -93,6 +93,11 @@ export const scripts: Record<string, ScriptEntry> = {
   },
 
   // Tmux integration
+  "gui-fzf-picker": {
+    file: "gui-fzf-picker.ts",
+    description:
+      "Terminal-hosted FZF picker for Alfred hotkeys that prints paste text",
+  },
   "tmux-health-check": {
     file: "tmux-health-check.ts",
     description: "Verify nested tmux keybinding chain and config health",
