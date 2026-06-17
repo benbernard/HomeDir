@@ -164,7 +164,7 @@ export PATH="/Users/benbernard/.codeium/windsurf/bin:$PATH"
 export PATH="$HOME/bin:$PATH"
 
 # Auto-Warpify
-[[ "$-" == *i* ]] && printf 'P$f{"hook": "SourcedRcFileForWarp", "value": { "shell": "zsh", "uname": "Linux" }}�'
+[[ "$-" == *i* && -z "$CODEX_SHELL" ]] && printf 'P$f{"hook": "SourcedRcFileForWarp", "value": { "shell": "zsh", "uname": "Linux" }}�'
 
 export PATH="$PATH:${HOME}/.config/gohan/bin"
 # bun completions

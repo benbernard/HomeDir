@@ -355,6 +355,23 @@ final class CoreTests: XCTestCase {
         XCTAssertEqual(filesRequest.preview?.window, "right:60%:wrap")
     }
 
+    func testProfileStoreIncludesAlfredFacingProfiles() throws {
+        let store = ProfileStore()
+        for profile in [
+            "context-files",
+            "context-dirs",
+            "home-files",
+            "home-dirs",
+            "repos-dirs",
+            "repos-files",
+            "downloads-files"
+        ] {
+            let request = try store.resolvedRequest(for: PickerRequest(profile: profile))
+            XCTAssertEqual(request.profile, profile)
+            XCTAssertNotEqual(request.source, .profile, "\(profile) should have a native source")
+        }
+    }
+
     func testProfileStoreIncludesCtrlTProfileBackedByFzfEnvironment() throws {
         let request = try ProfileStore().resolvedRequest(
             for: PickerRequest(profile: FzfSourceCommands.ctrlTProfileName)
@@ -1347,6 +1364,176 @@ final class CoreTests: XCTestCase {
         XCTAssertEqual(parsed.spans, [
             AnsiStyleSpan(start: 0, length: 5, foreground: .green)
         ])
+    }
+
+    func testProgramContextClassifiesTargetApps() {
+        XCTAssertEqual(
+            ProgramContextApp.classify(bundleIdentifier: "com.openai.codex", appName: nil),
+            .codex
+        )
+        XCTAssertEqual(
+            ProgramContextApp.classify(bundleIdentifier: "com.anthropic.claudefordesktop", appName: nil),
+            .claude
+        )
+        XCTAssertEqual(
+            ProgramContextApp.classify(bundleIdentifier: "com.mitchellh.ghostty", appName: nil),
+            .ghostty
+        )
+        XCTAssertEqual(ProgramContextApp.classify(bundleIdentifier: nil, appName: "Codex"), .codex)
+        XCTAssertNil(ProgramContextApp.classify(bundleIdentifier: "com.apple.finder", appName: "Finder"))
+    }
+
+    func testProgramContextBridgeRoundTripsMinimalContextFile() throws {
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("fzf-palette-context-\(UUID().uuidString)", isDirectory: true)
+        let cwd = root.appendingPathComponent("workspace", isDirectory: true)
+        try FileManager.default.createDirectory(at: cwd, withIntermediateDirectories: true)
+        let contextFile = root.appendingPathComponent("codex-context.json")
+        try #"{"cwd":"\#(cwd.path)"}"#.write(to: contextFile, atomically: true, encoding: .utf8)
+
+        let context = try ProgramContextBridge.loadContext(
+            for: .codex,
+            environment: ["FZF_PALETTE_CODEX_CONTEXT_FILE": contextFile.path],
+            homeDirectory: root
+        )
+
+        XCTAssertEqual(context.cwd, cwd.path)
+        XCTAssertEqual(context.provider, "codex-bridge")
+        XCTAssertEqual(context.appName, "Codex")
+        XCTAssertEqual(context.bundleIdentifier, "com.openai.codex")
+    }
+
+    func testProgramContextBridgeRejectsMissingDirectory() throws {
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("fzf-palette-context-\(UUID().uuidString)", isDirectory: true)
+        try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
+        let contextFile = root.appendingPathComponent("claude-context.json")
+        try #"{"cwd":"\#(root.appendingPathComponent("missing").path)"}"#.write(
+            to: contextFile,
+            atomically: true,
+            encoding: .utf8
+        )
+
+        XCTAssertThrowsError(try ProgramContextBridge.loadContext(
+            for: .claude,
+            environment: ["FZF_PALETTE_CLAUDE_CONTEXT_FILE": contextFile.path],
+            homeDirectory: root
+        )) { error in
+            XCTAssertEqual(
+                String(describing: error),
+                "Program context cwd is not an existing directory: \(root.appendingPathComponent("missing").path)"
+            )
+        }
+    }
+
+    func testProgramContextResolverUsesCodexBridgeForCodexApp() throws {
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("fzf-palette-context-\(UUID().uuidString)", isDirectory: true)
+        let cwd = root.appendingPathComponent("codex-workspace", isDirectory: true)
+        try FileManager.default.createDirectory(at: cwd, withIntermediateDirectories: true)
+        let contextFile = root.appendingPathComponent("codex-context.json")
+        _ = try ProgramContextBridge.writeContext(
+            ProgramContext(cwd: cwd.path, provider: "codex-bridge", detail: "test thread"),
+            for: .codex,
+            environment: ["FZF_PALETTE_CODEX_CONTEXT_FILE": contextFile.path],
+            homeDirectory: root
+        )
+
+        let resolver = ProgramContextResolver(
+            environment: ["FZF_PALETTE_CODEX_CONTEXT_FILE": contextFile.path],
+            homeDirectory: root
+        )
+        let context = resolver.resolve(frontmostApplication: FrontmostApplicationInfo(
+            name: "Codex",
+            bundleIdentifier: "com.openai.codex"
+        ))
+
+        XCTAssertEqual(context?.cwd, cwd.path)
+        XCTAssertEqual(context?.provider, "codex-bridge")
+        XCTAssertEqual(context?.detail, "test thread")
+    }
+
+    func testProgramContextResolverUsesClaudeBridgeForClaudeApp() throws {
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("fzf-palette-context-\(UUID().uuidString)", isDirectory: true)
+        let cwd = root.appendingPathComponent("claude-workspace", isDirectory: true)
+        try FileManager.default.createDirectory(at: cwd, withIntermediateDirectories: true)
+        let contextFile = root.appendingPathComponent("claude-context.json")
+        _ = try ProgramContextBridge.writeContext(
+            ProgramContext(cwd: cwd.path, provider: "claude-bridge"),
+            for: .claude,
+            environment: ["FZF_PALETTE_CLAUDE_CONTEXT_FILE": contextFile.path],
+            homeDirectory: root
+        )
+
+        let resolver = ProgramContextResolver(
+            environment: ["FZF_PALETTE_CLAUDE_CONTEXT_FILE": contextFile.path],
+            homeDirectory: root
+        )
+        let context = resolver.resolve(frontmostApplication: FrontmostApplicationInfo(
+            name: "Claude",
+            bundleIdentifier: "com.anthropic.claudefordesktop"
+        ))
+
+        XCTAssertEqual(context?.cwd, cwd.path)
+        XCTAssertEqual(context?.provider, "claude-bridge")
+        XCTAssertEqual(context?.appName, "Claude")
+    }
+
+    func testProgramContextResolverUsesGhosttyTmuxDirectory() throws {
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("fzf-palette-context-\(UUID().uuidString)", isDirectory: true)
+        let cwd = root.appendingPathComponent("ghostty-workspace", isDirectory: true)
+        try FileManager.default.createDirectory(at: cwd, withIntermediateDirectories: true)
+
+        let resolver = ProgramContextResolver(
+            environment: ["FZF_PALETTE_TEST_GHOSTTY_TMUX_CWD": cwd.path],
+            homeDirectory: root
+        )
+        let context = resolver.resolve(frontmostApplication: FrontmostApplicationInfo(
+            name: "Ghostty",
+            bundleIdentifier: "com.mitchellh.ghostty"
+        ))
+
+        XCTAssertEqual(context?.cwd, cwd.path)
+        XCTAssertEqual(context?.provider, "ghostty-tmux")
+        XCTAssertEqual(context?.appName, "Ghostty")
+    }
+
+    func testProgramContextResolverFailsClosedWhenGhosttyResolverExceedsBudget() throws {
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("fzf-palette-context-\(UUID().uuidString)", isDirectory: true)
+        let cwd = root.appendingPathComponent("ghostty-workspace", isDirectory: true)
+        try FileManager.default.createDirectory(at: cwd, withIntermediateDirectories: true)
+        let resolverScript = root.appendingPathComponent("slow-tmux-resolver.sh")
+        try """
+        #!/bin/sh
+        sleep 1
+        printf '%s\\n' '\(cwd.path)'
+        """.write(to: resolverScript, atomically: true, encoding: .utf8)
+        try FileManager.default.setAttributes(
+            [.posixPermissions: 0o755],
+            ofItemAtPath: resolverScript.path
+        )
+
+        let resolver = ProgramContextResolver(
+            environment: [
+                "FZF_PALETTE_GHOSTTY_TMUX_PANE": "%1",
+                "FZF_PALETTE_TMUX_RESOLVE_PANE_PATH": resolverScript.path,
+                "FZF_PALETTE_PROGRAM_CONTEXT_TIMEOUT_MS": "10"
+            ],
+            homeDirectory: root
+        )
+
+        let started = DispatchTime.now()
+        let context = resolver.resolve(frontmostApplication: FrontmostApplicationInfo(
+            name: "Ghostty",
+            bundleIdentifier: "com.mitchellh.ghostty"
+        ))
+        let elapsedMs = Double(DispatchTime.now().uptimeNanoseconds - started.uptimeNanoseconds) / 1_000_000
+
+        XCTAssertNil(context)
+        XCTAssertLessThan(elapsedMs, 200)
     }
 
     private func temporaryProfilesFile(

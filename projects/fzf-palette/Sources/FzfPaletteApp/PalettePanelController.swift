@@ -18,14 +18,76 @@ private struct RGBSample {
 }
 
 private enum PaletteVisualStyle {
-    static let contentCornerRadius: CGFloat = 16
-    static let paneCornerRadius: CGFloat = 10
-    static let paneBorderWidth: CGFloat = 0.5
-    static let rowSelectionCornerRadius: CGFloat = 7
+    static let contentCornerRadius: CGFloat = 18
+    static let paneCornerRadius: CGFloat = 12
+    static let paneBorderWidth: CGFloat = 0.8
+    static let rowSelectionCornerRadius: CGFloat = 8
 
     static func cgColor(_ color: NSColor, alpha: CGFloat = 1) -> CGColor {
         let resolved = color.withAlphaComponent(alpha).usingColorSpace(.deviceRGB)
         return resolved?.cgColor ?? NSColor(calibratedWhite: 0.5, alpha: alpha).cgColor
+    }
+
+    static func adaptiveColor(light: NSColor, dark: NSColor, for view: NSView?) -> NSColor {
+        let appearance = view?.effectiveAppearance ?? NSApp.effectiveAppearance
+        let bestMatch = appearance.bestMatch(from: [.darkAqua, .aqua])
+        return bestMatch == .darkAqua ? dark : light
+    }
+
+    static func rootBorderColor(for view: NSView?) -> CGColor {
+        cgColor(
+            adaptiveColor(
+                light: NSColor(calibratedWhite: 0.56, alpha: 1),
+                dark: NSColor(calibratedWhite: 0.78, alpha: 1),
+                for: view
+            ),
+            alpha: 0.30
+        )
+    }
+
+    static func paneBackgroundColor(for view: NSView?) -> CGColor {
+        cgColor(
+            adaptiveColor(
+                light: NSColor(calibratedRed: 0.995, green: 0.995, blue: 1.0, alpha: 1),
+                dark: NSColor(calibratedRed: 0.10, green: 0.11, blue: 0.13, alpha: 1),
+                for: view
+            ),
+            alpha: 0.86
+        )
+    }
+
+    static func contentBackgroundColor(for view: NSView?) -> CGColor {
+        cgColor(
+            adaptiveColor(
+                light: NSColor(calibratedRed: 0.935, green: 0.948, blue: 0.965, alpha: 1),
+                dark: NSColor(calibratedRed: 0.055, green: 0.065, blue: 0.080, alpha: 1),
+                for: view
+            ),
+            alpha: 0.84
+        )
+    }
+
+    static func paneBorderColor(for view: NSView?) -> CGColor {
+        cgColor(
+            adaptiveColor(
+                light: NSColor(calibratedWhite: 0.62, alpha: 1),
+                dark: NSColor(calibratedWhite: 0.92, alpha: 1),
+                for: view
+            ),
+            alpha: 0.18
+        )
+    }
+
+    static func selectionFillColor(for view: NSView?) -> NSColor {
+        adaptiveColor(
+            light: NSColor.controlAccentColor.withSystemEffect(.pressed),
+            dark: NSColor.controlAccentColor,
+            for: view
+        ).withAlphaComponent(0.24)
+    }
+
+    static func selectionStrokeColor(for view: NSView?) -> NSColor {
+        NSColor.controlAccentColor.withAlphaComponent(0.34)
     }
 }
 
@@ -41,8 +103,11 @@ private final class PaletteResultRowView: NSTableRowView {
             xRadius: PaletteVisualStyle.rowSelectionCornerRadius,
             yRadius: PaletteVisualStyle.rowSelectionCornerRadius
         )
-        NSColor.controlAccentColor.withAlphaComponent(window?.isKeyWindow == true ? 0.20 : 0.12).setFill()
+        PaletteVisualStyle.selectionFillColor(for: self).withAlphaComponent(window?.isKeyWindow == true ? 0.28 : 0.14).setFill()
         path.fill()
+        PaletteVisualStyle.selectionStrokeColor(for: self).setStroke()
+        path.lineWidth = 0.8
+        path.stroke()
     }
 }
 
@@ -63,6 +128,7 @@ final class PalettePanelController: NSObject, NSTableViewDataSource, NSTableView
     private let previewScrollView = NSScrollView(frame: .zero)
     private let previewTextView = NSTextView(frame: .zero)
     private let statusLabel = NSTextField(labelWithString: "Ready")
+    private let accentLine = NSView(frame: .zero)
     private var allRows: [PaletteRow] = []
     private var matchRangesBySourceIndex: [Int: [FuzzyMatchRange]] = [:]
     private var searchEngine = NativeFuzzySearchEngine()
@@ -128,6 +194,7 @@ final class PalettePanelController: NSObject, NSTableViewDataSource, NSTableView
         return PanelVisualSnapshot(
             panelVisible: panel.isVisible,
             queryFieldFocused: isQueryFieldFocused,
+            queryFieldActionBound: queryField.target != nil || queryField.action != nil,
             windowNumber: panel.windowNumber,
             captureX: captureRect.x,
             captureY: captureRect.y,
@@ -149,6 +216,8 @@ final class PalettePanelController: NSObject, NSTableViewDataSource, NSTableView
             previewCornerRadius: Double(previewScrollView.layer?.cornerRadius ?? 0),
             usesCustomSelectionStyle: true,
             visibleRows: rows.count,
+            selectedRowIndex: tableView.selectedRow,
+            activeRowText: activeRow()?.original ?? "",
             previewVisible: isPreviewPaneVisible,
             previewWidth: isPreviewPaneVisible ? previewScrollView.frame.width : 0,
             previewHeight: isPreviewPaneVisible ? previewScrollView.frame.height : 0,
@@ -225,6 +294,7 @@ final class PalettePanelController: NSObject, NSTableViewDataSource, NSTableView
         panel.isOpaque = false
         panel.hasShadow = true
         panel.isMovableByWindowBackground = true
+        panel.hidesOnDeactivate = false
         panel.backgroundColor = .clear
         panel.contentView = buildContentView()
         return panel
@@ -382,27 +452,69 @@ final class PalettePanelController: NSObject, NSTableViewDataSource, NSTableView
     }
 
     func selectNextRow() {
-        guard !rows.isEmpty else {
-            return
-        }
-
-        let current = tableView.selectedRow >= 0 ? tableView.selectedRow : 0
-        let next = min(current + 1, rows.count - 1)
-        tableView.selectRowIndexes(IndexSet(integer: next), byExtendingSelection: false)
-        tableView.scrollRowToVisible(next)
-        notifyActiveRowChanged()
+        _ = moveSelection(delta: 1)
     }
 
     func selectPreviousRow() {
+        _ = moveSelection(delta: -1)
+    }
+
+    func handleSyntheticKey(_ key: String) -> Bool {
+        switch key.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() {
+        case "down", "arrowdown":
+            return handlePaletteKey(keyCode: 125, charactersIgnoringModifiers: nil, modifierFlags: [])
+        case "up", "arrowup":
+            return handlePaletteKey(keyCode: 126, charactersIgnoringModifiers: nil, modifierFlags: [])
+        case "tab":
+            return handlePaletteKey(keyCode: 48, charactersIgnoringModifiers: "\t", modifierFlags: [])
+        case "return", "enter":
+            return handlePaletteKey(keyCode: 36, charactersIgnoringModifiers: "\r", modifierFlags: [])
+        case "escape", "esc":
+            return handlePaletteKey(keyCode: 53, charactersIgnoringModifiers: "\u{1b}", modifierFlags: [])
+        case "space":
+            return handlePaletteKey(keyCode: 49, charactersIgnoringModifiers: " ", modifierFlags: [])
+        default:
+            return false
+        }
+    }
+
+    @discardableResult
+    func benchmarkSelectionMovement(
+        rows sourceRows: [String],
+        steps: Int,
+        previewConfig: PreviewConfig? = nil
+    ) -> [Double] {
+        showRows(
+            title: "movement bench",
+            rows: sourceRows,
+            display: DisplayConfig(),
+            preview: "Movement benchmark",
+            previewConfig: previewConfig,
+            allowsMultipleSelection: false
+        )
+
+        let durations = (0..<max(0, steps)).map { _ in moveSelection(delta: 1) }
+        hide()
+        return durations
+    }
+
+    @discardableResult
+    private func moveSelection(delta: Int) -> Double {
+        let start = ContinuousClock.now
         guard !rows.isEmpty else {
-            return
+            return milliseconds(start.duration(to: ContinuousClock.now))
         }
 
         let current = tableView.selectedRow >= 0 ? tableView.selectedRow : 0
-        let previous = max(current - 1, 0)
-        tableView.selectRowIndexes(IndexSet(integer: previous), byExtendingSelection: false)
-        tableView.scrollRowToVisible(previous)
-        notifyActiveRowChanged()
+        let next = max(0, min(current + delta, rows.count - 1))
+        guard next != current else {
+            return milliseconds(start.duration(to: ContinuousClock.now))
+        }
+
+        tableView.selectRowIndexes(IndexSet(integer: next), byExtendingSelection: false)
+        tableView.scrollRowToVisible(next)
+        tableView.displayIfNeeded()
+        return milliseconds(start.duration(to: ContinuousClock.now))
     }
 
     @discardableResult
@@ -884,25 +996,7 @@ final class PalettePanelController: NSObject, NSTableViewDataSource, NSTableView
                 return event
             }
 
-            switch event.keyCode {
-            case 36:
-                self.acceptCurrentSelection()
-                return nil
-            case 53:
-                self.cancelActivePicker()
-                return nil
-            case 49 where self.allowsMultipleSelection:
-                self.toggleCurrentSelection()
-                return nil
-            default:
-                if self.handlePreviewShortcut(event) {
-                    return nil
-                }
-                if self.allowsMultipleSelection, self.handleMultiSelectShortcut(event) {
-                    return nil
-                }
-                return event
-            }
+            return self.handlePaletteKey(event) ? nil : event
         }
     }
 
@@ -915,12 +1009,22 @@ final class PalettePanelController: NSObject, NSTableViewDataSource, NSTableView
     }
 
     private func handleMultiSelectShortcut(_ event: NSEvent) -> Bool {
-        let flags = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
+        handleMultiSelectShortcut(
+            charactersIgnoringModifiers: event.charactersIgnoringModifiers,
+            modifierFlags: event.modifierFlags
+        )
+    }
+
+    private func handleMultiSelectShortcut(
+        charactersIgnoringModifiers: String?,
+        modifierFlags: NSEvent.ModifierFlags
+    ) -> Bool {
+        let flags = modifierFlags.intersection(.deviceIndependentFlagsMask)
         guard flags.contains(.control) else {
             return false
         }
 
-        switch event.charactersIgnoringModifiers?.lowercased() {
+        switch charactersIgnoringModifiers?.lowercased() {
         case "a":
             selectAllVisibleRows()
             return true
@@ -933,15 +1037,84 @@ final class PalettePanelController: NSObject, NSTableViewDataSource, NSTableView
     }
 
     private func handlePreviewShortcut(_ event: NSEvent) -> Bool {
-        let flags = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
+        handlePreviewShortcut(
+            charactersIgnoringModifiers: event.charactersIgnoringModifiers,
+            modifierFlags: event.modifierFlags
+        )
+    }
+
+    private func handlePreviewShortcut(
+        charactersIgnoringModifiers: String?,
+        modifierFlags: NSEvent.ModifierFlags
+    ) -> Bool {
+        let flags = modifierFlags.intersection(.deviceIndependentFlagsMask)
         guard flags.contains(.control),
-              event.charactersIgnoringModifiers == "/",
+              charactersIgnoringModifiers == "/",
               allowsPreviewToggle else {
             return false
         }
 
         _ = togglePreviewVisibility()
         return true
+    }
+
+    private func handlePaletteKey(_ event: NSEvent) -> Bool {
+        handlePaletteKey(
+            keyCode: event.keyCode,
+            charactersIgnoringModifiers: event.charactersIgnoringModifiers,
+            modifierFlags: event.modifierFlags
+        )
+    }
+
+    private func handlePaletteKey(
+        keyCode: UInt16,
+        charactersIgnoringModifiers: String?,
+        modifierFlags: NSEvent.ModifierFlags
+    ) -> Bool {
+        switch keyCode {
+        case 36:
+            acceptCurrentSelection()
+            return true
+        case 48:
+            if allowsMultipleSelection {
+                toggleCurrentSelection()
+            } else {
+                acceptCurrentSelection()
+            }
+            return true
+        case 53:
+            cancelActivePicker()
+            return true
+        case 49 where allowsMultipleSelection:
+            toggleCurrentSelection()
+            return true
+        case 125:
+            selectNextRow()
+            return true
+        case 126:
+            selectPreviousRow()
+            return true
+        default:
+            if handlePreviewShortcut(
+                charactersIgnoringModifiers: charactersIgnoringModifiers,
+                modifierFlags: modifierFlags
+            ) {
+                return true
+            }
+            if allowsMultipleSelection,
+               handleMultiSelectShortcut(
+                   charactersIgnoringModifiers: charactersIgnoringModifiers,
+                   modifierFlags: modifierFlags
+               ) {
+                return true
+            }
+            return false
+        }
+    }
+
+    private func milliseconds(_ duration: Duration) -> Double {
+        Double(duration.components.seconds) * 1000
+            + Double(duration.components.attoseconds) / 1_000_000_000_000_000
     }
 
     private var previewStateMessage: String {
@@ -1230,32 +1403,40 @@ final class PalettePanelController: NSObject, NSTableViewDataSource, NSTableView
         root.layer?.cornerCurve = .continuous
         root.layer?.masksToBounds = true
         root.layer?.borderWidth = PaletteVisualStyle.paneBorderWidth
-        root.layer?.borderColor = PaletteVisualStyle.cgColor(.separatorColor, alpha: 0.55)
+        root.layer?.borderColor = PaletteVisualStyle.rootBorderColor(for: root)
         root.autoresizingMask = [.width, .height]
 
         let content = NSView(frame: root.bounds)
         content.translatesAutoresizingMaskIntoConstraints = false
+        content.wantsLayer = true
+        content.layer?.backgroundColor = PaletteVisualStyle.contentBackgroundColor(for: content)
         root.addSubview(content)
 
         promptLabel.translatesAutoresizingMaskIntoConstraints = false
-        promptLabel.font = NSFont.monospacedSystemFont(ofSize: 16, weight: .semibold)
-        promptLabel.textColor = .secondaryLabelColor
+        promptLabel.font = NSFont.monospacedSystemFont(ofSize: 15, weight: .bold)
+        promptLabel.textColor = .controlAccentColor
         promptLabel.lineBreakMode = .byTruncatingMiddle
         promptLabel.setContentCompressionResistancePriority(.required, for: .horizontal)
         promptLabel.setContentHuggingPriority(.required, for: .horizontal)
 
         queryField.translatesAutoresizingMaskIntoConstraints = false
         queryField.placeholderString = "fzf-palette"
-        queryField.font = NSFont.systemFont(ofSize: 20, weight: .medium)
+        queryField.font = NSFont.systemFont(ofSize: 19, weight: .medium)
+        queryField.controlSize = .large
+        queryField.cell?.controlSize = .large
+        queryField.focusRingType = .none
         queryField.delegate = self
-        queryField.target = self
-        queryField.action = #selector(searchFieldAction(_:))
 
         headerLabel.translatesAutoresizingMaskIntoConstraints = false
-        headerLabel.font = NSFont.systemFont(ofSize: 12, weight: .medium)
+        headerLabel.font = NSFont.systemFont(ofSize: 12, weight: .semibold)
         headerLabel.textColor = .secondaryLabelColor
         headerLabel.lineBreakMode = .byTruncatingTail
         headerLabel.isHidden = true
+
+        accentLine.translatesAutoresizingMaskIntoConstraints = false
+        accentLine.wantsLayer = true
+        accentLine.layer?.backgroundColor = PaletteVisualStyle.cgColor(.controlAccentColor, alpha: 0.30)
+        accentLine.layer?.cornerRadius = 0.5
 
         splitView.translatesAutoresizingMaskIntoConstraints = false
         splitView.isVertical = true
@@ -1265,8 +1446,8 @@ final class PalettePanelController: NSObject, NSTableViewDataSource, NSTableView
         tableColumn.title = "Result"
         tableColumn.resizingMask = .autoresizingMask
         tableView.headerView = nil
-        tableView.rowHeight = 31
-        tableView.intercellSpacing = NSSize(width: 0, height: 3)
+        tableView.rowHeight = 30
+        tableView.intercellSpacing = NSSize(width: 0, height: 4)
         tableView.selectionHighlightStyle = .regular
         tableView.backgroundColor = .clear
         tableView.usesAlternatingRowBackgroundColors = false
@@ -1278,16 +1459,19 @@ final class PalettePanelController: NSObject, NSTableViewDataSource, NSTableView
         resultsScrollView.translatesAutoresizingMaskIntoConstraints = false
         resultsScrollView.hasVerticalScroller = true
         resultsScrollView.drawsBackground = false
+        resultsScrollView.contentInsets = NSEdgeInsets(top: 7, left: 8, bottom: 7, right: 8)
         stylePane(resultsScrollView)
         resultsScrollView.documentView = tableView
 
         previewTextView.isEditable = false
         previewTextView.font = NSFont.monospacedSystemFont(ofSize: 12, weight: .regular)
         previewTextView.drawsBackground = false
+        previewTextView.textContainerInset = NSSize(width: 12, height: 12)
         previewTextView.string = "Preview pane ready"
         previewScrollView.translatesAutoresizingMaskIntoConstraints = false
         previewScrollView.hasVerticalScroller = true
         previewScrollView.drawsBackground = false
+        previewScrollView.contentInsets = NSEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
         stylePane(previewScrollView)
         previewScrollView.documentView = previewTextView
 
@@ -1295,12 +1479,13 @@ final class PalettePanelController: NSObject, NSTableViewDataSource, NSTableView
         splitView.addArrangedSubview(previewScrollView)
 
         statusLabel.translatesAutoresizingMaskIntoConstraints = false
-        statusLabel.font = NSFont.systemFont(ofSize: 12, weight: .regular)
+        statusLabel.font = NSFont.monospacedDigitSystemFont(ofSize: 11, weight: .medium)
         statusLabel.textColor = .secondaryLabelColor
 
         content.addSubview(promptLabel)
         content.addSubview(queryField)
         content.addSubview(headerLabel)
+        content.addSubview(accentLine)
         content.addSubview(splitView)
         content.addSubview(statusLabel)
 
@@ -1310,28 +1495,33 @@ final class PalettePanelController: NSObject, NSTableViewDataSource, NSTableView
             content.trailingAnchor.constraint(equalTo: root.trailingAnchor),
             content.bottomAnchor.constraint(equalTo: root.bottomAnchor),
 
-            promptLabel.topAnchor.constraint(equalTo: content.topAnchor, constant: 24),
-            promptLabel.leadingAnchor.constraint(equalTo: content.leadingAnchor, constant: 22),
+            promptLabel.topAnchor.constraint(equalTo: content.topAnchor, constant: 22),
+            promptLabel.leadingAnchor.constraint(equalTo: content.leadingAnchor, constant: 24),
             promptLabel.widthAnchor.constraint(lessThanOrEqualToConstant: 220),
             promptLabel.centerYAnchor.constraint(equalTo: queryField.centerYAnchor),
 
-            queryField.topAnchor.constraint(equalTo: content.topAnchor, constant: 22),
-            queryField.leadingAnchor.constraint(equalTo: promptLabel.trailingAnchor, constant: 10),
-            queryField.trailingAnchor.constraint(equalTo: content.trailingAnchor, constant: -22),
-            queryField.heightAnchor.constraint(equalToConstant: 34),
+            queryField.topAnchor.constraint(equalTo: content.topAnchor, constant: 20),
+            queryField.leadingAnchor.constraint(equalTo: promptLabel.trailingAnchor, constant: 12),
+            queryField.trailingAnchor.constraint(equalTo: content.trailingAnchor, constant: -24),
+            queryField.heightAnchor.constraint(equalToConstant: 36),
 
-            headerLabel.topAnchor.constraint(equalTo: queryField.bottomAnchor, constant: 8),
-            headerLabel.leadingAnchor.constraint(equalTo: content.leadingAnchor, constant: 22),
-            headerLabel.trailingAnchor.constraint(equalTo: content.trailingAnchor, constant: -22),
+            headerLabel.topAnchor.constraint(equalTo: queryField.bottomAnchor, constant: 9),
+            headerLabel.leadingAnchor.constraint(equalTo: content.leadingAnchor, constant: 24),
+            headerLabel.trailingAnchor.constraint(equalTo: content.trailingAnchor, constant: -24),
             headerLabel.heightAnchor.constraint(equalToConstant: 16),
 
-            splitView.topAnchor.constraint(equalTo: headerLabel.bottomAnchor, constant: 12),
-            splitView.leadingAnchor.constraint(equalTo: content.leadingAnchor, constant: 22),
-            splitView.trailingAnchor.constraint(equalTo: content.trailingAnchor, constant: -22),
+            accentLine.topAnchor.constraint(equalTo: headerLabel.bottomAnchor, constant: 10),
+            accentLine.leadingAnchor.constraint(equalTo: content.leadingAnchor, constant: 24),
+            accentLine.trailingAnchor.constraint(equalTo: content.trailingAnchor, constant: -24),
+            accentLine.heightAnchor.constraint(equalToConstant: 1),
+
+            splitView.topAnchor.constraint(equalTo: accentLine.bottomAnchor, constant: 13),
+            splitView.leadingAnchor.constraint(equalTo: content.leadingAnchor, constant: 24),
+            splitView.trailingAnchor.constraint(equalTo: content.trailingAnchor, constant: -24),
             splitView.bottomAnchor.constraint(equalTo: statusLabel.topAnchor, constant: -12),
 
-            statusLabel.leadingAnchor.constraint(equalTo: content.leadingAnchor, constant: 22),
-            statusLabel.trailingAnchor.constraint(equalTo: content.trailingAnchor, constant: -22),
+            statusLabel.leadingAnchor.constraint(equalTo: content.leadingAnchor, constant: 24),
+            statusLabel.trailingAnchor.constraint(equalTo: content.trailingAnchor, constant: -24),
             statusLabel.bottomAnchor.constraint(equalTo: content.bottomAnchor, constant: -16),
             statusLabel.heightAnchor.constraint(equalToConstant: 18)
         ])
@@ -1345,13 +1535,9 @@ final class PalettePanelController: NSObject, NSTableViewDataSource, NSTableView
         scrollView.layer?.cornerCurve = .continuous
         scrollView.layer?.masksToBounds = true
         scrollView.layer?.borderWidth = PaletteVisualStyle.paneBorderWidth
-        scrollView.layer?.borderColor = PaletteVisualStyle.cgColor(.separatorColor, alpha: 0.55)
-        scrollView.layer?.backgroundColor = PaletteVisualStyle.cgColor(.controlBackgroundColor, alpha: 0.42)
+        scrollView.layer?.borderColor = PaletteVisualStyle.paneBorderColor(for: scrollView)
+        scrollView.layer?.backgroundColor = PaletteVisualStyle.paneBackgroundColor(for: scrollView)
         scrollView.contentView.wantsLayer = true
         scrollView.contentView.layer?.backgroundColor = PaletteVisualStyle.cgColor(.clear, alpha: 0)
-    }
-
-    @objc private func searchFieldAction(_ sender: NSSearchField) {
-        acceptCurrentSelection()
     }
 }

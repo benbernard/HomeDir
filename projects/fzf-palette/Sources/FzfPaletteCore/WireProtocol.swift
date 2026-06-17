@@ -47,6 +47,7 @@ public enum RequestType: String, Codable, Equatable {
     case testSelectAll = "test.selectAll"
     case testDeselectAll = "test.deselectAll"
     case testSetQuery = "test.setQuery"
+    case testKey = "test.key"
     case testMoveDown = "test.moveDown"
     case testMoveUp = "test.moveUp"
     case testTogglePreview = "test.togglePreview"
@@ -175,6 +176,8 @@ public struct AppStatus: Codable, Equatable {
     public var settingsHotkey: String?
     public var settingsProfile: String?
     public var settingsVisible: Bool
+    public var programContext: ProgramContext?
+    public var lastCompletionReason: String?
 
     public init(
         running: Bool,
@@ -198,7 +201,9 @@ public struct AppStatus: Codable, Equatable {
         hotkeys: [ProfileHotKeyStatus] = [],
         settingsHotkey: String? = nil,
         settingsProfile: String? = nil,
-        settingsVisible: Bool = false
+        settingsVisible: Bool = false,
+        programContext: ProgramContext? = nil,
+        lastCompletionReason: String? = nil
     ) {
         self.running = running
         self.pid = pid
@@ -222,6 +227,8 @@ public struct AppStatus: Codable, Equatable {
         self.settingsHotkey = settingsHotkey
         self.settingsProfile = settingsProfile
         self.settingsVisible = settingsVisible
+        self.programContext = programContext
+        self.lastCompletionReason = lastCompletionReason
     }
 }
 
@@ -289,6 +296,7 @@ public struct BenchReport: Codable, Equatable {
 public struct PanelVisualSnapshot: Codable, Equatable {
     public var panelVisible: Bool
     public var queryFieldFocused: Bool
+    public var queryFieldActionBound: Bool
     public var windowNumber: Int
     public var captureX: Int
     public var captureY: Int
@@ -310,6 +318,8 @@ public struct PanelVisualSnapshot: Codable, Equatable {
     public var previewCornerRadius: Double
     public var usesCustomSelectionStyle: Bool
     public var visibleRows: Int
+    public var selectedRowIndex: Int
+    public var activeRowText: String
     public var previewVisible: Bool
     public var previewWidth: Double
     public var previewHeight: Double
@@ -330,6 +340,7 @@ public struct PanelVisualSnapshot: Codable, Equatable {
     public init(
         panelVisible: Bool,
         queryFieldFocused: Bool,
+        queryFieldActionBound: Bool = false,
         windowNumber: Int = 0,
         captureX: Int = 0,
         captureY: Int = 0,
@@ -351,6 +362,8 @@ public struct PanelVisualSnapshot: Codable, Equatable {
         previewCornerRadius: Double = 0,
         usesCustomSelectionStyle: Bool = false,
         visibleRows: Int,
+        selectedRowIndex: Int = -1,
+        activeRowText: String = "",
         previewVisible: Bool,
         previewWidth: Double,
         previewHeight: Double = 0,
@@ -370,6 +383,7 @@ public struct PanelVisualSnapshot: Codable, Equatable {
     ) {
         self.panelVisible = panelVisible
         self.queryFieldFocused = queryFieldFocused
+        self.queryFieldActionBound = queryFieldActionBound
         self.windowNumber = windowNumber
         self.captureX = captureX
         self.captureY = captureY
@@ -391,6 +405,8 @@ public struct PanelVisualSnapshot: Codable, Equatable {
         self.previewCornerRadius = previewCornerRadius
         self.usesCustomSelectionStyle = usesCustomSelectionStyle
         self.visibleRows = visibleRows
+        self.selectedRowIndex = selectedRowIndex
+        self.activeRowText = activeRowText
         self.previewVisible = previewVisible
         self.previewWidth = previewWidth
         self.previewHeight = previewHeight

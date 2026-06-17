@@ -13,8 +13,11 @@ PROFILES_FILE="$TMPDIR/profiles.json"
 PROFILE_PREVIEW_FILE="$TMPDIR/profile-preview.out"
 TWO_STAGE_ROOT="$TMPDIR/two-stage-root"
 TWO_STAGE_PREVIEW_FILE="$TMPDIR/two-stage-preview.out"
+PROGRAM_CONTEXT_ROOT="$TMPDIR/program-context-root"
+CODEX_CONTEXT_FILE="$TMPDIR/codex-context.json"
 BUILTIN_HOME="$TMPDIR/builtin-home"
 BUILTIN_PROJECT="$BUILTIN_HOME/projects/project-builtin"
+BUILTIN_AVA="$BUILTIN_HOME/projects/ava"
 BUILTIN_REPO="$BUILTIN_HOME/repos/repo-builtin"
 BUILTIN_DOWNLOADS="$BUILTIN_HOME/Downloads"
 SETTINGS_SUITE="dev.benbernard.fzf-palette.e2e.$$"
@@ -234,12 +237,21 @@ cd "$ROOT"
 swift build -c release --product FzfPaletteApp >/dev/null
 swift build -c release --product fzf-palette >/dev/null
 
-mkdir -p "$TWO_STAGE_ROOT/nested"
+mkdir -p "$TWO_STAGE_ROOT/nested" "$PROGRAM_CONTEXT_ROOT"
 printf 'alpha\n' >"$TWO_STAGE_ROOT/alpha.txt"
 printf 'beta\n' >"$TWO_STAGE_ROOT/nested/beta.txt"
-mkdir -p "$BUILTIN_PROJECT/nested" "$BUILTIN_REPO" "$BUILTIN_DOWNLOADS"
+printf 'codex context\n' >"$PROGRAM_CONTEXT_ROOT/context.txt"
+python3 - "$CODEX_CONTEXT_FILE" "$PROGRAM_CONTEXT_ROOT" <<'PY'
+import json
+import sys
+path, cwd = sys.argv[1:3]
+with open(path, "w", encoding="utf-8") as handle:
+    json.dump({"cwd": cwd, "detail": "e2e codex context"}, handle)
+PY
+mkdir -p "$BUILTIN_PROJECT/nested" "$BUILTIN_AVA/gohan" "$BUILTIN_REPO" "$BUILTIN_DOWNLOADS"
 printf 'alpha\n' >"$BUILTIN_PROJECT/alpha.txt"
 printf 'beta\n' >"$BUILTIN_PROJECT/nested/beta.txt"
+printf 'gohan\n' >"$BUILTIN_AVA/gohan/gohan.txt"
 printf 'repo\n' >"$BUILTIN_REPO/README.md"
 printf 'old\n' >"$BUILTIN_DOWNLOADS/download-old.txt"
 printf 'new\n' >"$BUILTIN_DOWNLOADS/download-new.txt"
@@ -389,6 +401,9 @@ FZF_PALETTE_OPEN_LOG="$OPEN_LOG" \
 FZF_PALETTE_PASTE_LOG="$PASTE_LOG" \
 FZF_PALETTE_PROFILES_FILE="$PROFILES_FILE" \
 FZF_PALETTE_USER_DEFAULTS_SUITE="$SETTINGS_SUITE" \
+FZF_PALETTE_TEST_FRONTMOST_APP_NAME="Codex" \
+FZF_PALETTE_TEST_FRONTMOST_APP_BUNDLE_ID="com.openai.codex" \
+FZF_PALETTE_CODEX_CONTEXT_FILE="$CODEX_CONTEXT_FILE" \
 HOME="$BUILTIN_HOME" \
 "$APP_EXE" >"$TMPDIR/app.out" 2>"$TMPDIR/app.err" &
 APP_PID=$!
@@ -509,6 +524,22 @@ PY
 wait_for_panel_visible
 wait_for_picker_rows 1
 wait_for_chrome "hotkey>" "Hotkey profile" ">" "*" "inline"
+HOTKEY_CONTEXT_STATUS="$("$CLI" status --json)"
+python3 - "$HOTKEY_CONTEXT_STATUS" "$PROGRAM_CONTEXT_ROOT" <<'PY'
+import json
+import sys
+status = json.loads(sys.argv[1])["app"]
+expected_cwd = sys.argv[2]
+context = status.get("programContext")
+if not context:
+    raise SystemExit(f"expected program context in status, got {status}")
+if context.get("cwd") != expected_cwd:
+    raise SystemExit(f"expected context cwd {expected_cwd}, got {context}")
+if context.get("provider") != "codex-bridge":
+    raise SystemExit(f"expected codex-bridge provider, got {context}")
+if context.get("bundleIdentifier") != "com.openai.codex":
+    raise SystemExit(f"expected Codex bundle id, got {context}")
+PY
 HOTKEY_VISUAL="$("$CLI" test-control snapshot --json)"
 python3 - "$HOTKEY_VISUAL" <<'PY'
 import json
@@ -517,6 +548,7 @@ snapshot = json.loads(sys.argv[1])
 checks = [
     (snapshot["panelVisible"], "panel is visible"),
     (snapshot["queryFieldFocused"], "query field is focused"),
+    (not snapshot.get("queryFieldActionBound", True), "query field does not auto-accept through NSSearchField action"),
     (snapshot["width"] >= 900 and snapshot["height"] >= 500, "panel has stable expected size"),
     (snapshot["renderedWidth"] > 0 and snapshot["renderedHeight"] > 0, "panel rendered to pixels"),
     (snapshot["sampledPixels"] >= 1000, "snapshot sampled enough pixels"),
@@ -539,6 +571,56 @@ if failed:
     raise SystemExit("; ".join(failed) + f"; snapshot={snapshot}")
 PY
 "$CLI" test-control cancel >/tmp/fzf-palette-e2e-hotkey-cancel.out
+
+KEY_NAV_OUT="$TMPDIR/key-nav.out"
+KEY_NAV_ERR="$TMPDIR/key-nav.err"
+"$CLI" open \
+  --source-command "printf 'alpha\nbeta\ngamma\n'" \
+  +m \
+  --timeout-ms 5000 >"$KEY_NAV_OUT" 2>"$KEY_NAV_ERR" &
+OPEN_PID=$!
+
+wait_for_picker_rows 3
+KEY_NAV_INITIAL="$("$CLI" test-control snapshot --json)"
+python3 - "$KEY_NAV_INITIAL" <<'PY'
+import json
+import sys
+snapshot = json.loads(sys.argv[1])
+if not snapshot.get("queryFieldFocused"):
+    raise SystemExit(f"query field should be focused before arrow navigation: {snapshot}")
+if snapshot.get("selectedRowIndex") != 0 or snapshot.get("activeRowText") != "alpha":
+    raise SystemExit(f"expected initial active row alpha, got {snapshot}")
+PY
+
+"$CLI" test-control key down >/tmp/fzf-palette-e2e-key-down-control.out
+KEY_NAV_DOWN="$("$CLI" test-control snapshot --json)"
+python3 - "$KEY_NAV_DOWN" <<'PY'
+import json
+import sys
+snapshot = json.loads(sys.argv[1])
+if not snapshot.get("queryFieldFocused"):
+    raise SystemExit(f"query field lost focus after arrow down: {snapshot}")
+if snapshot.get("selectedRowIndex") != 1 or snapshot.get("activeRowText") != "beta":
+    raise SystemExit(f"expected arrow down to select beta, got {snapshot}")
+PY
+
+"$CLI" test-control key up >/tmp/fzf-palette-e2e-key-up-control.out
+KEY_NAV_UP="$("$CLI" test-control snapshot --json)"
+python3 - "$KEY_NAV_UP" <<'PY'
+import json
+import sys
+snapshot = json.loads(sys.argv[1])
+if not snapshot.get("queryFieldFocused"):
+    raise SystemExit(f"query field lost focus after arrow up: {snapshot}")
+if snapshot.get("selectedRowIndex") != 0 or snapshot.get("activeRowText") != "alpha":
+    raise SystemExit(f"expected arrow up to return to alpha, got {snapshot}")
+PY
+
+"$CLI" test-control cancel >/tmp/fzf-palette-e2e-key-nav-cancel.out
+set +e
+wait "$OPEN_PID"
+set -e
+OPEN_PID=""
 
 "$CLI" test-control carbon-hotkey >/tmp/fzf-palette-e2e-carbon-hotkey-control.out
 wait_for_panel_visible
@@ -648,6 +730,18 @@ if report["failures"]:
 metric = report["metrics"]["panel_show_ms"]
 if metric["max"] >= 200:
     raise SystemExit(f"panel max {metric['max']}ms >= 200ms")
+PY
+
+MOVEMENT_BENCH="$("$CLI" bench movement --runs 36 --warmup 6 --json)"
+python3 - "$MOVEMENT_BENCH" <<'PY'
+import json
+import sys
+report = json.loads(sys.argv[1])
+if report["failures"]:
+    raise SystemExit("; ".join(report["failures"]))
+metric = report["metrics"]["selection_movement_ms"]
+if metric["max"] >= 16:
+    raise SystemExit(f"selection movement max {metric['max']}ms >= 16ms")
 PY
 
 ACCEPT_OUT="$TMPDIR/accept.out"
@@ -816,6 +910,63 @@ if [[ "$(cat "$BUILTIN_CONTEXT_OUT")" != "$BUILTIN_PROJECT/alpha.txt" ]]; then
   echo "expected built-in context-files result $BUILTIN_PROJECT/alpha.txt, got:" >&2
   cat "$BUILTIN_CONTEXT_OUT" >&2
   cat "$BUILTIN_CONTEXT_ERR" >&2
+  exit 1
+fi
+
+ALFRED_CONTEXT_OUT="$TMPDIR/alfred-context.out"
+ALFRED_CONTEXT_ERR="$TMPDIR/alfred-context.err"
+"$CLI" open \
+  --profile context-files \
+  +m \
+  --timeout-ms 5000 >"$ALFRED_CONTEXT_OUT" 2>"$ALFRED_CONTEXT_ERR" &
+OPEN_PID=$!
+
+wait_for_panel_visible
+"$CLI" test-control query ava >/tmp/fzf-palette-e2e-alfred-context-query-ava-control.out
+wait_for_picker_rows 1
+sleep 1.2
+ALFRED_CONTEXT_ROOT_SNAPSHOT="$("$CLI" test-control snapshot --json)"
+python3 - "$ALFRED_CONTEXT_ROOT_SNAPSHOT" "$BUILTIN_AVA" <<'PY'
+import json
+import sys
+snapshot = json.loads(sys.argv[1])
+expected = sys.argv[2]
+if not snapshot.get("panelVisible"):
+    raise SystemExit(f"panel disappeared after idle query ava: {snapshot}")
+if not snapshot.get("queryFieldFocused"):
+    raise SystemExit(f"query field lost focus after idle query ava: {snapshot}")
+active = snapshot.get("activeRowText", "")
+if expected not in active:
+    raise SystemExit(f"expected ava root active before tab, got {snapshot}")
+PY
+
+"$CLI" test-control key tab >/tmp/fzf-palette-e2e-alfred-context-tab-control.out
+wait_for_panel_visible
+wait_for_chrome "files>" "Pick a file or directory" "" "" "inline"
+"$CLI" test-control query gohan >/tmp/fzf-palette-e2e-alfred-context-query-gohan-control.out
+wait_for_picker_rows 2
+sleep 1.2
+ALFRED_CONTEXT_INNER_SNAPSHOT="$("$CLI" test-control snapshot --json)"
+python3 - "$ALFRED_CONTEXT_INNER_SNAPSHOT" <<'PY'
+import json
+import sys
+snapshot = json.loads(sys.argv[1])
+if not snapshot.get("panelVisible"):
+    raise SystemExit(f"panel disappeared after ava tab gohan: {snapshot}")
+if not snapshot.get("queryFieldFocused"):
+    raise SystemExit(f"query field lost focus after ava tab gohan: {snapshot}")
+if "gohan" not in snapshot.get("activeRowText", ""):
+    raise SystemExit(f"expected gohan result after ava tab gohan, got {snapshot}")
+PY
+
+"$CLI" test-control accept >/tmp/fzf-palette-e2e-alfred-context-accept-control.out
+wait "$OPEN_PID"
+OPEN_PID=""
+
+if [[ "$(cat "$ALFRED_CONTEXT_OUT")" != "$BUILTIN_AVA/gohan" ]]; then
+  echo "expected ava tab gohan result $BUILTIN_AVA/gohan, got:" >&2
+  cat "$ALFRED_CONTEXT_OUT" >&2
+  cat "$ALFRED_CONTEXT_ERR" >&2
   exit 1
 fi
 
@@ -1803,4 +1954,34 @@ if ! grep -q "cancelled" "$CANCEL_ERR"; then
   exit 1
 fi
 
-echo "e2e hotkey-config/settings/hotkey/carbon-hotkey/physical-hotkey-optional/physical-ui-optional/profile-hotkeys/panel/visual-snapshot/query/native-chrome/default-opts/default-command/ctrl-t-command/built-in-profiles/profile/two-stage/case/ansi/tiebreak/tiebreak-list/tiebreak-chunk/no-sort/path-scheme/history-scheme/nth/accept/multi/multi-join/copy/paste/open/command/preview-update/preview-ansi/preview-terminal/preview-terminal-lines/preview-toggle/preview-layout/preview-scroll/result-command-cancel/source-preview-cancel/cancel passed"
+ORPHANED_CLIENT_OUT="$TMPDIR/orphaned-client.out"
+ORPHANED_CLIENT_ERR="$TMPDIR/orphaned-client.err"
+"$CLI" open \
+  --source-command "printf 'orphaned-client-row\n'" \
+  --timeout-ms 600000 >"$ORPHANED_CLIENT_OUT" 2>"$ORPHANED_CLIENT_ERR" &
+OPEN_PID=$!
+
+wait_for_picker_rows 1
+ORPHANED_CLIENT_PID_BEFORE="$("$CLI" status --json)"
+kill "$OPEN_PID" 2>/dev/null || true
+set +e
+wait "$OPEN_PID"
+set -e
+OPEN_PID=""
+
+"$CLI" test-control cancel >/tmp/fzf-palette-e2e-orphaned-client-cancel-control.out
+ORPHANED_CLIENT_PID_AFTER="$("$CLI" status --json)"
+python3 - "$ORPHANED_CLIENT_PID_BEFORE" "$ORPHANED_CLIENT_PID_AFTER" <<'PY'
+import json
+import sys
+before = json.loads(sys.argv[1])["app"]
+after = json.loads(sys.argv[2])["app"]
+if before["pid"] != after["pid"]:
+    raise SystemExit(f"app restarted after writing to orphaned picker client: before={before}, after={after}")
+if after["activePicker"]:
+    raise SystemExit(f"orphaned-client picker stayed active after cancel: {after}")
+if after.get("lastCompletionReason") != "panel_cancelled":
+    raise SystemExit(f"expected panel_cancelled after orphaned-client cancel, got {after}")
+PY
+
+echo "e2e hotkey-config/settings/program-context/hotkey/key-navigation/movement-bench/alfred-context-transition/carbon-hotkey/physical-hotkey-optional/physical-ui-optional/profile-hotkeys/panel/visual-snapshot/query/native-chrome/default-opts/default-command/ctrl-t-command/built-in-profiles/profile/two-stage/case/ansi/tiebreak/tiebreak-list/tiebreak-chunk/no-sort/path-scheme/history-scheme/nth/accept/multi/multi-join/copy/paste/open/command/preview-update/preview-ansi/preview-terminal/preview-terminal-lines/preview-toggle/preview-layout/preview-scroll/result-command-cancel/source-preview-cancel/cancel/orphaned-client passed"

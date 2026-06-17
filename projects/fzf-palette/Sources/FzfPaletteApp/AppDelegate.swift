@@ -58,6 +58,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private let resultCommandRunner = CommandRunner()
     private let activePickerLock = NSLock()
     private let activeWorkLock = NSLock()
+    private let programContextLock = NSLock()
+    private let completionReasonLock = NSLock()
     private var environmentSnapshot = EnvironmentSnapshot()
     private var hasActivePicker = false
     private var activeSourceToken: CommandCancellationToken?
@@ -68,6 +70,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var hotKeyConfigurationError: String?
     private var profileStore = ProfileStore()
     private var profileStoreLoadError: String?
+    private var lastProgramContext: ProgramContext?
+    private var lastCompletionReason = "not_started"
     private let settingsStore = SettingsStore()
     private lazy var settingsWindowController = SettingsWindowController(
         loadSettings: { [weak self] in
@@ -397,6 +401,36 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 panel.setQuery(query)
             }
             return .init(type: .result, id: request.id, status: .selected)
+        case .testKey:
+            guard isTestControlEnabled else {
+                return .init(
+                    type: .error,
+                    id: request.id,
+                    code: "test_control_disabled",
+                    message: "Set FZF_PALETTE_ENABLE_TEST_CONTROL=1 in the app environment to use test controls."
+                )
+            }
+            guard let key = request.query else {
+                return .init(
+                    type: .error,
+                    id: request.id,
+                    code: "missing_key",
+                    message: "test.key requires a key payload."
+                )
+            }
+            var handled = false
+            performPanelControl { panel in
+                handled = panel.handleSyntheticKey(key)
+            }
+            guard handled else {
+                return .init(
+                    type: .error,
+                    id: request.id,
+                    code: "unsupported_key",
+                    message: "Unsupported synthetic key: \(key)"
+                )
+            }
+            return .init(type: .status, id: request.id, app: appStatus())
         case .testMoveDown:
             guard isTestControlEnabled else {
                 return .init(
@@ -456,7 +490,20 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     private func showPaletteForHotKey(profile: String) {
         DispatchQueue.global(qos: .userInitiated).async { [weak self] in
-            _ = self?.runOpenRequest(PickerRequest(profile: profile))
+            guard let self else {
+                return
+            }
+
+            let context = self.resolveProgramContextForHotKey()
+            self.setLastProgramContext(context)
+
+            var request = PickerRequest(profile: profile)
+            if let context {
+                request.cwd = context.cwd
+                request.env.merge(context.environmentValues) { _, contextValue in contextValue }
+            }
+
+            _ = self.runOpenRequest(request)
         }
     }
 
@@ -474,6 +521,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             return runKeystrokeBench(request, id: id, rowCount: 10_000, targetP95Ms: 10)
         case "large-keystroke":
             return runKeystrokeBench(request, id: id, rowCount: 100_000, targetP95Ms: 20)
+        case "movement":
+            return runMovementBench(request, id: id)
         case "main-thread":
             return runMainThreadBench(request, id: id)
         case "source":
@@ -661,6 +710,54 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                     "rows": Double(rows.count)
                 ],
                 metrics: ["key_to_rows_rendered_ms": summary],
+                failures: failures
+            )
+        )
+    }
+
+    private func runMovementBench(_ request: BenchRequest, id: String?) -> PaletteResponse {
+        let totalRuns = max(1, request.runs + request.warmup)
+        let rows = benchmarkRows(count: 10_000)
+        let pickerRequest = PickerRequest(
+            profile: "bench-movement",
+            preview: PreviewConfig(command: "printf 'preview %s\\n' {}", debounceMs: 100)
+        )
+        let durations = DispatchQueue.main.sync {
+            configurePreviewUpdates(for: pickerRequest)
+            let durations = panelController.benchmarkSelectionMovement(
+                rows: rows,
+                steps: totalRuns,
+                previewConfig: pickerRequest.preview
+            )
+            panelController.clearActiveRowChangeHandler()
+            return durations
+        }
+        cancelPreviewWork()
+        let values = Array(durations.dropFirst(min(request.warmup, durations.count)))
+        let summary = MetricSummary(values: values)
+        var failures: [String] = []
+        if summary.max >= 16 {
+            failures.append("selection movement max \(summary.max)ms >= 16ms hard max")
+        }
+        if summary.p95 >= 8 {
+            failures.append("selection movement p95 \(summary.p95)ms >= 8ms target")
+        }
+
+        return .init(
+            type: failures.isEmpty ? .result : .error,
+            id: id,
+            code: failures.isEmpty ? nil : "benchmark_failed",
+            message: failures.isEmpty ? nil : failures.joined(separator: "; "),
+            bench: BenchReport(
+                name: request.name,
+                runs: values.count,
+                warmup: request.warmup,
+                budgets: [
+                    "hard_max_ms": 16,
+                    "target_p95_ms": 8,
+                    "rows": Double(rows.count)
+                ],
+                metrics: ["selection_movement_ms": summary],
                 failures: failures
             )
         )
@@ -1410,6 +1507,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 message: "Another picker is already active."
             )
         }
+        setLastCompletionReason("running:\(request.profile)")
         defer { endActivePicker() }
 
         let pasteTargetApplication = currentPasteTargetApplication()
@@ -1418,6 +1516,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         func finish(_ response: PaletteResponse) {
             if box.finish(response) {
+                if currentCompletionReason().hasPrefix("running:") {
+                    setLastCompletionReason(completionReason(for: response))
+                }
                 cancelActiveWork()
                 semaphore.signal()
             }
@@ -1444,6 +1545,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                         finish: finish
                     )
                 case .cancelled:
+                    self?.setLastCompletionReason("panel_cancelled")
                     finish(.init(type: .result, id: request.id, status: .cancelled))
                 }
             }
@@ -1458,6 +1560,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         let timeoutSeconds = request.timeoutMs > 0 ? Double(request.timeoutMs) / 1000 : 300
         if semaphore.wait(timeout: .now() + timeoutSeconds) == .timedOut {
+            setLastCompletionReason("request_timeout")
             cancelActiveWork()
             DispatchQueue.main.async { [weak self] in
                 self?.panelController.clearCompletion()
@@ -1559,6 +1662,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                         finish: finish
                     )
                 case .cancelled:
+                    self?.setLastCompletionReason("second_stage_panel_cancelled")
                     finish(.init(type: .result, id: secondStageRequest.id, status: .cancelled))
                 }
             }
@@ -1584,6 +1688,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             do {
                 try self.loadSource(for: request)
             } catch CommandRunError.cancelled {
+                self.setLastCompletionReason("source_cancelled")
                 finish(.init(type: .result, id: request.id, status: .cancelled))
             } catch {
                 DispatchQueue.main.async {
@@ -1592,6 +1697,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                         message: String(describing: error)
                     )
                 }
+                self.setLastCompletionReason("source_failed")
                 finish(.init(
                     type: .error,
                     id: request.id,
@@ -1720,6 +1826,85 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         return application
+    }
+
+    private func resolveProgramContextForHotKey() -> ProgramContext? {
+        let resolver = ProgramContextResolver(environment: programContextEnvironment())
+        return resolver.resolve(frontmostApplication: frontmostApplicationForContext())
+    }
+
+    private func programContextEnvironment() -> [String: String] {
+        environmentSnapshot.values.merging(ProcessInfo.processInfo.environment) { _, processValue in
+            processValue
+        }
+    }
+
+    private func frontmostApplicationForContext() -> FrontmostApplicationInfo? {
+        let environment = ProcessInfo.processInfo.environment
+        let hasTestFrontmostOverride = environment["FZF_PALETTE_TEST_FRONTMOST_APP_NAME"] != nil
+            || environment["FZF_PALETTE_TEST_FRONTMOST_APP_BUNDLE_ID"] != nil
+        if isTestControlEnabled, hasTestFrontmostOverride {
+            let pid = environment["FZF_PALETTE_TEST_FRONTMOST_APP_PID"].flatMap(Int32.init)
+            return FrontmostApplicationInfo(
+                name: environment["FZF_PALETTE_TEST_FRONTMOST_APP_NAME"],
+                bundleIdentifier: environment["FZF_PALETTE_TEST_FRONTMOST_APP_BUNDLE_ID"],
+                processIdentifier: pid
+            )
+        }
+
+        guard let application = NSWorkspace.shared.frontmostApplication,
+              application.processIdentifier != NSRunningApplication.current.processIdentifier else {
+            return nil
+        }
+
+        return FrontmostApplicationInfo(
+            name: application.localizedName,
+            bundleIdentifier: application.bundleIdentifier,
+            processIdentifier: application.processIdentifier
+        )
+    }
+
+    private func setLastProgramContext(_ context: ProgramContext?) {
+        programContextLock.withLock {
+            lastProgramContext = context
+        }
+    }
+
+    private func currentProgramContext() -> ProgramContext? {
+        programContextLock.withLock {
+            lastProgramContext
+        }
+    }
+
+    private func setLastCompletionReason(_ reason: String) {
+        completionReasonLock.withLock {
+            lastCompletionReason = reason
+        }
+    }
+
+    private func currentCompletionReason() -> String {
+        completionReasonLock.withLock {
+            lastCompletionReason
+        }
+    }
+
+    private func completionReason(for response: PaletteResponse) -> String {
+        if response.type == .error {
+            return response.code.map { "error:\($0)" } ?? "error"
+        }
+
+        switch response.status {
+        case .selected:
+            return "selected"
+        case .cancelled:
+            return "cancelled"
+        case .noMatch:
+            return "no_match"
+        case .error:
+            return response.code.map { "error:\($0)" } ?? "error"
+        case nil:
+            return response.code ?? response.type.rawValue
+        }
     }
 
     private func postPasteShortcut() throws {
@@ -2253,7 +2438,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             hotkeys: hotKeyController.hotKeyStatuses,
             settingsHotkey: settings.hotkey,
             settingsProfile: settings.profile,
-            settingsVisible: settingsWindowVisibleForStatus()
+            settingsVisible: settingsWindowVisibleForStatus(),
+            programContext: currentProgramContext(),
+            lastCompletionReason: currentCompletionReason()
         )
     }
 

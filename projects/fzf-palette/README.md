@@ -11,6 +11,7 @@ single `bin/ts` utility. Generated app bundles should live outside the repo.
 scripts/test-quiet.sh   # no-popup unit/integration/UI-support checks
 scripts/test-all.sh     # full local gate; opens the real AppKit panel
 scripts/bench.sh smoke  # app-backed performance smoke gate
+fzf-palette context set --app codex --cwd "$PWD"
 ```
 
 ## Docs

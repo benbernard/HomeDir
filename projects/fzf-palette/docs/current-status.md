@@ -39,10 +39,12 @@ not a complete `fzf` replacement yet.
 - CLI `status` and `env reload` requests over newline-delimited JSON.
 - CLI `status --json` includes panel visibility, active query, row counts,
   preview visibility, prompt text, header text, pointer text, marker text, info
-  style, settings hotkey/profile, and settings-window visibility for UI/E2E
-  assertions.
+  style, settings hotkey/profile, settings-window visibility, and the last
+  resolved hotkey program context for UI/E2E assertions.
 - CLI `cancel` request for local scripts and tests to stop the active
   picker/action.
+- CLI `context set|get|clear` bridge-file commands for Codex, Claude, and
+  Ghostty program-context cwd publishing.
 - CLI `open` request parsing for profile, cwd, source command, stdin, query,
   prompt, header, pointer, marker, inline info, preview command, preview window,
   fzf-style args, result mode, and timeout.
@@ -54,6 +56,8 @@ not a complete `fzf` replacement yet.
 - Native preallocated panel with:
   - Theme-aware native visual treatment using a vibrant rounded panel surface,
     rounded results/preview panes, and custom rounded row selection.
+  - The panel is pinned visible across app deactivation; only accept, cancel,
+    or request timeout should intentionally hide it.
   - Prompt label mapped from `--prompt`, falling back to profile/title text.
   - Query field.
   - Header label mapped from `--header`.
@@ -75,6 +79,9 @@ not a complete `fzf` replacement yet.
   - Native match highlighting for direct matches and `--nth` matches whose
     fields are visible in the displayed row.
   - Return-to-accept and Escape-to-cancel handling.
+  - Arrow Up/Down selection movement even while the query field is focused.
+  - Tab accepts the current row in single-select mode, which lets two-stage
+    profile flows transition without relying on Return.
 - First native fuzzy search engine:
   - Stored in `FzfPaletteCore` as `NativeFuzzySearchEngine`.
   - Caches normalized row bytes when rows are replaced or appended.
@@ -123,6 +130,7 @@ not a complete `fzf` replacement yet.
   - `fzf-palette test-control select-all`
   - `fzf-palette test-control deselect-all`
   - `fzf-palette test-control query`
+  - `fzf-palette test-control key`
   - `fzf-palette test-control move-down`
   - `fzf-palette test-control move-up`
 - Source loading from:
@@ -134,9 +142,27 @@ not a complete `fzf` replacement yet.
   - Caller-provided source command.
   - Stdin request input.
   - Static items in the internal model.
+- Hotkey program-context awareness:
+  - Codex desktop app (`com.openai.codex`) uses a bridge JSON file to resolve
+    cwd.
+  - Claude desktop app (`com.anthropic.claudefordesktop`) uses the same bridge
+    JSON format.
+  - Ghostty (`com.mitchellh.ghostty`) resolves the active `default` tmux client
+    through `~/bin/tmux-resolve-pane-path`, including the documented nested tmux
+    setup, and falls back cleanly if no tmux context is available.
+  - Context providers share one 50 ms total hotkey budget and fail closed rather
+    than delaying panel display.
+  - Explicit CLI/script `--cwd` requests remain authoritative; context
+    inference is applied to hotkey-triggered opens.
+  - Resolved context values are added to source/preview/result environments as
+    `FZF_PALETTE_PROGRAM_CONTEXT_*`.
+  - Built-in `context-files` includes the resolved context cwd as a `current`
+    root.
 - Profile store:
-  - Built-in `default`, `ctrl-t`, `context-files`, `repos`, `downloads`,
-    `git-status`, and `git-commits` profile definitions.
+  - Built-in `default`, `ctrl-t`, `context-files`, `context-dirs`,
+    `home-files`, `home-dirs`, `repos`, `repos-dirs`, `repos-files`,
+    `downloads`, `downloads-files`, `git-status`, and `git-commits` profile
+    definitions.
   - Optional JSON profile file at
     `~/Library/Application Support/FzfPalette/profiles.json`.
   - Test/config override through `FZF_PALETTE_PROFILES_FILE`.
@@ -314,6 +340,11 @@ not a complete `fzf` replacement yet.
   source resolution.
 - Live E2E coverage for built-in `repos`, `downloads`, and `context-files`
   profiles using deterministic temp-home fixtures.
+- Unit coverage for Codex, Claude, and Ghostty app classification, bridge-file
+  parsing, cwd validation, Codex/Claude bridge resolution, and Ghostty/tmux
+  directory resolution.
+- Live E2E coverage that simulates Codex as the frontmost app, triggers a hotkey,
+  and verifies the resolved bridge cwd in app status.
 
 ## Verified
 
@@ -472,12 +503,14 @@ source-order return output, and hidden-field space/JSON joins, verifies
 pasteboard copy mode, verifies side-effect-safe paste mode through
 `FZF_PALETTE_PASTE_LOG`, verifies side-effect-safe open mode,
 verifies command result mode, verifies preview updates after cursor
-movement and query changes, verifies JSON-configured two-stage profile
-transition and hidden final output, verifies rich SGR preview ANSI rendering
-without raw escape leakage, verifies terminal-control preview rendering for
-final visible screen state, verifies insert/delete-line and simple scroll-control
-preview rendering, verifies `ctrl-/` preview toggling, verifies right/up
-preview-window layout and wrap behavior, verifies result-command child-process
+movement and query changes, verifies focused-query Arrow Up/Down selection
+movement, verifies JSON-configured two-stage profile transition and hidden final
+output, verifies the built-in `context-files` `ava<Tab>` then `gohan` transition
+stays visible and returns the nested directory, verifies rich SGR preview ANSI
+rendering without raw escape leakage, verifies terminal-control preview
+rendering for final visible screen state, verifies insert/delete-line and simple
+scroll-control preview rendering, verifies `ctrl-/` preview toggling, verifies
+right/up preview-window layout and wrap behavior, verifies result-command child-process
 cleanup through `fzf-palette cancel`, verifies source and preview child-process
 cleanup, then opens another picker and verifies cancel behavior.
 
@@ -490,6 +523,31 @@ temporary LaunchAgent plist, validates app metadata including the generated icon
 validates the plist content and optional hotkey environment value, then verifies
 `--uninstall-launch-agent` removes it without touching the real user LaunchAgent
 state.
+
+## Resolved Alfred Workflow Regressions
+
+Reported on 2026-06-12 after switching Alfred from the old TypeScript
+`gui-fzf-picker` launcher to the native `fzf-palette` backend. These are now
+covered by live E2E and smoke benchmark gates:
+
+- Pressing `option+p`, typing `ava<Tab>`, then typing `gohan` makes the popup
+  disappear. Fixed by handling Tab as accept in single-select mode and covered
+  by an E2E `context-files` flow that chooses `ava`, transitions to the second
+  picker, searches `gohan`, and returns the nested directory.
+- While focus is in the search field, the popup does not accept arrow up/down
+  for selection movement. Fixed by routing Arrow Up/Down through the shared
+  palette key handler while the query field is focused and covered by E2E
+  synthetic key assertions.
+- When arrow up/down does work, selection movement is slow. Fixed by removing
+  duplicate active-row preview notifications from selection movement and covered
+  by `fzf-palette bench movement`, which is included in smoke benchmarks.
+- Switching from `ava` to inside `ava` from `option+p` is slow. Reduced by
+  making built-in context source commands stream their first rows directly
+  instead of buffering through `awk`; the same `ava<Tab>` then `gohan` E2E flow
+  covers the regression.
+- Typing a query and then idling can make the palette disappear. Hardened by
+  disabling AppKit panel auto-hide-on-deactivate and covered by E2E idle pauses
+  after typing both `ava` and `gohan`.
 
 ## Not Done Yet
 
@@ -513,6 +571,10 @@ state.
   Recording permission.
 - Mandatory OS-level physical-keydown timing benchmark in the default gate. The
   opt-in benchmark exists as `fzf-palette bench physical-hotkey --json`.
+- Automatic Codex/Claude GUI workspace scraping. The implemented path is an
+  explicit bridge file (`fzf-palette context set --app ... --cwd ...`) because
+  scraping Electron internals is brittle; Codex/Claude hooks still need to write
+  those bridge files in normal use.
 
 ## Next Slice
 

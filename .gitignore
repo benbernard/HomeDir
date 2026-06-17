@@ -496,3 +496,5 @@ bin/meeting-overlay
 .agents/skills/*
 .claude/agents/*
 .croissant/croissant.pid
+.config/graft
+.mitmproxy

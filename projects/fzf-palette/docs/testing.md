@@ -125,6 +125,9 @@ Required E2E workflows:
 - Global hotkey opens the panel.
 - Query field is focused immediately.
 - Typing filters visible rows.
+- A typed query remains visible and focused after idling; the panel must not
+  disappear without accept, cancel, or timeout.
+- Arrow Up/Down move the selection while the query field is focused.
 - Escape closes the panel.
 - Accepting a row returns the expected selected text.
 - Multi-select, select all, and deselect all work.
@@ -133,7 +136,11 @@ Required E2E workflows:
 - JSON-configured profiles work with source, display, preview, and result rules.
 - JSON-configured two-stage profiles transition from the first picker to the
   second picker and return the second picker's hidden-field result.
+- Single-select Tab accepts the current row so Alfred-style two-stage profile
+  flows can transition without closing the popup unexpectedly.
 - Built-in repo, downloads, and `context-files` profiles work before release.
+- Hotkey-triggered opens resolve program context for Codex, Claude, and
+  Ghostty/tmux when those apps are frontmost.
 - Preview pane updates for cursor movement.
 - Preview pane toggles when `ctrl-/:toggle-preview` is configured.
 - Slow previews do not block typing or list updates.
@@ -173,6 +180,7 @@ Required benchmark coverage:
 - Source command first row and completion.
 - Engine query latency without UI rendering.
 - UI keystroke to visible-row update.
+- UI selection movement, including preview-enabled rows.
 - Preview responsiveness while query input continues.
 - CLI-to-app roundtrip.
 - Selection to result delivery.
@@ -212,9 +220,11 @@ Expected behavior:
 - `test-e2e.sh`: live resident-app accept/cancel smoke test using gated
   test-control socket actions, including native prompt/header/pointer/marker
   and inline-info chrome, JSON-configured profile behavior, built-in profile
-  behavior against an isolated temp `$HOME`, return, copy, open, command, source
-  cancellation, preview cancellation, result-command cancellation, optional
-  physical keyboard input through `CGEvent`, and cancel behavior.
+  behavior against an isolated temp `$HOME`, focused-query Arrow Up/Down
+  navigation, single-select Tab transition for the built-in `context-files`
+  profile, return, copy, open, command, source cancellation, preview
+  cancellation, result-command cancellation, optional physical keyboard input
+  through `CGEvent`, and cancel behavior.
 - `test-visual-internal.sh`: permission-free visual gate. It launches the real
   resident app in forced light and dark appearances, opens the same picker in
   each run, captures app-rendered internal snapshots, and verifies nonblank
@@ -260,13 +270,16 @@ Current implementation status:
   resolution, multi-select source-order selection, multi-select result joining
   across newline, space, NUL, and JSON modes, engine-owned multi-select state,
   deferred match-range computation for native panel rendering,
+  program-context app classification, Codex/Claude bridge-file resolution,
+  Ghostty/tmux cwd resolution,
   launch-time hotkey binding
   parsing, and initial `fzf --filter` oracle parity.
 - `scripts/bench.sh smoke` launches the resident app and verifies the app-backed
   panel, direct hotkey, Carbon event hotkey, native-panel 10,000-row
   keystroke, native-panel 100,000-row large-keystroke, main-thread query task,
-  source-command, preview, result-delivery, lifecycle cleanup, and CLI
-  roundtrip benchmarks in addition to the local native engine benchmark.
+  source-command, preview, preview-enabled selection movement, result-delivery,
+  lifecycle cleanup, and CLI roundtrip benchmarks in addition to the local
+  native engine benchmark.
 - `scripts/test-quiet.sh` covers the no-popup subset for routine logic edits:
   unit tests, integration tests, and lightweight UI support tests. It
   intentionally avoids live app E2E, visual, install, and benchmark gates.
@@ -281,7 +294,8 @@ Current implementation status:
   window show/close status, and settings clear. It verifies normalized bindings
   and Carbon registration state through `status --json`, verifies direct and
   lower-level Carbon event hotkey panel show for the mapped default binding,
-  settings binding, and a profile-specific JSON binding, app-internal visual
+  settings binding, a simulated Codex frontmost-app bridge context, and a
+  profile-specific JSON binding, app-internal visual
   snapshot metrics for nonblank pixels, focused
   query input, preview pane visibility, stable panel size, styling, and basic
   layout violations, `FZF_DEFAULT_OPTS` merge behavior with `+m` override of
@@ -299,11 +313,14 @@ Current implementation status:
   JSON joins, copy mode, side-effect-safe paste mode through
   `FZF_PALETTE_PASTE_LOG`, side-effect-safe open mode through
   `FZF_PALETTE_OPEN_LOG`, command mode, preview updates after
-  cursor movement and query filtering, rich SGR preview ANSI rendering without
-  raw escape leakage, terminal-control preview rendering to final visible screen
-  state, insert/delete-line and simple scroll-control preview rendering, preview
-  toggling, native right/up preview-window layout and wrap snapshot assertions,
-  preview-window scroll-expression assertions, source child
+  cursor movement and query filtering, focused-query Arrow Up/Down selection
+  movement, the built-in `context-files` `ava<Tab>` then `gohan` transition
+  with idle pauses after both typed queries to catch unintended panel hiding,
+  rich SGR preview ANSI rendering without raw escape leakage, terminal-control
+  preview rendering to final visible screen state, insert/delete-line and simple
+  scroll-control preview rendering, preview toggling, native right/up
+  preview-window layout and wrap snapshot assertions, preview-window
+  scroll-expression assertions, source child
   cleanup, preview child cleanup, result-command child cleanup, and
   cancel.
 - `fzf-palette bench lifecycle --json` covers repeated panel show/hide, source

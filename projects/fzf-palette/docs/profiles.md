@@ -64,8 +64,10 @@ Current runtime behavior:
 - `fzf-palette open --profile name` resolves the profile before source loading.
 - Explicit CLI source, display, preview, result, and query options override the
   matching profile defaults.
-- Built-in profiles include `default`, `ctrl-t`, `context-files`, `repos`,
-  `downloads`, `git-status`, and `git-commits`.
+- Built-in profiles include `default`, `ctrl-t`, `context-files`,
+  `context-dirs`, `home-files`, `home-dirs`, `repos`, `repos-dirs`,
+  `repos-files`, `downloads`, `downloads-files`, `git-status`, and
+  `git-commits`.
 - Two-stage profiles are data-driven through `source.type = "twoStage"`.
 - Top-level `hotkeys` entries register profile-specific global bindings. The
   first launch-env binding still comes from `FZF_PALETTE_HOTKEY`, optionally
@@ -185,13 +187,18 @@ Example:
 ```
 
 The built-in `context-files` profile uses this source type. Its first stage lists
-`~` plus direct children of `~/projects` and `~/repos`; its second stage lists
-files and directories under the chosen root while pruning `.git` and
-`node_modules`.
+the hotkey program-context cwd as `current` when one was resolved, then `~` plus
+direct children of `~/projects` and `~/repos`; its second stage lists files and
+directories under the chosen root while pruning `.git` and `node_modules`. The
+built-in context file and directory sources are written to stream rows directly
+from the shell loop so the second picker can show matches as soon as `find`
+emits them.
 
 Live E2E covers the built-in `repos`, `downloads`, and `context-files` profiles
 against an isolated temp `$HOME` so tests do not depend on the developer's real
-directory contents.
+directory contents. It also covers the Alfred-style `context-files` transition
+where the user searches `ava`, presses Tab, searches `gohan`, and accepts the
+nested directory.
 
 ## Preview Panes
 
@@ -203,6 +210,8 @@ Supported preview inputs:
 - Parsed fields such as `{1}`, `{2}`, and `{}`.
 - Current query.
 - Current working directory.
+- Hotkey program-context environment such as
+  `$FZF_PALETTE_PROGRAM_CONTEXT_CWD`, when available.
 - Environment from the profile.
 
 Supported preview behavior:
