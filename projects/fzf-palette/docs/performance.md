@@ -55,6 +55,7 @@ Warm resident app, hotkey path:
 | Metric | Hard max | Target | Notes |
 | --- | ---: | ---: | --- |
 | Physical hotkey event to app event received | 15 ms | 5 ms | Carbon/keyboard event dispatch. |
+| Program context resolution | 50 ms hard timeout | 15 ms | Single total budget for supported hotkey frontmost apps; must fail closed. |
 | App event received to panel ordered front | 60 ms | 25 ms | Preallocated panel, no source work. |
 | App event received to query focused | 75 ms | 35 ms | Query field accepts input. |
 | Physical hotkey event to interactive panel | 200 ms | 75 ms | Primary product gate. |
@@ -72,6 +73,7 @@ Per-keystroke filtering:
 | Key down to visible rows updated, medium fixture | 50 ms | 10 ms | 10,000 rows. |
 | Key down to visible rows updated, large fixture | 50 ms | 20 ms | 100,000 rows; may require cancellation and snapshots. |
 | Key down while preview is running | 50 ms | 10 ms | Preview must never block filtering. |
+| Arrow movement to selected row updated | 16 ms | 8 ms | Preview updates must not duplicate or block row movement. |
 
 Cold app launch is not the main interaction, but it still matters:
 
@@ -150,6 +152,7 @@ fzf-palette bench engine --runs 500 --warmup 50 --json
 fzf-palette bench keystroke --runs 120 --warmup 20 --json
 fzf-palette bench large-keystroke --runs 60 --warmup 10 --json
 fzf-palette bench main-thread --runs 120 --warmup 20 --json
+fzf-palette bench movement --runs 120 --warmup 20 --json
 fzf-palette bench preview --runs 100 --warmup 10 --json
 fzf-palette bench result --runs 300 --warmup 30 --json
 fzf-palette bench lifecycle --runs 100 --warmup 10 --json
@@ -181,6 +184,9 @@ Current implementation status:
 - `fzf-palette bench main-thread --json` runs against the resident app and
   enforces a 16 ms hard max plus 10 ms p95 target for the synchronous
   main-thread query/filter/table-reload task on 10,000 generated rows.
+- `fzf-palette bench movement --json` runs against the resident app and
+  enforces a 16 ms hard max plus 8 ms p95 target for repeated native row
+  selection movement with a preview configuration active.
 - `fzf-palette bench source --json` runs against the resident app and enforces
   first-row and completion budgets for a generated 100-row no-PTY source
   command.
@@ -250,6 +256,7 @@ Benchmark types:
   query path and visible rows update.
 - `main-thread`: synchronous main-thread query/filter/table-reload task duration
   during repeated query updates.
+- `movement`: native row selection movement with preview configuration active.
 - `preview`: run preview commands and measure first output and render.
 - `result`: selection accept to app result response through the normal panel
   completion path.
@@ -446,6 +453,8 @@ Only commit curated benchmark notes when they explain a design decision.
 - Keep the app resident.
 - Preallocate the panel and native list view.
 - Keep the query field and list rendering on a minimal main-thread path.
+- Bound program-context providers; Codex/Claude bridge reads and Ghostty/tmux
+  lookups must fail closed rather than blocking the popup.
 - Cache shell environment off the hot path.
 - Keep the engine warm.
 - Keep source rows in memory structures optimized for incremental filtering.

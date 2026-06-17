@@ -45,6 +45,7 @@ src/converter
 src/downloader
 src/git-cleanup
 src/git-prune-old
+src/gui-fzf-picker
 src/ic
 src/meeting-notify
 src/notifyctl

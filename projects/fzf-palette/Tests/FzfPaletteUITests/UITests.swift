@@ -28,7 +28,15 @@ final class UITests: XCTestCase {
             ],
             settingsHotkey: "shift+cmd+k",
             settingsProfile: "context-files",
-            settingsVisible: true
+            settingsVisible: true,
+            programContext: ProgramContext(
+                cwd: "/Users/benbernard/projects/fzf-palette",
+                provider: "codex-bridge",
+                appName: "Codex",
+                bundleIdentifier: "com.openai.codex",
+                detail: "thread workspace"
+            ),
+            lastCompletionReason: "panel_cancelled"
         )
         let response = PaletteResponse(type: .status, app: status)
 
@@ -55,12 +63,18 @@ final class UITests: XCTestCase {
         XCTAssertEqual(decoded.app?.settingsHotkey, "shift+cmd+k")
         XCTAssertEqual(decoded.app?.settingsProfile, "context-files")
         XCTAssertEqual(decoded.app?.settingsVisible, true)
+        XCTAssertEqual(decoded.app?.programContext?.cwd, "/Users/benbernard/projects/fzf-palette")
+        XCTAssertEqual(decoded.app?.programContext?.provider, "codex-bridge")
+        XCTAssertEqual(decoded.app?.programContext?.appName, "Codex")
+        XCTAssertEqual(decoded.app?.programContext?.bundleIdentifier, "com.openai.codex")
+        XCTAssertEqual(decoded.app?.lastCompletionReason, "panel_cancelled")
     }
 
     func testVisualSnapshotRoundTripsForE2EAssertions() throws {
         let snapshot = PanelVisualSnapshot(
             panelVisible: true,
             queryFieldFocused: true,
+            queryFieldActionBound: false,
             windowNumber: 42,
             captureX: 10,
             captureY: 20,
@@ -82,6 +96,8 @@ final class UITests: XCTestCase {
             previewCornerRadius: 10,
             usesCustomSelectionStyle: true,
             visibleRows: 3,
+            selectedRowIndex: 1,
+            activeRowText: "beta",
             previewVisible: true,
             previewWidth: 420,
             previewHeight: 360,
@@ -105,6 +121,7 @@ final class UITests: XCTestCase {
 
         XCTAssertEqual(decoded.snapshot?.panelVisible, true)
         XCTAssertEqual(decoded.snapshot?.queryFieldFocused, true)
+        XCTAssertEqual(decoded.snapshot?.queryFieldActionBound, false)
         XCTAssertEqual(decoded.snapshot?.windowNumber, 42)
         XCTAssertEqual(decoded.snapshot?.captureX, 10)
         XCTAssertEqual(decoded.snapshot?.captureY, 20)
@@ -122,6 +139,8 @@ final class UITests: XCTestCase {
         XCTAssertEqual(decoded.snapshot?.resultsCornerRadius, 10)
         XCTAssertEqual(decoded.snapshot?.previewCornerRadius, 10)
         XCTAssertEqual(decoded.snapshot?.usesCustomSelectionStyle, true)
+        XCTAssertEqual(decoded.snapshot?.selectedRowIndex, 1)
+        XCTAssertEqual(decoded.snapshot?.activeRowText, "beta")
         XCTAssertEqual(decoded.snapshot?.previewVisible, true)
         XCTAssertEqual(decoded.snapshot?.previewWidth, 420)
         XCTAssertEqual(decoded.snapshot?.previewHeight, 360)

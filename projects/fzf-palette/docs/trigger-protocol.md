@@ -133,16 +133,50 @@ Hotkey flow:
 
 1. Hotkey received.
 2. Capture frontmost app identity and active screen.
-3. Create request from the hotkey's configured profile.
-4. Show preallocated panel immediately.
-5. Start profile source command, if it is not already warm.
-6. Stream rows into the native engine and render snapshots.
-7. Deliver result according to profile.
-8. Return focus to the previous app when appropriate.
+3. Resolve program context for supported frontmost apps.
+4. Create request from the hotkey's configured profile, using the resolved cwd
+   when available.
+5. Show preallocated panel immediately.
+6. Start profile source command, if it is not already warm.
+7. Stream rows into the native engine and render snapshots.
+8. Deliver result according to profile.
+9. Return focus to the previous app when appropriate.
 
 The panel must show before expensive filesystem work. A visible, focused empty
 native picker within a few dozen milliseconds is better than waiting to show a
 fully populated list.
+
+Program context is intentionally hotkey-focused. CLI/script callers already have
+their own cwd and can send it explicitly with `--cwd`. Hotkey requests infer cwd
+only for supported apps:
+
+- `Codex` (`com.openai.codex`) from a bridge file.
+- `Claude` (`com.anthropic.claudefordesktop`) from a bridge file.
+- `Ghostty` (`com.mitchellh.ghostty`) from the active `default` tmux client and
+  `~/bin/tmux-resolve-pane-path`.
+
+Resolution has one 50 ms total budget. If bridge-file or tmux context cannot be
+resolved inside that budget, the provider fails closed and the palette opens
+without inferred cwd.
+
+Bridge files are JSON files under
+`~/Library/Application Support/FzfPalette/program-context/`, or paths supplied
+by `FZF_PALETTE_CODEX_CONTEXT_FILE`, `FZF_PALETTE_CLAUDE_CONTEXT_FILE`,
+`FZF_PALETTE_GHOSTTY_CONTEXT_FILE`, or `FZF_PALETTE_PROGRAM_CONTEXT_FILE`.
+Minimal bridge content is:
+
+```json
+{"cwd":"/Users/benbernard/projects/fzf-palette"}
+```
+
+Useful bridge commands:
+
+```bash
+fzf-palette context set --app codex --cwd "$PWD"
+fzf-palette context set --app claude --cwd "$PWD"
+fzf-palette context get --app codex --json
+fzf-palette context clear --app claude
+```
 
 ## CLI
 
@@ -159,6 +193,7 @@ fzf-palette open --source-command 'git status -s' \
 some-command | fzf-palette open --stdin --preview-command 'bat --color always {}'
 fzf-palette cancel
 fzf-palette env reload
+fzf-palette context set --app codex --cwd "$PWD"
 fzf-palette bench panel --runs 100 --json
 fzf-palette bench source --runs 40 --json
 fzf-palette bench cli-roundtrip --runs 200 --json

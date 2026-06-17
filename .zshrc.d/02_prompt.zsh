@@ -61,7 +61,22 @@ if autoload +X url-quote-magic 2> /dev/null; then
 fi
 
 # powerlevel10k setup
-if [[ -z "$FORGE_SIMPLE_ZSH" ]]; then
+if [[ -n "$CODEX_SHELL" ]]; then
+  setopt PROMPT_SUBST
+
+  _codex_prompt_git() {
+    local branch
+    branch=$(gitbranch 2>/dev/null)
+    [[ -z "$branch" ]] && return
+    branch=${branch//\%/%%}
+    print -r -- " [$branch]"
+  }
+
+  # Codex's built-in shell currently runs best with plain ASCII and
+  # light-background colors instead of the regular Powerlevel10k glyph prompt.
+  PROMPT=$'%F{240}%n@%m %F{25}%~%f%F{28}$(_codex_prompt_git)%f %(?..%F{124}exit:%?%f)\n%F{22}%#%f '
+  RPROMPT=
+elif [[ -z "$FORGE_SIMPLE_ZSH" ]]; then
   source $(submodule powerlevel10k)/powerlevel10k.zsh-theme
 else
   PROMPT='%n@%m %1~ %# '
@@ -78,6 +93,9 @@ if [[ -z "$FORGE_SIMPLE_ZSH" && ${recording} != "true"  && -z "$VSCODE_IPC_HOOK_
     # zsh-autosuggestions setup
     export ZSH_AUTOSUGGEST_BUFFER_MAX_SIZE=20
     export ZSH_AUTOSUGGEST_USE_ASYNC=1
+    if [[ -n "$CODEX_SHELL" ]]; then
+      export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=245'
+    fi
     source ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
     bindkey '^^' autosuggest-accept # Binds Ctrl-6 to accept suggestion, iterm maps Ctrl-Enter to Ctrl-6 (Send Hex Code -> 0x1E)
     bindkey '\e[27;5;13~' autosuggest-accept # Binds escape code for ctrl+enter in ghostty, also needs support in tmux.conf

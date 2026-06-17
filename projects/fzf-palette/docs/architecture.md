@@ -302,6 +302,56 @@ The existing `bin/ts` prototype has useful profile thinking, especially the
 two-stage context picker. The native app should absorb the ideas, not depend on
 Terminal.app automation.
 
+## Program Context
+
+Hotkey-triggered pickers should understand the app the user was working in
+before the palette appeared. Explicit script/CLI requests still use the cwd they
+send, but hotkey requests resolve cwd from the frontmost program before profile
+resolution.
+
+Resolution order:
+
+1. Explicit CLI `--cwd` or profile `cwd` for script-triggered requests.
+2. Hotkey program context from the frontmost app.
+3. Profile default cwd, if configured.
+4. App fallback cwd.
+
+Target providers:
+
+- Codex desktop app (`com.openai.codex`): read a bridge JSON file written by
+  local hooks/scripts.
+- Claude desktop app (`com.anthropic.claudefordesktop`): read the same bridge
+  file format.
+- Ghostty (`com.mitchellh.ghostty`): use the documented Ghostty/tmux setup by
+  resolving the most recent attached `default` tmux client through
+  `~/bin/tmux-resolve-pane-path`, including nested tmux.
+
+All providers share a small total hotkey budget and fail closed. A missed context
+is acceptable; delaying the panel is not.
+
+Bridge files live by default under:
+
+```text
+~/Library/Application Support/FzfPalette/program-context/
+```
+
+The bridge JSON can be minimal:
+
+```json
+{"cwd":"/Users/benbernard/projects/fzf-palette"}
+```
+
+The CLI can write those files:
+
+```bash
+fzf-palette context set --app codex --cwd "$PWD"
+fzf-palette context set --app claude --cwd "$PWD"
+```
+
+This avoids scraping Electron app internals. Codex/Claude integrations should
+publish their active workspace explicitly; Ghostty can be inferred from tmux
+because the terminal stack already exposes active pane cwd.
+
 ## Preserving fzf Defaults
 
 Native mode should parse `FZF_DEFAULT_OPTS` and apply the supported local subset.

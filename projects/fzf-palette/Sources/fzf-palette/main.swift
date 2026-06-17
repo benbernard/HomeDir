@@ -53,6 +53,8 @@ func run(_ arguments: [String]) throws {
         try runLocalBench(rest)
     case "settings":
         try runSettings(rest)
+    case "context":
+        try runContext(rest)
     case "test-control":
         try runTestControl(rest)
     case "help", "--help", "-h":
@@ -143,6 +145,120 @@ func printSettings(_ response: PaletteResponse, json: Bool) throws {
 
 let settingsUsage = "Usage: fzf-palette settings get|show|close|clear [--json] OR fzf-palette settings set --hotkey value [--profile name] [--json]"
 
+func runContext(_ arguments: [String]) throws {
+    guard let action = arguments.first else {
+        throw CLIError.usage(contextUsage)
+    }
+
+    let json = arguments.contains("--json")
+    switch action {
+    case "set":
+        let options = try parseContextOptions(Array(arguments.dropFirst()))
+        let app = options.app
+        let cwd = try ProgramContextBridge.normalizedExistingDirectory(options.cwd)
+        let context = ProgramContext(
+            cwd: cwd,
+            provider: "\(app.rawValue)-bridge",
+            appName: app.displayName,
+            bundleIdentifier: app.defaultBundleIdentifier,
+            detail: options.detail,
+            updatedAt: ISO8601DateFormatter().string(from: Date())
+        )
+        let url = try ProgramContextBridge.writeContext(context, for: app)
+        try printContext(context, path: url.path, json: json)
+    case "get":
+        let options = try parseContextOptions(Array(arguments.dropFirst()), requireCwd: false)
+        do {
+            let context = try ProgramContextBridge.loadContext(for: options.app)
+            let url = ProgramContextBridge.contextFileURL(for: options.app)
+            try printContext(context, path: url.path, json: json)
+        } catch ProgramContextBridgeError.missingContextFile {
+            throw CLIError.usage("No context is recorded for \(options.app.rawValue).")
+        }
+    case "clear":
+        let options = try parseContextOptions(Array(arguments.dropFirst()), requireCwd: false)
+        let url = try ProgramContextBridge.removeContext(for: options.app)
+        if json {
+            let data = try WireCoding.encoder.encode(ContextClearResponse(path: url.path, cleared: true))
+            print(String(decoding: data, as: UTF8.self))
+        } else {
+            print("cleared: \(url.path)")
+        }
+    default:
+        throw CLIError.usage(contextUsage)
+    }
+}
+
+struct ContextClearResponse: Codable {
+    var path: String
+    var cleared: Bool
+}
+
+func parseContextOptions(
+    _ arguments: [String],
+    requireCwd: Bool = true
+) throws -> (app: ProgramContextApp, cwd: String, detail: String?) {
+    var app: ProgramContextApp?
+    var cwd = FileManager.default.currentDirectoryPath
+    var detail: String?
+
+    var index = 0
+    while index < arguments.count {
+        let arg = arguments[index]
+        func requireValue() throws -> String {
+            guard index + 1 < arguments.count else {
+                throw CLIError.usage("Missing value for \(arg)")
+            }
+            index += 1
+            return arguments[index]
+        }
+
+        switch arg {
+        case "--app":
+            let rawApp = try requireValue()
+            guard let parsed = ProgramContextBridge.app(named: rawApp) else {
+                throw CLIError.usage("Unsupported context app: \(rawApp)")
+            }
+            app = parsed
+        case "--cwd":
+            cwd = try requireValue()
+        case "--detail":
+            detail = try requireValue()
+        case "--json":
+            break
+        default:
+            throw CLIError.usage("Unknown context option: \(arg)")
+        }
+        index += 1
+    }
+
+    guard let app else {
+        throw CLIError.usage(contextUsage)
+    }
+
+    if requireCwd, cwd.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+        throw CLIError.usage("context set requires --cwd")
+    }
+
+    return (app, cwd, detail)
+}
+
+func printContext(_ context: ProgramContext, path: String, json: Bool) throws {
+    if json {
+        let data = try WireCoding.encoder.encode(context)
+        print(String(decoding: data, as: UTF8.self))
+        return
+    }
+
+    print("app: \(context.appName ?? "")")
+    print("bundle_id: \(context.bundleIdentifier ?? "")")
+    print("provider: \(context.provider)")
+    print("cwd: \(context.cwd)")
+    print("path: \(path)")
+}
+
+let contextUsage = "Usage: fzf-palette context set|get|clear --app codex|claude|ghostty [--cwd dir] [--detail text] [--json]"
+
 func runTestControl(_ arguments: [String]) throws {
     guard let action = arguments.first else {
         throw CLIError.usage(testControlUsage)
@@ -176,6 +292,12 @@ func runTestControl(_ arguments: [String]) throws {
             throw CLIError.usage("Usage: fzf-palette test-control physical-key return|escape|up|down|left|right|tab|space|delete")
         }
         requestType = .testPhysicalKey
+        query = key
+    case "key":
+        guard let key = firstNonFlagArgument(after: arguments.dropFirst()) else {
+            throw CLIError.usage("Usage: fzf-palette test-control key return|escape|up|down|tab|space")
+        }
+        requestType = .testKey
         query = key
     case "toggle":
         requestType = .testToggleSelection
@@ -224,7 +346,7 @@ func runTestControl(_ arguments: [String]) throws {
     print(response.message ?? response.status?.rawValue ?? response.type.rawValue)
 }
 
-let testControlUsage = "Usage: fzf-palette test-control accept|cancel|hotkey [profile]|carbon-hotkey [profile]|physical-hotkey [profile]|physical-type value|physical-key key|toggle|toggle-preview|select-all|deselect-all|query value|move-down|move-up|snapshot [--json]"
+let testControlUsage = "Usage: fzf-palette test-control accept|cancel|hotkey [profile]|carbon-hotkey [profile]|physical-hotkey [profile]|physical-type value|physical-key key|key key|toggle|toggle-preview|select-all|deselect-all|query value|move-down|move-up|snapshot [--json]"
 
 func firstNonFlagArgument<S: Sequence>(after arguments: S) -> String? where S.Element == String {
     arguments.first { !$0.hasPrefix("--") }
@@ -472,6 +594,11 @@ func printStatus(_ response: PaletteResponse, json: Bool) throws {
     print("settings_hotkey: \(status.settingsHotkey ?? "")")
     print("settings_profile: \(status.settingsProfile ?? "default")")
     print("settings_visible: \(status.settingsVisible)")
+    if let context = status.programContext {
+        print("program_context_provider: \(context.provider)")
+        print("program_context_app: \(context.appName ?? "")")
+        print("program_context_cwd: \(context.cwd)")
+    }
 }
 
 func printResult(_ response: PaletteResponse) throws {
@@ -506,7 +633,7 @@ func runLocalBench(_ arguments: [String]) throws {
         try runEngineBench(arguments, json: json)
     case "cli-roundtrip":
         try runCliRoundtripBench(arguments, json: json)
-    case "panel", "hotkey", "carbon-hotkey", "physical-hotkey", "keystroke", "large-keystroke", "main-thread", "source", "preview", "result", "lifecycle":
+    case "panel", "hotkey", "carbon-hotkey", "physical-hotkey", "keystroke", "large-keystroke", "movement", "main-thread", "source", "preview", "result", "lifecycle":
         try runAppBench(arguments, name: target, json: json)
     default:
         throw CLIError.usage("Unsupported benchmark: \(target)")
@@ -696,9 +823,10 @@ func printHelp() {
           fzf-palette open [--profile name] [--source-command command] [--multi] [--exact] [--preview-command command] [--prompt text] [--header text] [--pointer text] [--marker text] [--info inline] [--delimiter value] [--nth fields] [--with-nth fields] [--result-fields fields] [--result-command command] [--timeout-ms ms]
           fzf-palette settings get|show|close|clear [--json]
           fzf-palette settings set --hotkey value [--profile name] [--json]
+          fzf-palette context set|get|clear --app codex|claude|ghostty [--cwd dir] [--detail text] [--json]
           fzf-palette cancel
-          fzf-palette bench [engine|panel|hotkey|carbon-hotkey|physical-hotkey|keystroke|large-keystroke|main-thread|source|preview|result|lifecycle|cli-roundtrip] [--runs n] [--warmup n] [--json]
-          fzf-palette test-control accept|cancel|hotkey|carbon-hotkey|physical-hotkey|physical-type|physical-key|toggle|toggle-preview|select-all|deselect-all|query value|move-down|move-up|snapshot [--json]
+          fzf-palette bench [engine|panel|hotkey|carbon-hotkey|physical-hotkey|keystroke|large-keystroke|movement|main-thread|source|preview|result|lifecycle|cli-roundtrip] [--runs n] [--warmup n] [--json]
+          fzf-palette test-control accept|cancel|hotkey|carbon-hotkey|physical-hotkey|physical-type|physical-key|key|toggle|toggle-preview|select-all|deselect-all|query value|move-down|move-up|snapshot [--json]
         """
     )
 }

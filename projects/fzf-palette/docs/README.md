@@ -21,7 +21,8 @@ well is better than a terminal-shaped clone that supports every edge case.
 - `local-fzf-compatibility.md`: the local `fzf` defaults and call sites this app
   should support first.
 - `trigger-protocol.md`: how hotkeys, scripts, URL events, and result delivery
-  should work.
+  should work, including program-context detection for Codex, Claude, and
+  Ghostty/tmux.
 - `performance.md`: latency budgets, instrumentation, and benchmark harness.
 - `testing.md`: the required unit, integration, UI/E2E, and performance test
   plan.

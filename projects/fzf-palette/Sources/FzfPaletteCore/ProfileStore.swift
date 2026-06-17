@@ -75,9 +75,48 @@ public struct ProfileStore: Equatable {
             result: ResultConfig(mode: .return)
         ),
         PickerProfile(
+            name: "repos-dirs",
+            title: "Repo Directories",
+            source: .command("find \"$HOME/projects\" \"$HOME/repos\" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sort"),
+            display: DisplayConfig(prompt: "repos>", header: "Pick a repo", info: "inline"),
+            result: ResultConfig(mode: .return)
+        ),
+        PickerProfile(
+            name: "repos-files",
+            title: "Repo Files",
+            source: .command("fd --type f --hidden --no-ignore --exclude .git --exclude node_modules . \"$HOME/projects\" \"$HOME/repos\" 2>/dev/null"),
+            fzfOptions: ["--preview-window=right:60%:wrap", "--bind", "ctrl-/:toggle-preview"],
+            display: DisplayConfig(prompt: "repo-files>", header: "Pick a repo file", info: "inline"),
+            preview: PreviewConfig(command: "bat --color always {} 2>/dev/null || sed -n '1,160p' {}", window: "right:60%:wrap"),
+            result: ResultConfig(mode: .return)
+        ),
+        PickerProfile(
+            name: "home-files",
+            title: "Home Files",
+            source: .command("fd --type f --hidden --no-ignore --exclude .git --exclude node_modules --exclude repos . \"$HOME\" 2>/dev/null"),
+            fzfOptions: ["--preview-window=right:60%:wrap", "--bind", "ctrl-/:toggle-preview"],
+            display: DisplayConfig(prompt: "home-files>", header: "Pick a home file", info: "inline"),
+            preview: PreviewConfig(command: "bat --color always {} 2>/dev/null || sed -n '1,160p' {}", window: "right:60%:wrap"),
+            result: ResultConfig(mode: .return)
+        ),
+        PickerProfile(
+            name: "home-dirs",
+            title: "Home Directories",
+            source: .command("fd --type d --hidden --no-ignore --exclude .git --exclude node_modules --exclude repos . \"$HOME\" 2>/dev/null"),
+            display: DisplayConfig(prompt: "home-dirs>", header: "Pick a home directory", info: "inline"),
+            result: ResultConfig(mode: .return)
+        ),
+        PickerProfile(
             name: "downloads",
             title: "Downloads",
             source: .command("ls -1t \"$HOME/Downloads\" 2>/dev/null"),
+            display: DisplayConfig(prompt: "downloads>", header: "Recent downloads", info: "inline"),
+            result: ResultConfig(mode: .return)
+        ),
+        PickerProfile(
+            name: "downloads-files",
+            title: "Downloads",
+            source: .command("ls -1t \"$HOME/Downloads\" 2>/dev/null | awk -v dir=\"$HOME/Downloads\" '{print dir \"/\" $0}'"),
             display: DisplayConfig(prompt: "downloads>", header: "Recent downloads", info: "inline"),
             result: ResultConfig(mode: .return)
         ),
@@ -117,6 +156,36 @@ public struct ProfileStore: Equatable {
             ))
         ),
         PickerProfile(
+            name: "context-dirs",
+            title: "Context Directories",
+            source: .twoStage(TwoStageSource(
+                first: PickerStage(
+                    title: "Choose Root",
+                    source: .command(contextRootsCommand),
+                    display: DisplayConfig(
+                        delimiter: "\t",
+                        withNth: "1",
+                        prompt: "roots>",
+                        header: "Pick a root",
+                        info: "inline"
+                    ),
+                    result: ResultConfig(fields: "2")
+                ),
+                second: PickerStage(
+                    title: "Directories",
+                    source: .command(contextDirsCommand),
+                    display: DisplayConfig(
+                        delimiter: "\t",
+                        withNth: "1",
+                        prompt: "dirs>",
+                        header: "Pick a directory",
+                        info: "inline"
+                    ),
+                    result: ResultConfig(mode: .return, fields: "2")
+                )
+            ))
+        ),
+        PickerProfile(
             name: "git-status",
             title: "Git Status",
             source: .command("git status --short"),
@@ -137,6 +206,9 @@ public struct ProfileStore: Equatable {
     ]
 
     private static let contextRootsCommand = #"""
+if [ -n "$FZF_PALETTE_PROGRAM_CONTEXT_CWD" ] && [ -d "$FZF_PALETTE_PROGRAM_CONTEXT_CWD" ]; then
+  printf 'current\t%s\n' "$FZF_PALETTE_PROGRAM_CONTEXT_CWD"
+fi
 printf '~\t%s\n' "$HOME"
 for container in "$HOME/projects" "$HOME/repos"; do
   [ -d "$container" ] && find "$container" -mindepth 1 -maxdepth 1 -type d -print
@@ -145,7 +217,26 @@ done | sort | awk -F/ '{printf "%s\t%s\n", $NF, $0}'
 
     private static let contextFilesCommand = #"""
 root={}
-find "$root" -mindepth 1 -maxdepth 6 \( -name .git -o -name node_modules \) -prune -o \( -type f -o -type d \) -print 2>/dev/null | awk -v root="$root" 'index($0, root "/") == 1 { rel=substr($0, length(root)+2); if (rel != "") print rel "\t" $0 }'
+find "$root" -mindepth 1 -maxdepth 6 \( -name .git -o -name node_modules \) -prune -o \( -type f -o -type d \) -print 2>/dev/null | while IFS= read -r path; do
+  case "$path" in
+    "$root"/*)
+      rel=${path#"$root"/}
+      [ -n "$rel" ] && printf '%s\t%s\n' "$rel" "$path"
+      ;;
+  esac
+done
+"""#
+
+    private static let contextDirsCommand = #"""
+root={}
+find "$root" -mindepth 1 -maxdepth 6 \( -name .git -o -name node_modules \) -prune -o -type d -print 2>/dev/null | while IFS= read -r path; do
+  case "$path" in
+    "$root"/*)
+      rel=${path#"$root"/}
+      [ -n "$rel" ] && printf '%s\t%s\n' "$rel" "$path"
+      ;;
+  esac
+done
 """#
 
     public static func load(
