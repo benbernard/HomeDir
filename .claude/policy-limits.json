@@ -3,10 +3,10 @@
     "allow_remote_control": {
       "allowed": false
     },
-    "allow_routines": {
+    "allow_quick_web_setup": {
       "allowed": false
     },
-    "allow_quick_web_setup": {
+    "allow_cobalt_plinth": {
       "allowed": false
     },
     "enforce_web_search_mcp_isolation": {
