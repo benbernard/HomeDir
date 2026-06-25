@@ -498,3 +498,8 @@ bin/meeting-overlay
 .croissant/croissant.pid
 .config/graft
 .mitmproxy
+.claude/telemetry
+.pi/agent/prompts/sophie.md
+.pi/agent/AGENTS.md
+.pi/agent/models.json
+.pi/agent/settings.json
