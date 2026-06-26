@@ -137,10 +137,9 @@ See:
 
 ### Machine Setup
 
-`bin/mac/setupMac.sh` and related scripts document historical setup steps. Treat
-them as a reference, not a known-good bootstrap flow.
-
-See `docs/bootstrap-and-machine-setup.md`.
+`docs/initial-machine-setup.md` is the active agent-run Mac-to-Mac setup
+runbook. It also records which older `bin/mac/*` bootstrap scripts are still
+useful as references and which assumptions are stale.
 
 ### Small Apps And Browser Scripts
 

@@ -503,3 +503,4 @@ bin/meeting-overlay
 .pi/agent/AGENTS.md
 .pi/agent/models.json
 .pi/agent/settings.json
+/.homebrew
