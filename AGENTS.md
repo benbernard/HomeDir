@@ -6,11 +6,11 @@ Overall, don't spare my feelings and be bold with constructive criticism.
 
 ```text
 docs/
-├── bootstrap-and-machine-setup.md
 ├── browser-userscripts-and-small-apps.md
 ├── development-workflows.md
 ├── dotfiles-and-app-configs.md
 ├── home-directory-map.md
+├── initial-machine-setup.md
 ├── legacy-systems-index.md
 ├── macos-notification-framework.md
 ├── macos-url-routing.md
