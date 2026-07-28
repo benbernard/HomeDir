@@ -6,7 +6,8 @@ import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
 
 const HOME = process.env.HOME ?? "/";
-const SKILLS_DIR = path.join(HOME, ".config", "skillshare", "skills");
+const SKILLS_CONFIG = path.join(HOME, ".config", "skillshare", "config.yaml");
+const FALLBACK_SKILLS_DIR = path.join(HOME, ".config", "skillshare", "skills");
 const OPENCODE_CONFIG = path.join(HOME, ".config", "opencode", "opencode.json");
 const MANIFEST_FILE = path.join(
   HOME,
@@ -46,6 +47,18 @@ interface OpencodeConfig {
   command?: Record<string, OpencodeCommand>;
   [key: string]: unknown;
 }
+
+function readSkillshareSource(): string {
+  if (!fs.existsSync(SKILLS_CONFIG)) return FALLBACK_SKILLS_DIR;
+
+  const content = fs.readFileSync(SKILLS_CONFIG, "utf-8");
+  const match = content.match(/^source:\s*(.+)$/m);
+  if (!match) return FALLBACK_SKILLS_DIR;
+
+  return match[1].trim().replace(/^["']|["']$/g, "");
+}
+
+const SKILLS_DIR = readSkillshareSource();
 
 function readSkillsMetadata(): Record<string, SkillMetadata> {
   const metaFile = path.join(SKILLS_DIR, ".metadata.json");
