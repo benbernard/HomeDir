@@ -504,3 +504,5 @@ bin/meeting-overlay
 .pi/agent/models.json
 .pi/agent/settings.json
 /.homebrew
+/.claude-multi
+/.claude-open
