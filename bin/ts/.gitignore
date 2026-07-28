@@ -55,4 +55,5 @@ src/sync-claude-mcps
 src/sync-skills-to-opencode
 src/tmux-fzf-picker
 src/tmux-health-check
+src/trace-claude-settings
 # End auto-generated symlinks
