@@ -1,4 +1,11 @@
 #Environment
+# tmux panes carry TERM=tmux-256color (needed for italics passthrough). On
+# hosts whose terminfo db lacks that entry (older ssh targets), fall back to
+# the universally-available screen-256color so apps don't see an unknown TERM.
+if [[ -n "$TERM" && "$TERM" == tmux-256color ]] && ! infocmp "$TERM" &>/dev/null; then
+  export TERM=screen-256color
+fi
+
 setenv EDITOR nvim
 setenv VISUAL nvim
 setenv PAGER less

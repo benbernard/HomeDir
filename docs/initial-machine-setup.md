@@ -257,6 +257,59 @@ ssh "$TARGET" 'chmod 700 ~/.ssh; chmod 600 ~/.ssh/* 2>/dev/null || true; chmod 6
 ssh "$TARGET" 'ssh -T git@github.com || true'
 ```
 
+## GitHub CLI And API Auth
+
+Do not assume GitHub is healthy just because SSH cloning works. During the
+2026 move, `ssh -T git@github.com` worked while `gh auth status` had a stale
+token, which made org-wide API work return public-only or fail outright.
+
+Install `gh` early if the Brewfile has not done it yet:
+
+```bash
+brew install gh
+```
+
+Verify three separate GitHub surfaces on the target:
+
+```bash
+ssh -T git@github.com || true
+gh auth status
+gh api user --jq '{login, id}'
+```
+
+Expected state:
+
+- `ssh -T git@github.com` authenticates as the right GitHub user. It may exit
+  non-zero because GitHub does not provide shell access; read the message.
+- `gh auth status` shows the active account with enough access for normal work
+  across private repos, org metadata, PRs, issues, Actions, and package
+  workflows. Do not intentionally create a narrow token for this machine.
+- `gh api user` returns the expected login.
+
+If `gh auth status` reports an invalid or missing token, fix it interactively.
+The agent can run the command, but the user must complete the browser/device
+auth prompt:
+
+```bash
+gh auth refresh -h github.com
+```
+
+If refresh cannot recover the token, do a fresh login:
+
+```bash
+gh auth login -h github.com
+```
+
+Do not paste tokens into conversations or logs. If GitHub asks for SSO
+authorization, complete that in the browser and rerun the affected access
+check.
+
+Codex's GitHub connector is separate from local `gh`. If connector-backed
+GitHub tools return `UNAUTHORIZED`, `Reauthentication required`, or
+`oauth_token_response_invalid`, reauthenticate the GitHub connector in Codex.
+That does not imply local `gh` is broken, and fixing `gh` does not refresh the
+connector.
+
 ## Home Repo And Submodules
 
 Restore the tracked home repo before copying large untracked state:
@@ -269,6 +322,78 @@ ssh "$TARGET" 'cd /Users/benbernard && git submodule update --init --recursive'
 
 If submodule metadata breaks after later copies, sync `.git/modules/` from the
 source without deleting target-only metadata, then rerun `git status`.
+
+## Skillshare CLI, Skills, And Agents
+
+Skillshare is not just copied dot-state. Install the CLI explicitly, then
+verify the source repo and sync state. The 2026 transfer copied enough state for
+some skills to appear, but missed the executable until it was installed
+manually.
+
+Install the tool:
+
+```bash
+brew install skillshare
+command -v skillshare
+skillshare --version
+```
+
+Expected local layout:
+
+- Config: `~/.config/skillshare/config.yaml`
+- Skill source repo: `~/submodules/skillshare-skills`
+- Agent source: `~/.config/skillshare/agents`
+- Primary skill targets:
+  - `~/.claude/skills`
+  - `~/.codex/skills`
+  - `~/.cursor/skills`
+  - `~/.config/opencode/skills`
+  - `~/.agents/skills`
+
+The config should point at the repo source, not at an old
+`~/.config/skillshare/skills` directory:
+
+```bash
+sed -n '1,80p' ~/.config/skillshare/config.yaml
+git -C ~/submodules/skillshare-skills status --short --branch
+git -C ~/submodules/skillshare-skills remote -v
+```
+
+Then sync and validate:
+
+```bash
+skillshare sync --json
+skillshare status --json
+skillshare doctor --json
+```
+
+Healthy enough for a migrated machine:
+
+- `skillshare doctor --json` has `errors: 0`.
+- Source reports `~/submodules/skillshare-skills`.
+- No broken symlinks.
+- No skill sync drift.
+- The source repo is clean and has the expected GitHub remote.
+
+Do not blindly force-sync agents. `skillshare doctor` may report agent drift
+when a target has local overrides, and `skillshare sync agents --force` can
+overwrite those edits. Inspect first:
+
+```bash
+skillshare diff agents --stat --no-tui
+skillshare sync agents --dry-run
+```
+
+If OpenCode slash commands are generated from Skillshare, make sure the helper
+reads the configured Skillshare source rather than assuming the legacy
+`~/.config/skillshare/skills` path:
+
+```bash
+sync-skills-to-opencode --dry-run
+```
+
+If the dry run proposes command changes, review them before writing. It is
+normal for ignored or blacklisted Skillshare entries to be skipped.
 
 ## Package And App Install
 
@@ -464,7 +589,7 @@ OrbStack:
 Run on the target:
 
 ```bash
-zsh -lc 'echo $SHELL; command -v brew git rg fd jq gh bun node go pyenv rbenv fnm tmux nvim gohan gws codex claude'
+zsh -lc 'echo $SHELL; command -v brew git rg fd jq gh bun node go pyenv rbenv fnm tmux nvim codex claude'
 zsh -lc 'ben-scripts | head'
 zsh -lc 'ic --help >/dev/null'
 zsh -lc 'tmux -V'
@@ -482,7 +607,8 @@ Interactive checks:
 - Open MeetingBar and trigger a dry test.
 - Open BetterTouchTool and Karabiner and grant permissions.
 - Open OrbStack and confirm Docker CLI works.
-- Run `gh auth status`; re-auth if needed.
+- Run the GitHub CLI/API checks above; re-auth `gh` and the Codex GitHub
+  connector separately if needed.
 - Refresh `gcloud`, `aws`, and other expiring credentials.
 
 ## Final Cleanup

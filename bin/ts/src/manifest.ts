@@ -75,6 +75,11 @@ export const scripts: Record<string, ScriptEntry> = {
     file: "claude-notify.ts",
     description: "Claude Code hook for macOS notifications on task completion",
   },
+  "trace-claude-settings": {
+    file: "trace-claude-settings.ts",
+    description:
+      "Trace and preserve writes to Claude settings.json for diagnosis",
+  },
   "codex-notify": {
     file: "codex-notify.ts",
     description:

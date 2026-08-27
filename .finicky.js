@@ -1,11 +1,11 @@
 const WORK_CHROME = {
   name: "Google Chrome",
-  profile: "Default"
+  profile: "Work",
 };
 
 const HOME_CHROME = {
   name: "Google Chrome",
-  profile: "Profile 1",
+  profile: "Ben",
 };
 
 // const LINEAR_APP = () => {
