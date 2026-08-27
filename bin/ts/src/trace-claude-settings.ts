@@ -334,23 +334,31 @@ async function main(): Promise<void> {
   });
   tracer.stderr.pipe(stderrLog);
 
+  // Kills the entire detached tracer process group (sudo + fs_usage).
+  const killTracerGroup = (signal: "INT" | "TERM" | "KILL"): void => {
+    if (!tracer.pid || tracer.exitCode !== null || tracer.signalCode !== null)
+      return;
+    spawnSync(
+      "/usr/bin/sudo",
+      ["/bin/kill", "-s", signal, "--", `-${tracer.pid}`],
+      { stdio: "ignore" },
+    );
+  };
+
   let finalizing = false;
   const finalize = async (reason: string, exitCode = 0): Promise<void> => {
     if (finalizing) return;
     finalizing = true;
     process.removeAllListeners("SIGINT");
     process.removeAllListeners("SIGTERM");
+    process.removeAllListeners("SIGHUP");
     console.log(`\nStopping trace (${reason})...`);
 
     directoryWatcher.close();
-    if (observationTimer) clearTimeout(observationTimer);
+    clearTimeout(observationTimer);
 
-    if (tracer.pid && tracer.exitCode === null && tracer.signalCode === null) {
-      spawnSync(
-        "/usr/bin/sudo",
-        ["/bin/kill", "-s", "INT", "--", `-${tracer.pid}`],
-        { stdio: "ignore" },
-      );
+    if (tracer.exitCode === null && tracer.signalCode === null) {
+      killTracerGroup("INT");
       await Promise.race([
         new Promise<void>((resolveExit) =>
           tracer.once("exit", () => resolveExit()),
@@ -359,12 +367,8 @@ async function main(): Promise<void> {
       ]);
     }
 
-    if (tracer.pid && tracer.exitCode === null && tracer.signalCode === null) {
-      spawnSync(
-        "/usr/bin/sudo",
-        ["/bin/kill", "-s", "TERM", "--", `-${tracer.pid}`],
-        { stdio: "ignore" },
-      );
+    if (tracer.exitCode === null && tracer.signalCode === null) {
+      killTracerGroup("TERM");
       await Promise.race([
         new Promise<void>((resolveExit) =>
           tracer.once("exit", () => resolveExit()),
@@ -373,13 +377,7 @@ async function main(): Promise<void> {
       ]);
     }
 
-    if (tracer.pid && tracer.exitCode === null && tracer.signalCode === null) {
-      spawnSync(
-        "/usr/bin/sudo",
-        ["/bin/kill", "-s", "KILL", "--", `-${tracer.pid}`],
-        { stdio: "ignore" },
-      );
-    }
+    killTracerGroup("KILL");
 
     if (pendingOutput) handleLine(pendingOutput);
     observeTarget("final");
@@ -475,6 +473,10 @@ async function main(): Promise<void> {
 
   process.once("SIGINT", () => void finalize("SIGINT (Ctrl-C)"));
   process.once("SIGTERM", () => void finalize("SIGTERM", 1));
+  process.once("SIGHUP", () => void finalize("SIGHUP (terminal closed)", 1));
+  // Last resort for exits that bypass finalize (uncaught exception,
+  // process.exit): only synchronous work is allowed here.
+  process.on("exit", () => killTracerGroup("KILL"));
   tracer.once("error", (error) => {
     console.error(`fs_usage failed to start: ${error}`);
     void finalize("fs_usage start failure", 1);

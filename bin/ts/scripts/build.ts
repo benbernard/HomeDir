@@ -254,6 +254,18 @@ async function buildEntry(entryPoint: string): Promise<void> {
 
   // Make executable
   chmodSync(outfile, 0o755);
+
+  // Re-sign ad-hoc: bun --compile appends the JS payload after signing,
+  // which newer macOS dyld rejects ("malformed import table")
+  const signProc = Bun.spawn(["codesign", "--sign", "-", "--force", outfile], {
+    stdout: "pipe",
+    stderr: "pipe",
+  });
+  const signExitCode = await signProc.exited;
+  if (signExitCode !== 0) {
+    const stderr = await new Response(signProc.stderr).text();
+    console.warn(`Warning: codesign failed for ${fileName}: ${stderr}`);
+  }
 }
 
 /**
