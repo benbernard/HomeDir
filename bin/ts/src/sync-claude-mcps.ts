@@ -254,7 +254,7 @@ async function main() {
         console.log("\nProjects with MCP servers:");
         for (const [projPath, proj] of projectsWithMcps) {
           console.log(
-            `  --project ${projPath}  (${Object.keys(proj.mcpServers!).join(
+            `  --project ${projPath}  (${Object.keys(proj.mcpServers ?? {}).join(
               ", ",
             )})`,
           );
