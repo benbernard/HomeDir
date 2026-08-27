@@ -23,7 +23,7 @@ ic() {
 
 # Add completion for ic command
 _ic() {
-  local -a subcommands
+  local -a subcommands tmux_subcommands
   local curcontext="$curcontext" state line
   typeset -A opt_args
 
@@ -32,9 +32,18 @@ _ic() {
     'c:Clone a GitHub repo with SSH'
     'attach:Attach current repo to nested tmux session'
     'a:Attach current repo to nested tmux session'
+    'tmux:Show and recall tmux inventory'
+    't:Show and recall tmux inventory'
     '--help:Show help message'
     '-h:Show help message'
     'help:Show help message'
+  )
+  tmux_subcommands=(
+    'renumber:Renumber tmux windows'
+    'status:Show and refresh tmux inventory'
+    'recall:Alias for tmux status'
+    'refresh:Refresh tmux inventory quietly'
+    'watch:Continuously refresh tmux inventory'
   )
 
   _arguments -C \
@@ -53,6 +62,27 @@ _ic() {
         attach|a)
           _arguments \
             '--force[Detach other clients and attach]'
+          ;;
+        tmux|t)
+          if (( CURRENT == 2 )); then
+            _describe 'tmux subcommand' tmux_subcommands
+          else
+            case $words[3] in
+              status|s|recall|ls)
+                _arguments \
+                  '--json[Print machine-readable JSON]' \
+                  '--cached[Use the saved snapshot without refreshing]'
+                ;;
+              refresh|r)
+                _arguments '--quiet[Suppress refresh output]'
+                ;;
+              watch)
+                _arguments \
+                  '--interval[Refresh interval in seconds]:seconds:(10)' \
+                  '--quiet[Suppress refresh output]'
+                ;;
+            esac
+          fi
           ;;
       esac
       ;;

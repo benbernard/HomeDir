@@ -38,6 +38,7 @@ Ghostty Terminal
 | `~/.zshrc.d/02_functions.zsh` | Shell functions: `nesttm`, `nt` |
 | `~/.zshrc.d/05_ic.zsh` | `ic` shell wrapper (sources output script from TS binary) |
 | `bin/ts/src/ic.ts` | `ic` TypeScript binary: clone, attach, tmux renumber, symlinks |
+| `bin/ts/src/lib/tmux-inventory.ts` | Snapshot, reconcile, persist, and format outer/nested tmux state |
 | `bin/tmux-swap-or-move-window` | Shell script: swap two tmux windows by index |
 | `bin/tmux-resolve-pane-path` | Shell script: resolve pane's real cwd (follows into nested tmux) |
 | `bin/ts/src/tmux-fzf-picker.ts` | FZF file/directory picker in a tmux popup |
@@ -135,6 +136,45 @@ The `ic` command (`bin/ts/src/ic.ts` + `~/.zshrc.d/05_ic.zsh`) is the main tool 
 **The shell integration pattern:** The TypeScript binary writes commands to a temp file (via `--shell-integration-script`), and the zsh wrapper sources it. This is needed because the binary can't change the parent shell's state (like cd or exec tmux).
 
 **Key function:** `execNestedTmux()` in `ic.ts` wraps all tmux commands as `tmux -L nested -f ~/.tmux.nested.conf <command>`.
+
+## Tmux inventory and recall
+
+`ic attach` records a machine-readable snapshot of both tmux layers before it
+attaches. The snapshot includes every outer session/window/pane, every nested
+session/window/pane, detected coding agents, and the mapping from each nested
+client back to its outer pane. It is stored atomically at:
+
+```text
+~/.local/state/ic/tmux-inventory.json
+```
+
+The attach wrapper also starts one guarded background watcher. It refreshes the
+snapshot while the outer tmux server is alive, so window renames, reordering,
+new `ic attach` sessions, and client detach/reattach operations are reflected
+without requiring another attach. A stale snapshot is retained when the outer
+server exits; the watcher then stops. This is a last-known-state registry, not
+an unbounded event log.
+
+Use these commands from any shell:
+
+| Command | Purpose |
+|---------|---------|
+| `ic tmux status` (`ic t s`) | Refresh and print the current inventory |
+| `ic tmux status --json` | Print the inventory for scripts |
+| `ic tmux status --cached` | Print the last saved snapshot without querying tmux |
+| `ic tmux recall` | Alias for `status`; useful after tmux has exited |
+| `ic tmux refresh --quiet` | Refresh state without human output |
+| `ic tmux watch` | Run the refresh loop manually |
+
+The mapping uses explicit sockets (`default` and `nested`), nested client TTYs,
+and the matching outer pane TTY. This avoids confusing two nested sessions that
+use the same session name on different servers. Agent session IDs are resolved
+from process environment/arguments first, then recent Claude, Codex, Pi, or
+OpenCode session storage where available.
+
+The watcher uses `~/.local/state/ic/tmux-inventory.watcher.lock`, recovers a
+dead lock owner, and exits cleanly on `SIGINT`/`SIGTERM`. Delete the state file
+if it becomes invalid; the next `ic attach` or `ic tmux refresh` recreates it.
 
 ### 2. `nesttm <name>` (Manual method)
 

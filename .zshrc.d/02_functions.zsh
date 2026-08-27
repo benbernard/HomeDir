@@ -73,6 +73,9 @@ nesttm () {
 
   # Use separate socket for nested tmux with nested config
   # First check if session exists
+  # Request extended keys (modifyOtherKeys=2) on the outer pane so the outer
+  # tmux delivers CSI-u keys (e.g. S-Enter) to the nested client; reset after.
+  printf '\033[>4;2m'
   if env -u TMUX tmux -L nested has-session -t "$@" 2>/dev/null; then
     # Session exists, attach to it
     env -u TMUX tmux -L nested -f ~/.tmux.nested.conf attach-session -t "$@"
@@ -80,6 +83,7 @@ nesttm () {
     # Create new session with nested config
     env -u TMUX tmux -L nested -f ~/.tmux.nested.conf new-session -s "$@"
   fi
+  printf '\033[>4;0m'
 }
 
 mvscreenshot() {
@@ -210,4 +214,23 @@ pgtable() {
 
 lsPorts() {
   sudo lsof -iTCP -sTCP:LISTEN -n -P | awk 'NR>1 {print $9, $1, $2}' | sed 's/.*://' | while read port process pid; do echo "Port $port: $(ps -p $pid -o command= | sed 's/^-//') (PID: $pid)"; done | sort -n
+}
+
+# ============================================
+# Personal aliases / functions
+# ============================================
+# `computer <natural language>` -> opens pi interactive mode with that prompt
+# already submitted and running. Multiple words are joined into one prompt
+# (pi would otherwise treat each unquoted word as a separate message/turn).
+#   computer                       -> open pi with empty editor
+#   computer make this thing       -> pi "make this thing" (one turn)
+#   computer -p "summarize this"   -> raw pi flag passthrough
+computer() {
+  if (( $# == 0 )); then
+    pi
+  elif [[ $1 == -* ]]; then
+    pi "$@"
+  else
+    pi "$*"
+  fi
 }
