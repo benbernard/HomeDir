@@ -21,6 +21,12 @@ import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
 import { logError, logInfo, logSuccess } from "./lib/logger";
 import { prompt } from "./lib/prompts";
+import {
+  formatTmuxInventory,
+  readTmuxInventory,
+  refreshTmuxInventory,
+  runTmuxInventoryWatcher,
+} from "./lib/tmux-inventory";
 
 interface CommandResult {
   exitCode: number;
@@ -52,6 +58,15 @@ function outputScript(scriptContent: string): void {
     console.log("Would run script:");
     console.log(scriptContent);
   }
+}
+
+function tmuxInventoryTrackerScript(): string {
+  return dedent`
+    if [ -x "$HOME/bin/ts/bin/ic" ]; then
+      "$HOME/bin/ts/bin/ic" tmux refresh --quiet >/dev/null 2>&1 || true
+      nohup "$HOME/bin/ts/bin/ic" tmux watch --quiet >/dev/null 2>&1 </dev/null &
+    fi
+  `;
 }
 
 /**
@@ -730,9 +745,14 @@ async function attachCommand(
     const cdPrefix = needsCd ? `cd "${repoRoot}"\n        ` : "";
     const attachExistingScript = dedent`
       (
+        ${tmuxInventoryTrackerScript()}
         ${cdPrefix}printf '\\033kic: ${repoDirName}\\033\\\\'
 
+        # Request extended keys (modifyOtherKeys=2) on the outer pane so the outer
+        # tmux delivers CSI-u keys (e.g. S-Enter) to the nested client; reset after.
+        printf '\\033[>4;2m'
         env -u TMUX tmux -L nested -f ~/.tmux.nested.conf attach-session -t "${sessionName}"
+        printf '\\033[>4;0m'
       )
     `;
 
@@ -746,14 +766,17 @@ async function attachCommand(
   // Create a script that sets up nested tmux session and attaches to it
   const cdPrefixForCreate = needsCd ? `cd "${repoRoot}"\n      ` : "";
   const createScript = dedent`
-    (
+      (
+        ${tmuxInventoryTrackerScript()}
       ${cdPrefixForCreate}printf '\\033kic: ${repoDirName}\\033\\\\'
 
       env -u TMUX tmux -L nested -f ~/.tmux.nested.conf new-session -d -s "${sessionName}" -c "${repoRoot}"
       env -u TMUX tmux -L nested -f ~/.tmux.nested.conf new-window -t "${sessionName}:1" -c "${repoRoot}"
       env -u TMUX tmux -L nested -f ~/.tmux.nested.conf new-window -t "${sessionName}:2" -c "${repoRoot}"
       env -u TMUX tmux -L nested -f ~/.tmux.nested.conf select-window -t "${sessionName}:0"
+      printf '\\033[>4;2m'
       env -u TMUX tmux -L nested -f ~/.tmux.nested.conf attach-session -t "${sessionName}"
+      printf '\\033[>4;0m'
     )
   `;
 
@@ -1728,6 +1751,52 @@ async function tmuxRenumberCommand(dryRun: boolean): Promise<CommandResult> {
   return { exitCode: 0 };
 }
 
+async function tmuxInventoryStatusCommand(
+  json: boolean,
+  cached: boolean,
+): Promise<CommandResult> {
+  try {
+    const cachedInventory = cached ? readTmuxInventory() : null;
+    const inventory = cachedInventory ?? refreshTmuxInventory();
+    if (!inventory) {
+      logError("No tmux inventory is available yet");
+      return { exitCode: 1 };
+    }
+
+    if (json) {
+      console.log(JSON.stringify(inventory, null, 2));
+    } else {
+      console.log(formatTmuxInventory(inventory));
+    }
+    return { exitCode: 0 };
+  } catch (error) {
+    logError("Failed to refresh tmux inventory", error);
+    return { exitCode: 1 };
+  }
+}
+
+async function tmuxInventoryRefreshCommand(
+  quiet: boolean,
+): Promise<CommandResult> {
+  try {
+    const inventory = refreshTmuxInventory();
+    if (!quiet)
+      console.log(`tmux inventory refreshed at ${inventory.updatedAt}`);
+    return { exitCode: 0 };
+  } catch (error) {
+    if (!quiet) logError("Failed to refresh tmux inventory", error);
+    return { exitCode: 1 };
+  }
+}
+
+async function tmuxInventoryWatchCommand(
+  intervalSeconds: number,
+  quiet: boolean,
+): Promise<CommandResult> {
+  await runTmuxInventoryWatcher({ intervalSeconds, quiet });
+  return { exitCode: 0 };
+}
+
 async function attachDirsCommand(
   targetDir?: string,
   includeDotdirs = false,
@@ -1927,7 +1996,7 @@ async function main() {
           );
       },
     )
-    .command(["tmux", "t"], "Tmux window management", (yargs) => {
+    .command(["tmux", "t"], "Tmux window and inventory management", (yargs) => {
       return yargs
         .command(
           ["renumber", "rn"],
@@ -1943,6 +2012,51 @@ async function main() {
               .example("$0 t rn --dry-run", "Show what would be renumbered")
               .example("$0 tmux renumber", "Full command to renumber windows");
           },
+        )
+        .command(
+          ["status", "s", "recall", "ls"],
+          "Refresh and show all tracked outer and nested tmux sessions",
+          (yargs) => {
+            return yargs
+              .option("json", {
+                type: "boolean",
+                description: "Print the inventory as JSON",
+                default: false,
+              })
+              .option("cached", {
+                type: "boolean",
+                description: "Show the saved snapshot without refreshing tmux",
+                default: false,
+              })
+              .example("$0 tmux status", "Refresh and show tmux inventory")
+              .example(
+                "$0 tmux status --json",
+                "Print machine-readable inventory",
+              );
+          },
+        )
+        .command(
+          ["refresh", "r"],
+          "Refresh the saved tmux inventory without printing it",
+          (yargs) =>
+            yargs.option("quiet", {
+              type: "boolean",
+              description: "Suppress the refresh confirmation",
+              default: false,
+            }),
+        )
+        .command("watch", "Continuously refresh the tmux inventory", (yargs) =>
+          yargs
+            .option("interval", {
+              type: "number",
+              description: "Refresh interval in seconds",
+              default: 10,
+            })
+            .option("quiet", {
+              type: "boolean",
+              description: "Suppress refresh messages",
+              default: false,
+            }),
         )
         .demandCommand(1, "");
     })
@@ -2074,9 +2188,26 @@ async function main() {
 
     if (tmuxSubcommand === "renumber" || tmuxSubcommand === "rn") {
       result = await tmuxRenumberCommand(argv["dry-run"] as boolean);
+    } else if (
+      tmuxSubcommand === "status" ||
+      tmuxSubcommand === "s" ||
+      tmuxSubcommand === "recall" ||
+      tmuxSubcommand === "ls"
+    ) {
+      result = await tmuxInventoryStatusCommand(
+        argv.json as boolean,
+        argv.cached as boolean,
+      );
+    } else if (tmuxSubcommand === "refresh" || tmuxSubcommand === "r") {
+      result = await tmuxInventoryRefreshCommand(argv.quiet as boolean);
+    } else if (tmuxSubcommand === "watch") {
+      result = await tmuxInventoryWatchCommand(
+        argv.interval as number,
+        argv.quiet as boolean,
+      );
     } else {
       logError(`Unknown tmux subcommand: ${tmuxSubcommand}`);
-      logError("Available subcommands: renumber (rn)");
+      logError("Available subcommands: renumber, status, refresh, watch");
       result = { exitCode: 1 };
     }
   } else if (
