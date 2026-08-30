@@ -16,6 +16,7 @@ import {
   detectRepoFiles,
   detectWorkspace,
   getReposDir,
+  isWorkspaceDir,
   loadIcConfig,
   parseGitHubInput,
   resolveSetupHooks,
@@ -373,5 +374,21 @@ describe("ic - Workspace Detection", () => {
       `${reposDir}/myFeature/ava/src/components`,
     );
     expect(workspace).toBe("myFeature");
+  });
+});
+
+describe("ic - Workspace Attach Location", () => {
+  let reposDir: string;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(existsSync).mockReturnValue(false);
+    reposDir = getReposDir();
+  });
+
+  it("should use the workspace root only when already there", () => {
+    expect(isWorkspaceDir(`${reposDir}/myFeature`)).toBe(true);
+    expect(isWorkspaceDir(`${reposDir}/myFeature/ava`)).toBe(false);
+    expect(isWorkspaceDir(`${reposDir}/myFeature/ava/src`)).toBe(false);
   });
 });

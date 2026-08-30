@@ -305,7 +305,7 @@ export function detectWorkspace(path: string): string | null {
  * Check if the given path is exactly a workspace directory (not a repo within it).
  * Returns true if path is ~/repos/<workspace>, false otherwise.
  */
-function isWorkspaceDir(path: string): boolean {
+export function isWorkspaceDir(path: string): boolean {
   const reposDir = getReposDir();
 
   if (!path.startsWith(reposDir)) {
@@ -634,8 +634,8 @@ async function attachCommand(
   let repoDirName: string;
   let isWorkspaceSession = false;
 
-  if (workspace) {
-    // We're in a workspace - always attach at workspace level
+  if (workspace && isWorkspaceDir(currentDir)) {
+    // We're at the workspace root - attach at workspace level.
     const reposDir = getReposDir();
     repoRoot = join(reposDir, workspace);
     repoDirName = workspace;
@@ -643,7 +643,8 @@ async function attachCommand(
 
     logInfo(`Detected workspace '${workspace}', attaching at workspace level`);
   } else {
-    // Not in a workspace, use existing git repo logic
+    // Nested paths inside a workspace attach from the current directory.
+    // Otherwise, use the existing git repository logic.
     // Check if we're in a git repository and if we're at the root
     let gitRoot: string | null = null;
     try {
