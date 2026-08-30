@@ -96,8 +96,12 @@ if [[ -z "$FORGE_SIMPLE_ZSH" && ${recording} != "true"  && -z "$VSCODE_IPC_HOOK_
     if [[ -n "$CODEX_SHELL" ]]; then
       export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=245'
     fi
+
     source ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
-    bindkey '^^' autosuggest-accept # Binds Ctrl-6 to accept suggestion, iterm maps Ctrl-Enter to Ctrl-6 (Send Hex Code -> 0x1E)
-    bindkey '\e[27;5;13~' autosuggest-accept # Binds escape code for ctrl+enter in ghostty, also needs support in tmux.conf
+
+    # Bind different keys (terminals / tmux can send a bunch of different ones) to accept suggestions
+    bindkey '^@' autosuggest-accept # Ctrl-Space
+    bindkey '^^' autosuggest-accept # Ctrl-6 / Control-^
+    bindkey '\e[27;5;13~' autosuggest-accept # Ctrl-Enter in Ghostty/tmux
   fi
 fi
