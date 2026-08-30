@@ -118,6 +118,13 @@ bind-key C-o send-keys C-o           # C-x C-o sends literal C-o
 bind-key o send-keys C-o             # C-x o also sends literal C-o
 ```
 
+### Autosuggestion shortcut through nesting
+
+`Ctrl-Space` is defined in the shared tmux configuration as a no-prefix
+binding. Each tmux layer normalizes it to `Control-^` (`0x1e`), the sequence
+used by the zsh autosuggestion binding, before forwarding it to the next layer.
+The zsh configuration also binds the raw `Ctrl-Space` sequence directly.
+
 ## Ways to Create Nested Sessions
 
 ### 1. `ic attach` / `ic a` (Primary method)
