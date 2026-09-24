@@ -125,6 +125,16 @@ binding. Each tmux layer normalizes it to `Control-^` (`0x1e`), the sequence
 used by the zsh autosuggestion binding, before forwarding it to the next layer.
 The zsh configuration also binds the raw `Ctrl-Space` sequence directly.
 
+### Pane exit behavior
+
+Both tmux layers explicitly set the window option `remain-on-exit` to `off`.
+That is tmux's normal behavior: when a shell exits with `Ctrl-D`, tmux removes
+the pane instead of leaving a dead pane displaying `Pane is dead (status 0, …)`.
+The explicit setting matters because tmux options live in the server and can
+outlast a config reload or a shell restart. Reload the relevant config to repair
+the default for an already-running server. Panes already marked dead are not
+retroactively removed; remove those with `kill-pane` (or restart the server).
+
 ## Ways to Create Nested Sessions
 
 ### 1. `ic attach` / `ic a` (Primary method)
