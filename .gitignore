@@ -527,6 +527,7 @@ bin/meeting-overlay
 # Claude settings snapshots and generated state
 /.claude/settings.json.before-*.bak
 /.claude/jobs/pins.json
+/.claude/policy-limits.json
 
 # Fish-generated migration file
 /.config/fish/conf.d/fish_frozen_key_bindings.fish
