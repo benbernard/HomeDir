@@ -1,0 +1,160 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+  cat <<'EOF'
+Usage: reset-codex [--commit]
+
+By default, show the Codex files that would be moved. Pass --commit to quit
+ChatGPT and move the local state into timestamped backups, leaving the app closed.
+EOF
+}
+
+commit=false
+case "${1:-}" in
+  "")
+    ;;
+  --commit)
+    commit=true
+    shift
+    ;;
+  --help|-h)
+    usage
+    exit 0
+    ;;
+  *)
+    usage >&2
+    exit 2
+    ;;
+esac
+
+if (($#)); then
+  usage >&2
+  exit 2
+fi
+
+stamp="$(date +%Y%m%d-%H%M%S)"
+codex_backup="$HOME/.codex-reset-backup-$stamp"
+app_backup="$HOME/Library/Application Support/Codex.reset-backup-$stamp"
+
+app_paths=(
+  "$HOME/Library/Application Support/Codex"
+  "$HOME/Library/Caches/Codex"
+  "$HOME/Library/Preferences/com.openai.codex.plist"
+  "$HOME/Library/HTTPStorages/com.openai.codex.binarycookies"
+)
+app_backup_subdirectories=(
+  application-support
+  caches
+  preferences
+  httpstorages
+)
+
+codex_files=(
+  .codex-global-state.json
+  .codex-global-state.json.bak
+  auth.json
+  config.toml
+  external_agent_session_imports.json
+  transcription-history.jsonl
+  history.jsonl
+  session_index.jsonl
+  models_cache.json
+  cloud-config-bundle-cache.json
+  cloud-requirements-cache.json
+  installation_id
+  version.json
+  .personality_migration
+  .sandbox_migration
+  .app-server-state-reconciled-v1
+  AGENTS.md
+  state_5.sqlite
+  state_5.sqlite-shm
+  state_5.sqlite-wal
+  thread_history_1.sqlite
+  thread_history_1.sqlite-shm
+  thread_history_1.sqlite-wal
+  logs_2.sqlite
+  logs_2.sqlite-shm
+  logs_2.sqlite-wal
+  memories_1.sqlite
+  memories_1.sqlite-shm
+  memories_1.sqlite-wal
+  goals_1.sqlite
+  goals_1.sqlite-shm
+  goals_1.sqlite-wal
+  queue_1.sqlite
+  queue_1.sqlite-shm
+  queue_1.sqlite-wal
+)
+
+codex_directories=(
+  sessions
+  archived_sessions
+  shell_snapshots
+  memories
+  sqlite
+  thread-writer-locks
+  process_manager
+  ambient-suggestions
+  cache
+)
+
+move_to_backup() {
+  local source="$1"
+  local destination="$2"
+
+  if [[ -e "$source" || -L "$source" ]]; then
+    if [[ "$commit" == true ]]; then
+      mkdir -p "$destination"
+      printf 'Moving %s -> %s/\n' "$source" "$destination"
+      mv "$source" "$destination/"
+    else
+      printf 'Would move %s -> %s/\n' "$source" "$destination"
+    fi
+  else
+    printf 'Not found: %s\n' "$source"
+  fi
+}
+
+printf 'Codex Local State Reset\n'
+printf '=======================\n\n'
+printf 'Codex backup: %s\n' "$codex_backup"
+printf 'App backup:   %s\n\n' "$app_backup"
+
+if [[ "$commit" == true ]]; then
+  if [[ -e "$codex_backup" || -e "$app_backup" ]]; then
+    printf 'Backup path already exists; refusing to overwrite it.\n' >&2
+    exit 1
+  fi
+
+  printf 'Quitting ChatGPT...\n'
+  osascript -e 'tell application "ChatGPT" to quit'
+  sleep 3
+  mkdir -p "$codex_backup" "$app_backup"
+else
+  printf '=== DRY RUN MODE (pass --commit to actually reset) ===\n'
+fi
+
+printf '\n--- Application Support ---\n'
+for index in "${!app_paths[@]}"; do
+  move_to_backup "${app_paths[$index]}" "$app_backup/${app_backup_subdirectories[$index]}"
+done
+
+printf '\n--- Codex Local State ---\n'
+for path in "${codex_files[@]}"; do
+  move_to_backup "$HOME/.codex/$path" "$codex_backup"
+done
+
+printf '\n--- Derived Codex State ---\n'
+for path in "${codex_directories[@]}"; do
+  move_to_backup "$HOME/.codex/$path" "$codex_backup"
+done
+
+if [[ "$commit" == true ]]; then
+  printf '\nReset complete. ChatGPT remains closed. Backups are preserved at:\n'
+  printf '  %s\n' "$codex_backup"
+  printf '  %s\n' "$app_backup"
+else
+  printf '\nDry run complete. Re-run with --commit to move these paths.\n'
+fi
