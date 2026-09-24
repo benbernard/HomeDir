@@ -513,3 +513,20 @@ bin/meeting-overlay
 /.claude/settings.json
 /.claude/mcp-servers/
 /.config/vale-ai-tells/styles/
+/.claude/daemon/roster.json
+/.claude/daemon
+/.codex-reset-backup*
+
+# Local runtime data and backups
+/.mtplx/
+/.codex.bak/
+
+# Downloaded model weights
+/models/gguf/
+
+# Claude settings snapshots and generated state
+/.claude/settings.json.before-*.bak
+/.claude/jobs/pins.json
+
+# Fish-generated migration file
+/.config/fish/conf.d/fish_frozen_key_bindings.fish
