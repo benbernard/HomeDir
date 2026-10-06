@@ -1,4 +1,4 @@
-# Added by ForgeCode installer
+# Local tooling PATH
 export PATH="/Users/benbernard/.local/bin:$PATH"
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
 

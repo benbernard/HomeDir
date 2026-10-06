@@ -76,7 +76,7 @@ if [[ -n "$CODEX_SHELL" ]]; then
   # light-background colors instead of the regular Powerlevel10k glyph prompt.
   PROMPT=$'%F{240}%n@%m %F{25}%~%f%F{28}$(_codex_prompt_git)%f %(?..%F{124}exit:%?%f)\n%F{22}%#%f '
   RPROMPT=
-elif [[ -z "$FORGE_SIMPLE_ZSH" ]]; then
+elif [[ -z "$SIMPLE_ZSH" ]]; then
   source $(submodule powerlevel10k)/powerlevel10k.zsh-theme
 else
   PROMPT='%n@%m %1~ %# '
@@ -85,8 +85,8 @@ fi
 # powerlevel10k config is in 03_p10k.zsh
 
 # only use autosuggest if not in VSCODE, not recording, and not in the
-# simplified forge shell.
-if [[ -z "$FORGE_SIMPLE_ZSH" && ${recording} != "true"  && -z "$VSCODE_IPC_HOOK_CLI" ]]; then
+# simplified shell mode.
+if [[ -z "$SIMPLE_ZSH" && ${recording} != "true"  && -z "$VSCODE_IPC_HOOK_CLI" ]]; then
   zmodload zsh/zpty 1>/dev/null 2>/dev/null
   if type zpty >/dev/null;
   then;

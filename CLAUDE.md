@@ -20,3 +20,8 @@ When working in the home directory itself, see `CLAUDE.home.md` for detailed ins
 - Configuration management
 
 **Ignore `CLAUDE.home.md` when working in `/Users/benbernard/repos/*` or any other subdirectory.**
+
+# Job-specific Instructions
+
+Job-specific agent instructions live outside this public repo. If
+`~/site/AGENTS.md` exists, read and follow it in addition to this file.
