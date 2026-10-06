@@ -531,3 +531,13 @@ bin/meeting-overlay
 
 # Fish-generated migration file
 /.config/fish/conf.d/fish_frozen_key_bindings.fish
+
+# Agent scratch notes
+/agents/
+
+# Machine-local runtime state (not portable, never commit)
+/.blume/
+/.config/codex-config/
+/.config/fish/fish_variables
+/.claude/*.stamp.json
+.emulator_console_auth_token

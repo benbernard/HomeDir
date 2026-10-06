@@ -27,6 +27,16 @@
       "skillFolderHash": "121eecacd86c0aab06aef5cd4663e80c5397cd41",
       "installedAt": "2026-05-06T18:24:14.216Z",
       "updatedAt": "2026-05-06T18:24:14.216Z"
+    },
+    "macos-app-design": {
+      "source": "petekp/agent-skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/petekp/agent-skills.git",
+      "skillPath": "skills/macos-app-design/SKILL.md",
+      "skillFolderHash": "acc7b8a68b3a831cfe09b17987da3568e8d6510d",
+      "pluginName": "macos-app-design",
+      "installedAt": "2026-09-28T17:06:50.007Z",
+      "updatedAt": "2026-09-28T17:06:50.007Z"
     }
   },
   "dismissed": {
