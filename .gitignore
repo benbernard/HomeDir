@@ -413,6 +413,7 @@ VoiceInk-Dependencies/whisper.cpp
 .gt
 .dolt
 .config/recs-explorer/
+forge
 .config/uv
 .claude.home/debug
 .claude.home
