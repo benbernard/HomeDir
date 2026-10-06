@@ -409,8 +409,10 @@ VoiceInk-Dependencies/whisper.cpp
 .claude/mcp-needs-auth-cache.json
 
 .claude/teams
+.config/recs
 .gt
 .dolt
+.config/recs-explorer/
 .config/uv
 .claude.home/debug
 .claude.home
