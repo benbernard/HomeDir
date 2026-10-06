@@ -1,5 +1,5 @@
-# Skip Powerlevel10k configuration in simplified shell mode.
-if [[ -n "$SIMPLE_ZSH" ]]; then
+# Skip Powerlevel10k configuration for the simplified forge shell.
+if [[ -n "$FORGE_SIMPLE_ZSH" ]]; then
   return 0
 fi
 
