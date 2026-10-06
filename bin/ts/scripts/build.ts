@@ -227,7 +227,9 @@ async function buildEntry(entryPoint: string): Promise<void> {
   // Use Bun CLI directly since the API doesn't respect outfile with compile
   const proc = Bun.spawn(
     [
-      "bun",
+      // process.execPath is the bun binary currently running this script, so
+      // rebuilds work even when PATH is minimal (e.g. GUI-launched tools).
+      process.execPath,
       "build",
       entryPoint,
       "--compile",
@@ -257,7 +259,13 @@ async function buildEntry(entryPoint: string): Promise<void> {
 
   // Re-sign ad-hoc: bun --compile appends the JS payload after signing,
   // which newer macOS dyld rejects ("malformed import table")
-  const signProc = Bun.spawn(["codesign", "--sign", "-", "--force", outfile], {
+  const signProc = Bun.spawn([
+    "/usr/bin/codesign",
+    "--sign",
+    "-",
+    "--force",
+    outfile,
+  ], {
     stdout: "pipe",
     stderr: "pipe",
   });
@@ -308,23 +316,49 @@ function generateWrappers(): void {
 
     const wrapperContent = `#!/usr/bin/env bash
 # Auto-generated wrapper for ${name}
-# Checks if source is newer than binary and rebuilds if needed
+# Checks if source is newer than binary and rebuilds if needed.
+
+# Optional private site environment. Keeps work-specific values out of this
+# public repo while still reaching tools launched outside an interactive shell
+# (e.g. MeetingBar -> meeting-notify).
+SITE_ENV="\${HOME}/site/bin-ts.env.sh"
+if [ -f "\${SITE_ENV}" ]; then
+  . "\${SITE_ENV}"
+fi
 
 SOURCE="${sourcePath}"
 BINARY="${binaryPath}"
 BUILD_SCRIPT="${join(rootDir, "scripts/build.ts")}"
 
-# Check if source is newer than binary
-if [[ "$SOURCE" -nt "$BINARY" ]]; then
-  echo "Source changed, rebuilding ${name}..." >&2
-  cd "${rootDir}" && bun run "\${BUILD_SCRIPT}" --single "${sourceFile}" >/dev/null 2>&1 || {
-    echo "Build failed for ${name}" >&2
-    exit 1
-  }
+# Resolve bun without relying on PATH: GUI apps inherit a minimal PATH that
+# does not include ~/.bun/bin or Homebrew.
+BUN_BIN="\$(command -v bun 2>/dev/null || true)"
+if [ -z "\${BUN_BIN}" ]; then
+  for candidate in "\${HOME}/.bun/bin/bun" /opt/homebrew/bin/bun /usr/local/bin/bun; do
+    if [ -x "\${candidate}" ]; then
+      BUN_BIN="\${candidate}"
+      break
+    fi
+  done
 fi
 
-# Execute the binary
-exec "\${BINARY}" "$@"
+# Rebuild when the source is newer than the binary. Fail open: if the rebuild
+# cannot run, still execute the existing binary instead of exiting silently.
+if [[ "\${SOURCE}" -nt "\${BINARY}" ]]; then
+  echo "Source changed, rebuilding ${name}..." >&2
+  if [ -n "\${BUN_BIN}" ] && (cd "${rootDir}" && "\${BUN_BIN}" run "\${BUILD_SCRIPT}" --single "${sourceFile}" >/dev/null 2>&1); then
+    :
+  else
+    echo "Warning: could not rebuild ${name}; running existing binary" >&2
+  fi
+fi
+
+if [ ! -x "\${BINARY}" ]; then
+  echo "Error: ${name} binary not found at \${BINARY}" >&2
+  exit 1
+fi
+
+exec "\${BINARY}" "\$@"
 `;
 
     writeFileSync(wrapperPath, wrapperContent);
