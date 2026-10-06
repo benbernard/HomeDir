@@ -15,7 +15,7 @@ For interactive zsh sessions, the important path is:
 6. deferred `compinit`
 7. fast syntax highlighting
 8. late tool-specific blocks such as SDKMAN, gcloud, pyenv path setup, Bun,
-   Forge, Gohan, and OrbStack
+   site-provided tooling, and OrbStack
 
 The `.zshrc.d/` directory is the normal place to add shell behavior. Avoid
 editing `.zshrc` for new aliases, functions, or PATH entries unless the change

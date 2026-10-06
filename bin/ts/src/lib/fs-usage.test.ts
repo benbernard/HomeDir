@@ -31,19 +31,19 @@ describe("fs_usage parsing", () => {
   test("matches target-family temporary files", () => {
     expect(
       lineMentionsTargetFamily(
-        "12:00 openat /Users/example/.claude/.settings.json.123.tmp 0.001 tally.1",
+        "12:00 openat /Users/example/.claude/.settings.json.123.tmp 0.001 proc.1",
         target,
       ),
     ).toBe(true);
     expect(
       lineMentionsTargetFamily(
-        "12:00 openat /Users/example/.claude/settings.json.lock 0.001 tally.1",
+        "12:00 openat /Users/example/.claude/settings.json.lock 0.001 proc.1",
         target,
       ),
     ).toBe(true);
     expect(
       lineMentionsTargetFamily(
-        "12:00 openat /Users/example/.claude/session.json 0.001 tally.1",
+        "12:00 openat /Users/example/.claude/session.json 0.001 proc.1",
         target,
       ),
     ).toBe(false);

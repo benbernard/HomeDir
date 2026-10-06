@@ -505,7 +505,7 @@ pasteboard copy mode, verifies side-effect-safe paste mode through
 verifies command result mode, verifies preview updates after cursor
 movement and query changes, verifies focused-query Arrow Up/Down selection
 movement, verifies JSON-configured two-stage profile transition and hidden final
-output, verifies the built-in `context-files` `ava<Tab>` then `gohan` transition
+output, verifies the built-in `context-files` `alpha<Tab>` then `child` transition
 stays visible and returns the nested directory, verifies rich SGR preview ANSI
 rendering without raw escape leakage, verifies terminal-control preview
 rendering for final visible screen state, verifies insert/delete-line and simple
@@ -530,10 +530,10 @@ Reported on 2026-06-12 after switching Alfred from the old TypeScript
 `gui-fzf-picker` launcher to the native `fzf-palette` backend. These are now
 covered by live E2E and smoke benchmark gates:
 
-- Pressing `option+p`, typing `ava<Tab>`, then typing `gohan` makes the popup
+- Pressing `option+p`, typing `alpha<Tab>`, then typing `child` makes the popup
   disappear. Fixed by handling Tab as accept in single-select mode and covered
-  by an E2E `context-files` flow that chooses `ava`, transitions to the second
-  picker, searches `gohan`, and returns the nested directory.
+  by an E2E `context-files` flow that chooses `alpha`, transitions to the second
+  picker, searches `child`, and returns the nested directory.
 - While focus is in the search field, the popup does not accept arrow up/down
   for selection movement. Fixed by routing Arrow Up/Down through the shared
   palette key handler while the query field is focused and covered by E2E
@@ -541,13 +541,13 @@ covered by live E2E and smoke benchmark gates:
 - When arrow up/down does work, selection movement is slow. Fixed by removing
   duplicate active-row preview notifications from selection movement and covered
   by `fzf-palette bench movement`, which is included in smoke benchmarks.
-- Switching from `ava` to inside `ava` from `option+p` is slow. Reduced by
+- Switching from `alpha` to inside `alpha` from `option+p` is slow. Reduced by
   making built-in context source commands stream their first rows directly
-  instead of buffering through `awk`; the same `ava<Tab>` then `gohan` E2E flow
+  instead of buffering through `awk`; the same `alpha<Tab>` then `child` E2E flow
   covers the regression.
 - Typing a query and then idling can make the palette disappear. Hardened by
   disabling AppKit panel auto-hide-on-deactivate and covered by E2E idle pauses
-  after typing both `ava` and `gohan`.
+  after typing both `alpha` and `child`.
 
 ## Not Done Yet
 

@@ -52,11 +52,9 @@ test -x ~/bin/meeting-overlay
 test -x ~/bin/ts/bin/notifyctl
 ```
 
-Optional calendar enrichment uses:
-
-```text
-~/.config/gohan/bin/gws
-```
+Optional calendar enrichment uses the `gws` CLI, resolved from `PATH` (or
+`$MEETING_NOTIFY_GWS_BIN` when set). The calendar queried defaults to
+`primary`, or `$MEETING_NOTIFY_CALENDAR_ID` when set.
 
 If `gws` is missing or fails, the triggered meeting can still show; the overlay just loses the extra upcoming-meetings context.
 

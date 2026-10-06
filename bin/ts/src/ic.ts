@@ -35,6 +35,8 @@ interface CommandResult {
 interface IcConfig {
   hooks?: Record<string, string[]>;
   autoDetect?: Record<string, string[]>;
+  /** Default GitHub org/user for bare repo names (e.g. "myorg"). */
+  defaultOrg?: string;
 }
 
 let shellIntegrationScript: string | undefined;
@@ -88,6 +90,19 @@ export function getReposDir(): string {
 
   // Default to ~/repos
   return join(homedir(), "repos");
+}
+
+/**
+ * Resolve the default GitHub org/user used when only a repo name is given.
+ * The private site repo configures this via IC_DEFAULT_ORG or .icrc.json;
+ * without it, a bare repo name cannot be resolved to an owner.
+ */
+export function getDefaultOrg(): string | undefined {
+  const fromEnv = process.env.IC_DEFAULT_ORG;
+  if (fromEnv) {
+    return fromEnv;
+  }
+  return loadIcConfig().defaultOrg;
 }
 
 export function loadIcConfig(): IcConfig {
@@ -182,10 +197,11 @@ export function resolveSetupHooks(
  * - git@github.com:user/repo.git
  * - git@github.com:user/repo
  * - user/repo
- * - repo (defaults to instacart)
+ * - repo (uses defaultOrg when provided)
  */
 export function parseGitHubInput(
   input: string,
+  defaultOrg?: string,
 ): { user: string; repo: string } | null {
   // Remove trailing slashes
   const trimmedInput = input.trim().replace(/\/$/, "");
@@ -214,13 +230,14 @@ export function parseGitHubInput(
     }
   }
 
-  // Pattern 4: Just repo name, default to instacart
+  // Pattern 4: Just repo name, default to the configured org
   if (
     trimmedInput &&
     !trimmedInput.includes("/") &&
-    !trimmedInput.includes(":")
+    !trimmedInput.includes(":") &&
+    defaultOrg
   ) {
-    return { user: "instacart", repo: trimmedInput };
+    return { user: defaultOrg, repo: trimmedInput };
   }
 
   return null;
@@ -409,10 +426,13 @@ async function cloneCommand(
   }
 
   // Parse input to extract user and repo
-  const parsed = parseGitHubInput(input);
+  const parsed = parseGitHubInput(input, getDefaultOrg());
   if (!parsed) {
     logError(`Invalid input format: ${input}`);
     logError("Expected: user/repo, repo, or GitHub URL");
+    logError(
+      "For a bare repo name, set IC_DEFAULT_ORG or .icrc.json defaultOrg.",
+    );
     return { exitCode: 1 };
   }
 
@@ -561,7 +581,7 @@ function checkSessionStatus(sessionName: string): SessionStatus {
 
   try {
     // Check on nested socket (-L nested)
-    // Use exact match by prefixing '=' to prevent partial matching (e.g., 'olive' matching 'olive-server')
+    // Use exact match by prefixing '=' to prevent partial matching (e.g., 'api' matching 'api-server')
     execNestedTmux(`has-session -t \"=${sessionName}\" 2>&1`, {
       stdio: "pipe",
     });
@@ -1937,7 +1957,7 @@ async function main() {
           .example("$0 c user/repo", "Clone git@github.com:user/repo.git")
           .example(
             "$0 c myrepo",
-            "Clone git@github.com:instacart/myrepo.git (defaults to instacart)",
+            "Clone git@github.com:myorg/myrepo.git (defaults to IC_DEFAULT_ORG)",
           )
           .example(
             "$0 c myrepo -p myFeature",

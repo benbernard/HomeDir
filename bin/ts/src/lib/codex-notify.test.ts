@@ -38,7 +38,7 @@ describe("codex notification helpers", () => {
   it("uses the assistant preview when it contains real content", () => {
     expect(
       buildCodexNotification({
-        cwd: "/Users/benbernard/repos/tally",
+        cwd: "/Users/benbernard/repos/my-project",
         "input-messages": ["Fix the flaky test"],
         "last-assistant-message":
           "Implemented the notification adapter and verified the send path.",
@@ -48,10 +48,10 @@ describe("codex notification helpers", () => {
       body: "Implemented the notification adapter and verified the send path.",
       context: {
         client: "codex",
-        cwd: "/Users/benbernard/repos/tally",
+        cwd: "/Users/benbernard/repos/my-project",
         event_type: "agent-turn-complete",
       },
-      subtitle: "tally",
+      subtitle: "my-project",
       title: "Codex finished",
     });
   });

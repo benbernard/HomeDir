@@ -150,7 +150,6 @@
 [init]
   defaultBranch = main
 
-# Stuff from insta-setup.sh
 [http]
 	postBuffer = 524288000
 
@@ -160,15 +159,15 @@
 [url "git@github.com:"]
   insteadOf = https://github.com/
 
-[user]
-  email = ben.bernard@instacart.com
+# Job-specific identity and repo settings live in the private site repo, not
+# this public repo. Absent on machines without ~/site.
+[include]
+  path = ~/site/gitconfig.site
 
 [feature]
 	manyFiles = 1
 [url "ssh://git@github.com"]
 	insteadOf = https://github.com
-[maintenance]
-	repo = /Users/benbernard/repos/carrot
 [index]
 	sparse = true
 [rerere]

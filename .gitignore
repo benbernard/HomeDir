@@ -256,14 +256,9 @@ ATLauncher/
 gaol/
 Parallels/
 Applications (Parallels)/
-.instacart*
-.isc/
 .rbenv/
 .wget-hsts
-carrot/
-.config/ei/cdrp_dir
 .ecr/
-.config/bento/
 .config/iterm2/
 .config/micro/buffers
 bin/micro
@@ -282,13 +277,9 @@ OneDrive
 .shellrc.d/
 .terraform.versions/
 .vscode-server/
-bento/
 bin/bat
 bin/terraform
 go/
-tf-instacart/
-unata-*/
-vector_bento.toml
 .config/configstore/update-notifier-yo.json
 .config/lazygit/
 .config/github-copilot/
@@ -333,27 +324,20 @@ Library/Application Support/iTerm2/version.txt
 .config/.jira/.config.yml
 .cursor-tutor
 bin/jira
-ava
-isc-web
 
 Library/Application Support/iTerm2/version.txt
 .anydesk
 iCloud Drive (Archive)/TextEdit
-ava-extension
 .bash-preexec.sh
 Google Drive
 .config/atuin
 .config/gcloud
 .boto
 .zhistory
-aigateway
-bento
 .cspell
 event-log.txt
-carrot
 lefthook.yml
 .rediscli_history
-.conductorone
 .config/graphite/user_config
 .redis-insight
 .ask
@@ -361,23 +345,16 @@ lefthook.yml
 .degit/
 projects/seizure-import/export.zip
 projects/seizure-import/data
-.buildkite
-.config/bk.yaml
 .gk
 .supermaven
-bin/bk
 vs-code-trial
-.bk.yaml
 .cursor-tutor-1
 .vercel
 .specstory/history
 next-save
 bin/ts/.specstory/history
 bin/ts/dist
-.th-client
 
-.config/neuron
-.config/olive/traces
 
 .cursor-nightly
 .windsurf
@@ -396,11 +373,8 @@ bin/ts/dist
 .motd_shown
 .codex
 .kiro
-.config/gohan
-.config/gohan-local
 .claude.json.backup
 cookbook
-.config/gohan*/
 .config/claude-session-picker
 .icrc.json
 .claude/debug
@@ -412,29 +386,19 @@ cookbook
 .claude/todos
 .claude/history.jsonl
 .claude.json
-.config/fish/conf.d/gohan.fish
-.config/olive
 .config/fish/completions
 .claude/notification-state-*
 .claude/.credentials.json
 .claude/plans
 .config/claude-notify
 .claude/plugins/
-olive-cli
-olive-reviewer
-olive
-olive-server
-blueberry
-corncob
 .bun
-.config/pastry
 .claude/stats-cache.json
 .claude/cache
 .claude/paste-cache
 .serena
 .claude/tasks
 .claude/image-cache
-.config/ava-cli
 .claude/usage-data
 .claude/hooks/crumbs-*
 .claude/session-env
@@ -445,11 +409,8 @@ VoiceInk-Dependencies/whisper.cpp
 .claude/mcp-needs-auth-cache.json
 
 .claude/teams
-.config/recs
 .gt
 .dolt
-.config/recs-explorer/
-.bento/bento-daemon.port
 .config/uv
 .claude.home/debug
 .claude.home
@@ -459,7 +420,6 @@ VoiceInk-Dependencies/whisper.cpp
 .config/opencode
 .mcp-remote-go-auth/
 .playwright-cli
-.config/gws
 .agent-browser/
 .claude/.marketplace-auth-mode.json
 .electron-gyp/35.7.5
@@ -474,8 +434,6 @@ g-meet-app/bin/darwin-arm64-133
 .config/meety
 .claude.current
 temp-demo
-forge
-.config/tally
 .claude/.caveman-active
 .cursor
 .mcp-auth/mcp-remote-0.1.37
@@ -496,7 +454,6 @@ bin/meeting-overlay
 .agents/skills/*
 .claude/agents/*
 .croissant/croissant.pid
-.config/graft
 .mitmproxy
 .claude/telemetry
 /.pi/

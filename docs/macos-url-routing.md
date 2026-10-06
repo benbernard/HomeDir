@@ -14,13 +14,21 @@ Current behavior includes:
 - Slack archive web URLs are rewritten to `slack://` deep links.
 - `slack:` URLs open Slack.
 - Google Meet URLs route to a dedicated meeting app target.
-- Work-ish URLs such as GitHub, Instacart, Linear, AWS, `go/`, and `golinks.io`
-  route to the work Chrome profile or native app.
+- Work-ish URLs such as GitHub, Linear, AWS, `go/`, and `golinks.io` route to
+  the work Chrome profile or native app.
 - Personal URLs such as YouTube, Amazon, MyChart, LinkedIn, and Airtable route
   to the home Chrome profile.
 
 Be careful editing match order. Some rules are intentionally before broader
-rules, for example Linear before the broader Instacart/work routing.
+rules, for example Linear before the broader work routing.
+
+## Job-specific Rules
+
+The complete, machine-specific router lives in `~/site/finicky.js` in the
+private site repo. `.finicky.js` imports that config using its absolute local
+path: relative imports fail after Finicky transforms the entrypoint into its
+cache directory. The private site checkout must be present. Preserve the
+running config and validate with Finicky's dry-run mode when changing routing.
 
 ## Browser Profile Constants
 

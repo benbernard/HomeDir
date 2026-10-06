@@ -218,6 +218,13 @@ generate_summaries_batch() {
     local messages="$1"
     local debug_mode="${2:-false}"
 
+    # Summary endpoint is configured by the private site repo. Without it,
+    # sessions fall back to their first message as the title.
+    local endpoint="${CLAUDE_SESSION_PICKER_ENDPOINT:-}"
+    if [ -z "$endpoint" ]; then
+        return 1
+    fi
+
     # Count messages
     local count=$(echo "$messages" | grep -c '^')
 
@@ -250,7 +257,7 @@ Each summary should be a clear, concise description of what the user is asking f
         echo "=== DEBUG: Batch size: $count ===" >&2
         echo "=== DEBUG: Curl command ===" >&2
         echo "curl -s -m 30 --connect-timeout 10 -w \"\\n%{http_code}\" \\" >&2
-        echo "  https://aigateway.instacart.tools/unified/benbernard-personal/v1/chat/completions \\" >&2
+        echo "  $endpoint \\" >&2
         echo "  -H \"Content-Type: application/json\" \\" >&2
         echo "  -d '$json_data'" >&2
         echo "" >&2
@@ -259,7 +266,7 @@ Each summary should be a clear, concise description of what the user is asking f
         echo "" >&2
     fi
 
-    local response=$(curl -s -m 30 --connect-timeout 10 -w "\n%{http_code}" https://aigateway.instacart.tools/unified/benbernard-personal/v1/chat/completions \
+    local response=$(curl -s -m 30 --connect-timeout 10 -w "\n%{http_code}" "$endpoint" \
         -H "Content-Type: application/json" \
         -d "$json_data" 2>/dev/null)
 

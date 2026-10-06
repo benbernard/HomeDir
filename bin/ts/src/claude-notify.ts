@@ -1002,24 +1002,29 @@ function getFirstUserMessage(sessionFile: string): string | null {
 }
 
 async function generateSummary(message: string): Promise<string | null> {
+  // Summary endpoint is configured by the private site repo (see
+  // CLAUDE_NOTIFY_SUMMARY_ENDPOINT). Without it, notifications omit the
+  // generated summary.
+  const endpoint = process.env.CLAUDE_NOTIFY_SUMMARY_ENDPOINT;
+  if (!endpoint) {
+    return null;
+  }
+
   try {
-    const response = await fetch(
-      "https://aigateway.instacart.tools/unified/benbernard-personal/v1/chat/completions",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "gpt-5-nano",
-          reasoning_effort: "minimal",
-          messages: [
-            {
-              role: "user",
-              content: `Summarize this Claude Code session request in 3-8 words: "${message}"`,
-            },
-          ],
-        }),
-      },
-    );
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "gpt-5-nano",
+        reasoning_effort: "minimal",
+        messages: [
+          {
+            role: "user",
+            content: `Summarize this Claude Code session request in 3-8 words: "${message}"`,
+          },
+        ],
+      }),
+    });
 
     if (response.ok) {
       const data = await response.json();

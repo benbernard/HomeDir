@@ -1,4 +1,4 @@
-# Added by ForgeCode installer
+# Local tooling PATH
 export PATH="/Users/benbernard/.local/bin:$PATH"
 # Fix when setenv isn't available
 setenv() {
@@ -120,9 +120,6 @@ if [[ -e ${FAST_SYNTAX_PATH} ]]; then
   source ${FAST_SYNTAX_PATH}
 fi
 
-### BEGIN--Instacart Shell Settings. (Updated: Wed Jul 14 13:32:34 PDT 2021. [Script Version 1.3.16]) NO-TOUCH
-### END--Instacart Shell Settings.
-
 #THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
 export SDKMAN_DIR="$HOME/.sdkman"
 [[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
@@ -166,42 +163,9 @@ export PATH="$HOME/bin:$PATH"
 # Auto-Warpify
 [[ "$-" == *i* && -z "$CODEX_SHELL" ]] && printf 'P$f{"hook": "SourcedRcFileForWarp", "value": { "shell": "zsh", "uname": "Linux" }}�'
 
-export PATH="$PATH:${HOME}/.config/gohan/bin"
 # bun completions
 [ -s "/Users/benbernard/.bun/_bun" ] && source "/Users/benbernard/.bun/_bun"
 
 # bun
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
-# >>> forge initialize >>>
-# !! Contents within this block are managed by 'forge zsh setup' !!
-# !! Do not edit manually - changes will be overwritten !!
-
-if [[ -n "$FORGE_SIMPLE_ZSH" ]]; then
-    # Add required zsh plugins if not already present
-    if [[ ! " ${plugins[@]} " =~ " zsh-autosuggestions " ]]; then
-        plugins+=(zsh-autosuggestions)
-    fi
-    if [[ ! " ${plugins[@]} " =~ " zsh-syntax-highlighting " ]]; then
-        plugins+=(zsh-syntax-highlighting)
-    fi
-
-    # Load forge shell plugin (commands, completions, keybindings) if not already loaded
-    if [[ -z "$_FORGE_PLUGIN_LOADED" ]]; then
-        eval "$(forge zsh plugin)"
-    fi
-
-    # Load forge shell theme (prompt with AI context) if not already loaded
-    if [[ -z "$_FORGE_THEME_LOADED" ]]; then
-        eval "$(forge zsh theme)"
-    fi
-fi
-
-# I'm checking something 2
-# <<< forge initialize <<<
-
-# >>> gohan setup, do not edit this section <<<
-# !! Contents within this block are managed by gohan !!
-# gohan setup revision 6
-[ -f "/Users/benbernard/.config/gohan/gohan.sh" ] && source "/Users/benbernard/.config/gohan/gohan.sh"
-# <<< gohan setup end <<<

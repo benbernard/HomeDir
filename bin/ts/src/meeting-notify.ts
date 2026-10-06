@@ -55,7 +55,9 @@ const LOG_FILE = join(homedir(), "event-log.txt");
 const MEETING_PROMPT_LOG = join(homedir(), "meeting-prompt.log");
 const MEETING_OVERLAY = join(homedir(), "bin", "meeting-overlay");
 const NOTIFYCTL = join(homedir(), "bin", "ts", "bin", "notifyctl");
-const GWS_BIN = join(homedir(), ".config", "gohan", "bin", "gws");
+// The gws CLI is provided by the private site repo; default to PATH lookup.
+const GWS_BIN = process.env.MEETING_NOTIFY_GWS_BIN ?? "gws";
+const CALENDAR_ID = process.env.MEETING_NOTIFY_CALENDAR_ID ?? "primary";
 const UPCOMING_WINDOW_MS = 15 * 60 * 1000;
 const RECENT_START_GRACE_MS = 60 * 1000;
 const ACTIVE_MEETING_NOTIFICATION_ID = "meetingbar-active";
@@ -124,10 +126,10 @@ interface MeetingInfo {
  * escaping issues that would occur with passing 11 positional arguments.
  */
 function readPlist(plistPath: string): EventData {
-  const jsonStr = execSync(
-    `plutil -convert json -o - "${plistPath}"`,
-    { encoding: "utf-8", timeout: 5000 },
-  );
+  const jsonStr = execSync(`plutil -convert json -o - "${plistPath}"`, {
+    encoding: "utf-8",
+    timeout: 5000,
+  });
   const data = JSON.parse(jsonStr) as Record<string, string>;
 
   return {
@@ -151,7 +153,7 @@ function readPlist(plistPath: string): EventData {
  * (which have start.date but no start.dateTime, e.g. "Home" location events).
  */
 function fetchCalendarEvents(): MeetingInfo[] {
-  if (!existsSync(GWS_BIN)) {
+  if (GWS_BIN.includes("/") && !existsSync(GWS_BIN)) {
     return [];
   }
 
@@ -163,7 +165,7 @@ function fetchCalendarEvents(): MeetingInfo[] {
     const timeMax = later.toISOString();
 
     const params = JSON.stringify({
-      calendarId: "ben.bernard@instacart.com",
+      calendarId: CALENDAR_ID,
       timeMin,
       timeMax,
       singleEvents: true,

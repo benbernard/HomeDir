@@ -48,9 +48,13 @@ describe("ic - GitHub URL Parsing", () => {
     expect(result).toEqual({ user: "user", repo: "repo" });
   });
 
-  it("should default to instacart for repo-only input", () => {
-    const result = parseGitHubInput("myrepo");
-    expect(result).toEqual({ user: "instacart", repo: "myrepo" });
+  it("should use the provided default org for repo-only input", () => {
+    const result = parseGitHubInput("myrepo", "myorg");
+    expect(result).toEqual({ user: "myorg", repo: "myrepo" });
+  });
+
+  it("should return null for repo-only input without a default org", () => {
+    expect(parseGitHubInput("myrepo")).toBeNull();
   });
 
   it("should return null for invalid input", () => {

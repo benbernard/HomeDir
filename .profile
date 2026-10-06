@@ -11,8 +11,5 @@ fi
 
 . "$HOME/.grit/bin/env"
 
-# >>> gohan setup, do not edit this section <<<
-# !! Contents within this block are managed by gohan !!
-# gohan setup revision 6
-[ -f "/Users/benbernard/.config/gohan/gohan.sh" ] && source "/Users/benbernard/.config/gohan/gohan.sh"
-# <<< gohan setup end <<<
+# Job-specific login-shell setup lives in the private site repo, not this public repo.
+[ -f "$HOME/site/site.sh" ] && . "$HOME/site/site.sh"

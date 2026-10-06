@@ -19,7 +19,7 @@ const MANIFEST_FILE = path.join(
 // Skills whose source path contains any of these substrings are excluded.
 // Use this to block entire marketplace plugins by their path segment.
 const BLACKLIST_SOURCES = [
-  "external/gws", // Instacart marketplace GWS plugin (gws-*, recipe-*, persona-*)
+  "external/gws", // Work Google Workspace plugin (gws-*, recipe-*, persona-*)
 ];
 
 interface SkillMetadata {

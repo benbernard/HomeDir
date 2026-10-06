@@ -28,8 +28,8 @@ describe("claude-notify helper functions", () => {
     it("should replace slashes with dashes", () => {
       // We'll need to import or expose this function
       // For now, testing the logic
-      const path = "/Users/benbernard/repos/olive-cli";
-      const expected = "-Users-benbernard-repos-olive-cli";
+      const path = "/Users/benbernard/repos/my-project";
+      const expected = "-Users-benbernard-repos-my-project";
       const result = path.replace(/\//g, "-");
       expect(result).toBe(expected);
     });
@@ -40,7 +40,7 @@ describe("claude-notify helper functions", () => {
       const mockExistsSync = vi.mocked(existsSync);
       mockExistsSync.mockReturnValue(true);
 
-      const testPath = "/Users/benbernard/repos/olive-cli";
+      const testPath = "/Users/benbernard/repos/my-project";
       // This is the logic from findGitRoot
       const gitPath = join(testPath, ".git");
       const exists = existsSync(gitPath);
@@ -53,8 +53,8 @@ describe("claude-notify helper functions", () => {
       const mockExistsSync = vi.mocked(existsSync);
       // First call returns false, second returns true
       mockExistsSync
-        .mockReturnValueOnce(false) // /Users/benbernard/repos/olive-cli/.git
-        .mockReturnValueOnce(true); // /Users/benbernard/repos/olive-cli/../.git
+        .mockReturnValueOnce(false) // /Users/benbernard/repos/my-project/.git
+        .mockReturnValueOnce(true); // /Users/benbernard/repos/my-project/../.git
 
       expect(mockExistsSync("/test/deep/path/.git")).toBe(false);
       expect(mockExistsSync("/test/deep/.git")).toBe(true);
@@ -211,9 +211,9 @@ describe("claude-notify helper functions", () => {
 
   describe("project context", () => {
     it("should extract basename from git root", () => {
-      const gitRoot = "/Users/benbernard/repos/olive-cli";
+      const gitRoot = "/Users/benbernard/repos/my-project";
       const basename = gitRoot.split("/").pop();
-      expect(basename).toBe("olive-cli");
+      expect(basename).toBe("my-project");
     });
 
     it("should handle root path edge case", () => {

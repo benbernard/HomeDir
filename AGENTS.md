@@ -21,6 +21,11 @@ When working in the home directory itself, see `AGENTS.home.md` for detailed ins
 
 **Ignore `AGENTS.home.md` when working in `/Users/benbernard/repos/*` or any other subdirectory.**
 
+# Job-specific Instructions
+
+Job-specific agent instructions live outside this public repo. If
+`~/site/AGENTS.md` exists, read and follow it in addition to this file.
+
 # Testing
 
 - Prefer end-to-end tests where possible.

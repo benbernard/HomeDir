@@ -197,7 +197,7 @@ emits them.
 Live E2E covers the built-in `repos`, `downloads`, and `context-files` profiles
 against an isolated temp `$HOME` so tests do not depend on the developer's real
 directory contents. It also covers the Alfred-style `context-files` transition
-where the user searches `ava`, presses Tab, searches `gohan`, and accepts the
+where the user searches `alpha`, presses Tab, searches `child`, and accepts the
 nested directory.
 
 ## Preview Panes

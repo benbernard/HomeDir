@@ -314,7 +314,7 @@ Current implementation status:
   `FZF_PALETTE_PASTE_LOG`, side-effect-safe open mode through
   `FZF_PALETTE_OPEN_LOG`, command mode, preview updates after
   cursor movement and query filtering, focused-query Arrow Up/Down selection
-  movement, the built-in `context-files` `ava<Tab>` then `gohan` transition
+  movement, the built-in `context-files` `alpha<Tab>` then `child` transition
   with idle pauses after both typed queries to catch unintended panel hiding,
   rich SGR preview ANSI rendering without raw escape leakage, terminal-control
   preview rendering to final visible screen state, insert/delete-line and simple

@@ -4,4 +4,3 @@ type-checks, if present
 run it.
 - Never commit with --no-verify!!! NEVER.  If things aren't working, you may need to install new deps with 'npm install'
 - **Never send Slack messages unless explicitly asked to by the user.** Reading/searching Slack is fine; posting (status updates, replies, PR links, thread comments) requires an explicit request in the current conversation. This includes messages sent through an MCP Slack integration — they go out as me.
-- Do not call or recommend `gohan install` unless the user explicitly requests an exceptional bootstrap or manual recovery. Gohan installs all configured tools as a set; never invoke `gohan install` from tool hooks or use it to wire config-package dependencies.

@@ -17,7 +17,7 @@ PROGRAM_CONTEXT_ROOT="$TMPDIR/program-context-root"
 CODEX_CONTEXT_FILE="$TMPDIR/codex-context.json"
 BUILTIN_HOME="$TMPDIR/builtin-home"
 BUILTIN_PROJECT="$BUILTIN_HOME/projects/project-builtin"
-BUILTIN_AVA="$BUILTIN_HOME/projects/ava"
+BUILTIN_ALPHA="$BUILTIN_HOME/projects/alpha"
 BUILTIN_REPO="$BUILTIN_HOME/repos/repo-builtin"
 BUILTIN_DOWNLOADS="$BUILTIN_HOME/Downloads"
 SETTINGS_SUITE="dev.benbernard.fzf-palette.e2e.$$"
@@ -248,10 +248,10 @@ path, cwd = sys.argv[1:3]
 with open(path, "w", encoding="utf-8") as handle:
     json.dump({"cwd": cwd, "detail": "e2e codex context"}, handle)
 PY
-mkdir -p "$BUILTIN_PROJECT/nested" "$BUILTIN_AVA/gohan" "$BUILTIN_REPO" "$BUILTIN_DOWNLOADS"
+mkdir -p "$BUILTIN_PROJECT/nested" "$BUILTIN_ALPHA/child" "$BUILTIN_REPO" "$BUILTIN_DOWNLOADS"
 printf 'alpha\n' >"$BUILTIN_PROJECT/alpha.txt"
 printf 'beta\n' >"$BUILTIN_PROJECT/nested/beta.txt"
-printf 'gohan\n' >"$BUILTIN_AVA/gohan/gohan.txt"
+printf 'child\n' >"$BUILTIN_ALPHA/child/child.txt"
 printf 'repo\n' >"$BUILTIN_REPO/README.md"
 printf 'old\n' >"$BUILTIN_DOWNLOADS/download-old.txt"
 printf 'new\n' >"$BUILTIN_DOWNLOADS/download-new.txt"
@@ -922,28 +922,28 @@ ALFRED_CONTEXT_ERR="$TMPDIR/alfred-context.err"
 OPEN_PID=$!
 
 wait_for_panel_visible
-"$CLI" test-control query ava >/tmp/fzf-palette-e2e-alfred-context-query-ava-control.out
+"$CLI" test-control query alpha >/tmp/fzf-palette-e2e-alfred-context-query-alpha-control.out
 wait_for_picker_rows 1
 sleep 1.2
 ALFRED_CONTEXT_ROOT_SNAPSHOT="$("$CLI" test-control snapshot --json)"
-python3 - "$ALFRED_CONTEXT_ROOT_SNAPSHOT" "$BUILTIN_AVA" <<'PY'
+python3 - "$ALFRED_CONTEXT_ROOT_SNAPSHOT" "$BUILTIN_ALPHA" <<'PY'
 import json
 import sys
 snapshot = json.loads(sys.argv[1])
 expected = sys.argv[2]
 if not snapshot.get("panelVisible"):
-    raise SystemExit(f"panel disappeared after idle query ava: {snapshot}")
+    raise SystemExit(f"panel disappeared after idle query alpha: {snapshot}")
 if not snapshot.get("queryFieldFocused"):
-    raise SystemExit(f"query field lost focus after idle query ava: {snapshot}")
+    raise SystemExit(f"query field lost focus after idle query alpha: {snapshot}")
 active = snapshot.get("activeRowText", "")
 if expected not in active:
-    raise SystemExit(f"expected ava root active before tab, got {snapshot}")
+    raise SystemExit(f"expected alpha root active before tab, got {snapshot}")
 PY
 
 "$CLI" test-control key tab >/tmp/fzf-palette-e2e-alfred-context-tab-control.out
 wait_for_panel_visible
 wait_for_chrome "files>" "Pick a file or directory" "" "" "inline"
-"$CLI" test-control query gohan >/tmp/fzf-palette-e2e-alfred-context-query-gohan-control.out
+"$CLI" test-control query child >/tmp/fzf-palette-e2e-alfred-context-query-child-control.out
 wait_for_picker_rows 2
 sleep 1.2
 ALFRED_CONTEXT_INNER_SNAPSHOT="$("$CLI" test-control snapshot --json)"
@@ -952,19 +952,19 @@ import json
 import sys
 snapshot = json.loads(sys.argv[1])
 if not snapshot.get("panelVisible"):
-    raise SystemExit(f"panel disappeared after ava tab gohan: {snapshot}")
+    raise SystemExit(f"panel disappeared after alpha tab child: {snapshot}")
 if not snapshot.get("queryFieldFocused"):
-    raise SystemExit(f"query field lost focus after ava tab gohan: {snapshot}")
-if "gohan" not in snapshot.get("activeRowText", ""):
-    raise SystemExit(f"expected gohan result after ava tab gohan, got {snapshot}")
+    raise SystemExit(f"query field lost focus after alpha tab child: {snapshot}")
+if "child" not in snapshot.get("activeRowText", ""):
+    raise SystemExit(f"expected child result after alpha tab child, got {snapshot}")
 PY
 
 "$CLI" test-control accept >/tmp/fzf-palette-e2e-alfred-context-accept-control.out
 wait "$OPEN_PID"
 OPEN_PID=""
 
-if [[ "$(cat "$ALFRED_CONTEXT_OUT")" != "$BUILTIN_AVA/gohan" ]]; then
-  echo "expected ava tab gohan result $BUILTIN_AVA/gohan, got:" >&2
+if [[ "$(cat "$ALFRED_CONTEXT_OUT")" != "$BUILTIN_ALPHA/child" ]]; then
+  echo "expected alpha tab child result $BUILTIN_ALPHA/child, got:" >&2
   cat "$ALFRED_CONTEXT_OUT" >&2
   cat "$ALFRED_CONTEXT_ERR" >&2
   exit 1
