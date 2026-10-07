@@ -11,6 +11,7 @@ docs/
 ├── dotfiles-and-app-configs.md
 ├── home-directory-map.md
 ├── initial-machine-setup.md
+├── leak-protection.md
 ├── legacy-systems-index.md
 ├── macos-notification-framework.md
 ├── macos-url-routing.md
