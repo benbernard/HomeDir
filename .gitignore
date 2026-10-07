@@ -343,8 +343,6 @@ lefthook.yml
 .ask
 .cdk/
 .degit/
-projects/seizure-import/export.zip
-projects/seizure-import/data
 .gk
 .supermaven
 vs-code-trial
