@@ -7,7 +7,7 @@
     "dist": "electron-builder --mac"
   },
   "devDependencies": {
-    "electron": "^35.0.0",
+    "electron": "^44.7.0",
     "electron-builder": "^26.0.0"
   },
   "build": {
