@@ -79,10 +79,10 @@ class OverlayView: NSView {
 // MARK: - App Delegate
 
 class AppDelegate: NSObject, NSApplicationDelegate {
-    var window: NSWindow!
+    var windows: [NSWindow] = []
     var snoozeTimer: Timer?
     var clockTimer: Timer?
-    var clockLabel: NSTextField?
+    var clockLabels: [NSTextField] = []
     let cfg: Config
 
     init(_ cfg: Config) { self.cfg = cfg }
@@ -90,31 +90,49 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) { show() }
 
     func show() {
-        window?.close()
-        let screen = NSScreen.main ?? NSScreen.screens[0]
-        window = OverlayWindow(
-            contentRect: screen.frame,
-            styleMask: .borderless,
-            backing: .buffered,
-            defer: false
-        )
-        window.level = NSWindow.Level(rawValue: Int(CGWindowLevelForKey(.screenSaverWindow)))
-        window.backgroundColor = NSColor(calibratedRed: 0.04, green: 0.04, blue: 0.12, alpha: 0.96)
-        window.isOpaque = false
-        window.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .stationary]
+        closeWindows()
 
-        let overlay = OverlayView(frame: window.contentView!.bounds)
-        overlay.autoresizingMask = [.width, .height]
+        // Cover every attached display. If the screen list is momentarily
+        // empty, fall back to the main screen so the overlay still appears.
+        let screens = NSScreen.screens.isEmpty
+            ? [NSScreen.main].compactMap { $0 }
+            : NSScreen.screens
+        var buttons: [NSButton] = []
 
-        let buttons = buildContent(in: overlay)
+        for screen in screens {
+            let window = OverlayWindow(
+                contentRect: screen.frame,
+                styleMask: .borderless,
+                backing: .buffered,
+                defer: false
+            )
+            window.level = NSWindow.Level(rawValue: Int(CGWindowLevelForKey(.screenSaverWindow)))
+            window.backgroundColor = NSColor(calibratedRed: 0.04, green: 0.04, blue: 0.12, alpha: 0.96)
+            window.isOpaque = false
+            window.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .stationary]
 
-        window.contentView = overlay
-        window.orderFrontRegardless()
+            let overlay = OverlayView(frame: window.contentView!.bounds)
+            overlay.autoresizingMask = [.width, .height]
+
+            buttons.append(contentsOf: buildContent(in: overlay))
+
+            window.contentView = overlay
+            window.orderFrontRegardless()
+            windows.append(window)
+        }
 
         for btn in buttons { btn.isEnabled = false; btn.alphaValue = 0.4 }
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
             for btn in buttons { btn.isEnabled = true; btn.alphaValue = 1.0 }
         }
+    }
+
+    func closeWindows() {
+        for window in windows { window.close() }
+        windows.removeAll()
+        clockTimer?.invalidate()
+        clockTimer = nil
+        clockLabels.removeAll()
     }
 
     // MARK: - Layout
@@ -302,8 +320,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func installClock(in view: NSView, centerX: CGFloat, topY: CGFloat) {
-        clockTimer?.invalidate()
-
         let panelW: CGFloat = 360
         let panelH: CGFloat = 72
         let panel = NSView(frame: NSRect(x: centerX - panelW / 2, y: topY - panelH, width: panelW, height: panelH))
@@ -323,11 +339,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         label.alignment = .center
         label.frame = NSRect(x: 0, y: 8, width: panelW, height: 38)
         panel.addSubview(label)
-        clockLabel = label
+        clockLabels.append(label)
 
         updateClock()
-        clockTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
-            self?.updateClock()
+        if clockTimer == nil {
+            clockTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
+                self?.updateClock()
+            }
         }
     }
 
@@ -335,7 +353,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let df = DateFormatter()
         df.timeStyle = .short
         df.dateStyle = .none
-        clockLabel?.stringValue = df.string(from: Date())
+        let now = df.string(from: Date())
+        for label in clockLabels { label.stringValue = now }
     }
 
     func formatTime(_ s: String) -> String {
@@ -369,7 +388,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     @objc func snooze() {
-        window.orderOut(nil)
+        for window in windows { window.orderOut(nil) }
         snoozeTimer?.invalidate()
         snoozeTimer = Timer.scheduledTimer(withTimeInterval: 120, repeats: false) { [weak self] _ in
             self?.show()
