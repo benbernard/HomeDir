@@ -28,6 +28,7 @@ import { execFileSync, execSync, spawn } from "child_process";
 import { appendFileSync, existsSync, unlinkSync } from "fs";
 import { homedir } from "os";
 import { join } from "path";
+import { dedupeMeetings, normalizeMeetingUrl } from "./lib/meeting-dedup";
 
 interface EventData {
   eventId: string;
@@ -285,18 +286,6 @@ function generateNotificationMessage(
   return { message: "Meeting starting now", source: "default" };
 }
 
-function normalizeUrl(raw: string): string {
-  if (raw === "EMPTY" || !raw) return "";
-  if (raw.startsWith("gmeet://")) return raw;
-  if (raw.startsWith("https://meet.google.com/")) {
-    return raw.replace("https://", "gmeet://");
-  }
-  if (raw.startsWith("http://meet.google.com/")) {
-    return raw.replace("http://", "gmeet://");
-  }
-  return raw;
-}
-
 function eventStartsSoon(startTime: string, now: Date, later: Date): boolean {
   const startMs = Date.parse(startTime);
   if (Number.isNaN(startMs)) {
@@ -405,14 +394,10 @@ async function main(): Promise<void> {
     time: eventData.startDate,
   };
 
-  const seen = new Set([triggered.title]);
-  const meetings: MeetingInfo[] = [triggered];
-
-  for (const m of otherMeetings) {
-    if (seen.has(m.title)) continue;
-    seen.add(m.title);
-    meetings.push(m);
-  }
+  // MeetingBar and the Calendar API can report the same event with different
+  // titles (punctuation such as "<>" or a dropped em dash), so de-duplicate on
+  // the normalized URL, falling back to a normalized title.
+  const meetings: MeetingInfo[] = dedupeMeetings([triggered, ...otherMeetings]);
 
   const meetingsJson = JSON.stringify(meetings);
 
@@ -487,7 +472,7 @@ async function main(): Promise<void> {
     eventData.meetingNotes,
   );
 
-  const targetUrl = normalizeUrl(eventData.meetingUrl);
+  const targetUrl = normalizeMeetingUrl(eventData.meetingUrl);
 
   writeLog({
     timestamp: new Date().toISOString(),
