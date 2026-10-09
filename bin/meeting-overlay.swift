@@ -403,10 +403,96 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 }
 
+// MARK: - Single-instance lock
+
+/// Guarantees at most one overlay is ever on screen. The newest invocation
+/// takes over from any running overlay: it asks the old process to dismiss and
+/// waits for it to release the lock before showing its own content, so a new
+/// notification replaces the old one instead of stacking on top of it.
+final class OverlayLock {
+    private let fd: Int32
+
+    init() {
+        let dir = FileManager.default
+            .homeDirectoryForCurrentUser
+            .appendingPathComponent("Library/Application Support/meeting-overlay", isDirectory: true)
+        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        let path = dir.appendingPathComponent("overlay.lock").path
+        fd = open(path, O_CREAT | O_RDWR, 0o644)
+    }
+
+    /// Become the sole overlay. If another overlay holds the lock, terminate it
+    /// and wait for the lock to free up. Returns false when the lock could not
+    /// be taken over, in which case the caller should exit rather than draw a
+    /// second overlay.
+    @discardableResult
+    func acquire() -> Bool {
+        guard fd >= 0 else { return true }
+
+        if flock(fd, LOCK_EX | LOCK_NB) == 0 {
+            writePid()
+            return true
+        }
+
+        // Another overlay is running. Give it a moment to publish its pid, then
+        // ask it to dismiss so the newest notification wins.
+        for _ in 0..<40 {
+            if let pid = readPid(), pid > 0, pid != getpid() {
+                kill(pid, SIGTERM)
+                break
+            }
+            usleep(50_000)
+        }
+
+        // Wait for the previous overlay to exit and release the lock.
+        for _ in 0..<120 {
+            if flock(fd, LOCK_EX | LOCK_NB) == 0 {
+                writePid()
+                return true
+            }
+            usleep(50_000)
+        }
+
+        return false
+    }
+
+    private func writePid() {
+        _ = ftruncate(fd, 0)
+        _ = lseek(fd, 0, SEEK_SET)
+        let text = "\(getpid())\n"
+        _ = text.withCString { write(fd, $0, strlen($0)) }
+    }
+
+    private func readPid() -> pid_t? {
+        guard fd >= 0 else { return nil }
+        _ = lseek(fd, 0, SEEK_SET)
+        var buffer = [CChar](repeating: 0, count: 32)
+        let count = read(fd, &buffer, buffer.count - 1)
+        guard count > 0 else { return nil }
+        let text = String(cString: buffer).trimmingCharacters(in: .whitespacesAndNewlines)
+        return pid_t(text)
+    }
+}
+
 // MARK: - Main
 
 let app = NSApplication.shared
 app.setActivationPolicy(.accessory)
+
+// Only one overlay may be visible at a time; take over from a running one
+// instead of stacking a second full-screen window on top of it.
+let overlayLock = OverlayLock()
+if !overlayLock.acquire() {
+    exit(0)
+}
+
+// Replace the default SIGTERM action so a newer overlay can ask this one to
+// dismiss cleanly (closing its windows) before taking over the lock.
+signal(SIGTERM, SIG_IGN)
+let sigtermSource = DispatchSource.makeSignalSource(signal: SIGTERM, queue: .main)
+sigtermSource.setEventHandler { NSApp.terminate(nil) }
+sigtermSource.resume()
+
 let delegate = AppDelegate(config)
 app.delegate = delegate
 app.run()

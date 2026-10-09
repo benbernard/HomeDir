@@ -2,6 +2,7 @@ import { describe, expect, test } from "vitest";
 import {
   dedupeMeetings,
   isSameMeeting,
+  normalizeMeetingTime,
   normalizeMeetingTitle,
   normalizeMeetingUrl,
 } from "./meeting-dedup";
@@ -35,6 +36,31 @@ describe("normalizeMeetingTitle", () => {
   });
 });
 
+describe("normalizeMeetingTime", () => {
+  test("parses MeetingBar and RFC3339 times to the same key", () => {
+    expect(
+      normalizeMeetingTime("Thursday, October 8, 2026 at 4:00:00 PM"),
+    ).toBe(normalizeMeetingTime("2026-10-08T16:00:00-07:00"));
+  });
+
+  test("ignores seconds and the narrow no-break space MeetingBar emits", () => {
+    expect(
+      normalizeMeetingTime("Thursday, October 8, 2026 at 4:00:00\u202fPM"),
+    ).toBe(normalizeMeetingTime("Thursday, October 8, 2026 at 4:00:00 PM"));
+  });
+
+  test("distinguishes different start times", () => {
+    expect(
+      normalizeMeetingTime("Thursday, October 8, 2026 at 4:00:00 PM"),
+    ).not.toBe(normalizeMeetingTime("Thursday, October 8, 2026 at 4:30:00 PM"));
+  });
+
+  test("passes through unparseable input", () => {
+    expect(normalizeMeetingTime("sometime soon")).toBe("sometime soon");
+    expect(normalizeMeetingTime("")).toBe("");
+  });
+});
+
 describe("isSameMeeting", () => {
   test("matches the same event when titles differ but URLs agree", () => {
     expect(
@@ -48,8 +74,16 @@ describe("isSameMeeting", () => {
   test("does not match distinct meetings that share a title", () => {
     expect(
       isSameMeeting(
-        { title: "Standup", url: "https://meet.google.com/aaa-bbbb-ccc", time: "" },
-        { title: "Standup", url: "https://meet.google.com/ddd-eeee-fff", time: "" },
+        {
+          title: "Standup",
+          url: "https://meet.google.com/aaa-bbbb-ccc",
+          time: "",
+        },
+        {
+          title: "Standup",
+          url: "https://meet.google.com/ddd-eeee-fff",
+          time: "",
+        },
       ),
     ).toBe(false);
   });
@@ -61,6 +95,40 @@ describe("isSameMeeting", () => {
         { title: "Alex <> Kim", url: meet, time: "" },
       ),
     ).toBe(true);
+  });
+
+  test("matches the same event reported with different links at the same time", () => {
+    expect(
+      isSameMeeting(
+        {
+          title: "Project Sync",
+          url: "https://meet.google.com/aaa-bbbb-ccc?hs=224",
+          time: "Thursday, May 21, 2026 at 2:30:00 PM",
+        },
+        {
+          title: "Project Sync",
+          url: "https://meet.google.com/aaa-bbbb-ccc",
+          time: "2026-05-21T14:30:00-07:00",
+        },
+      ),
+    ).toBe(true);
+  });
+
+  test("does not match the same title at different times", () => {
+    expect(
+      isSameMeeting(
+        {
+          title: "Project Sync",
+          url: "https://meet.google.com/aaa-bbbb-ccc",
+          time: "Thursday, May 21, 2026 at 2:30:00 PM",
+        },
+        {
+          title: "Project Sync",
+          url: "https://meet.google.com/ddd-eeee-fff",
+          time: "2026-05-21T15:00:00-07:00",
+        },
+      ),
+    ).toBe(false);
   });
 });
 
@@ -79,8 +147,30 @@ describe("dedupeMeetings", () => {
   });
 
   test("keeps genuinely different meetings", () => {
-    const a = { title: "Design Review", url: "https://meet.google.com/x", time: "" };
-    const b = { title: "Team Standup", url: "https://meet.google.com/y", time: "" };
+    const a = {
+      title: "Design Review",
+      url: "https://meet.google.com/x",
+      time: "",
+    };
+    const b = {
+      title: "Team Standup",
+      url: "https://meet.google.com/y",
+      time: "",
+    };
     expect(dedupeMeetings([a, b])).toEqual([a, b]);
+  });
+
+  test("collapses the same event shared across two calendars", () => {
+    const triggered = {
+      title: "Project Sync",
+      url: "https://meet.google.com/aaa-bbbb-ccc?hs=224",
+      time: "Thursday, May 21, 2026 at 2:30:00 PM",
+    };
+    const calendar = {
+      title: "Project Sync",
+      url: "https://meet.google.com/aaa-bbbb-ccc",
+      time: "2026-05-21T14:30:00-07:00",
+    };
+    expect(dedupeMeetings([triggered, calendar])).toEqual([triggered]);
   });
 });

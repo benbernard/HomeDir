@@ -172,7 +172,7 @@ The current `meeting-notify.ts` declares it but does not write to it. Use `~/eve
 - Skips `"Focus Time (via Clockwise)"` and `"Lunch (via Clockwise)"`.
 - Fetches calendar events starting within the next 15 minutes.
 - Filters all-day events by requiring `start.dateTime`.
-- Kills any existing `meeting-overlay` process before launching a new one.
+- Kills any existing `meeting-overlay` process before launching a new one. The overlay also enforces a single instance with an exclusive lock, so a new invocation always dismisses the running overlay and takes its place.
 - Sends notification ID `meetingbar-active`, replacing the previous active meeting alert.
 - Sends no click actions when the event has no usable meeting URL.
 - Converts Google Meet HTTPS URLs to `gmeet://...`.
@@ -180,6 +180,7 @@ The current `meeting-notify.ts` declares it but does not write to it. Use `~/eve
 The overlay:
 
 - Uses a borderless, always-on-top full-screen Cocoa window.
+- Is a singleton: a new invocation asks the running overlay to dismiss and waits for it to exit, so only one overlay is ever visible.
 - Shows one meeting or a multi-meeting warning list.
 - Disables buttons for 1 second after show to prevent accidental clicks.
 - Has Join, Snooze 2 min, Dismiss, and Open in Google Calendar controls.
@@ -204,7 +205,7 @@ If the overlay does not show:
 1. Run `~/bin/build-meeting-overlay`.
 2. Test `~/bin/meeting-overlay` manually.
 3. Check `~/event-log.txt` for `overlay` warnings or errors.
-4. Check whether another `meeting-overlay` process is being killed and relaunched.
+4. Check whether another `meeting-overlay` process is holding the single-instance lock.
 
 If the native notification does not show:
 

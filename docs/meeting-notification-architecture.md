@@ -102,7 +102,7 @@ This is a compiled TypeScript binary that replaces the old `~/bin/event-prompt.s
 4. **Filters silent events** — hardcoded skip for `"Focus Time (via Clockwise)"` and `"Lunch (via Clockwise)"`
 5. **Fetches other upcoming meetings** from Google Calendar (via `gws` CLI) and explicitly keeps only timed events whose start time is within the next 15 minutes
 6. **Filters all-day events** — events with only `start.date` (no `start.dateTime`) are excluded. This prevents non-actionable events like "Home" or "Out of office" from appearing in the overlay
-7. **Builds meetings JSON** — triggered event + any other timed events starting soon
+7. **Builds meetings JSON** — triggered event + any other timed events starting soon, de-duplicated by normalized URL or by normalized title + start time (the same event is reported by MeetingBar and the Calendar API with different link strings, and can be shared into two calendars)
 8. **Replaces any active overlay and launches the new overlay** (if not `--dry-run`):
    ```bash
    ~/bin/meeting-overlay \
@@ -155,6 +155,7 @@ This is a compiled TypeScript binary that replaces the old `~/bin/event-prompt.s
   - **"Google Calendar"** — opens the day's calendar view in the default browser and dismisses the overlay
 - **Join behavior:** Clicking a Join button opens the meeting URL via `NSWorkspace.shared.open()` and immediately terminates the overlay app
 - **Safety delay:** Snooze and Dismiss are visually disabled for 1 second on show to prevent accidental clicks; Join and Google Calendar remain immediately available
+- **Single instance:** the overlay holds an exclusive lock (`~/Library/Application Support/meeting-overlay/overlay.lock`). A new invocation sends `SIGTERM` to the running overlay, waits for it to release the lock, then shows its own content. This guarantees at most one overlay is ever visible and that a new notification replaces the old one instead of stacking on top of it
 
 ---
 
@@ -325,6 +326,8 @@ The wrapper script at `~/bin/ts/bin/meeting-notify` auto-rebuilds on next run if
 | **Compiled TypeScript binary** | Replaces fragile shell scripts; `set -e`, `date` parsing, and `async` edge cases were causing silent failures |
 | **Sync calendar fetch** | `execSync` for `gws` avoids Bun background process termination issues |
 | **Filter all-day events** | Events like "Home" or "Out of office" have no actionable start time and clutter the overlay |
+| **Single overlay via `flock`** | MeetingBar can fire the hook twice for one event (the same event synced into two calendars has two EventKit identifiers), and the pre-spawn `pkill` races. An OS lock makes the newest overlay take over deterministically |
+| **Dedupe by title + start time** | The triggered copy and the Calendar API copy of one event can carry different link strings, so URL equality alone is not enough |
 | **No internal forking** | AppleScript's `nohup ... &` already backgrounds the binary; forking inside the binary broke in compiled Bun executables |
 | **JSON structured logging** | `~/event-log.txt` contains machine-parseable logs with timestamps, components, and metadata |
 
