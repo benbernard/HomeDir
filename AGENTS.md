@@ -32,3 +32,7 @@ Job-specific agent instructions live outside this public repo. If
 - Do not test documentation.
 - Do not write tests that merely assert what was written verbatim; tests should validate behavior.
 - Avoid overly obvious tests and tests that only exercise libraries.
+
+# Scope of Defensive Code
+
+Before you add code for a race condition or security edge case that is unlikely or purely hypothetical, tell me exactly what would go wrong, how likely that is, and how much complexity the extra code adds, in words a 10-year-old could understand. Then wait for my OK. Don't quietly widen the scope to guard against problems that only exist in theory.
