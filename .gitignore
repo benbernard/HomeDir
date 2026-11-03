@@ -49,6 +49,9 @@ Public/
 bin/chromedriver
 bin/chromedriver_mac32.zip
 bin/selenium-server-standalone-2.38.0.jar
+# scroll-reversal filter: compiled Swift artifacts (built by bin/scrollfix-build)
+bin/scrolldebounce
+bin/scrolltrace
 fieldbook/
 perl5/
 screen/
@@ -430,7 +433,6 @@ forge
 .cursor.old
 .claude/settings.json.bak
 .config/mcp-usher
-.config/meety
 .claude.current
 temp-demo
 .claude/.caveman-active

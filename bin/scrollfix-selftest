@@ -1,0 +1,65 @@
+#!/bin/bash
+# scrollfix-selftest — measure how well scrolldebounce is hiding the Naga X wheel glitch.
+#
+# Counts the wrong-direction wheel steps the hardware emits (raw HID) versus how many
+# still reach applications after filtering. Requires the scrolldebounce LaunchAgent to
+# be loaded — it does the filtering; this script only observes.
+#
+# usage: scrollfix-selftest [seconds]   (default 60)
+
+set -u
+DIR="$HOME/bin"
+DURATION="${1:-60}"
+CAP=$(mktemp -t scrollfix)
+trap 'rm -f "$CAP"' EXIT
+
+if ! launchctl print "gui/$(id -u)/dev.benbernard.scrolldebounce" >/dev/null 2>&1; then
+	echo "warning: dev.benbernard.scrolldebounce is not loaded — nothing is filtering."
+	echo "         load it with: launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/dev.benbernard.scrolldebounce.plist"
+	echo
+fi
+
+echo "Scroll up and down normally for ${DURATION}s (long steady passes work best)..."
+"$DIR/scrolltrace" "$DURATION" >"$CAP" 2>&1
+
+python3 - "$CAP" <<'PY'
+import sys
+
+raw, cg = [], []
+for line in open(sys.argv[1], errors='replace'):
+    f = line.rstrip('\n').split('\t')
+    if len(f) < 5:
+        continue
+    if f[0] == 'RAW' and int(f[4]) != 0:
+        raw.append((float(f[1]), int(f[4])))
+    elif f[0] == 'CG' and len(f) >= 6:
+        cg.append((float(f[1]), int(f[3])))
+
+def reversals(seq, gap=0.3):
+    return [
+        (seq[i][0], seq[i-1][1], seq[i][1], seq[i+1][1])
+        for i in range(1, len(seq) - 1)
+        if seq[i-1][1] * seq[i][1] < 0
+        and seq[i][1] * seq[i+1][1] < 0
+        and seq[i][0] - seq[i-1][0] < gap
+        and seq[i+1][0] - seq[i][0] < gap
+    ]
+
+if not raw:
+    print("\nNo wheel scrolling detected — nothing to measure. Try again and scroll.")
+    raise SystemExit(1)
+
+hw = reversals(raw)
+esc = reversals(cg)
+print(f"\n  wheel notches from hardware : {len(raw)}")
+print(f"  delivered to applications   : {len(cg)}")
+print(f"  filtered out                : {len(raw) - len(cg)}")
+print(f"\n  wrong-direction glitches emitted by the mouse : {len(hw)}  ({100.0*len(hw)/len(raw):.1f}% of notches)")
+print(f"  of those, reaching applications              : {len(esc)}")
+if esc:
+    for t, a, b, c in esc[:10]:
+        print(f"    escaped: {a:+d} -> {b:+d} -> {c:+d}")
+    print("\n  Some glitches still escape. Try raising the bar: --confirm 4")
+else:
+    print("\n  All hardware glitches were suppressed. The filter is holding.")
+PY

@@ -1,0 +1,37 @@
+#!/bin/bash
+# Build the scroll-reversal filter and its diagnostic tracer.
+#
+# Set CODESIGN_ID to a local code-signing identity to sign with it:
+#
+#   CODESIGN_ID="Your Local Code Signing" bin/scrollfix-build
+#
+# A stable identity matters here: macOS pins ad-hoc signed binaries to their cdhash for
+# the Accessibility grant, so an ad-hoc binary needs re-approval after every rebuild.
+# Signed with a persistent identity it keeps the grant. Unset, the binaries are ad-hoc
+# signed and still work, they just need re-approving after each build.
+#
+# Artifacts land next to this script and are git-ignored.
+set -euo pipefail
+
+cd "$(dirname "$0")"
+
+sign() {
+	local binary="$1" identifier="$2"
+	if [[ -n "${CODESIGN_ID:-}" ]]; then
+		codesign --force -s "$CODESIGN_ID" -i "$identifier" "$binary"
+	else
+		codesign --force -s - -i "$identifier" "$binary"
+	fi
+	codesign -dvv "$binary" 2>&1 | grep -E 'Identifier|Authority|Signature' || true
+}
+
+build() {
+	local name="$1" identifier="$2"
+	echo "==> $name"
+	swiftc -O "$name.swift" -o "$name.building"
+	mv "$name.building" "$name"
+	sign "$name" "$identifier"
+}
+
+build scrolldebounce dev.benbernard.scrolldebounce
+build scrolltrace dev.benbernard.scrolltrace

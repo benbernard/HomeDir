@@ -17,6 +17,7 @@ docs/
 ├── macos-url-routing.md
 ├── meeting-notification-architecture.md
 ├── meeting-notification-operations.md
+├── scrolldebounce.md
 ├── shell-startup.md
 └── tmux-setup.md
 

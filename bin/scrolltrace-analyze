@@ -1,0 +1,80 @@
+#!/usr/bin/env python3
+"""Analyze scrolltrace output: quantify sign reversals in raw HID vs OS-delivered events."""
+import sys
+from collections import Counter
+
+path = sys.argv[1] if len(sys.argv) > 1 else 'cap1.tsv'
+GAP = 0.400  # seconds; separates independent scroll gestures
+
+raw, cg, notes = [], [], []
+for line in open(path, errors='replace'):
+    f = line.rstrip('\n').split('\t')
+    if not f or not f[0]:
+        continue
+    if f[0] == 'RAW' and len(f) >= 5:
+        try:
+            raw.append((float(f[1]), int(f[2]), int(f[4])))
+        except ValueError:
+            pass
+    elif f[0] == 'CG' and len(f) >= 6:
+        try:
+            cg.append((float(f[1]), int(f[3]), float(f[4]), int(f[5])))
+        except ValueError:
+            pass
+    elif f[0] in ('PERM', 'HID_OPEN', 'TAP', 'MATCH', 'READY', 'DONE'):
+        notes.append(line.strip())
+
+
+def gestures(events, gap=GAP):
+    """Split a list of (host_ts, ...) into runs separated by >= gap seconds."""
+    runs, cur = [], []
+    for e in events:
+        if cur and e[0] - cur[-1][0] >= gap:
+            runs.append(cur)
+            cur = []
+        cur.append(e)
+    if cur:
+        runs.append(cur)
+    return runs
+
+
+def summarize(name, events, validx):
+    print(f"\n=== {name}: {len(events)} events, {len(gestures(events))} gestures ===")
+    if not events:
+        return
+    runs = gestures(events)
+    print(f"{'t':>10} {'n':>3} {'dir':>4} {'min':>4} {'max':>4} {'opposite':>8}  pattern")
+    total_opp = 0
+    for r in runs:
+        vals = [e[validx] for e in r]
+        nonzero = [v for v in vals if v != 0] or vals
+        pos, neg = sum(1 for v in nonzero if v > 0), sum(1 for v in nonzero if v < 0)
+        major = 1 if pos >= neg else -1
+        opp = [v for v in nonzero if (v > 0) != (major > 0) and v != 0]
+        total_opp += len(opp)
+        if opp and len(r) >= 3:
+            pat = ''.join('+' if v > 0 else ('-' if v < 0 else '0') for v in nonzero[:24])
+            print(f"{r[0][0]:>10.2f} {len(r):>3} {'+' if major > 0 else '-':>4} "
+                  f"{min(nonzero):>4} {max(nonzero):>4} {len(opp):>8}  {pat}")
+    print(f"-> total minority-direction events inside gestures: {total_opp}")
+    print(f"-> sign histogram: {dict(Counter(1 if e[validx] > 0 else (-1 if e[validx] < 0 else 0) for e in events))}")
+
+
+print("notes:", ' | '.join(notes[:8]))
+summarize('RAW HID wheel (device truth)', raw, 2)
+summarize('CG event delta1 (what apps get)', cg, 1)
+
+# pair raw wheel values to following CG deltas to spot OS-level inversions
+if raw and cg:
+    print("\n=== raw -> CG correlation (nearest CG event within 60ms) ===")
+    pairs = Counter()
+    for r in raw:
+        near = [c for c in cg if 0 <= c[0] - r[0] < 0.060]
+        for c in near:
+            rs = 1 if r[2] > 0 else (-1 if r[2] < 0 else 0)
+            cs = 1 if c[1] > 0 else (-1 if c[1] < 0 else 0)
+            if rs and cs:
+                pairs[(rs, cs)] += 1
+    for (rs, cs), n in sorted(pairs.items()):
+        verdict = 'consistent' if rs == cs else 'INVERTED'
+        print(f"  raw {'+' if rs > 0 else '-'} -> cg {'+' if cs > 0 else '-'}: {n:>4}  ({verdict})")

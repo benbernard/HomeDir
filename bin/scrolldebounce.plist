@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>dev.benbernard.scrolldebounce</string>
+
+	<key>ProgramArguments</key>
+	<array>
+		<string>/Users/benbernard/bin/scrolldebounce</string>
+		<string>--confirm</string>
+		<string>3</string>
+		<string>--gap</string>
+		<string>0.30</string>
+		<string>--log</string>
+		<string>/Users/benbernard/Library/Logs/scrolldebounce-events.log</string>
+		<string>--log-window</string>
+		<string>600</string>
+	</array>
+
+	<key>RunAtLoad</key>
+	<true/>
+
+	<key>KeepAlive</key>
+	<true/>
+
+	<key>ThrottleInterval</key>
+	<integer>30</integer>
+
+	<!-- Input filtering must not be napped or throttled. -->
+	<key>ProcessType</key>
+	<string>Interactive</string>
+
+	<key>StandardOutPath</key>
+	<string>/Users/benbernard/Library/Logs/scrolldebounce.log</string>
+	<key>StandardErrorPath</key>
+	<string>/Users/benbernard/Library/Logs/scrolldebounce.log</string>
+</dict>
+</plist>
