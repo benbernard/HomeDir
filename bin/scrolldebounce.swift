@@ -9,6 +9,12 @@
 // Every decision is kept in a rolling in-memory window and written to a snapshot file,
 // so the recent history can be copied out after a problem occurs.
 //
+// The first notch of a gesture is also put on probation: the encoder glitch most often
+// lands right after a pause, where there is no committed direction to compare against.
+// A leading notch is withheld for --lead seconds. If the wheel keeps going that way it is
+// folded into the next event; if nothing follows it is re-posted unchanged, so a
+// deliberate single notch still arrives.
+//
 // build: bin/scrollfix-build
 //   Signs with $CODESIGN_ID when set (keeps the Accessibility grant stable across
 //   rebuilds), otherwise ad-hoc signs, which macOS re-prompts for after each build.
@@ -19,12 +25,14 @@
 //   -v               verbose: echo HOLD/DROP decisions to stderr
 //   --confirm N      consecutive opposing events needed to accept a real reversal (default 3)
 //   --gap S          seconds of silence that resets the committed direction (default 0.30)
+//   --lead S         seconds a gesture's first notch is withheld to test it (default 0.050)
 //   --log PATH       keep a rolling snapshot of the last --log-window seconds at PATH
 //   --log-all        include continuous/trackpad scroll in the snapshot
 //   --log-window S   how much history to retain (default 600 = 10 minutes)
 //   --replay         EXPERIMENTAL: re-post withheld deltas on a confirmed reversal.
 //
-// Snapshot on demand:  kill -USR1 $(pgrep -x scrolldebounce)
+// Snapshot is rewritten every 10s from a run-loop timer, and on demand:
+//   kill -USR1 $(pgrep -x scrolldebounce)
 import Foundation
 import CoreGraphics
 import ApplicationServices
@@ -46,6 +54,7 @@ let logAll = argv.contains("--log-all")
 // session-height tap was observed to make other taps at that height stop delivering
 // events, so it is off by default.
 let replayEnabled = argv.contains("--replay")
+let LEAD = argValue("--lead").flatMap { Double($0) } ?? 0.050
 let logPath = argValue("--log")
 let logWindow = argValue("--log-window").flatMap { Double($0) } ?? 600.0
 let maxEntries = 200_000
@@ -61,6 +70,15 @@ var lastTime = 0.0
 var passed = 0
 var dropped = 0
 var tapRef: CFMachPort?
+
+// Leading-notch probation. The event is retained so it can be re-posted verbatim if it
+// turns out to be a real, deliberate single notch.
+var pendingSign = 0
+var pendingLine = 0
+var pendingPoint = 0.0
+var pendingTime = 0.0
+var pendingEvent: CGEvent?
+var leadTimer: CFRunLoopTimer?
 
 func note(_ s: String) {
     FileHandle.standardError.write((s + "\n").data(using: .utf8)!)
@@ -100,6 +118,46 @@ func recordEvent(_ decision: String, _ d1: Int64, _ d2: Int64, _ continuous: Int
     }
 }
 
+// Post a withheld event from the run loop rather than from inside the tap callback, so
+// the tap is never re-entered while it is still unwinding.
+func postLater(_ event: CGEvent) {
+    CFRunLoopPerformBlock(CFRunLoopGetCurrent(), CFRunLoopMode.commonModes.rawValue) {
+        event.post(tap: .cgSessionEventTap)
+    }
+    CFRunLoopWakeUp(CFRunLoopGetCurrent())
+}
+
+func releasePending(reason: String) {
+    guard pendingSign != 0 else { return }
+    let sign = pendingSign
+    let line = pendingLine
+    pendingSign = 0
+    pendingLine = 0
+    pendingPoint = 0
+    if let timer = leadTimer { CFRunLoopTimerInvalidate(timer) }
+    leadTimer = nil
+    committed = sign
+    opposites = 0
+    lastTime = pendingTime
+    if let event = pendingEvent {
+        pendingEvent = nil
+        event.setIntegerValueField(.eventSourceUserData, value: REPLAY_MARK)
+        postLater(event)
+    }
+    passed += 1
+    if verbose { note("release held \(line) (\(reason))") }
+    recordEvent("RELEASE", Int64(line), 0, 0, held: 0, discarded: 0)
+}
+
+func armLeadTimer() {
+    if let timer = leadTimer { CFRunLoopTimerInvalidate(timer) }
+    let timer = CFRunLoopTimerCreateWithHandler(
+        nil, CFAbsoluteTimeGetCurrent() + LEAD, 0, 0, 0
+    ) { _ in releasePending(reason: "no follow-up") }
+    leadTimer = timer
+    CFRunLoopAddTimer(CFRunLoopGetCurrent(), timer, .commonModes)
+}
+
 // Trim by age in one pass, off the event path.
 func trimAndFlush() {
     guard logPath != nil else { return }
@@ -113,6 +171,7 @@ func trimAndFlush() {
 // ---- event tap
 let callback: CGEventTapCallBack = { _, type, event, _ in
     if type == .tapDisabledByTimeout || type == .tapDisabledByUserInput {
+        releasePending(reason: "tap disabled")
         if let tapRef { CGEvent.tapEnable(tap: tapRef, enable: true) }
         note("tap re-enabled")
         return Unmanaged.passUnretained(event)
@@ -141,8 +200,68 @@ let callback: CGEventTapCallBack = { _, type, event, _ in
     var discarded = 0
     var folded = 0
 
+    // A leading notch still on probation is judged against this event.
+    if pendingSign != 0 && now - pendingTime > LEAD {
+        releasePending(reason: "late event")
+    }
+    if pendingSign != 0 {
+        let probationSign = pendingSign
+        let probationLine = pendingLine
+        let probationPoint = pendingPoint
+        pendingSign = 0
+        pendingLine = 0
+        pendingPoint = 0
+        pendingEvent = nil
+        if let timer = leadTimer { CFRunLoopTimerInvalidate(timer) }
+        leadTimer = nil
+
+        if sign == probationSign {
+            // The wheel kept going that way: the notch was real, so fold its travel into
+            // this event instead of losing it.
+            event.setIntegerValueField(.scrollWheelEventDeltaAxis1, value: d1 + Int64(probationLine))
+            event.setDoubleValueField(
+                .scrollWheelEventPointDeltaAxis1,
+                value: event.getDoubleValueField(.scrollWheelEventPointDeltaAxis1) + probationPoint)
+            committed = probationSign
+            opposites = 0
+            lastTime = now
+            passed += 1
+            recordEvent("FOLD", d1, d2, continuous, held: 0, discarded: 0)
+            return Unmanaged.passUnretained(event)
+        }
+        if abs(d1) > abs(Int64(probationLine)) {
+            // Opposite and bigger: the held notch was the glitch, this is the real scroll.
+            committed = sign
+            opposites = 0
+            lastTime = now
+            passed += 1
+            recordEvent("LEADGLITCH", d1, d2, continuous, held: 0, discarded: probationLine)
+            return Unmanaged.passUnretained(event)
+        }
+        // Contradictory single notches: keep the held direction committed and let the
+        // ordinary withhold path below judge this one.
+        committed = probationSign
+        opposites = 0
+        heldLine = probationLine
+        heldPoint = probationPoint
+    }
+
     if committed == 0 || now - lastTime > GAP {
-        // Fresh gesture (or long pause): believe whatever comes first.
+        // Fresh gesture (or long pause). A single leading notch is not trusted yet.
+        if abs(d1) <= 2 && !dryRun {
+            pendingSign = sign
+            pendingLine = Int(d1)
+            pendingPoint = event.getDoubleValueField(.scrollWheelEventPointDeltaAxis1)
+            pendingTime = now
+            pendingEvent = event
+            heldLine = 0
+            heldPoint = 0
+            lastTime = now
+            dropped += 1
+            recordEvent("HOLDLEAD", d1, d2, continuous, held: pendingLine, discarded: 0)
+            armLeadTimer()
+            return nil
+        }
         discarded = heldLine
         heldLine = 0
         heldPoint = 0
@@ -249,12 +368,12 @@ if let logPath { note("keeping last \(Int(logWindow))s of scroll events at \(log
 
 // Snapshot periodically so the file always holds roughly the last logWindow seconds.
 if logPath != nil {
-    let timer = DispatchSource.makeTimerSource(queue: .main)
-    timer.schedule(deadline: .now() + 10, repeating: 10)
-    timer.setEventHandler { trimAndFlush() }
-    timer.resume()
-    // Keep the timer alive for the lifetime of the process.
-    _ = timer
+    // A run-loop timer, held in a global: the previous DispatchSource lived in this block's
+    // scope, so it was deallocated on block exit and the snapshot file never refreshed.
+    let flushTimer = CFRunLoopTimerCreateWithHandler(
+        nil, CFAbsoluteTimeGetCurrent() + 10, 10, 0, 0
+    ) { _ in trimAndFlush() }
+    CFRunLoopAddTimer(CFRunLoopGetCurrent(), flushTimer, .commonModes)
     flushRing()
 }
 

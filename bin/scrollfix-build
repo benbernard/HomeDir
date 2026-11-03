@@ -5,15 +5,48 @@
 #
 #   CODESIGN_ID="Your Local Code Signing" bin/scrollfix-build
 #
-# A stable identity matters here: macOS pins ad-hoc signed binaries to their cdhash for
-# the Accessibility grant, so an ad-hoc binary needs re-approval after every rebuild.
-# Signed with a persistent identity it keeps the grant. Unset, the binaries are ad-hoc
-# signed and still work, they just need re-approving after each build.
+# A stable identity matters here: macOS pins an ad-hoc signed binary to its cdhash for
+# the Accessibility grant, so an ad-hoc binary needs re-approval after every rebuild — and
+# until someone clicks Allow, the filter is silently dead. Signed with a persistent
+# identity the grant survives rebuilds because the requirement names the certificate
+# instead of the cdhash.
+#
+# CODESIGN_ID overrides; otherwise the preferred local identity below is used, falling
+# back to the first available one. Ad-hoc is a last resort and says so.
 #
 # Artifacts land next to this script and are git-ignored.
 set -euo pipefail
 
 cd "$(dirname "$0")"
+
+# CODESIGN_ID overrides. Otherwise the identity is read from
+# ~/.local/scrollfix-signing-identity (untracked, one name per line, # for comments), or
+# taken from the machine when exactly one local codesigning identity exists. No identity
+# name is hard-coded here: this script is source-controlled.
+#
+# Artifacts land next to this script and are git-ignored.
+set -euo pipefail
+
+cd "$(dirname "$0")"
+
+SIGN_ID_FILE="$HOME/.local/scrollfix-signing-identity"
+if [[ -z "${CODESIGN_ID:-}" && -r "$SIGN_ID_FILE" ]]; then
+	CODESIGN_ID="$(sed -n 's/^[[:space:]]*\([^#[:space:]].*\)$/\1/p' "$SIGN_ID_FILE" | head -1)"
+fi
+if [[ -z "${CODESIGN_ID:-}" ]]; then
+	identities=()
+	while IFS= read -r name; do identities+=("$name"); done < <(
+		security find-identity -v -p codesigning 2>/dev/null \
+			| sed -n 's/^ *[0-9]*) [0-9A-F]\{40\} "\(.*\)"/\1/p')
+	if [[ ${#identities[@]} -eq 1 ]]; then
+		CODESIGN_ID="${identities[0]}"
+	fi
+fi
+if [[ -z "${CODESIGN_ID:-}" ]]; then
+	echo "warning: no codesigning identity found (set CODESIGN_ID or write one to" >&2
+	echo "         ~/.local/scrollfix-signing-identity) — signing ad-hoc; Accessibility" >&2
+	echo "         must be re-approved after every build." >&2
+fi
 
 sign() {
 	local binary="$1" identifier="$2"

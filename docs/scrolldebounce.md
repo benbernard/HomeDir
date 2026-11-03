@@ -43,10 +43,14 @@ The first launch needs a manual **Accessibility** grant. The daemon requests it
 and then retries every 3s, so no restart is needed after granting.
 
 Signing identity matters: TCC pins ad-hoc binaries to their cdhash, so an ad-hoc
-build needs re-approving after every rebuild. `CODESIGN_ID` signs with a stable
-identity instead, and the grant survives rebuilds. If a stale entry exists for
-this binary, remove it in System Settings and re-add; the checkbox can look
-enabled while the stored requirement no longer matches.
+build needs re-approving after every rebuild — and until someone clicks Allow the
+filter is silently dead. `scrollfix-build` therefore signs with a stable identity
+when it can find one: `$CODESIGN_ID`, else the first name in
+`~/.local/scrollfix-signing-identity` (untracked), else the machine's only local
+codesigning identity. Ad-hoc is a last resort and the build says so. The grant then
+survives rebuilds because the requirement names the certificate, not the cdhash.
+If a stale entry exists for this binary, remove it in System Settings and re-add;
+the checkbox can look enabled while the stored requirement no longer matches.
 
 ## How it decides
 
@@ -58,6 +62,22 @@ momentum and horizontal scrolling are never touched.
 - Opposing direction → withheld (`DROP`) until `--confirm` of them arrive.
 - Confirmed → real reversal; the withheld notches are **discarded**.
 - Original direction resumes → withheld notches were a glitch; discarded.
+
+The first notch of a gesture is not trusted, because the glitch most often lands
+right after a pause, where there is no committed direction to compare against. A
+leading notch (`|d1| ≤ 2`) is withheld for `--lead` (default 50ms):
+
+- Wheel continues the same way → `FOLD`; the held notch's delta is folded into the
+  next event so no travel is lost.
+- Next event is opposite and larger → `LEADGLITCH`; the held notch was the glitch
+  and is discarded.
+- Nothing follows → `RELEASE`; the event is re-posted unchanged at
+  `cgSessionEventTap` from the run loop, so a deliberate single notch still arrives,
+  about 50ms late.
+
+50ms because in a measured capture 92% of follow-up events arrived within 50ms and
+that window caught every boundary glitch; the remaining 9% of gestures were lone
+notches and took the release path.
 
 Cost: a genuine *fast* reversal loses `--confirm - 1` notches (~40ms). A
 deliberate reversal after a pause costs nothing.
