@@ -18,6 +18,6 @@
     "@types/aws-lambda": "^8.10.143",
     "@types/node": "^22.5.0",
     "lua-in-js": "^2.2.5",
-    "serverless": "^4.2.3"
+    "serverless": "^4.46.0"
   }
 }
