@@ -2,6 +2,12 @@ Prefer to use AskUserQuestions when responding with questions to a user, unless
 that question is the last thing in the response.  If more than 1 question,
 always prefer to use AskUserQuestions tool.
 
+# Screenshots
+
+Screenshots provided by the user (Xnapper) can be found at
+`~/Library/Application Support/Xnapper/Archives/` — `Output/` is the edited
+version, `Raw/` the original.
+
 # Messages
 
 Never send Slack messages unless explicitly asked to by the user. Reading or
@@ -25,6 +31,16 @@ When working in the home directory itself, see `AGENTS.home.md` for detailed ins
 
 Job-specific agent instructions live outside this public repo. If
 `~/site/AGENTS.md` exists, read and follow it in addition to this file.
+Never commit employer names, internal tools, project names, links, or other
+work-specific details here, including in examples and commit messages. Follow
+`docs/leak-protection.md` before committing; leave managed shell changes local.
+
+# Worktrees
+
+Worktrees live under `~/repos/worktrees/<repo>/<name>`. Branch names containing
+slashes can produce nested directories. Paths in the old `~/repos/<repo>-<name>`
+layout are stale. Use `git -C ~/repos/<repo> worktree list` to find the current
+path before opening a worktree from an old plan, shell variable, or editor tab.
 
 # Testing
 
@@ -32,7 +48,3 @@ Job-specific agent instructions live outside this public repo. If
 - Do not test documentation.
 - Do not write tests that merely assert what was written verbatim; tests should validate behavior.
 - Avoid overly obvious tests and tests that only exercise libraries.
-
-# Scope of Defensive Code
-
-Before you add code for a race condition or security edge case that is unlikely or purely hypothetical, tell me exactly what would go wrong, how likely that is, and how much complexity the extra code adds, in words a 10-year-old could understand. Then wait for my OK. Don't quietly widen the scope to guard against problems that only exist in theory.
