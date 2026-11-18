@@ -11,7 +11,11 @@
 .config/nvim/bundle/bufexplorer-7.3.0/doc/tags
 .config/nvim/bundle/calendar-vim/doc/tags
 .config/nvim/dein-plugins/
-.config/karabiner
+# Share the mouse rule, not Karabiner's per-machine profiles or backups.
+/.config/karabiner/**
+!/.config/karabiner/assets/
+!/.config/karabiner/assets/complex_modifications/
+!/.config/karabiner/assets/complex_modifications/btt-mouse-grid.js
 .nvim*
 .screen/
 .CFUserTextEncoding

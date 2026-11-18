@@ -113,6 +113,39 @@ artifacts.
 - `userScripts/` contains browser userscripts/extensions; see
   `userScripts/README.md`.
 
+### Mouse thumb grid → BetterTouchTool
+
+The [Karabiner rule](../.config/karabiner/assets/complex_modifications/btt-mouse-grid.js)
+turns the mouse's thumb keys into **Normal Mouse Buttons** in BTT. Change what a
+button *does* in BTT; change which mice send those buttons in the rule. It matches
+only the listed mouse's keyboard interface, so the real keyboard still types digits.
+
+| Thumb key | BTT button | Karabiner button |
+| --- | --- | --- |
+| `1` … `9` | 10 … 18 | 11 … 19 |
+| `0` | 19 | 20 |
+| `−` | 20 | 21 |
+| `=` / `+` | 21 | 22 |
+
+**New Mac:** Install Karabiner-Elements (16.2+ for the `.js` rule) and BTT,
+sync the dotfiles, and make sure your BTT preset is active. In Karabiner's
+active profile, choose **Complex Modifications → Add predefined rule** and enable
+**Mouse thumb grid to BTT Buttons 10–21**. No need to copy `karabiner.json` from
+another Mac or recreate the twelve bindings.
+
+**Replacement mouse:** The same vendor/product IDs work without changes, even
+in a different USB port. For a new model that sends digits and `−`/`+`, find its
+keyboard interface in **Karabiner-EventViewer → Devices** and add its vendor and
+product IDs to `mice` in the shared rule. Keep `is_keyboard: true`. Karabiner
+copies the rule into the active profile when enabled: after syncing an edit,
+remove the old copy in Complex Modifications and add the predefined rule again.
+
+**Quick check:** In BTT's button recorder, thumb `8` should register as **Button
+17**, and holding ⌘ should register **⌘ + Button 17**. In a text field, keyboard
+`8` should still type `8`. If the *mouse* types `8`, check that its keyboard
+interface has **Modify events** enabled in Karabiner's Devices tab. To undo the
+mapping, disable the rule in Complex Modifications; leave the BTT actions intact.
+
 ## Small App Projects
 
 - `projects/` contains standalone local project/app source, including
