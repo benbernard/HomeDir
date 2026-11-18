@@ -19,16 +19,6 @@ set -euo pipefail
 
 cd "$(dirname "$0")"
 
-# CODESIGN_ID overrides. Otherwise the identity is read from
-# ~/.local/scrollfix-signing-identity (untracked, one name per line, # for comments), or
-# taken from the machine when exactly one local codesigning identity exists. No identity
-# name is hard-coded here: this script is source-controlled.
-#
-# Artifacts land next to this script and are git-ignored.
-set -euo pipefail
-
-cd "$(dirname "$0")"
-
 SIGN_ID_FILE="$HOME/.local/scrollfix-signing-identity"
 if [[ -z "${CODESIGN_ID:-}" && -r "$SIGN_ID_FILE" ]]; then
 	CODESIGN_ID="$(sed -n 's/^[[:space:]]*\([^#[:space:]].*\)$/\1/p' "$SIGN_ID_FILE" | head -1)"

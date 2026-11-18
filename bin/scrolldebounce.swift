@@ -3,8 +3,9 @@
 // The Naga X wheel encoder intermittently emits steps in the wrong direction during a
 // single-direction scroll, and macOS scroll acceleration amplifies one step into a big
 // visible jump. This filter withholds opposing events until they are confirmed as a real
-// reversal. Withheld events are NOT discarded when the reversal is confirmed — their
-// deltas are folded into the confirming event, so no scroll distance is lost.
+// reversal. On confirmation the withheld notches are dropped, but the confirming notch is
+// itself put on probation for a moment: a burst of encoder glitches also reaches the
+// confirmation count, and if the old direction comes back the whole burst is revoked.
 //
 // Every decision is kept in a rolling in-memory window and written to a snapshot file,
 // so the recent history can be copied out after a problem occurs.
@@ -26,6 +27,7 @@
 //   --confirm N      consecutive opposing events needed to accept a real reversal (default 3)
 //   --gap S          seconds of silence that resets the committed direction (default 0.30)
 //   --lead S         seconds a gesture's first notch is withheld to test it (default 0.050)
+//   --probation S    seconds a confirmed reversal is held before it is believed (default 0.050)
 //   --log PATH       keep a rolling snapshot of the last --log-window seconds at PATH
 //   --log-all        include continuous/trackpad scroll in the snapshot
 //   --log-window S   how much history to retain (default 600 = 10 minutes)
@@ -55,6 +57,8 @@ let logAll = argv.contains("--log-all")
 // events, so it is off by default.
 let replayEnabled = argv.contains("--replay")
 let LEAD = argValue("--lead").flatMap { Double($0) } ?? 0.050
+// How long a confirmed reversal stays provisional before its confirming notch is delivered.
+let PROBATION = argValue("--probation").flatMap { Double($0) } ?? 0.050
 let logPath = argValue("--log")
 let logWindow = argValue("--log-window").flatMap { Double($0) } ?? 600.0
 let maxEntries = 200_000
@@ -79,6 +83,10 @@ var pendingPoint = 0.0
 var pendingTime = 0.0
 var pendingEvent: CGEvent?
 var leadTimer: CFRunLoopTimer?
+// The pending notch is either a gesture's first notch (probation) or the notch that
+// confirmed a reversal (post-confirmation probation). The two are released differently
+// and logged differently, so the role has to be remembered.
+var pendingIsReversal = false
 
 func note(_ s: String) {
     FileHandle.standardError.write((s + "\n").data(using: .utf8)!)
@@ -127,36 +135,46 @@ func postLater(_ event: CGEvent) {
     CFRunLoopWakeUp(CFRunLoopGetCurrent())
 }
 
+func clearPending() {
+    pendingSign = 0
+    pendingLine = 0
+    pendingPoint = 0
+    pendingIsReversal = false
+    pendingEvent = nil
+    if let timer = leadTimer { CFRunLoopTimerInvalidate(timer) }
+    leadTimer = nil
+}
+
 func releasePending(reason: String) {
     guard pendingSign != 0 else { return }
     let sign = pendingSign
     let line = pendingLine
-    pendingSign = 0
-    pendingLine = 0
-    pendingPoint = 0
-    if let timer = leadTimer { CFRunLoopTimerInvalidate(timer) }
-    leadTimer = nil
+    let wasReversal = pendingIsReversal
+    let event = pendingEvent
+    clearPending()
     committed = sign
     opposites = 0
     lastTime = pendingTime
-    if let event = pendingEvent {
+    if let event {
         pendingEvent = nil
         event.setIntegerValueField(.eventSourceUserData, value: REPLAY_MARK)
-        postLater(event)
+        if !dryRun { postLater(event) }
     }
     passed += 1
     if verbose { note("release held \(line) (\(reason))") }
-    recordEvent("RELEASE", Int64(line), 0, 0, held: 0, discarded: 0)
+    recordEvent(wasReversal ? "CONFIRMED" : "RELEASE", Int64(line), 0, 0, held: 0, discarded: 0)
 }
 
-func armLeadTimer() {
+func armPendingTimer(_ seconds: Double) {
     if let timer = leadTimer { CFRunLoopTimerInvalidate(timer) }
     let timer = CFRunLoopTimerCreateWithHandler(
-        nil, CFAbsoluteTimeGetCurrent() + LEAD, 0, 0, 0
+        nil, CFAbsoluteTimeGetCurrent() + seconds, 0, 0, 0
     ) { _ in releasePending(reason: "no follow-up") }
     leadTimer = timer
     CFRunLoopAddTimer(CFRunLoopGetCurrent(), timer, .commonModes)
 }
+
+func armLeadTimer() { armPendingTimer(LEAD) }
 
 // Trim by age in one pass, off the event path.
 func trimAndFlush() {
@@ -200,62 +218,73 @@ let callback: CGEventTapCallBack = { _, type, event, _ in
     var discarded = 0
     var folded = 0
 
-    // A leading notch still on probation is judged against this event.
-    if pendingSign != 0 && now - pendingTime > LEAD {
+    // A held notch — a gesture's first notch, or a reversal awaiting confirmation — is
+    // judged against this event.
+    if pendingSign != 0 && now - pendingTime > (pendingIsReversal ? PROBATION : LEAD) {
         releasePending(reason: "late event")
     }
     if pendingSign != 0 {
         let probationSign = pendingSign
         let probationLine = pendingLine
         let probationPoint = pendingPoint
-        pendingSign = 0
-        pendingLine = 0
-        pendingPoint = 0
-        pendingEvent = nil
-        if let timer = leadTimer { CFRunLoopTimerInvalidate(timer) }
-        leadTimer = nil
+        let provisionalReversal = pendingIsReversal
 
         if sign == probationSign {
             // The wheel kept going that way: the notch was real, so fold its travel into
             // this event instead of losing it.
-            event.setIntegerValueField(.scrollWheelEventDeltaAxis1, value: d1 + Int64(probationLine))
-            event.setDoubleValueField(
-                .scrollWheelEventPointDeltaAxis1,
-                value: event.getDoubleValueField(.scrollWheelEventPointDeltaAxis1) + probationPoint)
+            clearPending()
+            if !dryRun {
+                event.setIntegerValueField(.scrollWheelEventDeltaAxis1, value: d1 + Int64(probationLine))
+                event.setDoubleValueField(
+                    .scrollWheelEventPointDeltaAxis1,
+                    value: event.getDoubleValueField(.scrollWheelEventPointDeltaAxis1) + probationPoint)
+            }
             committed = probationSign
             opposites = 0
             lastTime = now
             passed += 1
-            recordEvent("FOLD", d1, d2, continuous, held: 0, discarded: 0)
+            recordEvent(provisionalReversal ? "KEPT" : "FOLD", d1, d2, continuous, held: 0, discarded: 0)
             return Unmanaged.passUnretained(event)
         }
-        if abs(d1) > abs(Int64(probationLine)) {
-            // Opposite and bigger: the held notch was the glitch, this is the real scroll.
-            committed = sign
+        if provisionalReversal {
+            // The direction we came from is back, so the "reversal" was a burst of encoder
+            // glitches. Discard the whole burst and keep scrolling the way we were.
+            clearPending()
+            committed = -probationSign
             opposites = 0
             lastTime = now
             passed += 1
-            recordEvent("LEADGLITCH", d1, d2, continuous, held: 0, discarded: probationLine)
+            recordEvent("REVOKED", d1, d2, continuous, held: 0, discarded: probationLine)
             return Unmanaged.passUnretained(event)
         }
-        // Contradictory single notches: keep the held direction committed and let the
-        // ordinary withhold path below judge this one.
+        // Opposite follow-up to a gesture's first notch. Magnitude used to decide this —
+        // "opposite and bigger means the held notch was the glitch" — but acceleration
+        // makes the encoder's spike the biggest event in the neighbourhood (a +8 spike
+        // after a -1 first notch), so that rule now flips the committed direction onto the
+        // glitch and then withholds the real scroll for --confirm notches. Larger is not
+        // more real. Keep the held notch pending (a same-direction event can still fold it
+        // in), keep the release timer armed for as long as the gesture is alive, and let
+        // the ordinary withhold path judge this event.
         committed = probationSign
-        opposites = 0
-        heldLine = probationLine
-        heldPoint = probationPoint
+        pendingTime = now
+        armPendingTimer(LEAD)
     }
 
     if committed == 0 || now - lastTime > GAP {
-        // Fresh gesture (or long pause). A single leading notch is not trusted yet.
-        if abs(d1) <= 2 && !dryRun {
+        // Fresh gesture (or long pause). The first notch is not trusted at all: after a
+        // pause the encoder's spike is the most likely thing to arrive first, and it is
+        // also the largest event (accelerated), so believing it by size is what let a
+        // spike steal the committed direction. Hold it whatever its size.
+        if !dryRun {
             pendingSign = sign
             pendingLine = Int(d1)
             pendingPoint = event.getDoubleValueField(.scrollWheelEventPointDeltaAxis1)
             pendingTime = now
             pendingEvent = event
+            pendingIsReversal = false
             heldLine = 0
             heldPoint = 0
+            opposites = 0
             lastTime = now
             dropped += 1
             recordEvent("HOLDLEAD", d1, d2, continuous, held: pendingLine, discarded: 0)
@@ -280,34 +309,62 @@ let callback: CGEventTapCallBack = { _, type, event, _ in
             // Commit the new direction BEFORE posting, so that if our own tap sees the
             // replayed event it is recognised as same-direction and passed rather than
             // withheld again.
-            let pendingLine = heldLine
-            let pendingPoint = heldPoint
+            let withheldLine = heldLine
+            let withheldPoint = heldPoint
             heldLine = 0
             heldPoint = 0
             committed = sign
             opposites = 0
+            // A gesture's first notch still on probation means this burst is the first
+            // sustained direction we have: the first notch was the spike, and the travel
+            // withheld since then belongs to the new direction. Carry it into the still
+            // provisional confirming event, which then either delivers it (KEPT) or throws
+            // it away with the rest of a glitch burst (REVOKED).
+            let fromGestureStart = pendingSign != 0 && !pendingIsReversal
+            if fromGestureStart {
+                discarded += pendingLine
+                clearPending()
+            }
 
             // Real reversal: hand back everything we withheld by re-posting it, so the
             // full scroll distance is delivered instead of being silently lost.
-            if (pendingLine != 0 || pendingPoint != 0) && replayEnabled {
-                folded = pendingLine
+            if (withheldLine != 0 || withheldPoint != 0) && replayEnabled {
+                folded = withheldLine
                 let made = CGEvent(scrollWheelEvent2Source: CGEventSource(stateID: .hidSystemState),
                                    units: .line, wheelCount: 1,
-                                   wheel1: Int32(pendingLine), wheel2: 0, wheel3: 0)
-                if verbose { note("posting replay wheel1=\(pendingLine) created=\(made != nil)") }
+                                   wheel1: Int32(withheldLine), wheel2: 0, wheel3: 0)
+                if verbose { note("posting replay wheel1=\(withheldLine) created=\(made != nil)") }
                 if let replay = made {
                     replay.setIntegerValueField(.eventSourceUserData, value: REPLAY_MARK)
                     replay.setIntegerValueField(.scrollWheelEventIsContinuous, value: 0)
-                    replay.setDoubleValueField(.scrollWheelEventPointDeltaAxis1, value: pendingPoint)
+                    replay.setDoubleValueField(.scrollWheelEventPointDeltaAxis1, value: withheldPoint)
                     replay.post(tap: .cghidEventTap)
                 }
                 decision = "REPLAY"
-            } else if pendingLine != 0 || pendingPoint != 0 {
-                // Withheld notches are dropped (default). Log what was lost.
-                discarded += pendingLine
-                decision = "REVERSAL"
             } else {
-                decision = "REVERSAL"
+                // Withheld notches are dropped (default). Log what was lost.
+                if !fromGestureStart { discarded += withheldLine }
+                if dryRun {
+                    decision = "REVERSAL"
+                } else {
+                    // Do not believe the reversal yet. A glitch burst reaches CONFIRM and
+                    // looks exactly like this from inside the tap; only the events that
+                    // follow tell the two apart. Hold the confirming notch for PROBATION:
+                    // the wheel continuing this way folds it into the next event and the
+                    // reversal stands, while the old direction returning revokes the whole
+                    // burst. Delivering it immediately would put a backwards jolt on screen
+                    // that no later decision can take back.
+                    pendingSign = sign
+                    pendingLine = Int(d1) + (fromGestureStart ? withheldLine : 0)
+                    pendingPoint = event.getDoubleValueField(.scrollWheelEventPointDeltaAxis1)
+                        + (fromGestureStart ? withheldPoint : 0)
+                    pendingTime = now
+                    pendingEvent = event
+                    pendingIsReversal = true
+                    suppress = true
+                    decision = "PROVISIONAL"
+                    armPendingTimer(PROBATION)
+                }
             }
         } else {
             // Withhold: either an encoder glitch or the start of a real reversal.
